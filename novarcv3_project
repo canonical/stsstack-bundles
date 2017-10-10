@@ -3,7 +3,7 @@ for param in $_OS_PARAMS; do
     unset $param
 done
 unset _OS_PARAMS
-export OS_AUTH_URL=${OS_AUTH_PROTOCOL:-http}://`juju-deployer -f keystone`:5000/v3
+export OS_AUTH_URL=${OS_AUTH_PROTOCOL:-http}://`juju run --unit keystone/0 unit-get private-address`:5000/v3
 export OS_USERNAME=admin
 export OS_PASSWORD=openstack
 export OS_USER_DOMAIN_NAME=admin_domain

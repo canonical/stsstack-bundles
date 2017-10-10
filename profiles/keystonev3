@@ -81,9 +81,9 @@ openstack flavor show m2.tempest || openstack flavor create --id 8 --ram 512 --d
 echo "Tempest"
 router=$(neutron --os-project-name admin router-list | grep provider-router | awk '{ print $2}')
 # Gather vars for tempest template
-keystone=$(juju-deployer -f keystone)
-dashboard=$(juju-deployer -f openstack-dashboard)
-ncc=$(juju-deployer -f nova-cloud-controller)
+keystone=$(juju run --unit keystone/0 unit-get private-address)
+dashboard=$(juju run --unit openstack-dashboard/0 unit-get private-address)
+ncc=$(juju run --unit nova-cloud-controller/0 unit-get private-address)
 http=${OS_AUTH_PROTOCOL:-http}
 
 # Insert vars into tempest conf
