@@ -1,0 +1,19 @@
+#!/bin/sh
+
+valid="default keystonev3 stsstack dellstack kernelstack ppc64el powerkvm arm64 lxd multihypervisor vpil refstack_only"
+
+usage() {
+  echo "$0 <profile>"
+  echo "\tdefault (serverstack) is used if no profile is selected"
+  echo "\tvalid profiles = $valid"
+}
+
+if [ -z $1 ]; then
+  ./profiles/default
+else
+  if test "${valid#*$1}" != "$valid"; then
+    ./profiles/$1
+  else
+    usage
+  fi
+fi

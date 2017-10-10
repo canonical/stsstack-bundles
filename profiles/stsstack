@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -ex
+
+# Set cts-stack overrides, if not already set.
+[[ -z "$NAMESERVER" ]] && export NAMESERVER="10.230.64.2"
+[[ -z "$SWIFT_IP" ]] && export SWIFT_IP="10.230.20.57"
+
+./profiles/default $1 $2 $3 $4 $5
