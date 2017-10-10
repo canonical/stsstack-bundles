@@ -50,3 +50,4 @@ else
   fi
 fi
 mv $fout $target
+echo "Bundle successfully written to $target"
