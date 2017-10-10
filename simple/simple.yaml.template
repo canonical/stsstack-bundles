@@ -63,7 +63,8 @@ services:
     num_units: 1
     charm: cs:~openstack-charmers-next/cinder
     options:
-      block-device: "None"
+      block-device: /dev/vdb
+      ephemeral-unmount: "true"
       glance-api-version: 2
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
     constraints: mem=1G
