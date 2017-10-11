@@ -1,0 +1,17 @@
+{% set flavor_name = flavor_name or "m1.tiny" %}
+---
+  NovaServers.boot_lock_unlock_and_delete:
+    -
+      args:
+        flavor:
+            name: "{{flavor_name}}"
+        image:
+            name: "__IMAGE__"
+      runner:
+        type: "constant"
+        times: 10
+        concurrency: 2
+      context:
+        users:
+          tenants: 1
+          users_per_tenant: 1

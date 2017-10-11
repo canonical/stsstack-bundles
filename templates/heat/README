@@ -1,0 +1,17 @@
+HEAT TEMPLATES DIR
+
+
+About
+=======
+  The heat git project has several heat (aka HOT) templates available.
+  Generally those can be used directly.  Some enhancements and modifications
+  may be necessary in our testing, such as adding the network id parameter
+  in the basic helloworld template (upstream template didn't have that).
+
+
+Example Usage
+=============
+  heat stack-create heat_basic -f heat-templates/heat-basic.yaml \
+    --parameters "admin_pass=Ubuntu;key_name=testkey;image=cirros;network=private"
+
+  heat stack-list
