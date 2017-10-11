@@ -10,13 +10,14 @@ verbose:                    &verbose                   True
 series: __SERIES__
 services:
   rabbitmq-server:
-    num_units: 1
+    num_units: 3
     charm: cs:~openstack-charmers-next/rabbitmq-server
     constraints: mem=1G
     options:
+      min-cluster-size: 3
       source: cloud:__SERIES__-__RELEASE____POCKET__
   keystone:
-    num_units: 1
+    num_units: 3
     charm: cs:~openstack-charmers-next/keystone
     constraints: mem=1G
     options:
@@ -24,13 +25,25 @@ services:
       verbose: *verbose
       admin-password: openstack
       admin-token: ubuntutesting
+      vip: 10.5.100.1
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+  keystone-hacluster:
+    num_units: 0
+    charm: cs:~openstack-charmers-next/hacluster
+    options:
+      cluster_count: 3
   openstack-dashboard:
-    num_units: 1
+    num_units: 3
     charm: cs:~openstack-charmers-next/openstack-dashboard
     constraints: mem=1G
     options:
+      vip: 10.5.100.2
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+  openstack-dashboard-hacluster:
+    num_units: 0
+    charm: cs:~openstack-charmers-next/hacluster
+    options:
+      cluster_count: 3
   nova-compute:
     charm: cs:~openstack-charmers-next/nova-compute
     num_units: 3
@@ -43,16 +56,22 @@ services:
       migration-auth-type: ssh
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
   nova-cloud-controller:
-    num_units: 1
+    num_units: 3
     charm: cs:~openstack-charmers-next/nova-cloud-controller
     constraints: mem=1G
     options:
       debug: *debug
       verbose: *verbose
       network-manager: Neutron
+      vip: 10.5.100.3
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+  nova-cloud-controller-hacluster:
+    num_units: 0
+    charm: cs:~openstack-charmers-next/hacluster
+    options:
+      cluster_count: 3
   neutron-gateway:
-    num_units: 1
+    num_units: 3
     charm: cs:~openstack-charmers-next/neutron-gateway
     constraints: mem=4G
     options:
@@ -62,19 +81,30 @@ services:
       bridge-mappings: physnet1:br-ex
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
   neutron-api:
-    num_units: 1
+    num_units: 3
     charm: cs:~openstack-charmers-next/neutron-api
     constraints: mem=1G
     options:
       debug: *debug
       verbose: *verbose
+      l2-population: False
+      enable-l3ha: True
+      min-l3-agents-per-router: 3
+      max-l3-agents-per-router: 3
       neutron-security-groups: True
+      vip: 10.5.100.4
       flat-network-providers: physnet1
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+  neutron-api-hacluster:
+    num_units: 0
+    charm: cs:~openstack-charmers-next/hacluster
+    options:
+      vip: 10.5.100.5
+      cluster_count: 3
   neutron-openvswitch:
     charm: cs:~openstack-charmers-next/neutron-openvswitch
   cinder:
-    num_units: 1
+    num_units: 3
     charm: cs:~openstack-charmers-next/cinder
     options:
       debug: *debug
@@ -82,18 +112,30 @@ services:
       block-device: /dev/vdb
       ephemeral-unmount: "true"
       glance-api-version: 2
+      vip: 10.5.100.6
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
     constraints: mem=1G
+  cinder-hacluster:
+    num_units: 0
+    charm: cs:~openstack-charmers-next/hacluster
+    options:
+      cluster_count: 3
   glance:
-    num_units: 1
+    num_units: 3
     charm: cs:~openstack-charmers-next/glance
     constraints: mem=1G
     options:
       debug: *debug
       verbose: *verbose
+      vip: 10.5.100.7
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+  glance-hacluster:
+    num_units: 0
+    charm: cs:~openstack-charmers-next/hacluster
+    options:
+      cluster_count: 3
   mysql:
-    num_units: 1
+    num_units: 3
     charm: cs:~openstack-charmers-next/percona-cluster
     constraints: mem=4G
     options:
@@ -101,8 +143,21 @@ services:
       max-connections: 20000
       root-password: ChangeMe123
       sst-password: ChangeMe123
+      vip: 10.5.100.8
       source: cloud:__SERIES__-__RELEASE____POCKET__
+  mysql-hacluster:
+    num_units: 0
+    charm: cs:~openstack-charmers-next/hacluster
+    options:
+      cluster_count: 3
 relations:
+  - [ cinder, cinder-hacluster ]
+  - [ neutron-api, neutron-api-hacluster ]
+  - [ glance, glance-hacluster ]
+  - [ keystone, keystone-hacluster ]
+  - [ mysql, mysql-hacluster ]
+  - [ openstack-dashboard, openstack-dashboard-hacluster ]
+  - [ nova-cloud-controller, nova-cloud-controller-hacluster ]
   - [ keystone, mysql ]
   - [ nova-cloud-controller, mysql ]
   - [ nova-cloud-controller, rabbitmq-server ]
