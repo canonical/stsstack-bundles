@@ -2,8 +2,14 @@ _OS_PARAMS=$(env | awk 'BEGIN {FS="="} /^OS_/ {print $1;}' | paste -sd ' ')
 for param in $_OS_PARAMS; do
     unset $param
 done
+
+keystone_addr=`juju config keystone vip`
+if [ -z "$keystone_addr" ]; then
+keystone_addr=`juju run --unit keystone/0 unit-get private-address`
+fi
+
 unset _OS_PARAMS
-export OS_AUTH_URL=${OS_AUTH_PROTOCOL:-http}://`juju run --unit keystone/0 unit-get private-address`:5000/v3
+export OS_AUTH_URL=${OS_AUTH_PROTOCOL:-http}://${keystone_addr}:5000/v3
 export OS_USERNAME=admin
 export OS_PASSWORD=openstack
 export OS_REGION_NAME=RegionOne
