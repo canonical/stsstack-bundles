@@ -80,7 +80,8 @@ services:
       debug: *debug
       verbose: *verbose
       block-device: /dev/vdb
-      ephemeral-unmount: "true"
+      ephemeral-unmount: "/mnt"
+      overwrite: "true"
       glance-api-version: 2
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
     constraints: mem=1G
