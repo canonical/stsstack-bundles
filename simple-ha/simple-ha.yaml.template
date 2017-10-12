@@ -156,7 +156,6 @@ relations:
   - [ neutron-api, neutron-api-hacluster ]
   - [ glance, glance-hacluster ]
   - [ keystone, keystone-hacluster ]
-  - [ mysql, mysql-hacluster ]
   - [ openstack-dashboard, openstack-dashboard-hacluster ]
   - [ nova-cloud-controller, nova-cloud-controller-hacluster ]
   - [ keystone, mysql ]
