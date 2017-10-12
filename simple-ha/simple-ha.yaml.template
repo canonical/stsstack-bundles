@@ -110,6 +110,7 @@ services:
       verbose: *verbose
       block-device: /dev/vdb
       ephemeral-unmount: "/mnt"
+      overwrite: "true"
       glance-api-version: 2
       vip: 10.5.100.5
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
