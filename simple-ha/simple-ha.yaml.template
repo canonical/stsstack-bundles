@@ -150,6 +150,7 @@ services:
     options:
       cluster_count: 3
 relations:
+  - [ mysql, mysql-hacluster ]
   - [ cinder, cinder-hacluster ]
   - [ neutron-api, neutron-api-hacluster ]
   - [ glance, glance-hacluster ]
