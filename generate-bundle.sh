@@ -17,27 +17,39 @@ pocket=${3-""}
 template=`basename $(pwd)`.yaml.template
 target=`basename $(pwd)`.yaml
 
+# PLEASE KEEP THE FOLLOWING UP-TO-DATE AS NEW RELEASES COME OUT AND OLDER ONES ARE DEPRECATED.
+# See https://www.ubuntu.com/info/release-end-of-life 
 declare -A lts=( [trusty]=icehouse
                  [xenial]=mitaka )
+declare -A nonlts=( [zesty]=
+                    [artful]= )
 
 default_r=false
 if [ -z "$series" ]; then
   series=xenial
-  release=${lts[$series]}
+  release=
   default_r=true
-  echo "Using default series '$series' and release '$release'"
+  echo "Using default series '$series' (with distro release of openstack i.e. ${lts[$series]})"
 elif ! ( _=${lts[$series]} ) 2>/dev/null; then
-  echo "Unknown series '$series'. Please specify one of: ${!lts[@]}"
-  exit 1
+  if ! ( _=${nonlts[$series]} ) 2>/dev/null; then 
+    echo "Unknown series '$series'. Please specify one of: ${!lts[@]} ${!nonlts[@]}"
+    exit 1
+  fi
 else
   echo "Using series '$series'"
 fi
 
-if [ -z "$release" ]; then
-  release=${lts[$series]}
-  echo "Using default release '$release'"
-elif ! $default_r; then
-  echo "Using release '$release'"
+if ! $default_r; then
+  if [ -n "$release" ]; then
+    echo "Using release '$release'"
+  else
+    echo -n "Using $series distro release of openstack"
+    if ! ( _=${nonlts[$series]} ) 2>/dev/null; then
+      echo " i.e. '${lts[$series]}'"
+    else
+      echo ""
+    fi
+  fi
 fi
 
 ltsmatch ()
@@ -51,7 +63,9 @@ ltsmatch ()
 
 fout=`mktemp`
 if [ -z "$series" ] || [ -z "$release" ] ; then
-  cat $template| sed -r "/\ssource:.+$/d"| sed -r "/\sopenstack-origin:.+$/d" > $fout
+  cat $template| sed -r "/\ssource:.+$/d"| sed -r "/\sopenstack-origin:.+$/d" > ${fout}.tmp
+  cat ${fout}.tmp| sed -e "s/__SERIES__/$series/g" > $fout
+  rm ${fout}.tmp
 else
   cat $template| sed -e "s/__SERIES__/$series/g" -e "s/__RELEASE__/$release/g" > $fout
   if [ -n "$pocket" ] ; then
