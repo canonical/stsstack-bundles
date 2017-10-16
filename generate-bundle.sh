@@ -11,15 +11,34 @@
 #              Xenial + Proposed Newton UCA: ./gen-bundle.sh xenial newton proposed
 #
 #
-series=${1-"xenial"}
-release=${2-"ocata"}
+series=${1-""}
+release=${2-""}
 pocket=${3-""}
 template=`basename $(pwd)`.yaml.template
 target=`basename $(pwd)`.yaml
 
-declare -A lts=( [precise]=essex
-                 [trusty]=icehouse
+declare -A lts=( [trusty]=icehouse
                  [xenial]=mitaka )
+
+default_r=false
+if [ -z "$series" ]; then
+  series=xenial
+  release=${lts[$series]}
+  default_r=true
+  echo "Using default series '$series' and release '$release'"
+elif ! ( _=${lts[$series]} ) 2>/dev/null; then
+  echo "Unknown series '$series'. Please specify one of: ${!lts[@]}"
+  exit 1
+else
+  echo "Using series '$series'"
+fi
+
+if [ -z "$release" ]; then
+  release=${lts[$series]}
+  echo "Using default release '$release'"
+elif ! $default_r; then
+  echo "Using release '$release'"
+fi
 
 ltsmatch ()
 {
