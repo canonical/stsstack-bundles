@@ -69,26 +69,26 @@ if __name__ == '__main__':
     if keystoneclient.__version__ >= "3.10.0":
         auth = v2.Password(username=os.environ['OS_USERNAME'],
                            password=os.environ['OS_PASSWORD'],
-                           tenant_name=os.environ['OS_TENANT_NAME'],
+                           tenant_name=os.environ['OS_PROJECT_NAME'],
                            auth_url=os.environ['OS_AUTH_URL'])
         sess = session.Session(auth=auth)
         keystone = ks_client.Client(session=sess)
     else:
         keystone = ks_client.Client(username=os.environ['OS_USERNAME'],
                                     password=os.environ['OS_PASSWORD'],
-                                    tenant_name=os.environ['OS_TENANT_NAME'],
+                                    tenant_name=os.environ['OS_PROJECT_NAME'],
                                     auth_url=os.environ['OS_AUTH_URL'],
                                     region_name=os.environ['OS_REGION_NAME'])
     quantum = client.Client(username=os.environ['OS_USERNAME'],
                             password=os.environ['OS_PASSWORD'],
-                            tenant_name=os.environ['OS_TENANT_NAME'],
+                            tenant_name=os.environ['OS_PROJECT_NAME'],
                             auth_url=os.environ['OS_AUTH_URL'],
                             region_name=os.environ['OS_REGION_NAME'])
 
     # Resolve tenant id
     tenant_id = None
     for tenant in [t._info for t in keystone.tenants.list()]:
-        if (tenant['name'] == (opts.tenant or os.environ['OS_TENANT_NAME'])):
+        if (tenant['name'] == (opts.tenant or os.environ['OS_PROJECT_NAME'])):
             tenant_id = tenant['id']
             break  # Tenant ID found - stop looking
     if not tenant_id:

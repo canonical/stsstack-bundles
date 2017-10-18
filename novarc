@@ -11,6 +11,6 @@ fi
 unset _OS_PARAMS
 export OS_USERNAME=admin
 export OS_PASSWORD=openstack
-export OS_TENANT_NAME=admin
+export OS_PROJECT_NAME=admin
 export OS_REGION_NAME=RegionOne
 export OS_AUTH_URL=${OS_AUTH_PROTOCOL:-http}://${keystone_addr}:5000/v2.0

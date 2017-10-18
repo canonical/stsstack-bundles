@@ -44,7 +44,7 @@ if __name__ == '__main__':
         auth = keystoneauth1_v2.Password(
             username=os.environ['OS_USERNAME'],
             password=os.environ['OS_PASSWORD'],
-            tenant_name=os.environ['OS_TENANT_NAME'],
+            tenant_name=os.environ['OS_PROJECT_NAME'],
             auth_url=os.environ['OS_AUTH_URL'])
     session = keystoneauth1_session.Session(auth=auth)
 
