@@ -24,6 +24,9 @@ declare -A lts=( [trusty]=icehouse
 declare -A nonlts=( [zesty]=
                     [artful]= )
 
+
+[ -e "$template" ] || { echo "Template '$template' not found. Are you in a bundle directory?"; exit 1; }
+
 default_r=false
 if [ -z "$series" ]; then
   series=xenial
