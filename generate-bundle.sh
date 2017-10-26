@@ -4,11 +4,11 @@
 #
 # Description: Use this tool to generate a Juju (2.x) native-format bundle e.g.:
 #
-#              Trusty + Mitaka Cloud Archive: ./gen-bundle.sh trusty mitaka
+#              Trusty + Mitaka Cloud Archive: ./generate-bundle.sh trusty mitaka
 #
-#              xenial-proposed: ./gen-bundle.sh xenial mitaka proposed
+#              xenial-proposed: ./generate-bundle.sh xenial mitaka proposed
 #
-#              Xenial + Proposed Newton UCA: ./gen-bundle.sh xenial newton proposed
+#              Xenial + Proposed Newton UCA: ./generate-bundle.sh xenial newton proposed
 #
 #
 series=${1-""}
