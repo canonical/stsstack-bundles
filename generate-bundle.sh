@@ -20,7 +20,8 @@ target=`basename $(pwd)`.yaml
 # PLEASE KEEP THE FOLLOWING UP-TO-DATE AS NEW RELEASES COME OUT AND OLDER ONES ARE DEPRECATED.
 # See https://www.ubuntu.com/info/release-end-of-life 
 declare -A lts=( [trusty]=icehouse
-                 [xenial]=mitaka )
+                 [xenial]=mitaka 
+                 [bionic]=queens )
 declare -A nonlts=( [zesty]=
                     [artful]= )
 

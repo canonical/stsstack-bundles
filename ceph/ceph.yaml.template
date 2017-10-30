@@ -109,6 +109,7 @@ relations:
     - rabbitmq-server:amqp
   - [ nova-compute, glance ]
   - [ nova-compute, ceph ]
+  - [ nova-compute, cinder-ceph ]
   - [ glance, mysql ]
   - [ glance, keystone ]
   - [ glance, ceph ]
