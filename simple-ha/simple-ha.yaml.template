@@ -168,7 +168,6 @@ relations:
   - - nova-compute
     - rabbitmq-server:amqp
   - [ nova-compute, glance ]
-  - [ nova-compute, cinder-ceph ]
   - [ glance, mysql ]
   - [ glance, keystone ]
   - [ glance, "cinder:image-service" ]
