@@ -8,6 +8,12 @@ if [ -z "$keystone_addr" ]; then
 keystone_addr=`juju run --unit keystone/0 unit-get private-address`
 fi
 
+if [ "$(juju config keystone use-https)" = "True" ] || \
+     [ "$(juju config keystone https-service-endpoints)" = "True" ] ||
+     [ -n "$(juju config keystone ssl_cert)" ]; then
+  export OS_AUTH_PROTOCOL=https
+fi
+
 unset _OS_PARAMS
 export OS_USERNAME=admin
 export OS_PASSWORD=openstack
