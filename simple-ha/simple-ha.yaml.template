@@ -104,6 +104,7 @@ services:
     charm: cs:~openstack-charmers-next/neutron-openvswitch
   cinder:
     num_units: 3
+    constraints: mem=1G
     charm: cs:~openstack-charmers-next/cinder
     options:
       debug: *debug
@@ -114,7 +115,6 @@ services:
       glance-api-version: 2
       vip: 10.5.100.5
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
-    constraints: mem=1G
   cinder-hacluster:
     num_units: 0
     charm: cs:~openstack-charmers-next/hacluster

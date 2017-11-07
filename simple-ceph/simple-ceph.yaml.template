@@ -41,6 +41,7 @@ services:
       enable-live-migration: True
       enable-resize: True
       migration-auth-type: ssh
+      libvirt-image-backend: rbd
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
   nova-cloud-controller:
     num_units: 1
@@ -73,6 +74,24 @@ services:
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
   neutron-openvswitch:
     charm: cs:~openstack-charmers-next/neutron-openvswitch
+  ceph-mon:
+    num_units: 1
+    constraints: mem=1G
+    charm: cs:~openstack-charmers-next/ceph-mon
+    options:
+      monitor-count: 3
+      monitor-secret: AQCXrnZQwI7KGBAAiPofmKEXKxu5bUzoYLVkbQ==
+      fsid: 6547bd3e-1397-11e2-82e5-53567c8d32dc
+      source: cloud:__SERIES__-__RELEASE____POCKET__
+  ceph-osd:
+    num_units: 3
+    constraints: mem=1G
+    charm: cs:~openstack-charmers-next/ceph-osd
+    options:
+      osd-devices: /dev/vdb
+      osd-reformat: "yes"
+      ephemeral-unmount: /mnt
+      source: cloud:__SERIES__-__RELEASE____POCKET__
   cinder:
     num_units: 1
     constraints: mem=1G
@@ -80,11 +99,12 @@ services:
     options:
       debug: *debug
       verbose: *verbose
-      block-device: /dev/vdb
-      ephemeral-unmount: "/mnt"
-      overwrite: "true"
+      block-device: ""
       glance-api-version: 2
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+  cinder-ceph:
+    num_units: 0
+    charm: cs:~openstack-charmers-next/cinder-ceph
   glance:
     num_units: 1
     charm: cs:~openstack-charmers-next/glance
@@ -114,6 +134,7 @@ relations:
   - - nova-compute
     - rabbitmq-server:amqp
   - [ nova-compute, glance ]
+  - [ ceph-mon, ceph-osd ]
   - [ glance, mysql ]
   - [ glance, keystone ]
   - [ glance, "cinder:image-service" ]
@@ -122,6 +143,10 @@ relations:
   - [ cinder, rabbitmq-server ]
   - [ cinder, nova-cloud-controller ]
   - [ cinder, keystone ]
+  - [ cinder, cinder-ceph ]
+  - [ cinder-ceph, ceph-mon ]
+  - [ nova-compute, cinder-ceph ]
+  - [ nova-compute, ceph-mon ]
   - [ neutron-gateway, nova-cloud-controller ]
   - [ openstack-dashboard, keystone ]
   - [ "neutron-gateway:amqp", rabbitmq-server ]
