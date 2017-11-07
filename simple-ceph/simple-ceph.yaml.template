@@ -79,7 +79,7 @@ services:
     constraints: mem=1G
     charm: cs:~openstack-charmers-next/ceph-mon
     options:
-      monitor-count: 3
+      monitor-count: 1
       monitor-secret: AQCXrnZQwI7KGBAAiPofmKEXKxu5bUzoYLVkbQ==
       fsid: 6547bd3e-1397-11e2-82e5-53567c8d32dc
       source: cloud:__SERIES__-__RELEASE____POCKET__
@@ -139,6 +139,7 @@ relations:
   - [ glance, keystone ]
   - [ glance, "cinder:image-service" ]
   - [ glance, rabbitmq-server ]
+  - [ glance, ceph-mon ]
   - [ cinder, mysql ]
   - [ cinder, rabbitmq-server ]
   - [ cinder, nova-cloud-controller ]
