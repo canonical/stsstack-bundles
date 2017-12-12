@@ -25,6 +25,13 @@ services:
     charm: cs:~openstack-charmers-next/hacluster
     options:
       cluster_count: 3
+  glance:
+    num_units: 1
+    charm: cs:~openstack-charmers-next/glance
+    options:
+      debug: *debug
+      verbose: *verbose
+      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
   swift-proxy:
     num_units: 3
     charm: cs:~openstack-charmers-next/swift-proxy
@@ -87,7 +94,10 @@ relations:
   - [ mysql, mysql-hacluster ]
   - [ keystone, keystone-hacluster ]
   - [ keystone, mysql ]
+  - [ glance, mysql ]
+  - [ glance, keystone ]
   - [ swift-proxy, keystone ]
+  - [ swift-proxy, glance ]
   - [ swift-proxy, swift-storage-z1 ]
   - [ swift-proxy, swift-storage-z2 ]
   - [ swift-proxy, swift-storage-z3 ]
