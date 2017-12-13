@@ -96,6 +96,7 @@ relations:
   - [ keystone, mysql ]
   - [ glance, mysql ]
   - [ glance, keystone ]
+  - [ swift-proxy, swift-proxy-hacluster ]
   - [ swift-proxy, keystone ]
   - [ swift-proxy, glance ]
   - [ swift-proxy, swift-storage-z1 ]

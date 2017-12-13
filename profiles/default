@@ -30,7 +30,6 @@ source novarc
 
 upload_image cloudimages xenial xenial-server-cloudimg-amd64-disk1.img
 upload_image cloudimages trusty trusty-server-cloudimg-amd64-disk1.img
-upload_image cloudimages precise precise-server-cloudimg-amd64-disk1.img
 upload_image swift cirros cirros-0.3.4-x86_64-disk.img
 upload_image swift cirros2 cirros-0.3.4-x86_64-disk.img
 
