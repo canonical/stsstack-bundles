@@ -37,9 +37,10 @@ services:
     charm: cs:~openstack-charmers-next/swift-proxy
     constraints: mem=1G
     options:
+      debug: *debug
       zone-assignment: manual
       replicas: 3
-      vip: 10.5.100.6
+      vip: 10.5.100.2
       swift-hash: fdfef9d4-8b06-11e2-8ac0-531c923c8fae
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
   swift-proxy-hacluster:
@@ -75,7 +76,7 @@ services:
       overwrite: "true"
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
   mysql:
-    num_units: 3
+    num_units: 1
     charm: cs:~openstack-charmers-next/percona-cluster
     constraints: mem=4G
     options:
@@ -83,15 +84,8 @@ services:
       max-connections: 20000
       root-password: ChangeMe123
       sst-password: ChangeMe123
-      vip: 10.5.100.7
       source: cloud:__SERIES__-__RELEASE____POCKET__
-  mysql-hacluster:
-    num_units: 0
-    charm: cs:~openstack-charmers-next/hacluster
-    options:
-      cluster_count: 3
 relations:
-  - [ mysql, mysql-hacluster ]
   - [ keystone, keystone-hacluster ]
   - [ keystone, mysql ]
   - [ glance, mysql ]
