@@ -56,6 +56,12 @@ if ! $default_r; then
   fi
 fi
 
+if [ -z "$pocket" ]; then
+  echo "Using default pocket"
+else
+  echo "Using pocket '$pocket'"
+fi
+
 ltsmatch ()
 {
     for s in ${!lts[@]};
