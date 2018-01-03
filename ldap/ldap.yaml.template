@@ -34,7 +34,6 @@ services:
       ldap-password: crapper
       ldap-suffix: dc=test,dc=com
       domain-name: userdomain
-      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
   openstack-dashboard:
     num_units: 1
     charm: cs:~openstack-charmers-next/openstack-dashboard
