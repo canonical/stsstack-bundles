@@ -118,7 +118,7 @@ services:
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
   mongodb:
     num_units: 1
-    branch: https://git.launchpad.net/mongodb-charm
+    charm: cs:mongodb
     constraints: mem=1G
 relations:
   - [ keystone, mysql ]
