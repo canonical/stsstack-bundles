@@ -150,6 +150,8 @@ relations:
   - [ neutron-api, neutron-gateway ]
   - [ neutron-openvswitch, nova-compute ]
   - [ neutron-openvswitch, rabbitmq-server ]
+  - - ceilometer
+    - keystone:identity-service
   - [ ceilometer, rabbitmq-server ]
   - [ ceilometer, mongodb ]
   - [ ceilometer-agent, nova-compute ]
