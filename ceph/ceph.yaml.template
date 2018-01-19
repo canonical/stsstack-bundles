@@ -1,8 +1,12 @@
 # vim: set ts=2 et:
 # IMPORTANT: ALL MODIFICATIONS SHOULD BE MADE TO THE TEMPLATE THEN REGENERATE
-#            THE BUNDLE WITH gen-bundle.sh <series> [<os-release>] [<pocket>]
+#            THE BUNDLE WITH generate-bundle.sh <series> [<os-release>] [<pocket>]
 # Juju 2.x native deployer bundle for development ('next') charms
-# UOSCI relies on this for OS-on-OS deployment testing
+
+## Variables
+debug:                      &debug                     True
+verbose:                    &verbose                   True
+
 series: __SERIES__
 services:
   rabbitmq-server:
@@ -11,14 +15,20 @@ services:
     constraints: mem=1G
     options:
       source: cloud:__SERIES__-__RELEASE____POCKET__
-  ceph:
-    charm: cs:~openstack-charmers-next/ceph
+  ceph-mon:
+    charm: cs:~openstack-charmers-next/ceph-mon
+    num_units: 1
+    constraints: mem=1G
+    options:
+      monitor-count: 1
+      fsid: 6547bd3e-1397-11e2-82e5-53567c8d32dc
+      monitor-secret: AQCXrnZQwI7KGBAAiPofmKEXKxu5bUzoYLVkbQ==
+      source: cloud:__SERIES__-__RELEASE____POCKET__
+  ceph-osd:
+    charm: cs:~openstack-charmers-next/ceph-osd
     num_units: 3
     constraints: mem=1G
     options:
-      monitor-count: 3
-      fsid: 6547bd3e-1397-11e2-82e5-53567c8d32dc
-      monitor-secret: AQCXrnZQwI7KGBAAiPofmKEXKxu5bUzoYLVkbQ==
       osd-devices: /dev/vdb
       osd-reformat: "yes"
       ephemeral-unmount: /mnt
@@ -28,6 +38,8 @@ services:
     charm: cs:~openstack-charmers-next/keystone
     constraints: mem=1G
     options:
+      debug: *debug
+      verbose: *verbose
       admin-password: openstack
       admin-token: ubuntutesting
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
@@ -42,15 +54,20 @@ services:
     num_units: 3
     constraints: mem=4G
     options:
+      debug: *debug
+      verbose: *verbose
       enable-live-migration: True
       enable-resize: True
       migration-auth-type: ssh
+      libvirt-image-backend: rbd
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
   nova-cloud-controller:
     num_units: 1
     charm: cs:~openstack-charmers-next/nova-cloud-controller
     constraints: mem=1G
     options:
+      debug: *debug
+      verbose: *verbose
       network-manager: Neutron
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
   neutron-gateway:
@@ -58,6 +75,8 @@ services:
     charm: cs:~openstack-charmers-next/neutron-gateway
     constraints: mem=4G
     options:
+      debug: *debug
+      verbose: *verbose
       instance-mtu: 1300
       bridge-mappings: physnet1:br-ex
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
@@ -66,6 +85,8 @@ services:
     charm: cs:~openstack-charmers-next/neutron-api
     constraints: mem=1G
     options:
+      debug: *debug
+      verbose: *verbose
       neutron-security-groups: True
       flat-network-providers: physnet1
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
@@ -73,12 +94,14 @@ services:
     charm: cs:~openstack-charmers-next/neutron-openvswitch
   cinder:
     num_units: 1
+    constraints: mem=1G
     charm: cs:~openstack-charmers-next/cinder
     options:
-      block-device: "None"
+      debug: *debug
+      verbose: *verbose
+      block-device: ""
       glance-api-version: 2
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
-    constraints: mem=1G
   cinder-ceph:
     charm: cs:~openstack-charmers-next/cinder-ceph
   glance:
@@ -86,6 +109,8 @@ services:
     charm: cs:~openstack-charmers-next/glance
     constraints: mem=1G
     options:
+      debug: *debug
+      verbose: *verbose
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
   mysql:
     num_units: 1
@@ -103,16 +128,17 @@ relations:
   - [ nova-cloud-controller, rabbitmq-server ]
   - [ nova-cloud-controller, glance ]
   - [ nova-cloud-controller, keystone ]
+  - [ ceph-mon, ceph-osd ]
   - [ nova-compute, nova-cloud-controller ]
   - [ nova-compute, mysql ]
   - - nova-compute
     - rabbitmq-server:amqp
   - [ nova-compute, glance ]
-  - [ nova-compute, ceph ]
+  - [ nova-compute, ceph-mon ]
   - [ nova-compute, cinder-ceph ]
   - [ glance, mysql ]
   - [ glance, keystone ]
-  - [ glance, ceph ]
+  - [ glance, ceph-mon ]
   - [ glance, "cinder:image-service" ]
   - [ glance, rabbitmq-server ]
   - [ cinder, mysql ]
@@ -120,7 +146,7 @@ relations:
   - [ cinder, nova-cloud-controller ]
   - [ cinder, keystone ]
   - [ cinder, cinder-ceph ]
-  - [ cinder-ceph, ceph ]
+  - [ cinder-ceph, ceph-mon ]
   - [ neutron-gateway, nova-cloud-controller ]
   - [ openstack-dashboard, keystone ]
   - [ "neutron-gateway:amqp", rabbitmq-server ]

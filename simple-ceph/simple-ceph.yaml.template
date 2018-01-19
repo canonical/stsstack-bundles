@@ -15,6 +15,24 @@ services:
     constraints: mem=1G
     options:
       source: cloud:__SERIES__-__RELEASE____POCKET__
+  ceph-mon:
+    charm: cs:~openstack-charmers-next/ceph-mon
+    num_units: 1
+    constraints: mem=1G
+    options:
+      monitor-count: 1
+      fsid: 6547bd3e-1397-11e2-82e5-53567c8d32dc
+      monitor-secret: AQCXrnZQwI7KGBAAiPofmKEXKxu5bUzoYLVkbQ==
+      source: cloud:__SERIES__-__RELEASE____POCKET__
+  ceph-osd:
+    charm: cs:~openstack-charmers-next/ceph-osd
+    num_units: 3
+    constraints: mem=1G
+    options:
+      osd-devices: /dev/vdb
+      osd-reformat: "yes"
+      ephemeral-unmount: /mnt
+      source: cloud:__SERIES__-__RELEASE____POCKET__
   keystone:
     num_units: 1
     charm: cs:~openstack-charmers-next/keystone
@@ -74,24 +92,6 @@ services:
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
   neutron-openvswitch:
     charm: cs:~openstack-charmers-next/neutron-openvswitch
-  ceph-mon:
-    num_units: 1
-    constraints: mem=1G
-    charm: cs:~openstack-charmers-next/ceph-mon
-    options:
-      monitor-count: 1
-      monitor-secret: AQCXrnZQwI7KGBAAiPofmKEXKxu5bUzoYLVkbQ==
-      fsid: 6547bd3e-1397-11e2-82e5-53567c8d32dc
-      source: cloud:__SERIES__-__RELEASE____POCKET__
-  ceph-osd:
-    num_units: 3
-    constraints: mem=1G
-    charm: cs:~openstack-charmers-next/ceph-osd
-    options:
-      osd-devices: /dev/vdb
-      osd-reformat: "yes"
-      ephemeral-unmount: /mnt
-      source: cloud:__SERIES__-__RELEASE____POCKET__
   cinder:
     num_units: 1
     constraints: mem=1G
@@ -103,7 +103,6 @@ services:
       glance-api-version: 2
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
   cinder-ceph:
-    num_units: 0
     charm: cs:~openstack-charmers-next/cinder-ceph
   glance:
     num_units: 1
