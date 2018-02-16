@@ -12,7 +12,9 @@ if [ -z $1 ]; then
   ./profiles/default
 else
   if test "${valid#*$1}" != "$valid"; then
-    ./profiles/$1
+    profile=$1
+    shift
+    ./profiles/$profile $@
   else
     usage
   fi
