@@ -43,10 +43,11 @@ access=$(openstack ec2 credentials create --user demo --project demo  | awk '/ac
 secret=$(openstack ec2 credentials show $access  | awk '/secret/ {print $4}')
 
 source novarcv3_project
+# Download images if not already present
+mkdir -vp ~/images
 upload_image cloudimages xenial xenial-server-cloudimg-amd64-disk1.img
 upload_image cloudimages trusty trusty-server-cloudimg-amd64-disk1.img
 upload_image swift cirros cirros-0.3.4-x86_64-disk.img
-upload_image swift cirros2 cirros-0.3.4-x86_64-disk.img
 
 image_id=$(openstack image list | awk '/cirros\s/ {print $2}')
 image_alt_id=$(openstack image list | awk '/cirros2\s/ {print $2}')
