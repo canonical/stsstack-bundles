@@ -1,0 +1,221 @@
+# vim: set ts=2 et:
+# IMPORTANT: ALL MODIFICATIONS SHOULD BE MADE TO THE TEMPLATE THEN REGENERATE
+#            THE BUNDLE WITH generate-bundle.sh <series> [<os-release>] [<pocket>]
+# Juju 2.x native deployer bundle for development ('next') charms
+
+## Variables
+debug:                      &debug                     True
+verbose:                    &verbose                   True
+
+series: __SERIES__
+services:
+  rabbitmq-server:
+    num_units: 1
+    charm: cs:~openstack-charmers-next/rabbitmq-server
+    constraints: mem=1G
+    options:
+      source: cloud:__SERIES__-__RELEASE____POCKET__
+  ceph-mon-az1:
+    charm: cs:~openstack-charmers-next/ceph-mon
+    num_units: 1
+    constraints: mem=1G
+    options:
+      monitor-count: 1
+      fsid: 6547bd3e-1397-11e2-82e5-53567c8d32dc
+      monitor-secret: AQCXrnZQwI7KGBAAiPofmKEXKxu5bUzoYLVkbQ==
+      source: cloud:__SERIES__-__RELEASE____POCKET__
+  ceph-mon-az2:
+    charm: cs:~openstack-charmers-next/ceph-mon
+    num_units: 1
+    constraints: mem=1G
+    options:
+      monitor-count: 1
+      fsid: 6547bd3e-1397-11e2-82e5-53567c8d32dc
+      monitor-secret: AQCXrnZQwI7KGBAAiPofmKEXKxu5bUzoYLVkbQ==
+      source: cloud:__SERIES__-__RELEASE____POCKET__
+  ceph-osd-az1:
+    charm: cs:~openstack-charmers-next/ceph-osd
+    num_units: 3
+    constraints: mem=1G
+    options:
+      osd-devices: /dev/vdb
+      osd-reformat: "yes"
+      ephemeral-unmount: /mnt
+      source: cloud:__SERIES__-__RELEASE____POCKET__
+  ceph-osd-az2:
+    charm: cs:~openstack-charmers-next/ceph-osd
+    num_units: 3
+    constraints: mem=1G
+    options:
+      osd-devices: /dev/vdb
+      osd-reformat: "yes"
+      ephemeral-unmount: /mnt
+      source: cloud:__SERIES__-__RELEASE____POCKET__
+  keystone:
+    num_units: 1
+    charm: cs:~openstack-charmers-next/keystone
+    constraints: mem=1G
+    options:
+      debug: *debug
+      verbose: *verbose
+      admin-password: openstack
+      admin-token: ubuntutesting
+      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+  openstack-dashboard:
+    num_units: 1
+    charm: cs:~openstack-charmers-next/openstack-dashboard
+    constraints: mem=1G
+    options:
+      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+  nova-compute-az1:
+    charm: cs:~openstack-charmers-next/nova-compute
+    num_units: 1
+    constraints: mem=4G
+    options:
+      debug: *debug
+      verbose: *verbose
+      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+  nova-compute-az2:
+    charm: cs:~openstack-charmers-next/nova-compute
+    num_units: 1
+    constraints: mem=4G
+    options:
+      debug: *debug
+      verbose: *verbose
+      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+  nova-cloud-controller:
+    num_units: 1
+    charm: cs:~openstack-charmers-next/nova-cloud-controller
+    constraints: mem=1G
+    options:
+      debug: *debug
+      verbose: *verbose
+      network-manager: Neutron
+      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+  neutron-gateway:
+    num_units: 1
+    charm: cs:~openstack-charmers-next/neutron-gateway
+    constraints: mem=4G
+    options:
+      debug: *debug
+      verbose: *verbose
+      instance-mtu: 1300
+      bridge-mappings: physnet1:br-ex
+      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+  neutron-api:
+    num_units: 1
+    charm: cs:~openstack-charmers-next/neutron-api
+    constraints: mem=1G
+    options:
+      debug: *debug
+      verbose: *verbose
+      neutron-security-groups: True
+      flat-network-providers: physnet1
+      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+  neutron-openvswitch:
+    charm: cs:~openstack-charmers-next/neutron-openvswitch
+  cinder-api:
+    num_units: 1
+    charm: cs:~openstack-charmers-next/cinder
+    constraints: mem=1G
+    options:
+      glance-api-version: 2
+      enabled-services: "api scheduler"
+  cinder-volume-az1:
+    num_units: 1
+    constraints: mem=1G
+    charm: cs:~openstack-charmers-next/cinder
+    options:
+      debug: *debug
+      verbose: *verbose
+      block-device: ""
+      config-flags: "storage_availability_zone=az1"
+      glance-api-version: 2
+      enabled-services: "volume"
+      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+  cinder-ceph-az1:
+    charm: cs:~openstack-charmers-next/cinder-ceph
+  cinder-volume-az2:
+    num_units: 1
+    constraints: mem=1G
+    charm: cs:~openstack-charmers-next/cinder
+    options:
+      debug: *debug
+      verbose: *verbose
+      block-device: ""
+      config-flags: "storage_availability_zone=az2"
+      glance-api-version: 2
+      enabled-services: "volume"
+      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+  cinder-ceph-az2:
+    charm: cs:~openstack-charmers-next/cinder-ceph
+  glance:
+    num_units: 1
+    charm: cs:~openstack-charmers-next/glance
+    constraints: mem=1G
+    options:
+      debug: *debug
+      verbose: *verbose
+      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+  mysql:
+    num_units: 1
+    charm: cs:~openstack-charmers-next/percona-cluster
+    constraints: mem=4G
+    options:
+      dataset-size: 50%
+      max-connections: 20000
+      root-password: ChangeMe123
+      sst-password: ChangeMe123
+      source: cloud:__SERIES__-__RELEASE____POCKET__
+relations:
+  - [ keystone, mysql ]
+  - [ nova-cloud-controller, mysql ]
+  - [ nova-cloud-controller, rabbitmq-server ]
+  - [ nova-cloud-controller, glance ]
+  - [ nova-cloud-controller, keystone ]
+  - [ nova-compute-az1, nova-cloud-controller ]
+  - [ nova-compute-az2, nova-cloud-controller ]
+  - [ nova-compute-az1, mysql ]
+  - [ nova-compute-az2, mysql ]
+  - [ nova-compute-az1, "rabbitmq-server:amqp" ]
+  - [ nova-compute-az2, "rabbitmq-server:amqp" ]
+  - [ nova-compute-az1, glance ]
+  - [ nova-compute-az2, glance ]
+  - [ ceph-mon-az1, ceph-osd-az1 ]
+  - [ ceph-mon-az2, ceph-osd-az2 ]
+  - [ glance, mysql ]
+  - [ glance, keystone ]
+  - [ glance, "cinder-api:image-service" ]
+  - [ glance, "cinder-volume-az1:image-service" ]
+  - [ glance, "cinder-volume-az2:image-service" ]
+  - [ glance, rabbitmq-server ]
+  - [ cinder-api, mysql ]
+  - [ cinder-volume-az1, mysql ]
+  - [ cinder-volume-az2, mysql ]
+  - [ cinder-api, rabbitmq-server ]
+  - [ cinder-volume-az1, rabbitmq-server ]
+  - [ cinder-volume-az2, rabbitmq-server ]
+  - [ cinder-api, nova-cloud-controller ]
+  - [ cinder-volume-az1, nova-cloud-controller ]
+  - [ cinder-volume-az2, nova-cloud-controller ]
+  - [ cinder-api, keystone ]
+  - [ cinder-volume-az1, cinder-ceph-az1 ]
+  - [ cinder-volume-az2, cinder-ceph-az2 ]
+  - [ cinder-ceph-az1, ceph-mon-az1 ]
+  - [ cinder-ceph-az2, ceph-mon-az2 ]
+  - [ nova-compute-az1, cinder-ceph-az1 ]
+  - [ nova-compute-az2, cinder-ceph-az2 ]
+  - [ nova-compute-az1, ceph-mon-az1 ]
+  - [ nova-compute-az2, ceph-mon-az2 ]
+  - [ neutron-gateway, nova-cloud-controller ]
+  - [ openstack-dashboard, keystone ]
+  - [ "neutron-gateway:amqp", rabbitmq-server ]
+  - [ neutron-api, mysql ]
+  - [ neutron-api, rabbitmq-server ]
+  - [ neutron-api, nova-cloud-controller ]
+  - [ neutron-api, neutron-openvswitch ]
+  - [ neutron-api, keystone ]
+  - [ neutron-api, neutron-gateway ]
+  - [ neutron-openvswitch, nova-compute-az1 ]
+  - [ neutron-openvswitch, nova-compute-az2 ]
+  - [ neutron-openvswitch, rabbitmq-server ]
