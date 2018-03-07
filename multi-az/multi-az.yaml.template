@@ -119,8 +119,12 @@ services:
     charm: cs:~openstack-charmers-next/cinder
     constraints: mem=1G
     options:
+      debug: *debug
+      verbose: *verbose
       glance-api-version: 2
       enabled-services: "api scheduler"
+      config-flags: "storage_availability_zone=None"
+      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
   cinder-volume-az1:
     num_units: 1
     constraints: mem=1G
