@@ -58,3 +58,4 @@ relations:
   - [ keystone, mysql ]
   - [ ceph-mon, ceph-osd ]
   - [ ceph-rgw, ceph-mon ]
+  - [ ceph-rgw, keystone ]
