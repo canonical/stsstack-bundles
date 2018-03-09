@@ -95,6 +95,9 @@ services:
   neutron-openvswitch:
     num_units: 0
     charm: cs:~openstack-charmers-next/neutron-openvswitch
+    options:
+      debug: *debug
+      verbose: *verbose
   cinder:
     num_units: 1
     charm: cs:~openstack-charmers-next/cinder

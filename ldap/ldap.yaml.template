@@ -82,6 +82,9 @@ services:
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
   neutron-openvswitch:
     charm: cs:~openstack-charmers-next/neutron-openvswitch
+    options:
+      debug: *debug
+      verbose: *verbose
   cinder:
     num_units: 1
     constraints: mem=1G
