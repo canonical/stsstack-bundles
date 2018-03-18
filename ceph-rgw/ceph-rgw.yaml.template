@@ -18,13 +18,25 @@ services:
       fsid: 6547bd3e-1397-11e2-82e5-53567c8d32dc
       monitor-secret: AQCXrnZQwI7KGBAAiPofmKEXKxu5bUzoYLVkbQ==
       source: cloud:__SERIES__-__RELEASE____POCKET__
-  ceph-rgw:
+  ceph-rgw-east:
     charm: cs:~openstack-charmers-next/ceph-radosgw
     num_units: 1
     constraints: mem=1G
     options:
       loglevel: 20
       source: cloud:__SERIES__-__RELEASE____POCKET__
+      pool-prefix: east
+      config-flags: '{"client.radosgw.gateway": {"rgw zone": "east", "rgw zonegroup": "east", "rgw cache enabled":"true","rgw cache lru size":"10000" }}'
+  ceph-rgw-west:
+    charm: cs:~openstack-charmers-next/ceph-radosgw
+    num_units: 1
+    constraints: mem=1G
+    options:
+      loglevel: 20
+      source: cloud:__SERIES__-__RELEASE____POCKET__
+      pool-prefix: west
+      region: RegionTwo
+      config-flags: '{"global":{"rgw override bucket index max shards":"8"}, "client.radosgw.gateway": {"rgw zone": "west", "rgw zonegroup": "west", "rgw cache enabled":"true","rgw cache lru size":"10000" }}'
   ceph-osd:
     charm: cs:~openstack-charmers-next/ceph-osd
     num_units: 3
@@ -50,12 +62,14 @@ services:
     constraints: mem=4G
     options:
       dataset-size: 50%
-      max-connections: 20000
+      max-connections: 10000
       root-password: ChangeMe123
       sst-password: ChangeMe123
       source: cloud:__SERIES__-__RELEASE____POCKET__
 relations:
   - [ keystone, mysql ]
   - [ ceph-mon, ceph-osd ]
-  - [ ceph-rgw, ceph-mon ]
-  - [ ceph-rgw, keystone ]
+  - [ ceph-rgw-east, ceph-mon ]
+  - [ ceph-rgw-west, ceph-mon ]
+  - [ ceph-rgw-east, keystone ]
+  - [ ceph-rgw-west, keystone ]
