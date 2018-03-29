@@ -6,20 +6,16 @@
 ## Variables
 debug:                      &debug                     True
 verbose:                    &verbose                   True
+loglevel:                   &loglevel                  10
 
 series: __SERIES__
 services:
-  rabbitmq-server:
-    num_units: 1
-    charm: cs:~openstack-charmers-next/rabbitmq-server
-    constraints: mem=1G
-    options:
-      source: cloud:__SERIES__-__RELEASE____POCKET__
   ceph-mon:
     charm: cs:~openstack-charmers-next/ceph-mon
     num_units: 1
     constraints: mem=1G
     options:
+      loglevel: *loglevel
       monitor-count: 1
       fsid: 6547bd3e-1397-11e2-82e5-53567c8d32dc
       monitor-secret: AQCXrnZQwI7KGBAAiPofmKEXKxu5bUzoYLVkbQ==
@@ -29,6 +25,7 @@ services:
     num_units: 3
     constraints: mem=1G
     options:
+      loglevel: *loglevel
       osd-devices: /dev/vdb
       osd-reformat: "yes"
       ephemeral-unmount: /mnt
@@ -43,67 +40,6 @@ services:
       admin-password: openstack
       admin-token: ubuntutesting
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
-  openstack-dashboard:
-    num_units: 1
-    charm: cs:~openstack-charmers-next/openstack-dashboard
-    constraints: mem=1G
-    options:
-      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
-  nova-compute:
-    charm: cs:~openstack-charmers-next/nova-compute
-    num_units: 3
-    constraints: mem=4G
-    options:
-      debug: *debug
-      verbose: *verbose
-      enable-live-migration: True
-      enable-resize: True
-      migration-auth-type: ssh
-      libvirt-image-backend: rbd
-      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
-  nova-cloud-controller:
-    num_units: 1
-    charm: cs:~openstack-charmers-next/nova-cloud-controller
-    constraints: mem=1G
-    options:
-      debug: *debug
-      verbose: *verbose
-      network-manager: Neutron
-      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
-  neutron-gateway:
-    num_units: 1
-    charm: cs:~openstack-charmers-next/neutron-gateway
-    constraints: mem=4G
-    options:
-      debug: *debug
-      verbose: *verbose
-      instance-mtu: 1300
-      bridge-mappings: physnet1:br-ex
-      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
-  neutron-api:
-    num_units: 1
-    charm: cs:~openstack-charmers-next/neutron-api
-    constraints: mem=1G
-    options:
-      debug: *debug
-      verbose: *verbose
-      neutron-security-groups: True
-      flat-network-providers: physnet1
-      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
-  neutron-openvswitch:
-    charm: cs:~openstack-charmers-next/neutron-openvswitch
-  cinder:
-    num_units: 1
-    constraints: mem=1G
-    charm: cs:~openstack-charmers-next/cinder
-    options:
-      debug: *debug
-      verbose: *verbose
-      block-device: ""
-      glance-api-version: 2
-      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
-  cinder-ceph:
-    charm: cs:~openstack-charmers-next/cinder-ceph
   glance:
     num_units: 1
     charm: cs:~openstack-charmers-next/glance
@@ -124,37 +60,7 @@ services:
       source: cloud:__SERIES__-__RELEASE____POCKET__
 relations:
   - [ keystone, mysql ]
-  - [ nova-cloud-controller, mysql ]
-  - [ nova-cloud-controller, rabbitmq-server ]
-  - [ nova-cloud-controller, glance ]
-  - [ nova-cloud-controller, keystone ]
   - [ ceph-mon, ceph-osd ]
-  - [ nova-compute, nova-cloud-controller ]
-  - [ nova-compute, mysql ]
-  - - nova-compute
-    - rabbitmq-server:amqp
-  - [ nova-compute, glance ]
-  - [ nova-compute, ceph-mon ]
-  - [ nova-compute, cinder-ceph ]
   - [ glance, mysql ]
   - [ glance, keystone ]
   - [ glance, ceph-mon ]
-  - [ glance, "cinder:image-service" ]
-  - [ glance, rabbitmq-server ]
-  - [ cinder, mysql ]
-  - [ cinder, rabbitmq-server ]
-  - [ cinder, nova-cloud-controller ]
-  - [ cinder, keystone ]
-  - [ cinder, cinder-ceph ]
-  - [ cinder-ceph, ceph-mon ]
-  - [ neutron-gateway, nova-cloud-controller ]
-  - [ openstack-dashboard, keystone ]
-  - [ "neutron-gateway:amqp", rabbitmq-server ]
-  - [ neutron-api, mysql ]
-  - [ neutron-api, rabbitmq-server ]
-  - [ neutron-api, nova-cloud-controller ]
-  - [ neutron-api, neutron-openvswitch ]
-  - [ neutron-api, keystone ]
-  - [ neutron-api, neutron-gateway ]
-  - [ neutron-openvswitch, nova-compute ]
-  - [ neutron-openvswitch, rabbitmq-server ]
