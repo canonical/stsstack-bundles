@@ -39,7 +39,7 @@ services:
     constraints: mem=1G
     options:
       osd-devices: /dev/vdb
-      osd-reformat: "yes"
+      osd-reformat: True 
       ephemeral-unmount: /mnt
       source: cloud:__SERIES__-__RELEASE____POCKET__
   ceph-osd-az2:
@@ -48,7 +48,7 @@ services:
     constraints: mem=1G
     options:
       osd-devices: /dev/vdb
-      osd-reformat: "yes"
+      osd-reformat: True 
       ephemeral-unmount: /mnt
       source: cloud:__SERIES__-__RELEASE____POCKET__
   keystone:

@@ -27,7 +27,7 @@ services:
     options:
       loglevel: *loglevel
       osd-devices: /dev/vdb
-      osd-reformat: "yes"
+      osd-reformat: True 
       ephemeral-unmount: /mnt
       source: cloud:__SERIES__-__RELEASE____POCKET__
   keystone:
