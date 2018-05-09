@@ -1,0 +1,113 @@
+# vim: set ts=2 et:
+# IMPORTANT: ALL MODIFICATIONS SHOULD BE MADE TO THE TEMPLATE THEN REGENERATE
+#            THE BUNDLE WITH generate-bundle.sh <series> [<os-release>] [<pocket>]
+# Juju 2.x native deployer bundle for development ('next') charms
+
+## Variables
+debug:                      &debug                     True
+verbose:                    &verbose                   True
+
+series: __SERIES__
+services:
+  ceph-mon:
+    charm: cs:~openstack-charmers-next/ceph-mon
+    num_units: 1
+    constraints: mem=1G
+    options:
+      monitor-count: 1
+      loglevel: 10
+      fsid: 6547bd3e-1397-11e2-82e5-53567c8d32dc
+      monitor-secret: AQCXrnZQwI7KGBAAiPofmKEXKxu5bUzoYLVkbQ==
+      source: cloud:__SERIES__-__RELEASE____POCKET__
+  ceph-osd:
+    charm: cs:~openstack-charmers-next/ceph-osd
+    num_units: 3
+    constraints: mem=1G
+    options:
+      loglevel: 10
+      osd-devices: /dev/vdb
+      osd-reformat: True 
+      ephemeral-unmount: /mnt
+      source: cloud:__SERIES__-__RELEASE____POCKET__
+  keystone:
+    num_units: 1
+    charm: cs:~openstack-charmers-next/keystone
+    constraints: mem=1G
+    options:
+      debug: *debug
+      verbose: *verbose
+      admin-password: openstack
+      admin-token: ubuntutesting
+      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+  glance:
+    num_units: 1
+    charm: cs:~openstack-charmers-next/glance
+    constraints: mem=1G
+    options:
+      debug: *debug
+      verbose: *verbose
+      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+  mysql:
+    num_units: 1
+    charm: cs:~openstack-charmers-next/percona-cluster
+    constraints: mem=4G
+    options:
+      dataset-size: 50%
+      max-connections: 20000
+      root-password: ChangeMe123
+      sst-password: ChangeMe123
+      source: cloud:__SERIES__-__RELEASE____POCKET__
+  elasticsearch:
+    charm: elasticsearch
+    num_units: 2
+    contraints: "mem=8G"
+    options:
+      firewall_enabled: false
+  filebeat:
+    charm: filebeat
+    options:
+      logpath: "/var/log/ceph/*"
+  graylog:
+    charm: graylog
+    num_units: 1
+    options:
+      index_replicas: 1
+      index_shards: 4
+      index_rotation_strategy: size
+      index_rotation_size: 10737418240
+      index_retention_count: 7
+  mongodb:
+    charm: mongodb
+    num_units: 1
+    options:
+      backups_enabled: true
+  ntp:
+    charm: ntp
+    options:
+      auto_peers: false
+      source: ntp1.canonical.com ntp2.canonical.com ntp3.canonical.com ntp4.canonical.com
+  telegraf:
+    charm: telegraf
+    expose: true
+    options:
+      prometheus_output_port: default
+relations:
+  - [ keystone, mysql ]
+  - [ ceph-mon, ceph-osd ]
+  - [ glance, mysql ]
+  - [ glance, keystone ]
+  - [ glance, ceph-mon ]
+  - ['graylog', 'filebeat']
+  - ['graylog', 'ntp']
+  - ['graylog', 'telegraf']
+  - ['graylog', 'elasticsearch']
+  - ['graylog', 'mongodb:database']
+  - ['elasticsearch:juju-info', 'filebeat:beats-host']
+  - ['elasticsearch', 'ntp']
+  - ['elasticsearch', 'telegraf']
+  - ['mongodb', 'filebeat']
+  - ['mongodb', 'ntp']
+  - ['mongodb', 'telegraf']
+  - [ ceph-mon, filebeat ]
+  - [ ceph-osd, filebeat ]
+
