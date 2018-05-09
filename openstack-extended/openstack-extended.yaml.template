@@ -133,6 +133,8 @@ services:
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
   ceilometer-agent:
     charm: cs:~openstack-charmers-next/ceilometer-agent
+    options:
+      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
   heat:
     num_units: 1
     charm: cs:~openstack-charmers-next/heat
