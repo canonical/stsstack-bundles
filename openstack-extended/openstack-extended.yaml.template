@@ -130,6 +130,8 @@ services:
     charm: cs:~openstack-charmers-next/ceilometer
     constraints: mem=1G
     options:
+      debug: *debug
+      verbose: *verbose
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
   ceilometer-agent:
     charm: cs:~openstack-charmers-next/ceilometer-agent
@@ -139,6 +141,8 @@ services:
     num_units: 1
     charm: cs:~openstack-charmers-next/heat
     options:
+      debug: *debug
+      verbose: *verbose
       openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
   mongodb:
     num_units: 1
