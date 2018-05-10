@@ -1,11 +1,13 @@
 # vim: set ts=2 et:
 # IMPORTANT: ALL MODIFICATIONS SHOULD BE MADE TO THE TEMPLATE THEN REGENERATE
-#            THE BUNDLE WITH generate-bundle.sh <series> [<os-release>] [<pocket>]
+#            THE BUNDLE WITH generate-bundle.sh 
 # Juju 2.x native deployer bundle for development ('next') charms
 
 ## Variables
 debug:                      &debug                     True
 verbose:                    &verbose                   True
+openstack_origin:           &openstack_origin          __OS_ORIGIN__
+source:                     &source                    __SOURCE__
 
 series: __SERIES__
 services:
@@ -19,7 +21,7 @@ services:
       admin-password: openstack
       admin-token: ubuntutesting
       vip: 10.5.100.1
-      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+      openstack-origin: *openstack_origin
   keystone-hacluster:
     num_units: 0
     charm: cs:~openstack-charmers-next/hacluster
@@ -31,7 +33,7 @@ services:
     options:
       debug: *debug
       verbose: *verbose
-      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+      openstack-origin: *openstack_origin
   swift-proxy:
     num_units: 3
     charm: cs:~openstack-charmers-next/swift-proxy
@@ -42,7 +44,7 @@ services:
       replicas: 3
       vip: 10.5.100.2
       swift-hash: fdfef9d4-8b06-11e2-8ac0-531c923c8fae
-      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+      openstack-origin: *openstack_origin
   swift-proxy-hacluster:
     num_units: 0
     charm: cs:~openstack-charmers-next/hacluster
@@ -56,7 +58,7 @@ services:
       zone: 1
       block-device: vdb
       overwrite: "true"
-      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+      openstack-origin: *openstack_origin
   swift-storage-z2:
     num_units: 1
     charm: cs:~openstack-charmers-next/swift-storage
@@ -65,7 +67,7 @@ services:
       zone: 2
       block-device: vdb
       overwrite: "true"
-      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+      openstack-origin: *openstack_origin
   swift-storage-z3:
     num_units: 1
     charm: cs:~openstack-charmers-next/swift-storage
@@ -74,7 +76,7 @@ services:
       zone: 3
       block-device: vdb
       overwrite: "true"
-      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+      openstack-origin: *openstack_origin
   mysql:
     num_units: 1
     charm: cs:~openstack-charmers-next/percona-cluster
@@ -84,7 +86,7 @@ services:
       max-connections: 20000
       root-password: ChangeMe123
       sst-password: ChangeMe123
-      source: cloud:__SERIES__-__RELEASE____POCKET__
+      source: *source
 relations:
   - [ keystone, keystone-hacluster ]
   - [ keystone, mysql ]

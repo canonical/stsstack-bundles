@@ -1,11 +1,13 @@
 # vim: set ts=2 et:
 # IMPORTANT: ALL MODIFICATIONS SHOULD BE MADE TO THE TEMPLATE THEN REGENERATE
-#            THE BUNDLE WITH generate-bundle.sh <series> [<os-release>] [<pocket>]
+#            THE BUNDLE WITH generate-bundle.sh 
 # Juju 2.x native deployer bundle for development ('next') charms
 
 ## Variables
 debug:                      &debug                     True
 verbose:                    &verbose                   True
+openstack_origin:           &openstack_origin          __OS_ORIGIN__
+source:                     &source                    __SOURCE__
 
 series: __SERIES__
 services:
@@ -14,7 +16,7 @@ services:
     charm: cs:~openstack-charmers-next/rabbitmq-server
     constraints: mem=1G
     options:
-      source: cloud:__SERIES__-__RELEASE____POCKET__
+      source: *source
   ceph-mon-az1:
     charm: cs:~openstack-charmers-next/ceph-mon
     num_units: 1
@@ -23,7 +25,7 @@ services:
       monitor-count: 1
       fsid: 6547bd3e-1397-11e2-82e5-53567c8d32dc
       monitor-secret: AQCXrnZQwI7KGBAAiPofmKEXKxu5bUzoYLVkbQ==
-      source: cloud:__SERIES__-__RELEASE____POCKET__
+      source: *source
   ceph-mon-az2:
     charm: cs:~openstack-charmers-next/ceph-mon
     num_units: 1
@@ -32,7 +34,7 @@ services:
       monitor-count: 1
       fsid: 6547bd3e-1397-11e2-82e5-53567c8d32dc
       monitor-secret: AQCXrnZQwI7KGBAAiPofmKEXKxu5bUzoYLVkbQ==
-      source: cloud:__SERIES__-__RELEASE____POCKET__
+      source: *source
   ceph-osd-az1:
     charm: cs:~openstack-charmers-next/ceph-osd
     num_units: 3
@@ -41,7 +43,7 @@ services:
       osd-devices: /dev/vdb
       osd-reformat: True 
       ephemeral-unmount: /mnt
-      source: cloud:__SERIES__-__RELEASE____POCKET__
+      source: *source
   ceph-osd-az2:
     charm: cs:~openstack-charmers-next/ceph-osd
     num_units: 3
@@ -50,7 +52,7 @@ services:
       osd-devices: /dev/vdb
       osd-reformat: True 
       ephemeral-unmount: /mnt
-      source: cloud:__SERIES__-__RELEASE____POCKET__
+      source: *source
   keystone:
     num_units: 1
     charm: cs:~openstack-charmers-next/keystone
@@ -60,13 +62,13 @@ services:
       verbose: *verbose
       admin-password: openstack
       admin-token: ubuntutesting
-      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+      openstack-origin: *openstack_origin
   openstack-dashboard:
     num_units: 1
     charm: cs:~openstack-charmers-next/openstack-dashboard
     constraints: mem=1G
     options:
-      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+      openstack-origin: *openstack_origin
   nova-compute-az1:
     charm: cs:~openstack-charmers-next/nova-compute
     num_units: 1
@@ -74,7 +76,7 @@ services:
     options:
       debug: *debug
       verbose: *verbose
-      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+      openstack-origin: *openstack_origin
   nova-compute-az2:
     charm: cs:~openstack-charmers-next/nova-compute
     num_units: 1
@@ -82,7 +84,7 @@ services:
     options:
       debug: *debug
       verbose: *verbose
-      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+      openstack-origin: *openstack_origin
   nova-cloud-controller:
     num_units: 1
     charm: cs:~openstack-charmers-next/nova-cloud-controller
@@ -91,7 +93,7 @@ services:
       debug: *debug
       verbose: *verbose
       network-manager: Neutron
-      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+      openstack-origin: *openstack_origin
   neutron-gateway:
     num_units: 1
     charm: cs:~openstack-charmers-next/neutron-gateway
@@ -101,7 +103,7 @@ services:
       verbose: *verbose
       instance-mtu: 1300
       bridge-mappings: physnet1:br-ex
-      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+      openstack-origin: *openstack_origin
   neutron-api:
     num_units: 1
     charm: cs:~openstack-charmers-next/neutron-api
@@ -111,7 +113,7 @@ services:
       verbose: *verbose
       neutron-security-groups: True
       flat-network-providers: physnet1
-      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+      openstack-origin: *openstack_origin
   neutron-openvswitch:
     charm: cs:~openstack-charmers-next/neutron-openvswitch
     options:
@@ -127,7 +129,7 @@ services:
       glance-api-version: 2
       enabled-services: "api scheduler"
       config-flags: "storage_availability_zone=None"
-      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+      openstack-origin: *openstack_origin
   cinder-volume-az1:
     num_units: 1
     constraints: mem=1G
@@ -139,7 +141,7 @@ services:
       config-flags: "storage_availability_zone=az1"
       glance-api-version: 2
       enabled-services: "volume"
-      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+      openstack-origin: *openstack_origin
   cinder-ceph-az1:
     charm: cs:~openstack-charmers-next/cinder-ceph
   cinder-volume-az2:
@@ -153,7 +155,7 @@ services:
       config-flags: "storage_availability_zone=az2"
       glance-api-version: 2
       enabled-services: "volume"
-      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+      openstack-origin: *openstack_origin
   cinder-ceph-az2:
     charm: cs:~openstack-charmers-next/cinder-ceph
   glance:
@@ -163,7 +165,7 @@ services:
     options:
       debug: *debug
       verbose: *verbose
-      openstack-origin: cloud:__SERIES__-__RELEASE____POCKET__
+      openstack-origin: *openstack_origin
   mysql:
     num_units: 1
     charm: cs:~openstack-charmers-next/percona-cluster
@@ -173,7 +175,7 @@ services:
       max-connections: 20000
       root-password: ChangeMe123
       sst-password: ChangeMe123
-      source: cloud:__SERIES__-__RELEASE____POCKET__
+      source: *source
 relations:
   - [ keystone, mysql ]
   - [ nova-cloud-controller, mysql ]

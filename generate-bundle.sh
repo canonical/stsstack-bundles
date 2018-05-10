@@ -4,93 +4,85 @@
 #
 # Description: Use this tool to generate a Juju (2.x) native-format bundle e.g.:
 #
-#              Trusty + Mitaka Cloud Archive: ./generate-bundle.sh trusty mitaka
+#              Trusty + Mitaka Cloud Archive: ./generate-bundle.sh --series trusty --release mitaka
 #
-#              xenial-proposed: ./generate-bundle.sh xenial mitaka proposed
+#              Xenial (Mitaka) Proposed: ./generate-bundle.sh --series xenial --pocket proposed
 #
-#              Xenial + Proposed Newton UCA: ./generate-bundle.sh xenial newton proposed
+#              Xenial + Proposed Ocata UCA: ./generate-bundle.sh --series xenial --release ocata --pocket proposed
 #
 #
-series=${1-""}
-release=${2-""}
-pocket=${3-""}
-template=`basename $(pwd)`.yaml.template
-target=`basename $(pwd)`.yaml
-
-# PLEASE KEEP THE FOLLOWING UP-TO-DATE AS NEW RELEASES COME OUT AND OLDER ONES ARE DEPRECATED.
-# See https://www.ubuntu.com/info/release-end-of-life 
+series=xenial
+release=
+pocket=
+template=
+path=
 declare -A lts=( [trusty]=icehouse
-                 [xenial]=mitaka 
+                 [xenial]=mitaka
                  [bionic]=queens )
-declare -A nonlts=( [zesty]=
-                    [artful]= )
+while (($# > 0))
+do
+    case "$1" in
+        --path)
+            path=$2
+            shift
+            ;;
+        --series)
+            series=$2
+            shift
+            ;;
+        --release)
+            release=$2
+            shift
+            ;;
+        --pocket)
+            pocket=$2
+            shift
+            ;;
+        --template)
+            template=$2
+            shift
+            ;;
+        *)
+            echo "ERROR: invalid input '$1'"
+            echo "USAGE: `basename $0` [--series s] [--release r] [--pocket p] --template t --path p"
+            exit 1
+            ;;
+    esac
+    shift
+done
 
-
-[ -e "$template" ] || { echo "Template '$template' not found. Are you in a bundle directory?"; exit 1; }
-
-default_r=false
-if [ -z "$series" ]; then
-  series=xenial
-  release=
-  default_r=true
-  echo "Using default series '$series' (with distro release of openstack i.e. ${lts[$series]})"
-elif ! ( _=${lts[$series]} ) 2>/dev/null; then
-  if ! ( _=${nonlts[$series]} ) 2>/dev/null; then 
-    echo "Unknown series '$series'. Please specify one of: ${!lts[@]} ${!nonlts[@]}"
-    exit 1
-  fi
-else
-  echo "Using series '$series'"
-fi
-
-if ! $default_r; then
-  if [ -n "$release" ]; then
-    echo "Using release '$release'"
-  else
-    echo -n "Using $series distro release of openstack"
-    if ! ( _=${nonlts[$series]} ) 2>/dev/null; then
-      echo " i.e. '${lts[$series]}'"
-    else
-      echo ""
-    fi
-  fi
-fi
-
-if [ -z "$pocket" ]; then
-  echo "Using default pocket"
-else
-  echo "Using pocket '$pocket'"
-fi
+[ -z "$template" ] || [ -z "$path" ] && { echo "ERROR: no template provided with --template"; exit 1; }
 
 ltsmatch ()
 {
-    for s in ${!lts[@]};
-        do
-            [ "$s" = "$1" ] && [ "${lts[$s]}" = "$2" ] && return 0
-        done
+    [ -z "$release" ] && return 0
+    for s in ${!lts[@]}; do
+        [ "$s" = "$1" ] && [ "${lts[$s]}" = "$2" ] && return 0
+    done
     return 1
 }
 
-fout=`mktemp`
-if [ -z "$series" ] || [ -z "$release" ] ; then
-  cat $template| sed -r "/\ssource:.+$/d"| sed -r "/\sopenstack-origin:.+$/d" > ${fout}.tmp
-  cat ${fout}.tmp| sed -e "s/__SERIES__/$series/g" > $fout
-  rm ${fout}.tmp
+if ltsmatch $series $release ; then
+  _release=''
 else
-  cat $template| sed -e "s/__SERIES__/$series/g" -e "s/__RELEASE__/$release/g" > $fout
-  if [ -n "$pocket" ] ; then
-      if ltsmatch $series $release ; then
-          sed -i -r "s/(openstack-origin:\s)cloud:${series}-${release}__POCKET__/\1distro-$pocket/g" $fout
-          sed -i -r "s/(source:\s)cloud:${series}-${release}__POCKET__/\1$pocket/g" $fout
-      else
-          sed -i -r "s/__POCKET__/\/$pocket/g" $fout
-      fi
-  else
-      sed -i -r "s/__POCKET__//g" $fout
-  fi
-  if [ `echo -e "$series\nxenia"| sort| head -n 1` = "$series" ]; then
-      sed -i -r "s/#__MONGODB__//g" $fout
-  fi
+  _release="cloud:${series}-${release}"
 fi
-mv $fout $target
-echo "Bundle successfully written to $target"
+[ -z "$pocket" ] || \
+  if [ -n "$_release" ]; then
+    _release="${_release}\/${pocket}"
+  else
+    _release="$pocket";
+  fi
+
+fout=`mktemp -d`/`basename $template| sed 's/.template//'`
+cat $template| sed -e "s/__SERIES__/$series/g" -e "s/__SOURCE__/$_release/g" > ${fout}.tmp
+os_origin=$_release
+[ "$os_origin" = "proposed" ] && os_origin="distro-proposed"
+cat ${fout}.tmp| sed -e "s/__SERIES__/$series/g" -e "s/__OS_ORIGIN__/$os_origin/g" > $fout
+dst=`dirname $path`/bundles/
+mkdir -p $dst
+mv $fout $dst
+[ -n "$release" ] || release=${lts[$series]} 
+target=${series}-$release
+[ -z "$pocket" ] || target=${target}-$pocket
+echo "Your $target bundle can be found at $dst`basename $fout`"
