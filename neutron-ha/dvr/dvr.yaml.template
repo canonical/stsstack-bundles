@@ -65,8 +65,6 @@ services:
       debug: *debug
       verbose: *verbose
       neutron-security-groups: True
-      default-tenant-network-type: vxlan
-      overlay-network-type: vxlan
       enable-dvr: true
       dhcp-agents-per-network: 2
       flat-network-providers: physnet1
@@ -118,4 +116,3 @@ relations:
   - [ neutron-api, neutron-gateway ]
   - [ neutron-openvswitch, nova-compute ]
   - [ neutron-openvswitch, rabbitmq-server ]
-

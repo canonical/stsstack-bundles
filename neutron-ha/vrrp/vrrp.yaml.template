@@ -65,8 +65,6 @@ services:
       debug: *debug
       verbose: *verbose
       neutron-security-groups: True
-      default-tenant-network-type: vxlan
-      overlay-network-type: vxlan
       enable-l3ha: true
       dhcp-agents-per-network: 2
       min-l3-agents-per-router: 3
@@ -120,4 +118,3 @@ relations:
   - [ neutron-api, neutron-gateway ]
   - [ neutron-openvswitch, nova-compute ]
   - [ neutron-openvswitch, rabbitmq-server ]
-
