@@ -58,6 +58,7 @@ services:
       zone: 1
       block-device: vdb
       overwrite: "true"
+      ephemeral-unmount: True
       openstack-origin: *openstack_origin
   swift-storage-z2:
     num_units: 1
@@ -67,6 +68,7 @@ services:
       zone: 2
       block-device: vdb
       overwrite: "true"
+      ephemeral-unmount: True
       openstack-origin: *openstack_origin
   swift-storage-z3:
     num_units: 1
@@ -76,6 +78,7 @@ services:
       zone: 3
       block-device: vdb
       overwrite: "true"
+      ephemeral-unmount: True
       openstack-origin: *openstack_origin
   mysql:
     num_units: 1
