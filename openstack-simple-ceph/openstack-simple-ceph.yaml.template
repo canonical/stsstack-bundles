@@ -153,7 +153,7 @@ relations:
   - [ nova-compute, cinder-ceph ]
   - [ nova-compute, ceph-mon ]
   - [ neutron-gateway, nova-cloud-controller ]
-  - [ openstack-dashboard, keystone ]
+  - [ "openstack-dashboard:identity-service", "keystone:identity-service" ]
   - [ "neutron-gateway:amqp", rabbitmq-server ]
   - [ neutron-api, mysql ]
   - [ neutron-api, rabbitmq-server ]

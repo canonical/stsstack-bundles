@@ -217,7 +217,7 @@ relations:
   - [ nova-compute-az1, ceph-mon-az1 ]
   - [ nova-compute-az2, ceph-mon-az2 ]
   - [ neutron-gateway, nova-cloud-controller ]
-  - [ openstack-dashboard, keystone ]
+  - [ "openstack-dashboard:identity-service", "keystone:identity-service" ]
   - [ "neutron-gateway:amqp", rabbitmq-server ]
   - [ neutron-api, mysql ]
   - [ neutron-api, rabbitmq-server ]

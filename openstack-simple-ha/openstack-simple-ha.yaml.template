@@ -182,7 +182,7 @@ relations:
   - [ cinder, nova-cloud-controller ]
   - [ cinder, keystone ]
   - [ neutron-gateway, nova-cloud-controller ]
-  - [ openstack-dashboard, keystone ]
+  - [ "openstack-dashboard:identity-service", "keystone:identity-service" ]
   - [ "neutron-gateway:amqp", rabbitmq-server ]
   - [ neutron-api, mysql ]
   - [ neutron-api, rabbitmq-server ]
