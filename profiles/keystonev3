@@ -26,29 +26,39 @@ if [[ "${BARE_METAL^^}" != "TRUE" ]]; then
 fi
 
 # Configure neutron networking on overcloud
-source novarcv3_domain
+source novarcv3_project
 ./bin/neutron-ext-net-ksv3 --project admin --network-type flat -g $GATEWAY -c $CIDR_EXT -f $FIP_RANGE ext_net
 ./bin/neutron-tenant-net-ksv3 --project admin --network-type $net_type -r provider-router -N $NAMESERVER private $CIDR_PRIV
 ext_net=$(openstack network list | awk '/ext_net/ {print $2}')
 
 # Create demo/testing users, tenants and flavor
-openstack project show demo || openstack project create demo
-openstack user show demo || openstack user create --project demo --password pass --enable --email demo@dev.null demo
+openstack project show --domain admin_domain demo || \
+	openstack project create --domain admin_domain demo
+openstack user show --domain admin_domain demo || \
+	openstack user create --project-domain admin_domain --project demo \
+	--password pass --enable --email demo@dev.null \
+	--domain admin_domain demo
 openstack role show Member || openstack role create Member
-openstack role add --user demo --project demo Member
-openstack project show alt_demo || openstack project create alt_demo
-openstack user show alt_demo || openstack user create --project alt_demo --password secret --enable --email alt_demo@dev.null alt_demo
-openstack role add --user alt_demo --project alt_demo Member
-access=$(openstack ec2 credentials create --user demo --project demo  | awk '/access/ {print $4}')
+openstack role add --user-domain admin_domain --user demo \
+	--project-domain admin_domain --project demo Member
+openstack project show --domain admin_domain alt_demo || \
+	openstack project create --domain admin_domain alt_demo
+openstack user show --domain admin_domain alt_demo || \
+	openstack user create --project-domain admin_domain --project alt_demo \
+	--password secret --enable --email alt_demo@dev.null \
+	--domain admin_domain alt_demo
+openstack role add --user-domain admin_domain --user alt_demo \
+	--project-domain admin_domain --project alt_demo Member
+access=$(openstack ec2 credentials create --user-domain admin_domain \
+	--user demo --project-domain admin_domain --project demo \
+       | awk '/access/ {print $4}')
 secret=$(openstack ec2 credentials show $access  | awk '/secret/ {print $4}')
 
-source novarcv3_project
 # Download images if not already present
 mkdir -vp ~/images
 upload_image cloudimages xenial xenial-server-cloudimg-amd64-disk1.img
 upload_image cloudimages trusty trusty-server-cloudimg-amd64-disk1.img
 upload_image swift cirros cirros-0.3.4-x86_64-disk.img
-
 image_id=$(openstack image list | awk '/cirros\s/ {print $2}')
 image_alt_id=$(openstack image list | awk '/cirros2\s/ {print $2}')
 
@@ -67,6 +77,7 @@ keystone=$(juju run --unit keystone/0 unit-get private-address)
 dashboard=$(juju run --unit openstack-dashboard/0 unit-get private-address)
 ncc=$(juju run --unit nova-cloud-controller/0 unit-get private-address)
 http=${OS_AUTH_PROTOCOL:-http}
+default_domain_id=$(openstack domain list | awk '/default/ {print $2}')
 
 # Insert vars into tempest conf
 sed -e "s/__IMAGE_ID__/$image_id/g" -e "s/__IMAGE_ALT_ID__/$image_alt_id/g" \
@@ -76,20 +87,12 @@ sed -e "s/__IMAGE_ID__/$image_id/g" -e "s/__IMAGE_ALT_ID__/$image_alt_id/g" \
     -e "s/__NAMESERVER__/$NAMESERVER/g" \
     -e "s/__CIDR_PRIV__/${CIDR_PRIV////\\/}/g" \
     -e "s/__NCC__/$ncc/g" -e "s/__SECRET__/$secret/g" -e "s/__ACCESS__/$access/g" \
-    templates/tempest/tempest.conf.template > tempest.conf
-
-sed -e "s/__IMAGE_ID__/$image_id/g" -e "s/__IMAGE_ALT_ID__/$image_alt_id/g" \
-    -e "s/__DASHBOARD__/$dashboard/g" -e "s/__KEYSTONE__/$keystone/g" \
-    -e "s/__EXT_NET__/$ext_net/g" -e "s/__PROTO__/$http/g" \
-    -e "s/__SWIFT__/$SWIFT_IP/g" \
-    -e "s/__NAMESERVER__/$NAMESERVER/g" \
-    -e "s/__CIDR_PRIV__/${CIDR_PRIV////\\/}/g" \
-    -e "s/__NCC__/$ncc/g" -e "s/__SECRET__/$secret/g" -e "s/__ACCESS__/$access/g" \
-    templates/tempest/tempest.refstack.template.conf > tempest_refstack.conf
+    -e "s/__DEFAULT_DOMAIN_ID__/$default_domain_id/g" \
+    templates/tempest/tempest-v3.conf.template > tempest.conf
 
 # Git tempest, place the rendered tempest template
 [ -d tempest ] || git clone https://github.com/openstack/tempest
-# Checkout latest commit that included run_tempest.sh. This is a stop-gap until
-# OSCI uses tempest charm or switches to new style of executing tempest tests.
-git --git-dir=tempest/.git --work-tree=tempest checkout f2ba23f7834facb2bfe7c376840e7630881d1bf9
+git --git-dir=tempest/.git --work-tree=tempest checkout master
+git --git-dir=tempest/.git --work-tree=tempest pull
 cp tempest.conf tempest/etc
+cp templates/tempest/accounts.yaml tempest/etc

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-valid="default keystonev3 stsstack dellstack kernelstack ppc64el powerkvm arm64 lxd multihypervisor vpil refstack_only"
+valid="default keystonev3 stsstack dellstack kernelstack amd64 amd64-v3 ppc64el ppc64el-v3 powerkvm arm64 arm64-v3 lxd multihypervisor vpil refstack_only"
 
 usage() {
   echo "$0 <profile>"
