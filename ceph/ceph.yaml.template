@@ -6,7 +6,7 @@
 ## Variables
 debug:                      &debug                     True
 verbose:                    &verbose                   True
-loglevel:                   &loglevel                  10
+loglevel:                   &loglevel                  20
 openstack_origin:           &openstack_origin          __OS_ORIGIN__
 source:                     &source                    __SOURCE__
 
