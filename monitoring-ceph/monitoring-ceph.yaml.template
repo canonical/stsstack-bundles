@@ -28,7 +28,6 @@ services:
     options:
       loglevel: 10
       osd-devices: /dev/vdb
-      osd-reformat: True 
       ephemeral-unmount: /mnt
       source: *source
   keystone:

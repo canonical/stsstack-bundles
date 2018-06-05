@@ -32,7 +32,6 @@ services:
     constraints: mem=1G
     options:
       osd-devices: /dev/vdb
-      osd-reformat: True 
       ephemeral-unmount: /mnt
       source: *source
   keystone:
