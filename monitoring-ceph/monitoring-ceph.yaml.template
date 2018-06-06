@@ -18,7 +18,6 @@ services:
     options:
       monitor-count: 1
       loglevel: 10
-      fsid: 6547bd3e-1397-11e2-82e5-53567c8d32dc
       monitor-secret: AQCXrnZQwI7KGBAAiPofmKEXKxu5bUzoYLVkbQ==
       source: *source
   ceph-osd:
