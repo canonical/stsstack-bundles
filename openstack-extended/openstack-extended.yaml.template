@@ -148,6 +148,30 @@ services:
     num_units: 1
     charm: cs:mongodb
     constraints: mem=1G
+  aodh:
+    charm: cs:aodh
+    constraints: mem=1G
+  memcached:
+    charm: cs:memcached
+    constraints: mem=1G
+  designate:
+    charm: cs:designate
+    constraints: mem=1G
+    options:
+      nameservers: 'ns1.ubuntu.com'
+      nova-domain: 'stsstack.ubuntu.com.'
+      neutron-domain: 'stsstack.ubuntu.com.'
+      nova-domain-email: 'seymore@stsstack.ubuntu.com'
+      neutron-domain-email: 'seymore@stsstack.ubuntu.com'
+  designate-bind:
+    charm: cs:designate-bind
+  barbican:
+    charm: cs:~openstack-charmers/barbican
+    constraints: mem=1G
+  gnocchi:
+    charm: cs:~openstack-charmers-next/gnocchi
+  memcached:
+    charm: cs:memcached
 relations:
   - [ keystone, mysql ]
   - [ nova-cloud-controller, mysql ]
@@ -184,8 +208,7 @@ relations:
   - [ neutron-api, neutron-gateway ]
   - [ neutron-openvswitch, nova-compute ]
   - [ neutron-openvswitch, rabbitmq-server ]
-  - - ceilometer
-    - keystone:identity-service
+  - [ ceilometer, "keystone:identity-service" ]
   - [ ceilometer, rabbitmq-server ]
   - [ ceilometer, mongodb ]
   - [ ceilometer-agent, nova-compute ]
@@ -193,4 +216,23 @@ relations:
   - [ heat, mysql ]
   - [ heat, keystone ]
   - [ heat, rabbitmq-server ]
+  - [ aodh, rabbitmq-server ]
+  - [ aodh, mysql ]
+  - [ aodh, keystone ]
+  - [ designate, keystone ]
+  - [ designate, mysql ]
+  - [ designate, rabbitmq-server ]
+  - [ designate, designate-bind ]
+  - [ designate, memcached ]
+  - [ barbican, rabbitmq-server ]
+  - [ barbican, mysql ]
+  - [ barbican, keystone ]
+  - [ gnocchi, ceph-mon ]
+  - [ gnocchi, mysql ]
+  - [ gnocchi, rabbitmq-server ]
+  - [ gnocchi, memcached ]
+  - [ gnocchi, ceilometer ]
+  - [ gnocchi, keystone ]
+  - [ ceilometer, "keystone:identity-credentials" ]
+  - [ "designate:dnsaas", "neutron-api:external-dns" ]
 
