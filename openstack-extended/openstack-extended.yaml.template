@@ -149,12 +149,15 @@ services:
     charm: cs:mongodb
     constraints: mem=1G
   aodh:
+    num_units: 1
     charm: cs:aodh
     constraints: mem=1G
   memcached:
+    num_units: 1
     charm: cs:memcached
     constraints: mem=1G
   designate:
+    num_units: 1
     charm: cs:designate
     constraints: mem=1G
     options:
@@ -166,11 +169,14 @@ services:
   designate-bind:
     charm: cs:designate-bind
   barbican:
+    num_units: 1
     charm: cs:~openstack-charmers/barbican
     constraints: mem=1G
   gnocchi:
+    num_units: 1
     charm: cs:~openstack-charmers-next/gnocchi
   memcached:
+    num_units: 1
     charm: cs:memcached
 relations:
   - [ keystone, mysql ]
