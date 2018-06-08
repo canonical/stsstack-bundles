@@ -150,31 +150,33 @@ services:
     constraints: mem=1G
   aodh:
     num_units: 1
-    charm: cs:aodh
-    constraints: mem=1G
-  memcached:
-    num_units: 1
-    charm: cs:memcached
-    constraints: mem=1G
-  designate:
-    num_units: 1
-    charm: cs:designate
+    charm: cs:~openstack-charmers-next/aodh
     constraints: mem=1G
     options:
-      nameservers: 'ns1.ubuntu.com'
+      debug: *debug
+  designate:
+    num_units: 1
+    charm: cs:~openstack-charmers-next/designate
+    constraints: mem=1G
+    options:
+      debug: *debug
       nova-domain: 'stsstack.ubuntu.com.'
       neutron-domain: 'stsstack.ubuntu.com.'
       nova-domain-email: 'seymore@stsstack.ubuntu.com'
       neutron-domain-email: 'seymore@stsstack.ubuntu.com'
   designate-bind:
-    charm: cs:designate-bind
+    charm: cs:~openstack-charmers-next/designate-bind
   barbican:
     num_units: 1
-    charm: cs:~openstack-charmers/barbican
+    charm: cs:~openstack-charmers-next/barbican
     constraints: mem=1G
+    options:
+      debug: *debug
   gnocchi:
     num_units: 1
     charm: cs:~openstack-charmers-next/gnocchi
+    options:
+      debug: *debug
   memcached:
     num_units: 1
     charm: cs:memcached
