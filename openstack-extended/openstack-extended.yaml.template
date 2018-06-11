@@ -181,7 +181,7 @@ services:
   memcached:
     num_units: 1
     charm: cs:memcached
-#}IN_XENIAL
+#}MIN_XENIAL
 relations:
   - [ keystone, mysql ]
   - [ nova-cloud-controller, mysql ]

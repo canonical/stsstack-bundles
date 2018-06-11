@@ -89,4 +89,5 @@ result=$dst`basename $fout`
 if [[ "${series,,}" < "xenial" ]]; then
 sed -i '/#MIN_XENIAL{/,/#}MIN_XENIAL/{//!d}' $result
 fi
+sed -ri '/.+MIN_XENIAL.*/d' $result
 echo "Your $target bundle can be found at $result"
