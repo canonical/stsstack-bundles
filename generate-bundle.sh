@@ -85,4 +85,8 @@ mv $fout $dst
 [ -n "$release" ] || release=${lts[$series]} 
 target=${series}-$release
 [ -z "$pocket" ] || target=${target}-$pocket
-echo "Your $target bundle can be found at $dst`basename $fout`"
+result=$dst`basename $fout`
+if [[ "${series,,}" < "xenial" ]]; then
+sed -i '/#MIN_XENIAL{/,/#}MIN_XENIAL/{//!d}' $result
+fi
+echo "Your $target bundle can be found at $result"

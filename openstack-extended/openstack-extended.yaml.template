@@ -148,6 +148,7 @@ services:
     num_units: 1
     charm: cs:mongodb
     constraints: mem=1G
+#MIN_XENIAL{
   aodh:
     num_units: 1
     charm: cs:~openstack-charmers-next/aodh
@@ -180,6 +181,7 @@ services:
   memcached:
     num_units: 1
     charm: cs:memcached
+#}IN_XENIAL
 relations:
   - [ keystone, mysql ]
   - [ nova-cloud-controller, mysql ]
@@ -224,6 +226,7 @@ relations:
   - [ heat, mysql ]
   - [ heat, keystone ]
   - [ heat, rabbitmq-server ]
+#MIN_XENIAL{
   - [ aodh, rabbitmq-server ]
   - [ aodh, mysql ]
   - [ aodh, keystone ]
@@ -243,4 +246,4 @@ relations:
   - [ gnocchi, keystone ]
   - [ ceilometer, "keystone:identity-credentials" ]
   - [ "designate:dnsaas", "neutron-api:external-dns" ]
-
+#}MIN_XENIAL
