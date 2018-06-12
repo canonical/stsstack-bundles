@@ -155,12 +155,14 @@ services:
     constraints: mem=1G
     options:
       debug: *debug
+      openstack-origin: *openstack_origin
   designate:
     num_units: 1
     charm: cs:~openstack-charmers-next/designate
     constraints: mem=1G
     options:
       debug: *debug
+      openstack-origin: *openstack_origin
       nova-domain: 'stsstack.ubuntu.com.'
       neutron-domain: 'stsstack.ubuntu.com.'
       nova-domain-email: 'seymore@stsstack.ubuntu.com'
@@ -173,11 +175,13 @@ services:
     constraints: mem=1G
     options:
       debug: *debug
+      openstack-origin: *openstack_origin
   gnocchi:
     num_units: 1
     charm: cs:~openstack-charmers-next/gnocchi
     options:
       debug: *debug
+      openstack-origin: *openstack_origin
   memcached:
     num_units: 1
     charm: cs:memcached
