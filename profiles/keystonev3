@@ -6,6 +6,10 @@ set -ex
 
 install_packages
 
+# Set sts-stack overrides, if not already set.
+[[ -z "$NAMESERVER" ]] && export NAMESERVER="10.230.64.2"
+[[ -z "$SWIFT_IP" ]] && export SWIFT_IP="10.230.19.58"
+
 # Set serverstack defaults, if not already set.
 [[ -z "$GATEWAY" ]] && export GATEWAY="10.5.0.1"
 [[ -z "$CIDR_EXT" ]] && export CIDR_EXT="10.5.0.0/16"
