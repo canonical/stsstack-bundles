@@ -22,9 +22,12 @@ services:
     num_units: 1
     constraints: mem=1G
     options:
+      source: *source
       monitor-count: 1
       monitor-secret: AQCXrnZQwI7KGBAAiPofmKEXKxu5bUzoYLVkbQ==
-      source: *source
+#MIN_PIKE{
+      config-flags: '{"mon": {"mon max pg per osd": "1000"}}'
+#}MIN_PIKE
   ceph-osd:
     charm: cs:~openstack-charmers-next/ceph-osd
     num_units: 3

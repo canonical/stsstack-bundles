@@ -86,8 +86,15 @@ mv $fout $dst
 target=${series}-$release
 [ -z "$pocket" ] || target=${target}-$pocket
 result=$dst`basename $fout`
+
+if [[ "${release,,}" < "pike" ]]; then
+sed -i '/#MIN_PIKE{/,/#}MIN_PIKE/{//!d}' $result
+fi
+sed -ri '/.+MIN_PIKE.*/d' $result
+
 if [[ "${series,,}" < "xenial" ]]; then
 sed -i '/#MIN_XENIAL{/,/#}MIN_XENIAL/{//!d}' $result
 fi
 sed -ri '/.+MIN_XENIAL.*/d' $result
+
 echo "Your $target bundle can be found at $result"
