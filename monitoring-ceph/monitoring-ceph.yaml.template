@@ -20,6 +20,7 @@ services:
       monitor-count: 1
       loglevel: 10
       monitor-secret: AQCXrnZQwI7KGBAAiPofmKEXKxu5bUzoYLVkbQ==
+      pgs-per-ods: 10  # set to very low value to allow for all-in-one deploys with 3 osds
 #MIN_PIKE{
       config-flags: '{"mon": {"mon max pg per osd": "1000"}}'
 #}MIN_PIKE
