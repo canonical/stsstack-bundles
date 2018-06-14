@@ -6,6 +6,7 @@
 ## Variables
 debug:                      &debug                     True
 verbose:                    &verbose                   True
+loglevel:                   &loglevel                  10
 openstack_origin:           &openstack_origin          __OS_ORIGIN__
 source:                     &source                    __SOURCE__
 
@@ -23,20 +24,20 @@ services:
     constraints: mem=1G
     options:
       source: *source
+      loglevel: *loglevel
       monitor-count: 1
       monitor-secret: AQCXrnZQwI7KGBAAiPofmKEXKxu5bUzoYLVkbQ==
-      pgs-per-osd: 30  # set to very low value to allow for all-in-one deploys with 3 osds
-#MIN_PIKE{
-      config-flags: '{"mon": {"mon max pg per osd": "1000"}}'
-#}MIN_PIKE
+      expected-osd-count: 3
   ceph-osd:
     charm: cs:~openstack-charmers-next/ceph-osd
     num_units: 3
     constraints: mem=1G
     options:
-      osd-devices: /dev/vdb
-      ephemeral-unmount: /mnt
       source: *source
+      loglevel: *loglevel
+      osd-devices: None
+    storage:
+      osd-devices: cinder,10G,1
   keystone:
     num_units: 1
     charm: cs:~openstack-charmers-next/keystone
