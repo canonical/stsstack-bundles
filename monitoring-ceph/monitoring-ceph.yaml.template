@@ -29,7 +29,7 @@ services:
     options:
       loglevel: *loglevel
       source: *source
-      osd-devices: None
+      osd-devices: ''  # must be empty string when using juju storage
     storage:
       osd-devices: cinder,10G,1
   keystone:
