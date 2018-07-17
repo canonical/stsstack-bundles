@@ -189,8 +189,6 @@ relations:
   - [ nova-cloud-controller, keystone ]
   - [ nova-compute-az1, nova-cloud-controller ]
   - [ nova-compute-az2, nova-cloud-controller ]
-  - [ nova-compute-az1, mysql ]
-  - [ nova-compute-az2, mysql ]
   - [ nova-compute-az1, "rabbitmq-server:amqp" ]
   - [ nova-compute-az2, "rabbitmq-server:amqp" ]
   - [ nova-compute-az1, glance ]
