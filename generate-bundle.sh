@@ -12,6 +12,7 @@
 #
 #
 series=xenial
+_series=
 release=
 pocket=
 template=
@@ -27,7 +28,7 @@ do
             shift
             ;;
         --series)
-            series=$2
+            _series=$2
             shift
             ;;
         --release)
@@ -62,6 +63,7 @@ ltsmatch ()
     return 1
 }
 
+[ -n "$_series" ] || series=$_series
 if ltsmatch $series $release ; then
   _release=''
 else
@@ -82,7 +84,19 @@ cat ${fout}.tmp| sed -e "s/__SERIES__/$series/g" -e "s/__OS_ORIGIN__/$os_origin/
 dst=`dirname $path`/bundles/
 mkdir -p $dst
 mv $fout $dst
-[ -n "$release" ] || release=${lts[$series]} 
+if [ -n "$release" ]; then
+    declare -a idx=( ${!lts[@]} )
+    i=${#idx[@]}
+    __series=${idx[$((--i))]}
+    while [[ "$release" < "${lts[$__series]}" ]] && ((i>=0)); do
+        __series=${idx[$((i--))]}
+    done
+    # ensure correct series
+    [ -n "$_series" ] && [ "$_series" != "$__series" ] && { echo "Series auto-corrected to $__series"; }
+    series=$__series
+else
+    release=${lts[$series]} 
+fi
 target=${series}-$release
 [ -z "$pocket" ] || target=${target}-$pocket
 result=$dst`basename $fout`
