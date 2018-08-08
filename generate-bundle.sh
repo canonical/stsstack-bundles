@@ -63,7 +63,7 @@ ltsmatch ()
     return 1
 }
 
-[ -n "$_series" ] || series=$_series
+[ -z "$_series" ] || series=$_series
 
 if [ -n "$release" ]; then
     declare -a idx=( ${!lts[@]} )
