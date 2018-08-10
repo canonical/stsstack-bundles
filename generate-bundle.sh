@@ -69,7 +69,7 @@ if [ -n "$release" ]; then
     declare -a idx=( ${!lts[@]} )
     i=${#idx[@]}
     __series=${idx[$((--i))]}
-    while [[ "$release" < "${lts[$__series]}" ]] && ((i>=0)); do
+    while ! [[ "$release" > "${lts[$__series]}" ]] && ((i>=0)); do
         __series=${idx[$((i--))]}
     done
     # ensure correct series
@@ -93,9 +93,11 @@ fi
 
 fout=`mktemp -d`/`basename $template| sed 's/.template//'`
 cat $template| sed -e "s/__SERIES__/$series/g" -e "s/__SOURCE__/$_release/g" > ${fout}.tmp
+
 os_origin=$_release
 [ "$os_origin" = "proposed" ] && os_origin="distro-proposed"
 cat ${fout}.tmp| sed -e "s/__SERIES__/$series/g" -e "s/__OS_ORIGIN__/$os_origin/g" > $fout
+
 dst=`dirname $path`/bundles/
 mkdir -p $dst
 mv $fout $dst
