@@ -80,21 +80,23 @@ else
 fi
 
 if ltsmatch $series $release ; then
-  _release=''
+  source=''
 else
-  _release="cloud:${series}-${release}"
+  source="cloud:${series}-${release}"
 fi
-[ -z "$pocket" ] || \
-  if [ -n "$_release" ]; then
-    _release="${_release}\/${pocket}"
+
+if [ -n "$pocket" ]; then
+  if [ -n "$source" ]; then
+    source="${source}\/${pocket}"
   else
-    _release="$pocket";
+    source="$pocket";
   fi
+fi
 
 fout=`mktemp -d`/`basename $template| sed 's/.template//'`
-cat $template| sed -e "s/__SERIES__/$series/g" -e "s/__SOURCE__/$_release/g" > ${fout}.tmp
+cat $template| sed -e "s/__SERIES__/$series/g" -e "s/__SOURCE__/$source/g" > ${fout}.tmp
 
-os_origin=$_release
+os_origin=$source
 [ "$os_origin" = "proposed" ] && os_origin="distro-proposed"
 cat ${fout}.tmp| sed -e "s/__SERIES__/$series/g" -e "s/__OS_ORIGIN__/$os_origin/g" > $fout
 
@@ -110,9 +112,9 @@ sed -i '/#MIN_PIKE{/,/#}MIN_PIKE/{//!d}' $result
 fi
 sed -ri '/.+MIN_PIKE.*/d' $result
 
-if [[ "${series,,}" < "xenial" ]]; then
-sed -i '/#MIN_XENIAL{/,/#}MIN_XENIAL/{//!d}' $result
+if [[ "${release,,}" < "mitaka" ]]; then
+sed -i '/#MIN_MITAKA{/,/#}MIN_MITAKA/{//!d}' $result
 fi
-sed -ri '/.+MIN_XENIAL.*/d' $result
+sed -ri '/.+MIN_MITAKA.*/d' $result
 
 echo "Your $target bundle can be found at $result"
