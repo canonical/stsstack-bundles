@@ -1,0 +1,71 @@
+[auth]
+test_accounts_file=accounts.yaml
+default_credentials_domain_name=default
+admin_username=admin
+admin_project_name=admin
+admin_password=openstack
+admin_domain_name=admin_domain
+[compute]
+image_ref=__IMAGE_ID__
+image_ref_alt=__IMAGE_ALT_ID__
+flavor_ref=7
+flavor_ref_alt=8
+region=RegionOne
+min_compute_nodes = 3
+[compute-feature-enabled]
+console_output=false
+resize=true
+live_migration=true
+block_migration_for_live_migration=true
+[identity]
+uri_v3=__PROTO__://__KEYSTONE__:5000/v3
+auth_version=v3
+admin_role=Admin
+region=RegionOne
+default_domain_id=__DEFAULT_DOMAIN_ID__
+admin_domain_scope=true
+[identity-feature-enabled]
+api_v2=false
+api_v3=true
+[image]
+catalog_type = image
+region=RegionOne
+http_image = http://__SWIFT__:80/swift/v1/images/cirros-0.3.4-x86_64-uec.tar.gz
+[network]
+project_network_cidr=__CIDR_PRIV__
+public_network_id=__EXT_NET__
+dns_servers=__NAMESERVER__
+project_networks_reachable = false
+[network-feature-enabled]
+ipv6=false
+[orchestration]
+stack_owner_role = Admin
+instance_type = m1.small
+keypair_name = testkey
+[oslo_concurrency]
+lock_path=/tmp
+[scenario]
+img_dir=/home/ubuntu/images
+ssh_user=cirros
+[service_available]
+ceilometer = true
+cinder = true
+glance = true
+heat = true
+horizon = true
+ironic = false
+neutron = true
+nova = true
+sahara = false
+swift = true
+trove = false
+zaqar = false
+[volume]
+catalog_type = volumev3
+backend_names=cinder-ceph
+storage_protocol=ceph
+[volume-feature-enabled]
+backup=false
+api_v1=false
+api_v2=false
+api_v3=true
