@@ -1,0 +1,6 @@
+- username: 'demo'
+  tenant_name: 'demo'
+  password: 'secret'
+- username: 'alt_demo'
+  tenant_name: 'alt_demo'
+  password: 'secret'
