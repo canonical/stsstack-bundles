@@ -20,6 +20,12 @@ path=
 declare -A lts=( [trusty]=icehouse
                  [xenial]=mitaka
                  [bionic]=queens )
+
+usage () {
+echo "USAGE: `basename $0` [--series s] [--release r] [--pocket p] --template t --path p"
+}
+
+
 while (($# > 0))
 do
     case "$1" in
@@ -43,9 +49,13 @@ do
             template=$2
             shift
             ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
         *)
             echo "ERROR: invalid input '$1'"
-            echo "USAGE: `basename $0` [--series s] [--release r] [--pocket p] --template t --path p"
+            usage
             exit 1
             ;;
     esac
