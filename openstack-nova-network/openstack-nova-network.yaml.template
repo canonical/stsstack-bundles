@@ -1,0 +1,106 @@
+# vim: set ts=2 et:
+# IMPORTANT: ALL MODIFICATIONS SHOULD BE MADE TO THE TEMPLATE THEN REGENERATE
+#            THE BUNDLE WITH generate-bundle.sh 
+# Juju 2.x native deployer bundle for development ('next') charms
+
+## Variables
+debug:                      &debug                     True
+verbose:                    &verbose                   True
+openstack_origin:           &openstack_origin          __OS_ORIGIN__
+source:                     &source                    __SOURCE__
+
+series: __SERIES__
+services:
+  rabbitmq-server:
+    num_units: 1
+    charm: cs:~openstack-charmers-next/rabbitmq-server
+    constraints: mem=1G
+    options:
+      source: *source
+  keystone:
+    num_units: 1
+    charm: cs:~openstack-charmers-next/keystone
+    constraints: mem=1G
+    options:
+      debug: *debug
+      verbose: *verbose
+      admin-password: openstack
+      admin-token: ubuntutesting
+      openstack-origin: *openstack_origin
+  openstack-dashboard:
+    num_units: 1
+    charm: cs:~openstack-charmers-next/openstack-dashboard
+    constraints: mem=1G
+    options:
+      openstack-origin: *openstack_origin
+  nova-compute:
+    charm: cs:~openstack-charmers-next/nova-compute
+    num_units: 3
+    constraints: mem=4G
+    options:
+      debug: *debug
+      verbose: *verbose
+      enable-live-migration: True
+      enable-resize: True
+      migration-auth-type: ssh
+      openstack-origin: *openstack_origin
+  nova-cloud-controller:
+    num_units: 1
+    charm: cs:~openstack-charmers-next/nova-cloud-controller
+    constraints: mem=1G
+    options:
+      debug: *debug
+      verbose: *verbose
+      network-manager: FlatDHCPManager
+      openstack-origin: *openstack_origin
+      config-flags: 'flat_network_bridge=br100,multi_host=True,share_dhcp_address=True'
+  cinder:
+    num_units: 1
+    constraints: mem=1G
+    charm: cs:~openstack-charmers-next/cinder
+    options:
+      debug: *debug
+      verbose: *verbose
+      block-device: /dev/vdb
+      ephemeral-unmount: "/mnt"
+      overwrite: "true"
+      glance-api-version: 2
+      openstack-origin: *openstack_origin
+  glance:
+    num_units: 1
+    charm: cs:~openstack-charmers-next/glance
+    constraints: mem=1G
+    options:
+      debug: *debug
+      verbose: *verbose
+      openstack-origin: *openstack_origin
+  mysql:
+    num_units: 1
+    charm: cs:~openstack-charmers-next/percona-cluster
+    constraints: mem=4G
+    options:
+      dataset-size: 50%
+      max-connections: 20000
+      root-password: ChangeMe123
+      sst-password: ChangeMe123
+      source: *source
+relations:
+  - [ keystone, mysql ]
+  - [ nova-cloud-controller, mysql ]
+  - [ nova-cloud-controller, rabbitmq-server ]
+  - [ nova-cloud-controller, glance ]
+  - [ nova-cloud-controller, keystone ]
+  - [ nova-compute, nova-cloud-controller ]
+  - - nova-compute
+    - rabbitmq-server:amqp
+  - [ nova-compute, glance ]
+  - [ glance, mysql ]
+  - [ glance, keystone ]
+  - [ glance, "cinder:image-service" ]
+  - [ glance, rabbitmq-server ]
+  - [ cinder, mysql ]
+  - [ cinder, rabbitmq-server ]
+  - [ cinder, nova-cloud-controller ]
+  - [ cinder, keystone ]
+  - [ "openstack-dashboard:identity-service", "keystone:identity-service" ]
+
