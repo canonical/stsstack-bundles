@@ -44,6 +44,7 @@ services:
       enable-resize: True
       migration-auth-type: ssh
       openstack-origin: *openstack_origin
+      config-flags: 'flat_network_bridge=br100,multi_host=True,share_dhcp_address=True'
   nova-cloud-controller:
     num_units: 1
     charm: cs:~openstack-charmers-next/nova-cloud-controller
@@ -53,7 +54,6 @@ services:
       verbose: *verbose
       network-manager: FlatDHCPManager
       openstack-origin: *openstack_origin
-      config-flags: 'flat_network_bridge=br100,multi_host=True,share_dhcp_address=True'
   cinder:
     num_units: 1
     constraints: mem=1G
