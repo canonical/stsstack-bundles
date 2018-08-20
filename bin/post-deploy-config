@@ -152,7 +152,7 @@ if __name__ == '__main__':
             print("Using existing interface {} "
                   "for instance {}".format(data_port, uuid))
 
-        data_port = "br-ex:{}".format(data_port)
+        data_port = "br-data:{}".format(data_port)
         if data_port not in ext_port:
             ext_port.append(data_port)
 

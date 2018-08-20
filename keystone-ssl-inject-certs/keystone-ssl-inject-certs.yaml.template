@@ -215,7 +215,7 @@ services:
       debug: *debug
       verbose: *verbose
       instance-mtu: 1300
-      bridge-mappings: physnet1:br-ex
+      bridge-mappings: physnet1:br-data
       openstack-origin: *openstack_origin
   neutron-api:
     num_units: 1
