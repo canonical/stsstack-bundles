@@ -75,15 +75,26 @@ ltsmatch ()
 
 [ -z "$_series" ] || series=$_series
 
-if [ -n "$release" ]; then
+if [ -n "$release" ] && ! ltsmatch $series $release; then
     declare -a idx=( ${!lts[@]} )
     i=${#idx[@]}
     __series=${idx[$((--i))]}
+    series_plus_one=$__series
     while ! [[ "$release" > "${lts[$__series]}" ]] && ((i>=0)); do
-        __series=${idx[$((i--))]}
+        s=${idx[$((i))]}
+        if [ -z "$_series" ] && [ "${lts[$s]}" = "$release" ]; then
+            __series=$s
+            break
+        fi
+        series_plus_one=$s
+        __series=${idx[$((--i))]}
     done
     # ensure correct series
-    [ -n "$_series" ] && [ "$_series" != "$__series" ] && { echo "Series auto-corrected to $__series"; }
+    if [ -n "$_series" ]; then
+        if ! [ "$_series" = "$__series" ]; then
+            echo "Series auto-corrected from '$_series' to '$__series'"
+        fi
+    fi
     series=$__series
 else
     release=${lts[$series]} 
