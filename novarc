@@ -4,7 +4,7 @@ for param in $_OS_PARAMS; do
 done
 
 keystone_addr=`juju config keystone vip`
-if [ -z "$keystone_addr" ]; then
+if [ -z "$keystone_addr" ] || [ "$keystone_addr" = "<nil>" ]; then
 keystone_addr=`juju run --unit keystone/0 unit-get private-address`
 fi
 
