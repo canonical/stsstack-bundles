@@ -11,7 +11,7 @@ fi
 
 ssl_cert=`juju config keystone ssl_cert`
 # TODO(hopem): remove fix for bug 1789415 once released
-if [ -n "$ssl_cert" ] && [ "$ssl_cert" != "<nil>" ]; then; then
+if [ -n "$ssl_cert" ] && [ "$ssl_cert" != "<nil>" ]; then
   export OS_AUTH_PROTOCOL=https
 fi
 
