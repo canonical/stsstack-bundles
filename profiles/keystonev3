@@ -30,7 +30,7 @@ if [[ "${BARE_METAL^^}" != "TRUE" ]]; then
 fi
 
 # Configure neutron networking on overcloud
-source novarcv3_project
+source novarc
 ./bin/neutron-ext-net-ksv3 --project admin --network-type flat -g $GATEWAY -c $CIDR_EXT -f $FIP_RANGE ext_net
 ./bin/neutron-tenant-net-ksv3 --project admin --network-type $net_type -r provider-router -N $NAMESERVER private $CIDR_PRIV
 ext_net=$(openstack network list | awk '/ext_net/ {print $2}')
