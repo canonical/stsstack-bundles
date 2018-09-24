@@ -1,0 +1,11 @@
+applications:
+  nova-cloud-controller:
+    num_units: 3
+    options:
+      vip: 10.5.100.1
+  nova-cloud-controller-hacluster:
+    charm: cs:~openstack-charmers-next/hacluster
+    options:
+      debug: True
+relations:
+  - [ nova-cloud-controller, nova-cloud-controller-hacluster ]
