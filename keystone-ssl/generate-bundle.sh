@@ -1,5 +1,6 @@
 #!/bin/bash -eu
-opts=( $@ )
-opts+=( --template keystone-ssl.yaml.template )
-opts+=( --path $0 )
-`dirname $0`/../generate-bundle.sh ${opts[@]}
+opts=(
+--template keystone-ssl.yaml.template
+--path $0
+)
+`dirname $0`/../common/generate-bundle.sh ${opts[@]} $@
