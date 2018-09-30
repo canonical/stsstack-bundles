@@ -47,6 +47,8 @@ lock_path=/tmp
 [scenario]
 img_dir=/home/ubuntu/images
 ssh_user=cirros
+[validation]
+image_ssh_user=cirros
 [service_available]
 ceilometer = true
 cinder = true
