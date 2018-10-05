@@ -1,0 +1,12 @@
+applications:
+  heat:
+    num_units: __NUM_HEAT_UNITS__
+    options:
+      vip: 10.5.100.9
+  heat-hacluster:
+    charm: cs:~openstack-charmers-next/hacluster
+    options:
+        cluster_count: __NUM_HEAT_UNITS__
+relations:
+  - [ heat, heat-hacluster ]
+

@@ -1,0 +1,6 @@
+applications:
+  rabbitmq-server:
+    num_units: __NUM_RABBIT_UNITS__
+    options:
+      min-cluster-size: __NUM_RABBIT_UNITS__
+

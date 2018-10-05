@@ -11,7 +11,7 @@ openstack_origin:           &openstack_origin          __OS_ORIGIN__
 source:                     &source                    __SOURCE__
 
 series: __SERIES__
-services:
+applications:
   ceph-mon:
     charm: cs:~openstack-charmers-next/ceph-mon
     num_units: 1

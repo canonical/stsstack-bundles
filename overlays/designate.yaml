@@ -1,0 +1,29 @@
+# Variables
+debug:                      &debug                     True
+verbose:                    &verbose                   True
+openstack_origin:           &openstack_origin          __OS_ORIGIN__
+
+applications:
+  designate:
+    charm: cs:~openstack-charmers-next/designate
+    num_units: 1
+    constraints: mem=1G
+    options:
+      debug: *debug
+      openstack-origin: *openstack_origin
+      nova-domain: 'cloud.sts.'
+      neutron-domain: 'cloud.sts.'
+      nova-domain-email: 'stsstack@cloud.sts'
+      neutron-domain-email: 'stsstack@cloud.sts'
+      nameservers: 10.5.0.2  # this currently works for the default ststack tenant networks
+  designate-bind:
+    charm: cs:~openstack-charmers-next/designate-bind
+    num_units: 1
+relations:
+  - [ designate, keystone ]
+  - [ designate, mysql ]
+  - [ designate, rabbitmq-server ]
+  - [ designate, designate-bind ]
+  - [ designate, memcached ]
+  - [ "designate:dnsaas", "neutron-api:external-dns" ]
+

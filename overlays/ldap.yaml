@@ -1,0 +1,12 @@
+applications:
+  keystone-ldap:
+    charm: cs:~openstack-charmers-next/keystone-ldap
+    options:
+      ldap-server: 'ldap://__LDAP_SERVER__'
+      ldap-user: cn=admin,dc=test,dc=com
+      ldap-password: crapper
+      ldap-suffix: dc=test,dc=com
+      domain-name: userdomain
+relations:
+  - [ keystone, keystone-ldap ]
+

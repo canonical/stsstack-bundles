@@ -1,0 +1,11 @@
+applications:
+  cinder:
+    num_units: __NUM_CINDER_UNITS__
+    options:
+      vip: 10.5.100.4
+  cinder-hacluster:
+    charm: cs:~openstack-charmers-next/hacluster
+    options:
+        cluster_count: __NUM_CINDER_UNITS__
+relations:
+  - [ cinder, cinder-hacluster ]

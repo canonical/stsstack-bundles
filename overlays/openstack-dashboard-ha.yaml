@@ -1,0 +1,11 @@
+applications:
+  openstack-dashboard:
+    num_units: __NUM_HORIZON_UNITS__
+    options:
+      vip: 10.5.100.6
+  openstack-dashboard-hacluster:
+    charm: cs:~openstack-charmers-next/hacluster
+    options:
+        cluster_count: __NUM_HORIZON_UNITS__
+relations:
+  - [ openstack-dashboard, openstack-dashboard-hacluster ]

@@ -1,0 +1,12 @@
+applications:
+  mysql:
+    num_units: __NUM_MYSQL_UNITS__
+    options:
+      vip: 10.5.100.7
+      min-cluster-size: __NUM_MYSQL_UNITS__
+  mysql-hacluster:
+    charm: cs:~openstack-charmers-next/hacluster
+    options:
+        cluster_count: __NUM_MYSQL_UNITS__
+relations:
+  - [ mysql, mysql-hacluster ]

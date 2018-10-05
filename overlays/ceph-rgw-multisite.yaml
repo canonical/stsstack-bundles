@@ -1,0 +1,27 @@
+# Variables
+source:                     &source                    __SOURCE__
+loglevel:                   &loglevel                  10
+
+applications:
+  ceph-rgw:
+    charm: cs:~openstack-charmers-next/ceph-radosgw
+    num_units: 1
+    constraints: mem=1G
+    options:
+      loglevel: *loglevel
+      source: *source
+      pool-prefix: east
+      config-flags: '{"client.radosgw.gateway": {"rgw zone": "east", "rgw zonegroup": "east", "rgw cache enabled":"true","rgw cache lru size":"10000" }}'
+  ceph-rgw-alt:
+    charm: cs:~openstack-charmers-next/ceph-radosgw
+    num_units: 1
+    constraints: mem=1G
+    options:
+      loglevel: *loglevel
+      source: *source
+      pool-prefix: west
+      region: RegionTwo
+      config-flags: '{"global":{"rgw override bucket index max shards":"8"}, "client.radosgw.gateway": {"rgw zone": "west", "rgw zonegroup": "west", "rgw cache enabled":"true","rgw cache lru size":"10000" }}'
+relations:
+  - [ ceph-rgw-alt, ceph-mon ]
+  - [ ceph-rgw-alt, keystone ]

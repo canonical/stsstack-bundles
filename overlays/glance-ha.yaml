@@ -1,0 +1,11 @@
+applications:
+  glance:
+    num_units: __NUM_GLANCE_UNITS__
+    options:
+      vip: 10.5.100.3
+  glance-hacluster:
+    charm: cs:~openstack-charmers-next/hacluster
+    options:
+        cluster_count: __NUM_GLANCE_UNITS__
+relations:
+  - [ glance, glance-hacluster ]

@@ -1,0 +1,34 @@
+# Variables
+debug:                      &debug                     True
+verbose:                    &verbose                   True
+openstack_origin:           &openstack_origin          __OS_ORIGIN__
+
+applications:
+  ceilometer:
+    charm: cs:~openstack-charmers-next/ceilometer
+    num_units: 1
+    constraints: mem=1G
+    options:
+      debug: *debug
+      verbose: *verbose
+      openstack-origin: *openstack_origin
+  ceilometer-agent:
+    charm: cs:~openstack-charmers-next/ceilometer-agent
+    options:
+      openstack-origin: *openstack_origin
+  aodh:
+    charm: cs:~openstack-charmers-next/aodh
+    num_units: 1
+    constraints: mem=1G
+    options:
+      debug: *debug
+      openstack-origin: *openstack_origin
+relations:
+  - [ ceilometer, "keystone:identity-service" ]
+  - [ ceilometer, "keystone:identity-credentials" ]
+  - [ "ceilometer:amqp", "rabbitmq-server:amqp" ]
+  - [ ceilometer-agent, nova-compute ]
+  - [ ceilometer-agent, ceilometer ]
+  - [ aodh, rabbitmq-server ]
+  - [ aodh, mysql ]
+  - [ aodh, keystone ]

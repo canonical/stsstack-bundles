@@ -1,0 +1,22 @@
+# Variables
+source:                     &source                    __SOURCE__
+loglevel:                   &loglevel                  10
+
+applications:
+  nova-compute:
+    options:
+      libvirt-image-backend: rbd
+  cinder:
+    options:
+      block-device:  ''
+      ephemeral-unmount: ''
+      overwrite: 'false'
+      glance-api-version: 2
+  cinder-ceph:
+    charm: cs:~openstack-charmers-next/cinder-ceph
+relations:
+  - [ glance, ceph-mon ]
+  - [ cinder, cinder-ceph ]
+  - [ cinder-ceph, ceph-mon ]
+  - [ nova-compute, cinder-ceph ]
+  - [ nova-compute, ceph-mon ]

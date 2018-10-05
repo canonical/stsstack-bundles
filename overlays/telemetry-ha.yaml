@@ -1,0 +1,18 @@
+applications:
+  ceilometer:
+    num_units: 3
+    options:
+      vip: 10.5.100.10
+  aodh:
+    num_units: 3
+    options:
+      vip: 10.5.100.11
+  gnocchi:
+    num_units: 3
+    options:
+      vip: 10.5.100.12
+relations:
+  - [ ceilometer, ceilometer-hacluster ]
+  - [ aodh, aodh-hacluster ]
+  - [ gnocchi, gnocchi-hacluster ]
+

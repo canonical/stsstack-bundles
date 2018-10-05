@@ -1,0 +1,18 @@
+# Variables
+debug:                      &debug                     True
+verbose:                    &verbose                   True
+openstack_origin:           &openstack_origin          __OS_ORIGIN__
+
+applications:
+  barbican:
+    charm: cs:~openstack-charmers-next/barbican
+    num_units: 1
+    constraints: mem=1G
+    options:
+      debug: *debug
+      openstack-origin: *openstack_origin
+relations:
+  - [ barbican, rabbitmq-server ]
+  - [ barbican, mysql ]
+  - [ barbican, keystone ]
+

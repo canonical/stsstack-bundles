@@ -1,0 +1,12 @@
+applications:
+  neutron-dynamic-routing:
+    charm: cs:neutron-dynamic-routing
+    num_units: 1
+    constraints: mem=1G
+  quagga:
+    charm: cs:~openstack-charmers-next/quagga
+    num_units: 1
+    constraints: mem=1G
+relations:
+  - [neutron-dynamic-routing, rabbitmq-server]
+  - [neutron-dynamic-routing, quagga]

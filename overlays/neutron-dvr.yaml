@@ -1,0 +1,7 @@
+applications:
+  neutron-api:
+    options:
+      enable-dvr: true
+  neutron-openvswitch:
+    options:
+      data-port: '__DVR_DATA_PORT__'

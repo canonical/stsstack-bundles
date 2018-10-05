@@ -10,9 +10,16 @@ debug:                      &debug                     True
 verbose:                    &verbose                   True
 openstack_origin:           &openstack_origin          __OS_ORIGIN__
 source:                     &source                    __SOURCE__
+num_compute_units:          &num_compute_units         __NUM_COMPUTE_UNITS__
 
 series: __SERIES__
 applications:
+  rabbitmq-server:
+    num_units: 1
+    charm: cs:~openstack-charmers-next/rabbitmq-server
+    constraints: mem=1G
+    options:
+      source: *source
   keystone:
     num_units: 1
     charm: cs:~openstack-charmers-next/keystone
@@ -23,52 +30,52 @@ applications:
       admin-password: openstack
       admin-token: ubuntutesting
       openstack-origin: *openstack_origin
-  glance:
+  openstack-dashboard:
     num_units: 1
-    charm: cs:~openstack-charmers-next/glance
+    charm: cs:~openstack-charmers-next/openstack-dashboard
+    constraints: mem=1G
+    options:
+      openstack-origin: *openstack_origin
+  nova-compute:
+    charm: cs:~hopem/nova-compute-nova-network
+    num_units: *num_compute_units
+    constraints: mem=4G
     options:
       debug: *debug
       verbose: *verbose
+      enable-live-migration: True
+      enable-resize: True
+      migration-auth-type: ssh
       openstack-origin: *openstack_origin
-  swift-proxy:
+      config-flags: 'flat_network_bridge=br100,multi_host=True,share_dhcp_address=True'
+  nova-cloud-controller:
     num_units: 1
-    charm: cs:~openstack-charmers-next/swift-proxy
+    charm: cs:~openstack-charmers-next/nova-cloud-controller
     constraints: mem=1G
     options:
       debug: *debug
-      zone-assignment: manual
-      replicas: 3
-      swift-hash: fdfef9d4-8b06-11e2-8ac0-531c923c8fae
+      verbose: *verbose
+      network-manager: FlatDHCPManager
       openstack-origin: *openstack_origin
-  swift-storage-z1:
+  cinder:
     num_units: 1
-    charm: cs:~openstack-charmers-next/swift-storage
+    constraints: mem=1G
+    charm: cs:~openstack-charmers-next/cinder
+    options:
+      debug: *debug
+      verbose: *verbose
+      block-device: /dev/vdb
+      ephemeral-unmount: "/mnt"
+      overwrite: "true"
+      glance-api-version: 2
+      openstack-origin: *openstack_origin
+  glance:
+    num_units: 1
+    charm: cs:~openstack-charmers-next/glance
     constraints: mem=1G
     options:
-      zone: 1
-      block-device: vdb
-      overwrite: "true"
-      ephemeral-unmount: '/mnt' 
-      openstack-origin: *openstack_origin
-  swift-storage-z2:
-    num_units: 1
-    charm: cs:~openstack-charmers-next/swift-storage
-    constraints: mem=1G
-    options:
-      zone: 2
-      block-device: vdb
-      overwrite: "true"
-      ephemeral-unmount: '/mnt' 
-      openstack-origin: *openstack_origin
-  swift-storage-z3:
-    num_units: 1
-    charm: cs:~openstack-charmers-next/swift-storage
-    constraints: mem=1G
-    options:
-      zone: 3
-      block-device: vdb
-      overwrite: "true"
-      ephemeral-unmount: '/mnt' 
+      debug: *debug
+      verbose: *verbose
       openstack-origin: *openstack_origin
   mysql:
     num_units: 1
@@ -82,11 +89,20 @@ applications:
       source: *source
 relations:
   - [ keystone, mysql ]
+  - [ "nova-cloud-controller:shared-db", mysql ]
+  - [ "nova-cloud-controller:amqp", rabbitmq-server ]
+  - [ nova-cloud-controller, glance ]
+  - [ nova-cloud-controller, keystone ]
+  - [ nova-compute, nova-cloud-controller ]
+  - - nova-compute
+    - rabbitmq-server:amqp
+  - [ nova-compute, glance ]
   - [ glance, mysql ]
   - [ glance, keystone ]
-  - [ swift-proxy, keystone ]
-  - [ swift-proxy, glance ]
-  - [ swift-proxy, swift-storage-z1 ]
-  - [ swift-proxy, swift-storage-z2 ]
-  - [ swift-proxy, swift-storage-z3 ]
-
+  - [ glance, "cinder:image-service" ]
+  - [ glance, rabbitmq-server ]
+  - [ cinder, mysql ]
+  - [ cinder, rabbitmq-server ]
+  - [ cinder, nova-cloud-controller ]
+  - [ cinder, keystone ]
+  - [ "openstack-dashboard:identity-service", "keystone:identity-service" ]

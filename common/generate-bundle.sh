@@ -2,39 +2,46 @@
 #
 # Author: edward.hope-morley@canonical.com
 #
-# Description: Use this tool to generate a Juju (2.x) native-format bundle e.g.:
+# Description: Use this tool to generate a Juju (2.x) native-format bundle e.g.
 #
-#              Trusty + Mitaka Cloud Archive: ./generate-bundle.sh --series trusty --release mitaka
+#     Xenial + Queens UCA: ./generate-bundle.sh --series xenial --release queens
 #
-#              Xenial (Mitaka) Proposed: ./generate-bundle.sh --series xenial --pocket proposed
+#     Bionic (Queens) Proposed: ./generate-bundle.sh --series bionic --pocket proposed
 #
-#              Xenial + Proposed Ocata UCA: ./generate-bundle.sh --series xenial --release ocata --pocket proposed
+#     Bionic + Stein UCA: ./generate-bundle.sh --release stein
 #
 #
-series=xenial
-_series=
+series=bionic
+series_provided=false
 release=
 pocket=
 template=
 path=
+params_path=
+bundle_name=
+replay=false
+run_command=false
+declare -a overlays=()
 declare -A lts=( [trusty]=icehouse
                  [xenial]=mitaka
                  [bionic]=queens )
 
-usage () {
-echo "USAGE: `basename $0` [--series s] [--release r] [--pocket p] --template t --path p"
-}
-
+. `dirname $0`/helpers.sh
 
 while (($# > 0))
 do
     case "$1" in
+        --overlay)
+            overlays+=( $2 )
+            shift
+            ;;
         --path)
             path=$2
             shift
             ;;
         --series)
-            _series=$2
+            series=$2
+            series_provided=true
             shift
             ;;
         --release)
@@ -42,6 +49,7 @@ do
             shift
             ;;
         --pocket)
+            # archive pocket e.g. proposed
             pocket=$2
             shift
             ;;
@@ -49,20 +57,39 @@ do
             template=$2
             shift
             ;;
+        --bundle-params)
+            # parameters passed by custom generators
+            params_path=$2
+            shift
+            ;;
+        --name)
+            # give bundle set a name and store under named dir
+            bundle_name=$2
+            shift
+            ;;
+        --replay)
+            # replay the last recorded command if exists
+            replay=true
+            ;;
+        --run)
+            # deploy bundle once generated
+            run_command=true
+            ;;
         -h|--help)
-            usage
+            _usage
             exit 0
             ;;
         *)
             echo "ERROR: invalid input '$1'"
-            usage
+            _usage
             exit 1
             ;;
     esac
     shift
 done
 
-[ -z "$template" ] || [ -z "$path" ] && { echo "ERROR: no template provided with --template"; exit 1; }
+[ -z "$template" ] || [ -z "$path" ] && \
+    { echo "ERROR: no template provided with --template"; exit 1; }
 
 ltsmatch ()
 {
@@ -73,36 +100,55 @@ ltsmatch ()
     return 1
 }
 
-[ -z "$_series" ] || series=$_series
+# Replay ingores any args and just print the previously generated command
+subdir="/${bundle_name}"
+[ -n "${bundle_name}" ] || subdir=''
+bundles_dir=`dirname $path`/b$subdir
+mkdir -p $bundles_dir
+
+finish ()
+{
+if $replay; then
+    target=${bundles_dir}/command
+    echo -e "INFO: replaying last known command (from $target)\n"
+    [ -e "$target" ] || { echo "ERROR: $target does not exist"; exit 1; }
+fi
+echo "Command to deploy:"
+cat ${bundles_dir}/command
+if $run_command; then
+    eval `cat ${bundles_dir}/command`
+fi
+$replay && exit 0
+}
+$replay && finish
 
 if [ -n "$release" ] && ! ltsmatch $series $release; then
     declare -a idx=( ${!lts[@]} )
     i=${#idx[@]}
-    __series=${idx[$((--i))]}
-    series_plus_one=$__series
-    while ! [[ "$release" > "${lts[$__series]}" ]] && ((i>=0)); do
+    _series=${idx[$((--i))]}
+    series_plus_one=$_series
+    while ! [[ "$release" > "${lts[$_series]}" ]] && ((i>=0)); do
         s=${idx[$((i))]}
-        if [ -z "$_series" ] && [ "${lts[$s]}" = "$release" ]; then
-            __series=$s
+        if ! $series_provided && [ "${lts[$s]}" = "$release" ]; then
+            _series=$s
             break
         fi
         series_plus_one=$s
-        __series=${idx[$((--i))]}
+        _series=${idx[$((--i))]}
     done
     # ensure correct series
-    if [ -n "$_series" ]; then
-        if ! [ "$_series" = "$__series" ]; then
-            echo "Series auto-corrected from '$_series' to '$__series'"
+    if $series_provided; then
+        if ! [ "$series" = "$_series" ]; then
+            echo "Series auto-corrected from '$series' to '$_series'"
         fi
     fi
-    series=$__series
+    series=$_series
 else
     release=${lts[$series]} 
 fi
 
-if ltsmatch $series $release ; then
-  source=''
-else
+source=''
+if ! ltsmatch $series $release ; then
   source="cloud:${series}-${release}"
 fi
 
@@ -114,28 +160,48 @@ if [ -n "$pocket" ]; then
   fi
 fi
 
-fout=`mktemp -d`/`basename $template| sed 's/.template//'`
-cat $template| sed -e "s/__SERIES__/$series/g" -e "s/__SOURCE__/$source/g" > ${fout}.tmp
-
 os_origin=$source
 [ "$os_origin" = "proposed" ] && os_origin="distro-proposed"
-cat ${fout}.tmp| sed -e "s/__SERIES__/$series/g" -e "s/__OS_ORIGIN__/$os_origin/g" > $fout
 
-dst=`dirname $path`/bundles/
-mkdir -p $dst
-mv $fout $dst
+render () {
+# generic replacements
+sed -i -e "s/__SERIES__/$series/g" \
+       -e "s/__OS_ORIGIN__/$os_origin/g" \
+       -e "s/__SOURCE__/$source/g" $1
+
+# service-specific replacements
+if [ -n "$params_path" ]; then
+    eval `cat $params_path` $1
+fi
+}
+
+fout=`mktemp -d`/`basename $template| sed 's/.template//'`
+cp $template $fout
+render $fout
+
+mv $fout $bundles_dir
 target=${series}-$release
 [ -z "$pocket" ] || target=${target}-$pocket
-result=$dst`basename $fout`
+result=$bundles_dir/`basename $fout`
 
-if [[ "${release,,}" < "pike" ]]; then
-sed -i '/#MIN_PIKE{/,/#}MIN_PIKE/{//!d}' $result
+# remove duplicate overlays
+declare -a _overlays=()
+declare -A overlay_dedup=()
+if ((${#overlays[@]})); then
+    mkdir -p $bundles_dir/o
+    echo "Created $target bundle and overlays:"
+    for overlay in ${overlays[@]}; do
+        [ "${overlay_dedup[$overlay]:-null}" = "null" ] || continue
+        cp overlays/$overlay $bundles_dir/o
+        _overlays+=( --overlay $bundles_dir/o/$overlay )
+        render $bundles_dir/o/$overlay
+        overlay_dedup[$overlay]=true
+        echo " + $overlay"
+    done
+    echo ""
+else
+    echo -e "Created $target bundle\n"
 fi
-sed -ri '/.+MIN_PIKE.*/d' $result
 
-if [[ "${release,,}" < "mitaka" ]]; then
-sed -i '/#MIN_MITAKA{/,/#}MIN_MITAKA/{//!d}' $result
-fi
-sed -ri '/.+MIN_MITAKA.*/d' $result
-
-echo "Your $target bundle can be found at $result"
+echo -e "juju deploy ${result} ${_overlays[@]:-}\n" > ${bundles_dir}/command
+finish

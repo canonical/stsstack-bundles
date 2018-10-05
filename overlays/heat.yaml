@@ -1,0 +1,19 @@
+# Variables
+debug:                      &debug                     True
+verbose:                    &verbose                   True
+openstack_origin:           &openstack_origin          __OS_ORIGIN__
+
+applications:
+  heat:
+    charm: cs:~openstack-charmers-next/gnocchi
+    num_units: 1
+    constraints: mem=1G
+    options:
+      debug: *debug
+      verbose: *verbose
+      openstack-origin: *openstack_origin
+relations:
+  - [ heat, mysql ]
+  - [ heat, keystone ]
+  - [ heat, rabbitmq-server ]
+

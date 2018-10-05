@@ -1,0 +1,11 @@
+applications:
+  rsyslog:
+    charm: cs:~rsyslog-charmers/rsyslog
+    num_units: 1
+    options:
+      nova_logs: true
+      protocol: udp
+  rsyslog-forwarder-ha:
+    charm: cs:~rsyslog-charmers/rsyslog-forwarder-ha
+relations:
+ - [ rsyslog, rsyslog-forwarder-ha ]
