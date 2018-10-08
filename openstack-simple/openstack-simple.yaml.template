@@ -111,7 +111,7 @@ services:
 relations:
   - [ keystone, mysql ]
   - [ "nova-cloud-controller:shared-db", mysql ]
-  - [ nova-cloud-controller, rabbitmq-server ]
+  - [ "nova-cloud-controller:amqp", rabbitmq-server ]
   - [ nova-cloud-controller, glance ]
   - [ nova-cloud-controller, keystone ]
   - [ nova-compute, nova-cloud-controller ]
