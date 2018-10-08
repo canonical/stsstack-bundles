@@ -194,7 +194,7 @@ services:
 #}MIN_MITAKA
 relations:
   - [ keystone, mysql ]
-  - [ nova-cloud-controller, mysql ]
+  - [ "nova-cloud-controller:shared-db", mysql ]
   - [ nova-cloud-controller, rabbitmq-server ]
   - [ nova-cloud-controller, glance ]
   - [ nova-cloud-controller, keystone ]
