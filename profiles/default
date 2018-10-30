@@ -48,9 +48,9 @@ create_default_flavors
 # Gather vars for tempest template
 ext_net=$(openstack network list --name ext_net -f value -c ID)
 router=$(openstack router list --name provider-router -f value -c ID)
-keystone=$(juju-deployer -f keystone)
-dashboard=$(juju-deployer -f openstack-dashboard)
-ncc=$(juju-deployer -f nova-cloud-controller)
+keystone=$(juju run --unit keystone/0 unit-get private-address)
+dashboard=$(juju run --unit openstack-dashboard/0 unit-get private-address)
+ncc=$(juju run --unit nova-cloud-controller/0 unit-get private-address)
 http=${OS_AUTH_PROTOCOL:-http}
 
 # Insert vars into tempest conf
