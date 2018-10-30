@@ -23,8 +23,6 @@ net_type=${1:-"gre"}
 
 # If not on bare metal, add extra port to overcloud neutron-gateway and configure charm to use it
 if [[ "${BARE_METAL^^}" != "TRUE" ]]; then
-    unset OS_DEFAULT_DOMAIN OS_PROJECT_NAME OS_IDENTITY_API_VERSION OS_PROJECT_DOMAIN_NAME
-    source novarc_unset_all
     source ~/novarc
     ./bin/post-deploy-config neutron-gateway
 fi
@@ -33,53 +31,31 @@ fi
 source novarc
 ./bin/neutron-ext-net-ksv3 --project admin --network-type flat -g $GATEWAY -c $CIDR_EXT -f $FIP_RANGE ext_net
 ./bin/neutron-tenant-net-ksv3 --project admin --network-type $net_type -r provider-router -N $NAMESERVER private $CIDR_PRIV
+ext_net=$(openstack network list --name ext_net -f value -c ID)
 
 # Create demo/testing users, tenants and flavor
-openstack project show --domain admin_domain demo || \
-	openstack project create --domain admin_domain demo
-openstack user show --domain admin_domain demo || \
-	openstack user create --project-domain admin_domain --project demo \
-	--password pass --enable --email demo@dev.null \
-	--domain admin_domain demo
-openstack role show Member || openstack role create Member
-openstack role add --user-domain admin_domain --user demo \
-	--project-domain admin_domain --project demo Member
-openstack project show --domain admin_domain alt_demo || \
-	openstack project create --domain admin_domain alt_demo
-openstack user show --domain admin_domain alt_demo || \
-	openstack user create --project-domain admin_domain --project alt_demo \
-	--password secret --enable --email alt_demo@dev.null \
-	--domain admin_domain alt_demo
-openstack role add --user-domain admin_domain --user alt_demo \
-	--project-domain admin_domain --project alt_demo Member
-access=$(openstack ec2 credentials create --user-domain admin_domain \
-	--user demo --project-domain admin_domain --project demo \
-       | awk '/access/ {print $4}')
-secret=$(openstack ec2 credentials show $access  | awk '/secret/ {print $4}')
+create_tempest_users_v3
 
+# Download images if not already present
+mkdir -vp ~/images
 #upload_image cloudimages trusty trusty-server-cloudimg-amd64-disk1.img
 upload_image cloudimages xenial xenial-server-cloudimg-amd64-disk1.img
 upload_image cloudimages bionic bionic-server-cloudimg-amd64.img
 upload_image swift cirros cirros-0.4.0-x86_64-disk.img
 upload_image swift cirros2 cirros-0.3.5-x86_64-disk.img
+image_id=$(openstack image list --name cirros -f value -c ID)
+image_alt_id=$(openstack image list --name cirros_alt -f value -c ID)
 
-image_id=$(openstack image list | awk '/cirros\s/ {print $2}')
-image_alt_id=$(openstack image list | awk '/cirros2\s/ {print $2}')
-
-create_tempest_users
-
-access=$(openstack --os-username demo --os-password pass --os-tenant-name demo ec2 credentials create | grep access | awk '{ print $4 }')
-secret=$(openstack ec2 credentials show $access | grep secret | awk '{ print $4 }')
-
+echo "Flavors"
 create_tempest_flavors
 create_default_flavors
 
+echo "Tempest"
+router=$(openstack router list --name provider-router -f value -c ID)
 # Gather vars for tempest template
-ext_net=$(neutron net-list | grep ext_net | awk '{ print $2 }')
-router=$(neutron --os-project-name admin router-list | grep provider-router | awk '{ print $2}')
-keystone=$(juju run --unit keystone/0 unit-get private-address)
-dashboard=$(juju run --unit openstack-dashboard/0 unit-get private-address)
-ncc=$(juju run --unit nova-cloud-controller/0 unit-get private-address)
+keystone=$(juju-deployer -f keystone)
+dashboard=$(juju-deployer -f openstack-dashboard)
+ncc=$(juju-deployer -f nova-cloud-controller)
 http=${OS_AUTH_PROTOCOL:-http}
 default_domain_id=$(openstack domain list | awk '/default/ {print $2}')
 
@@ -90,18 +66,9 @@ sed -e "s/__IMAGE_ID__/$image_id/g" -e "s/__IMAGE_ALT_ID__/$image_alt_id/g" \
     -e "s/__SWIFT__/$SWIFT_IP/g" \
     -e "s/__NAMESERVER__/$NAMESERVER/g" \
     -e "s/__CIDR_PRIV__/${CIDR_PRIV////\\/}/g" \
-    -e "s/__NCC__/$ncc/g" -e "s/__SECRET__/$secret/g" -e "s/__ACCESS__/$access/g" \
+    -e "s/__NCC__/$ncc/g" \
     -e "s/__DEFAULT_DOMAIN_ID__/$default_domain_id/g" \
     templates/tempest/tempest-v3.conf.template > tempest.conf
-
-sed -e "s/__IMAGE_ID__/$image_id/g" -e "s/__IMAGE_ALT_ID__/$image_alt_id/g" \
-    -e "s/__DASHBOARD__/$dashboard/g" -e "s/__KEYSTONE__/$keystone/g" \
-    -e "s/__EXT_NET__/$ext_net/g" -e "s/__PROTO__/$http/g" \
-    -e "s/__SWIFT__/$SWIFT_IP/g" \
-    -e "s/__NAMESERVER__/$NAMESERVER/g" \
-    -e "s/__CIDR_PRIV__/${CIDR_PRIV////\\/}/g" \
-    -e "s/__NCC__/$ncc/g" -e "s/__SECRET__/$secret/g" -e "s/__ACCESS__/$access/g" \
-    templates/tempest/tempest.refstack.template.conf > tempest_refstack.conf
 
 # Git tempest, place the rendered tempest template
 [ -d tempest ] || git clone https://github.com/openstack/tempest

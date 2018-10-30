@@ -1,11 +1,39 @@
 #!/bin/bash
 
+# Upload Image for Single Hypervisor Clouds
 function upload_image {
     src=$1
     image_name=$2
     image_file=$3
     image_format=${4:-"qcow2"}
-    image_hv_type=${5:-"qemu"}
+    image_arch=${5:-"x86_64"}
+
+    case "$src" in
+        swift) http_root="http://$SWIFT_IP:80/swift/v1/images";;
+        cloudimages) http_root="http://cloud-images.ubuntu.com/${image_name}/current";;
+    esac
+
+    mkdir -vp ~/images
+
+    [ -f ~/images/$image_file ] || {
+        wget -O ~/images/$image_file ${http_root}/${image_file}
+    }
+
+    openstack image show $image_name || {
+        openstack image create --public \
+            --container-format=bare --disk-format=$image_format \
+            --file=${HOME}/images/$image_file  $image_name \
+            --property architecture=$image_arch
+    }
+}
+
+# Upload Image for Multi-Hypervisor Clouds
+function upload_image_mh {
+    src=$1
+    image_name=$2
+    image_file=$3
+    image_format=${4:-"qcow2"}
+    image_hv_type=${5:-"kvm"}
     image_arch=${6:-"x86_64"}
 
     case "$src" in
@@ -28,6 +56,14 @@ function upload_image {
     }
 }
 
+function setup_default_images {
+    upload_image cloudimages bionic bionic-server-cloudimg-amd64.img
+    upload_image cloudimages xenial xenial-server-cloudimg-amd64-disk1.img
+    upload_image cloudimages trusty trusty-server-cloudimg-amd64-disk1.img
+    upload_image swift cirros cirros-0.3.4-x86_64-disk.img
+    upload_image swift cirros_alt cirros-0.3.4-x86_64-disk.img
+}
+
 function install_packages {
     # Install dependencies and CLI tools
     # See also requirements.txt in tempest (probably need to sudo pip install -r requirements.txt)
@@ -41,21 +77,79 @@ function install_packages {
     #    python-openstackclient openvswitch-test openvswitch-common -y
 }
 
+function create_roles {
+    openstack role show Member || openstack role create Member
+    openstack role show ResellerAdmin || openstack role create ResellerAdmin
+}
+
 function create_tempest_users {
     # Create demo/testing users, tenants and flavor
-    openstack project show demo || openstack project create demo
-    openstack user show demo || openstack user create --project demo --password pass --enable --email demo@dev.null demo
-    openstack role show Member || openstack role create Member
+    create_roles
+    openstack project show demo || {
+        openstack project create demo
+    }
+
+    openstack user show demo || {
+        openstack user create --project demo \
+                              --password pass \
+                              --enable \
+                              --email demo@dev.null demo
+    }
     openstack role add --user demo --project demo Member || :
-    openstack project show alt_demo || openstack project create alt_demo
-    openstack user show alt_demo || openstack user create --project alt_demo --password secret --enable --email alt_demo@dev.null alt_demo
+
+    openstack project show alt_demo || {
+        openstack project create alt_demo
+    }
+    openstack user show alt_demo || {
+        openstack user create --project alt_demo \
+                              --password secret \
+                              --enable \
+                              --email alt_demo@dev.null alt_demo
+    }
     openstack role add --user alt_demo --project alt_demo Member || :
+}
+
+function create_tempest_users_v3 {
+    # Create demo/testing users and projects
+    create_roles
+    openstack project show --domain admin_domain demo || {
+        openstack project create --domain admin_domain demo
+    }
+
+    openstack user show --domain admin_domain demo || {
+        openstack user create --project-domain admin_domain \
+                              --project demo \
+                              --password pass \
+                              --enable --email demo@dev.null \
+                              --domain admin_domain demo
+    }
+    openstack role add --user-domain admin_domain \
+                       --user demo \
+                       --project-domain admin_domain \
+                       --project demo Member || :
+
+    openstack project show --domain admin_domain alt_demo || {
+        openstack project create --domain admin_domain alt_demo
+    }
+
+    openstack user show --domain admin_domain alt_demo || {
+        openstack user create --project-domain admin_domain \
+                              --project alt_demo \
+                              --password secret \
+                              --enable \
+                              --email alt_demo@dev.null \
+                              --domain admin_domain alt_demo
+    }
+    openstack role add --user-domain admin_domain \
+                       --user alt_demo \
+                       --project-domain admin_domain \
+                       --project alt_demo Member || :
 }
 
 function create_tempest_flavors {
     openstack flavor show m1.cirros || openstack flavor create  --id 6 --ram 64  --disk 1 --vcpus 1 m1.cirros
-    openstack flavor show m1.tempest || openstack flavor create --id 7 --ram 256 --disk 5 --vcpus 1 m1.tempest
-    openstack flavor show m2.tempest || openstack flavor create --id 8 --ram 512 --disk 5 --vcpus 1 m2.tempest
+    openstack flavor show m1.tempest || openstack flavor create --id 7 --ram 256 --disk 0 --vcpus 1 m1.tempest
+    openstack flavor show m2.tempest || openstack flavor create --id 8 --ram 512 --disk 0 --vcpus 1 m2.tempest
 }
 
 function create_default_flavors {
