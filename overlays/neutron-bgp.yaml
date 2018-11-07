@@ -16,6 +16,8 @@ applications:
     charm: cs:~openstack-charmers-next/quagga
     num_units: 1
     constraints: mem=1G
+    options:
+      asn: 4321
 relations:
   - [neutron-dynamic-routing, rabbitmq-server]
   - [neutron-dynamic-routing, quagga]
