@@ -128,6 +128,7 @@ do
             overlays+=( "telemetry-legacy.yaml" )
             ;;
         --telemetry-ha)
+            get_units $1 __NUM_TELEMETRY_UNITS__ 3
             overlays+=( "telemetry.yaml" )
             overlays+=( "telemetry-ha.yaml" )
             ;;

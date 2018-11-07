@@ -1,16 +1,28 @@
 applications:
   ceilometer:
-    num_units: 3
+    num_units: __NUM_TELEMETRY_UNITS__
     options:
       vip: 10.5.100.10
   aodh:
-    num_units: 3
+    num_units: __NUM_TELEMETRY_UNITS__
     options:
       vip: 10.5.100.11
   gnocchi:
-    num_units: 3
+    num_units: __NUM_TELEMETRY_UNITS__
     options:
       vip: 10.5.100.12
+  ceilometer-hacluster:
+    charm: cs:~openstack-charmers-next/hacluster
+    options:
+        cluster_count: __NUM_TELEMETRY_UNITS__
+  aodh-hacluster:
+    charm: cs:~openstack-charmers-next/hacluster
+    options:
+        cluster_count: __NUM_TELEMETRY_UNITS__
+  gnocchi-hacluster:
+    charm: cs:~openstack-charmers-next/hacluster
+    options:
+        cluster_count: __NUM_TELEMETRY_UNITS__
 relations:
   - [ ceilometer, ceilometer-hacluster ]
   - [ aodh, aodh-hacluster ]
