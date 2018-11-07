@@ -16,4 +16,3 @@ relations:
   - [ heat, mysql ]
   - [ heat, keystone ]
   - [ heat, rabbitmq-server ]
-

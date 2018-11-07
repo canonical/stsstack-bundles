@@ -1,8 +1,17 @@
+# Variables
+debug:                      &debug                     True
+verbose:                    &verbose                   True
+openstack_origin:           &openstack_origin          __OS_ORIGIN__
+
 applications:
   neutron-dynamic-routing:
-    charm: cs:neutron-dynamic-routing
+    charm: cs:~openstack-charmers-next/neutron-dynamic-routing
     num_units: 1
     constraints: mem=1G
+    options:
+      debug: *debug
+      verbose: *verbose
+      openstack-origin: *openstack_origin
   quagga:
     charm: cs:~openstack-charmers-next/quagga
     num_units: 1
