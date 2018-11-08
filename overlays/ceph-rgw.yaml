@@ -13,27 +13,6 @@ applications:
     options:
       loglevel: *loglevel
       source: *source
-  keystone:
-    charm: cs:~openstack-charmers-next/keystone
-    num_units: 1
-    constraints: mem=1G
-    options:
-      debug: *debug
-      verbose: *verbose
-      admin-password: openstack
-      admin-token: ubuntutesting
-      openstack-origin: *openstack_origin
-  mysql:
-    charm: cs:~openstack-charmers-next/percona-cluster
-    num_units: 1
-    constraints: mem=4G
-    options:
-      dataset-size: 50%
-      max-connections: 10000
-      root-password: ChangeMe123
-      sst-password: ChangeMe123
-      source: *source
 relations:
-  - [ keystone, mysql ]
   - [ ceph-rgw, keystone ]
   - [ ceph-rgw, ceph-mon ]
