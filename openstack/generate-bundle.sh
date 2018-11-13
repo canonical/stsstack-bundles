@@ -15,7 +15,7 @@ parameters[__NUM_COMPUTE_UNITS__]=1
 while (($# > 0))
 do
     case "$1" in
-        --num-compute|-n)
+        --num-compute)
             parameters[__NUM_COMPUTE_UNITS__]=$2
             shift
             ;;

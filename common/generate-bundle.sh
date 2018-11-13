@@ -39,21 +39,21 @@ do
             path=$2
             shift
             ;;
-        --series)
+        --series|-s)
             series=$2
             series_provided=true
             shift
             ;;
-        --release)
+        --release|-r)
             release=$2
             shift
             ;;
-        --pocket)
+        --pocket|-p)
             # archive pocket e.g. proposed
             pocket=$2
             shift
             ;;
-        --template)
+        --template|-t)
             template=$2
             shift
             ;;
@@ -62,7 +62,7 @@ do
             params_path=$2
             shift
             ;;
-        --name)
+        --name|-n)
             # give bundle set a name and store under named dir
             bundle_name=$2
             shift
