@@ -15,7 +15,7 @@ applications:
       neutron-domain: 'cloud.sts.'
       nova-domain-email: 'stsstack@cloud.sts'
       neutron-domain-email: 'stsstack@cloud.sts'
-      nameservers: 10.5.0.2  # this currently works for the default ststack tenant networks
+      nameservers: 'ns1.example.com.'
   designate-bind:
     charm: cs:~openstack-charmers-next/designate-bind
     num_units: 1
