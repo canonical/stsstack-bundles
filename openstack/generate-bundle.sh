@@ -56,7 +56,7 @@ do
             overlays+=( "neutron-vrrp.yaml" )
             ;;
         --keystone-v3)
-            overlays+=( "keystone-v3" )
+            overlays+=( "keystone-v3.yaml" )
             ;;
         --mysql-ha*)
             get_units $1 __NUM_MYSQL_UNITS__ 3
