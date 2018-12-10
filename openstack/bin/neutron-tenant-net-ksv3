@@ -12,7 +12,7 @@ usage = """Usage: %prog [options] name cidr
 
 For example:
 
-  %prog -t admin -r provider-router admin_net 10.5.5.0/24
+  %prog -p admin -r provider-router admin_net 10.5.5.0/24
 
 will create a new network for the admin tenant called 'admin_net' with a
 default gateway of 10.5.5.1 and a dhcp allocation range of
@@ -62,7 +62,8 @@ if __name__ == '__main__':
         user_domain_name=os.environ['OS_USER_DOMAIN_NAME'],
         username=os.environ['OS_USERNAME'],
         password=os.environ['OS_PASSWORD'],
-        domain_name=os.environ.get('OS_DOMAIN_NAME', os.environ['OS_PROJECT_DOMAIN_NAME']),
+        project_domain_name=os.environ['OS_PROJECT_DOMAIN_NAME'],
+        project_name=os.environ['OS_PROJECT_NAME'],
         auth_url=os.environ['OS_AUTH_URL'])
     sess = session.Session(auth=auth)
 
@@ -71,11 +72,7 @@ if __name__ == '__main__':
     quantum = client.Client(session=sess)
 
     # Resolve tenant id
-    project_id = None
-    for proj in [t._info for t in keystone.projects.list()]:
-        if (proj['name'] == (opts.project or os.environ['OS_PROJECT_NAME'])):
-            project_id = proj['id']
-            break  # Tenant ID found - stop looking
+    project_id = auth.get_project_id(sess)
     if not project_id:
         logging.error("Unable to locate project id for %s.", opts.tenant)
         sys.exit(1)
