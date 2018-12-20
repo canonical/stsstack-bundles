@@ -14,8 +14,6 @@ applications:
       openstack-origin: *openstack_origin
   ceilometer-agent:
     charm: cs:~openstack-charmers-next/ceilometer-agent
-    options:
-      openstack-origin: *openstack_origin
   aodh:
     charm: cs:~openstack-charmers-next/aodh
     num_units: 1
