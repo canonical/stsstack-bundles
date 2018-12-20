@@ -29,6 +29,12 @@ do
             overlays+=( "ceph.yaml" )
             overlays+=( "openstack-ceph.yaml" )
             ;;
+        --ceph-rgw)
+            overlays+=( "ceph-rgw.yaml" )
+            ;;
+        --ceph-rgw-multisite)
+            overlays+=( "ceph-rgw-multisite.yaml" )
+            ;;
         --designate)
             overlays+=( "memcached.yaml" )
             overlays+=( "designate.yaml" )
