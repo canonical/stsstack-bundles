@@ -114,6 +114,13 @@ do
             get_units $1 __NUM_HORIZON_UNITS__ 3
             overlays+=( "openstack-dashboard-ha.yaml" )
             ;;
+        --swift)
+            overlays+=( "swift.yaml" )
+            ;;
+        --swift-ha)
+            get_units $1 __NUM_SWIFT_PROXY_UNITS__ 3
+            overlays+=( "swift-ha.yaml" )
+            ;;
         --telemetry)
             # ceilometer + aodh
             overlays+=( "telemetry.yaml" )

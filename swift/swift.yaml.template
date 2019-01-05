@@ -30,46 +30,6 @@ applications:
       debug: *debug
       verbose: *verbose
       openstack-origin: *openstack_origin
-  swift-proxy:
-    num_units: 1
-    charm: cs:~openstack-charmers-next/swift-proxy
-    constraints: mem=1G
-    options:
-      debug: *debug
-      zone-assignment: manual
-      replicas: 3
-      swift-hash: fdfef9d4-8b06-11e2-8ac0-531c923c8fae
-      openstack-origin: *openstack_origin
-  swift-storage-z1:
-    num_units: 1
-    charm: cs:~openstack-charmers-next/swift-storage
-    constraints: mem=1G
-    options:
-      zone: 1
-      block-device: vdb
-      overwrite: "true"
-      ephemeral-unmount: '/mnt' 
-      openstack-origin: *openstack_origin
-  swift-storage-z2:
-    num_units: 1
-    charm: cs:~openstack-charmers-next/swift-storage
-    constraints: mem=1G
-    options:
-      zone: 2
-      block-device: vdb
-      overwrite: "true"
-      ephemeral-unmount: '/mnt' 
-      openstack-origin: *openstack_origin
-  swift-storage-z3:
-    num_units: 1
-    charm: cs:~openstack-charmers-next/swift-storage
-    constraints: mem=1G
-    options:
-      zone: 3
-      block-device: vdb
-      overwrite: "true"
-      ephemeral-unmount: '/mnt' 
-      openstack-origin: *openstack_origin
   mysql:
     num_units: 1
     charm: cs:~openstack-charmers-next/percona-cluster
@@ -84,9 +44,4 @@ relations:
   - [ keystone, mysql ]
   - [ glance, mysql ]
   - [ glance, keystone ]
-  - [ swift-proxy, keystone ]
   - [ swift-proxy, glance ]
-  - [ swift-proxy, swift-storage-z1 ]
-  - [ swift-proxy, swift-storage-z2 ]
-  - [ swift-proxy, swift-storage-z3 ]
-

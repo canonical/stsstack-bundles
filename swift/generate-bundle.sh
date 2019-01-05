@@ -10,7 +10,7 @@ opts=(
 
 # defaults
 #parameters[]=
-
+overlays+=( swift.yaml )
 
 while (($# > 0))
 do
