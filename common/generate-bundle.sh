@@ -21,6 +21,7 @@ params_path=
 bundle_name=
 replay=false
 run_command=false
+list_bundles=false
 declare -a overlays=()
 declare -A lts=( [trusty]=icehouse
                  [xenial]=mitaka
@@ -71,6 +72,9 @@ do
             # replay the last recorded command if exists
             replay=true
             ;;
+        --list)
+            list_bundles=true
+            ;;
         --run)
             # deploy bundle once generated
             run_command=true
@@ -100,12 +104,23 @@ ltsmatch ()
     return 1
 }
 
-# Replay ingores any args and just print the previously generated command
 subdir="/${bundle_name}"
 [ -n "${bundle_name}" ] || subdir=''
 bundles_dir=`dirname $path`/b$subdir
+if $list_bundles; then
+  if [ -d "$bundles_dir" ]; then
+    echo -e "Existing bundles:\n./b (default)"
+    find $bundles_dir/* -maxdepth 0 -type d| egrep -v "$bundles_dir/o$" 
+    echo ""
+  else
+    echo "There are currently no bundles."
+  fi
+  exit
+fi
+
 mkdir -p $bundles_dir
 
+# Replay ingores any args and just prints the previously generated command
 finish ()
 {
 if $replay; then
