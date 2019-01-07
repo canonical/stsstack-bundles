@@ -22,6 +22,7 @@ bundle_name=
 replay=false
 run_command=false
 list_bundles=false
+create_model=false
 declare -a overlays=()
 declare -A lts=( [trusty]=icehouse
                  [xenial]=mitaka
@@ -32,6 +33,10 @@ declare -A lts=( [trusty]=icehouse
 while (($# > 0))
 do
     case "$1" in
+        --create-model)
+            # creates a model using the value provided by --name
+            create_model=true
+            ;;
         --overlay)
             overlays+=( $2 )
             shift
@@ -91,6 +96,25 @@ do
     esac
     shift
 done
+
+if $create_model; then
+    if [ -z "$bundle_name" ]; then
+        echo "ERROR: no --name provided so cannot create Juju model" 
+        exit 1
+    else
+        if `juju list-models| egrep -q "^$bundle_name\* "`; then
+            echo -e "Juju model '$bundle_name' already exists and is the current context - skipping create\n"
+        elif `juju list-models| egrep -q "^$bundle_name "`; then
+            echo "Juju model '$bundle_name' already exists but is not the current context - switching context"
+            juju switch $bundle_name
+            echo ""
+        else
+            echo "Creating Juju model $bundle_name"
+            juju add-model $bundle_name
+            echo ""
+        fi
+    fi
+fi
 
 [ -z "$template" ] || [ -z "$path" ] && \
     { echo "ERROR: no template provided with --template"; exit 1; }
