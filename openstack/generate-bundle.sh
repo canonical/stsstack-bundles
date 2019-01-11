@@ -11,6 +11,12 @@ opts=(
 # defaults
 parameters[__NUM_COMPUTE_UNITS__]=1
 
+list_overlays ()
+{
+    echo "Supported overlays:"
+    sed -r 's/.+\s+(--[[:alnum:]\-]+\*?).+/\1/g;t;d' `basename $0`| \
+        egrep -v "\--list-overlays|--num-compute"
+}
 
 while (($# > 0))
 do
@@ -57,7 +63,7 @@ do
         --ldap)
             overlays+=( "ldap.yaml" )
             ;;
-        --vrrp)
+        --vrrp*)
             get_units $1 __NUM_NEUTRON_GATEWAY_UNITS__ 3
             overlays+=( "neutron-vrrp.yaml" )
             ;;
@@ -117,7 +123,7 @@ do
         --swift)
             overlays+=( "swift.yaml" )
             ;;
-        --swift-ha)
+        --swift-ha*)
             get_units $1 __NUM_SWIFT_PROXY_UNITS__ 3
             overlays+=( "swift-ha.yaml" )
             ;;
@@ -140,7 +146,7 @@ do
             # ceilometer only (+mongodb)
             overlays+=( "telemetry-legacy.yaml" )
             ;;
-        --telemetry-ha)
+        --telemetry-ha*)
             get_units $1 __NUM_TELEMETRY_UNITS__ 3
             overlays+=( "telemetry.yaml" )
             overlays+=( "telemetry-ha.yaml" )
@@ -154,6 +160,10 @@ do
             overlays+=( "openstack-dashboard-ha.yaml" )
             overlays+=( "rabbitmq-server-ha.yaml" )
             overlays+=( "mysql-ha.yaml" )
+            ;;
+        --list-overlays)
+            list_overlays
+            exit
             ;;
         *)
             opts+=( $1 )

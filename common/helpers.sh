@@ -3,7 +3,7 @@ declare -a overlays=()
 
 _usage () {
 cat << EOF
-USAGE: `basename $0` INTERNAL_OPTS OPTIONS
+USAGE: `basename $0` INTERNAL_OPTS OPTIONS [OVERLAYS]
 
 OPTIONS:
      --create-model
@@ -28,6 +28,19 @@ OPTIONS:
         Automatically execute the generated deployment command.
      -s, --series s
         Ubuntu series.
+
+OVERLAYS:
+     You can optionally add one or more feature overlay. These are
+     specified as --<overlayname> using the name of an overlay as found in
+     the output of running ./generate-bundle.sh --list-overlays.
+
+     Note that overlays listed with a asterisk at the end of the name
+     support having a number of units specified using a colon e.g.
+
+     ./generate-bundle.sh --myoverlay:6
+
+     will give you six units of myoverlay. This is useful for overlays
+     that provide HA or scale-out services.
 
 INTERNAL_OPTS (don't use these):
      --bundle-params
