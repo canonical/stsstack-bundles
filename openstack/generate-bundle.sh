@@ -127,23 +127,19 @@ do
             get_units $1 __NUM_SWIFT_PROXY_UNITS__ 3
             overlays+=( "swift-ha.yaml" )
             ;;
-        --telemetry)
-            # ceilometer + aodh
-            overlays+=( "telemetry.yaml" )
-            ;;
-        --telemetry-gnocchi)
-            # ceilometer + aodh + gnocchi
+        --telemetry|--telemetry-gnocchi)
+            # ceilometer + aodh + gnocchi (>= pike)
             overlays+=( "ceph.yaml" )
             overlays+=( "gnocchi.yaml" )
             overlays+=( "memcached.yaml" )
             overlays+=( "telemetry.yaml" )
             ;;
         --telemetry-legacy-aodh)
-            # ceilometer + aodh + mongodb
+            # ceilometer + aodh + mongodb (<= pike)
             overlays+=( "telemetry-legacy-aodh.yaml" )
             ;;
         --telemetry-legacy)
-            # ceilometer only (+mongodb)
+            # ceilometer + mongodb (<= pike)
             overlays+=( "telemetry-legacy.yaml" )
             ;;
         --telemetry-ha*)
@@ -152,6 +148,7 @@ do
             overlays+=( "telemetry-ha.yaml" )
             ;;
         --ha)
+            # This is HA for services in the base bundle only.
             overlays+=( "cinder-ha.yaml" )
             overlays+=( "glance-ha.yaml" )
             overlays+=( "keystone-ha.yaml" )
