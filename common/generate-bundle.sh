@@ -23,6 +23,7 @@ replay=false
 run_command=false
 list_bundles=false
 create_model=false
+use_stable_charms=false
 declare -a overlays=()
 declare -A lts=( [trusty]=icehouse
                  [xenial]=mitaka
@@ -83,6 +84,9 @@ do
         --run)
             # deploy bundle once generated
             run_command=true
+            ;;
+        --use-stable-charms)
+            use_stable_charms=true
             ;;
         -h|--help)
             _usage
@@ -212,6 +216,10 @@ sed -i -e "s/__SERIES__/$series/g" \
 if [ -n "$params_path" ]; then
     eval `cat $params_path` $1
 fi
+
+if $use_stable_charms; then
+    sed -i -r 's,~openstack-charmers-next/,,g' $1
+fi
 }
 
 fout=`mktemp -d`/`basename $template| sed 's/.template//'`
@@ -226,9 +234,14 @@ result=$bundles_dir/`basename $fout`
 # remove duplicate overlays
 declare -a _overlays=()
 declare -A overlay_dedup=()
+if $use_stable_charms; then
+    msg="using stable charms"
+else
+    msg="using dev/next charms"
+fi
 if ((${#overlays[@]})); then
     mkdir -p $bundles_dir/o
-    echo "Created $target bundle and overlays:"
+    echo "Created $target bundle and overlays ($msg):"
     for overlay in ${overlays[@]}; do
         [ "${overlay_dedup[$overlay]:-null}" = "null" ] || continue
         cp overlays/$overlay $bundles_dir/o
@@ -239,7 +252,7 @@ if ((${#overlays[@]})); then
     done
     echo ""
 else
-    echo -e "Created $target bundle\n"
+    echo -e "Created $target bundle ($msg)\n"
 fi
 
 echo -e "juju deploy ${result} ${_overlays[@]:-}\n" > ${bundles_dir}/command

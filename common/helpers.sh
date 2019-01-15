@@ -28,6 +28,10 @@ OPTIONS:
         Automatically execute the generated deployment command.
      -s, --series s
         Ubuntu series.
+    --use-stable-charms
+        By default the development (cs:~openstack-charmers-next) version of
+        the charms are used where available. Use this flag if you want to
+        use the stable (released) charms i.e. cs:<charm>.
 
 OVERLAYS:
      You can optionally add one or more feature overlay. These are
