@@ -74,6 +74,9 @@ do
             get_units $1 __NUM_MYSQL_UNITS__ 3
             overlays+=( "mysql-ha.yaml" )
             ;;
+        --nova-cells)
+             overlays+=( "nova-cells.yaml" )
+            ;;
         --rabbitmq-server-ha*)
             get_units $1 __NUM_RABBIT_UNITS__ 3
             overlays+=( "rabbitmq-server-ha.yaml" )

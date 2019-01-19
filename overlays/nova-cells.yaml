@@ -1,0 +1,56 @@
+# Variables
+debug:                      &debug                     True
+verbose:                    &verbose                   True
+openstack_origin:           &openstack_origin          __OS_ORIGIN__
+source:                     &source                    __OS_ORIGIN__
+
+# See https://docs.openstack.org/project-deploy-guide/charm-deployment-guide/latest/app-nova-cells.html
+
+applications:
+  nova-cell-controller-cell2:
+    charm: cs:~openstack-charmers-next/nova-cell-controller
+    num_units: 1
+    constraints: mem=1G
+    options:
+      debug: *debug
+      verbose: *verbose
+      openstack-origin: *openstack_origin
+      cell-name: 'cell2'
+  rabbitmq-server-cell2:
+    num_units: 1
+    charm: cs:~openstack-charmers-next/rabbitmq-server
+    constraints: mem=1G
+    options:
+      source: *source
+  mysql-cell2:
+    num_units: 1
+    charm: cs:~openstack-charmers-next/percona-cluster
+    constraints: mem=4G
+    options:
+      dataset-size: 50%
+      max-connections: 20000
+      root-password: ChangeMe123
+      sst-password: ChangeMe123
+      source: *source
+  nova-compute-cell2:
+    charm: cs:~openstack-charmers-next/nova-compute
+    num_units: 1 
+    constraints: mem=4G
+    options:
+      debug: *debug
+      verbose: *verbose
+      enable-live-migration: True
+      enable-resize: True
+      migration-auth-type: ssh
+      openstack-origin: *openstack_origin
+relations:
+  - [ 'nova-compute-cell2:amqp', 'rabbitmq-server-cell2:amqp' ]
+  - [ 'nova-cell-controller-cell2:amqp', 'rabbitmq-server-cell2:amqp' ]
+  - [ 'nova-cell-controller-cell2:shared-db', 'mysql-cell2:shared-db' ]
+  - [ 'nova-cell-controller-cell2:cloud-compute', 'nova-compute-cell2:cloud-compute' ]
+  - [ 'nova-cell-controller-cell2:nova-cell-compute', 'nova-cloud-controller:nova-cell-api' ]
+  - [ 'nova-cloud-controller:amqp-cell', 'rabbitmq-server-cell2:amqp' ]
+  - [ 'nova-cloud-controller:shared-db-cell', 'mysql-cell2:shared-db' ]
+  - [ 'nova-compute-cell2:neutron-plugin', 'neutron-openvswitch:neutron-plugin' ]
+  - [ 'nova-compute-cell2:image-service', 'glance:image-service' ]
+  - [ 'nova-compute-cell2:cloud-credentials', 'keystone:identity-credentials' ]
