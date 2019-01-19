@@ -5,6 +5,8 @@ applications:
     constraints: mem=1G
     options:
       port: "3000"  # XXX: bug 1752960
+      install_method: snap
+      admin_password: admin
   prometheus:
     charm: cs:prometheus2
     num_units: 1

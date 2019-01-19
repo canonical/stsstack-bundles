@@ -5,6 +5,7 @@ applications:
     constraints: mem=8G
     options:
       firewall_enabled: false
+      es-heap-size: 4
   filebeat:
     charm: filebeat
     options:
