@@ -1,0 +1,17 @@
+applications:
+  vault:
+    charm: cs:~openstack-charmers-next/vault
+    num_units: 1
+  easyrsa:
+    charm: cs:~containers/easyrsa
+    num_units: 1
+  etcd:
+    charm: cs:etcd
+    num_units: 1
+    options:
+      channel: 3.1/stable
+relations:
+  - ['mysql:shared-db', 'vault:shared-db']
+  - ['ceph-osd:secrets-storage', 'vault:secrets']
+  - ['etcd:db', 'vault:etcd']
+  - ['etcd:certificates', 'easyrsa:client']

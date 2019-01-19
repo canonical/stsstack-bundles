@@ -147,6 +147,11 @@ do
             overlays+=( "telemetry.yaml" )
             overlays+=( "telemetry-ha.yaml" )
             ;;
+        --vault)
+            overlays+=( "ceph.yaml" )
+            overlays+=( "openstack-ceph.yaml" )
+            overlays+=( "vault.yaml" )
+            ;;
         --ha)
             # This is HA for services in the base bundle only.
             overlays+=( "cinder-ha.yaml" )
