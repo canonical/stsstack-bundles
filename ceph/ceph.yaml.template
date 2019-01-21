@@ -9,17 +9,18 @@ verbose:                    &verbose                   True
 loglevel:                   &loglevel                  20
 openstack_origin:           &openstack_origin          __OS_ORIGIN__
 source:                     &source                    __SOURCE__
+num_mon_units:              &num_mon_units             __NUM_CEPH_MON_UNITS__
 
 series: __SERIES__
 applications:
   ceph-mon:
     charm: cs:~openstack-charmers-next/ceph-mon
-    num_units: 1
+    num_units: *num_mon_units
     constraints: mem=1G
     options:
       source: *source
       loglevel: *loglevel
-      monitor-count: 1
+      monitor-count: *num_mon_units
       monitor-secret: AQCXrnZQwI7KGBAAiPofmKEXKxu5bUzoYLVkbQ==
       expected-osd-count: 3
   ceph-osd:

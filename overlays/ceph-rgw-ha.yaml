@@ -1,0 +1,12 @@
+applications:
+  ceph-rgw:
+    num_units: __NUM_CEPH_RGW_UNITS__
+    options:
+      vip: 10.5.100.14
+  ceph-rgw-hacluster:
+    charm: cs:~openstack-charmers-next/hacluster
+    num_units: 0
+    options:
+      cluster_count: __NUM_CEPH_RGW_UNITS__
+relations:
+  - [ ceph-rgw, ceph-rgw-hacluster ]

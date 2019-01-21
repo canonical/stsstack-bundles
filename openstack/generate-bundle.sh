@@ -10,6 +10,7 @@ opts=(
 
 # defaults
 parameters[__NUM_COMPUTE_UNITS__]=1
+parameters[__NUM_CEPH_MON_UNITS__]=1
 
 
 while (($# > 0))
@@ -28,6 +29,12 @@ do
         --ceph)
             overlays+=( "ceph.yaml" )
             overlays+=( "openstack-ceph.yaml" )
+            ;;
+        --ceph-mon-ha*)
+            get_units $1 __NUM_CEPH_MON_UNITS__ 3
+            overlays+=( "ceph.yaml" )
+            overlays+=( "openstack-ceph.yaml" )
+            overlays+=( "ceph-mon-ha.yaml" )
             ;;
         --ceph-rgw)
             overlays+=( "ceph-rgw.yaml" )
