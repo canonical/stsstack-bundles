@@ -30,11 +30,9 @@ do
             overlays+=( "ceph.yaml" )
             overlays+=( "openstack-ceph.yaml" )
             ;;
-        --ceph-mon-ha*)
-            get_units $1 __NUM_CEPH_MON_UNITS__ 3
-            overlays+=( "ceph.yaml" )
-            overlays+=( "openstack-ceph.yaml" )
-            overlays+=( "ceph-mon-ha.yaml" )
+        --num-ceph-mons)
+            parameters[__NUM_CEPH_MON_UNITS__]=$2
+            shift
             ;;
         --ceph-rgw)
             overlays+=( "ceph-rgw.yaml" )
