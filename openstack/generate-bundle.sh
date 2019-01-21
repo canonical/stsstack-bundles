@@ -11,12 +11,13 @@ opts=(
 # defaults
 parameters[__NUM_COMPUTE_UNITS__]=1
 parameters[__NUM_CEPH_MON_UNITS__]=1
+parameters[__NEUTRON_FW_DRIVER__]=openvswitch  # legacy is iptables_hybrid
 
 
 while (($# > 0))
 do
     case "$1" in
-        --num-compute)
+        --num-compute)  #type:<int>
             parameters[__NUM_COMPUTE_UNITS__]=$2
             shift
             ;;
@@ -30,7 +31,7 @@ do
             overlays+=( "ceph.yaml" )
             overlays+=( "openstack-ceph.yaml" )
             ;;
-        --num-ceph-mons)
+        --num-ceph-mons)  #type:<int>
             parameters[__NUM_CEPH_MON_UNITS__]=$2
             shift
             ;;
@@ -61,6 +62,10 @@ do
             ;;
         --ldap)
             overlays+=( "ldap.yaml" )
+            ;;
+        --neutron-fw-driver)  #type:[openvswitch|iptables_hybrid] (default=openvswitch)
+            parameters[__NEUTRON_FW_DRIVER__]=$2
+            shift
             ;;
         --vrrp*)
             get_units $1 __NUM_NEUTRON_GATEWAY_UNITS__ 3

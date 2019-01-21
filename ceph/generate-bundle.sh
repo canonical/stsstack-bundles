@@ -18,7 +18,7 @@ do
         --graylog)
             overlays+=( "graylog.yaml ")
             ;;
-        --num-mons|--num-ceph-mons)
+        --num-mons|--num-ceph-mons)  #type:<int>
             parameters[__NUM_CEPH_MON_UNITS__]=$2
             shift
             ;;

@@ -15,6 +15,8 @@ OPTIONS:
         List existing bundles.
      --list-overlays
         List supported overlays.
+     --list-opts
+        List extra options supported by bundle.
      -n, --name n
         Name for bundle. If this is not provided then the default bundle
         location is used.
@@ -46,7 +48,8 @@ OVERLAYS:
      ./generate-bundle.sh --myoverlay:6
 
      will give you six units of myoverlay. This is useful for overlays
-     that provide HA or scale-out services.
+     that provide HA or scale-out services. See --list-overlays for
+     available overlays.
 
 INTERNAL_OPTS (don't use these):
      --bundle-params
@@ -59,6 +62,7 @@ INTERNAL_OPTS (don't use these):
      -t, --template t
         (internal only) Generated bundle templates.
 EOF
+list_opts
 }
 
 get_units()
@@ -97,5 +101,11 @@ list_overlays ()
 {
     echo "Supported overlays:"
     sed -r 's/.+\s+(--[[:alnum:]\-]+\*?).+/\1/g;t;d' `basename $0`| \
-        egrep -v "\--list-overlays|--num-compute"
+        egrep -v "\--list-overlays|--num-compute|--num-ceph-mons|--neutron-fw-driver"
+}
+
+list_opts ()
+{
+    echo -e "\nBUNDLE OPTS:"
+    sed -r 's/.+\s+(--[[:alnum:]\-]+).+#type:(.+)/      \1 \2/g;t;d' `basename $0`
 }
