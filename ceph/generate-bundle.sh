@@ -40,6 +40,10 @@ do
             overlays+=( "ceph-rgw-ha.yaml" )
             overlays+=( "ceph-rgw-multisite.yaml" )
             ;;
+        --vault)
+            overlays+=( "mysql.yaml" )
+            overlays+=( "vault.yaml" )
+            ;;
         --list-overlays)
             list_overlays
             exit
