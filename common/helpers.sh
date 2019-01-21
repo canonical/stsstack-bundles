@@ -13,6 +13,8 @@ OPTIONS:
         Display this help message.
      --list
         List existing bundles.
+     --list-overlays
+        List supported overlays.
      -n, --name n
         Name for bundle. If this is not provided then the default bundle
         location is used.
@@ -48,7 +50,7 @@ OVERLAYS:
 
 INTERNAL_OPTS (don't use these):
      --bundle-params
-        (internal only) Bundle paramaters passed by sub-generator
+        (internal only) Bundle parameters passed by sub-generator
      --overlay p
         (internal only) Overlay to be added to deployment. Can be
         specified multiple times.
@@ -89,4 +91,11 @@ if ((${#parameters[@]})); then
 fi
 `dirname $0`/common/generate-bundle.sh ${opts[@]}
 [ -n "$ftmp" ] && rm $ftmp
+}
+
+list_overlays ()
+{
+    echo "Supported overlays:"
+    sed -r 's/.+\s+(--[[:alnum:]\-]+\*?).+/\1/g;t;d' `basename $0`| \
+        egrep -v "\--list-overlays|--num-compute"
 }

@@ -11,12 +11,6 @@ opts=(
 # defaults
 parameters[__NUM_COMPUTE_UNITS__]=1
 
-list_overlays ()
-{
-    echo "Supported overlays:"
-    sed -r 's/.+\s+(--[[:alnum:]\-]+\*?).+/\1/g;t;d' `basename $0`| \
-        egrep -v "\--list-overlays|--num-compute"
-}
 
 while (($# > 0))
 do
