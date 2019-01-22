@@ -158,6 +158,8 @@ do
             overlays+=( "ceph.yaml" )
             overlays+=( "openstack-ceph.yaml" )
             overlays+=( "vault.yaml" )
+            overlays+=( "vault-ceph.yaml" )
+            overlays+=( "vault-openstack.yaml" )
             ;;
         --ha)
             # This is HA for services in the base bundle only.

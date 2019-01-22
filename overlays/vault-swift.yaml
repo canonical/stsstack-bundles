@@ -1,0 +1,14 @@
+applications:
+  swift-storage-z1:
+    options:
+      encrypt=true
+  swift-storage-z2:
+    options:
+      encrypt=true
+  swift-storage-z3:
+    options:
+      encrypt=true
+relations:
+  - ['swift-storage-z1:secrets-storage', 'vault:secrets']
+  - ['swift-storage-z2:secrets-storage', 'vault:secrets']
+  - ['swift-storage-z3:secrets-storage', 'vault:secrets']

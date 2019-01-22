@@ -12,6 +12,5 @@ applications:
       channel: 3.1/stable
 relations:
   - ['mysql:shared-db', 'vault:shared-db']
-  - ['ceph-osd:secrets-storage', 'vault:secrets']
   - ['etcd:db', 'vault:etcd']
   - ['etcd:certificates', 'easyrsa:client']
