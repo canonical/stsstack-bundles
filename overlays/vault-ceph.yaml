@@ -1,7 +1,7 @@
 applications:
   ceph-osd:
     options:
-      osd-encrypt=true
-      osd-encrypt-keymanager=vault
+      osd-encrypt: true
+      osd-encrypt-keymanager: vault
 relations:
   - ['ceph-osd:secrets-storage', 'vault:secrets']
