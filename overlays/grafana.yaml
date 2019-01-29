@@ -17,17 +17,18 @@ applications:
   prometheus-ceph-exporter:
     charm: cs:prometheus-ceph-exporter
     num_units: 1
-  telegraf-prometheus:
+  telegraf:
     charm: cs:telegraf
+    expose: true
+    options:
+      prometheus_output_port: default
 relations:
-  - [ grafana, telegraf ]
   - [ "prometheus:grafana-source", "grafana:grafana-source" ]
-  - [ "prometheus:juju-info", "telegraf-prometheus:juju-info" ]
   - [ "prometheus:target", "telegraf:prometheus-client" ]
-  - [ "prometheus:target", "telegraf-prometheus:prometheus-client" ]
   - [ "prometheus-openstack-exporter:identity-credentials", "keystone:identity-credentials" ]
   - [ "prometheus-openstack-exporter:prometheus-openstack-exporter-service", "prometheus:target" ]
   - [ prometheus-openstack-exporter, filebeat ]
   - [ "prometheus-ceph-exporter:ceph-exporter", "prometheus:target" ]
   - [ "prometheus-ceph-exporter:ceph", "ceph-mon:client" ]
-
+# NOTE: telegraf relations to services will need to be added manually e.g.
+# - [ telegraf, nova-compute ]
