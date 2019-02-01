@@ -28,7 +28,8 @@ declare -a overlays=()
 declare -A lts=( [trusty]=icehouse
                  [xenial]=mitaka
                  [bionic]=queens )
-
+declare -A nonlts=( [cosmic]=rocky
+                    [disco]=stein )
 . `dirname $0`/helpers.sh
 
 while (($# > 0))
@@ -132,6 +133,15 @@ ltsmatch ()
     return 1
 }
 
+nonltsmatch ()
+{
+    [ -z "$release" ] && return 0
+    for s in ${!nonlts[@]}; do
+        [ "$s" = "$1" ] && [ "${nonlts[$s]}" = "$2" ] && return 0
+    done
+    return 1
+}
+
 subdir="/${bundle_name}"
 [ -n "${bundle_name}" ] || subdir=''
 bundles_dir=`dirname $path`/b$subdir
@@ -165,7 +175,7 @@ $replay && exit 0
 }
 $replay && finish
 
-if [ -n "$release" ] && ! ltsmatch $series $release; then
+if [ -n "$release" ] && ! ltsmatch $series $release && ! nonltsmatch $series $release; then
     declare -a idx=( ${!lts[@]} )
     i=${#idx[@]}
     _series=${idx[$((--i))]}
@@ -187,11 +197,11 @@ if [ -n "$release" ] && ! ltsmatch $series $release; then
     fi
     series=$_series
 else
-    release=${lts[$series]} 
+    release=${lts[$series]:-${nonlts[$series]}}
 fi
 
 source=''
-if ! ltsmatch $series $release ; then
+if ! ltsmatch $series $release && ! nonltsmatch $series $release ; then
   source="cloud:${series}-${release}"
 fi
 
