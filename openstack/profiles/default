@@ -18,6 +18,9 @@ install_packages
 [[ -z "$CIDR_PRIV" ]] && export CIDR_PRIV="192.168.21.0/24"
 [[ -z "$SWIFT_IP" ]] && export SWIFT_IP="10.245.161.162"
 
+NS_ARG=""
+[ "`juju config neutron-api enable-ml2-dns`" = "true" ] && unset NAMESERVER || NS_ARG="-N $NAMESERVER"
+
 # Accept network type as first parameter, assume gre if unspecified
 net_type=${1:-"gre"}
 
@@ -32,12 +35,12 @@ source novarc
 
 if is_ksv3; then
 ./bin/neutron-ext-net-ksv3 --project admin --network-type flat -g $GATEWAY -c $CIDR_EXT -f $FIP_RANGE ext_net
-./bin/neutron-tenant-net-ksv3 --project admin --network-type $net_type -r provider-router -N $NAMESERVER private $CIDR_PRIV
+./bin/neutron-tenant-net-ksv3 --project admin --network-type $net_type -r provider-router $NS_ARG private $CIDR_PRIV
 # Create demo/testing users, tenants and flavor
 create_tempest_users_v3
 else
 ./bin/neutron-ext-net --network-type flat -g $GATEWAY -c $CIDR_EXT -f $FIP_RANGE ext_net
-./bin/neutron-tenant-net --network-type $net_type -t admin -r provider-router -N $NAMESERVER private $CIDR_PRIV
+./bin/neutron-tenant-net --network-type $net_type -t admin -r provider-router $NS_ARG private $CIDR_PRIV
 # Create demo/testing users, tenants and flavor
 create_tempest_users
 fi

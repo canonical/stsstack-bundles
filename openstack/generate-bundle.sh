@@ -7,6 +7,7 @@ opts=(
 --template openstack.yaml.template
 --path $0
 )
+msgs=()
 
 # defaults
 parameters[__NUM_COMPUTE_UNITS__]=1
@@ -51,11 +52,11 @@ do
             ;;
         --graylog)
             overlays+=( "graylog.yaml ")
-            echo "NOTE: you will need to manually relate graylog (filebeat) to any services you want to monitor"
+            msgs+=( "NOTE: you will need to manually relate graylog (filebeat) to any services you want to monitor" )
             ;;
         --grafana)
             overlays+=( "grafana.yaml ")
-            echo "NOTE: you will need to manually relate grafana (telegraf) to any services you want to monitor"
+            msgs+=( "NOTE: you will need to manually relate grafana (telegraf) to any services you want to monitor" )
             ;;
         --heat)
             overlays+=( "heat.yaml ")
@@ -77,6 +78,9 @@ do
         --mysql-ha*)
             get_units $1 __NUM_MYSQL_UNITS__ 3
             overlays+=( "mysql-ha.yaml" )
+            ;;
+        --ml2dns)
+            overlays+=( "neutron-ml2dns.yaml" )
             ;;
         --nova-cells)
              overlays+=( "nova-cells.yaml" )
@@ -182,5 +186,12 @@ do
     esac
     shift
 done
+
+if ((${#msgs[@]})); then
+  for m in "${msgs[@]}"; do
+    echo -e "$m"
+  done
+read -p "Hit [ENTER] to continue"
+fi
 
 generate

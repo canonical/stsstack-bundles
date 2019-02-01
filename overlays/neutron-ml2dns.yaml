@@ -1,0 +1,15 @@
+# Variables
+dns_domain:                 &dns_domain                'overcloud.stsstack.qa.1ss.'
+dns_servers:                &dns_servers               '10.198.200.1'
+
+applications:
+  neutron-api:
+    options:
+      enable-ml2-dns: True
+      dns-domain: *dns_domain
+  neutron-gateway:
+    options:
+      dns-servers: *dns_servers
+  neutron-gateway:
+    options:
+      dns-servers: *dns_servers
