@@ -43,6 +43,7 @@ do
             overlays+=( "ceph-rgw-multisite.yaml" )
             ;;
         --designate)
+            overlays+=( "neutron-ml2dns.yaml" )
             overlays+=( "memcached.yaml" )
             overlays+=( "designate.yaml" )
             ;;
@@ -103,6 +104,7 @@ do
         --designate-ha*)
             get_units $1 __NUM_DESIGNATE_UNITS__ 3
             overlays+=( "memcached.yaml" )
+            overlays+=( "neutron-ml2dns.yaml" )
             overlays+=( "designate.yaml" )
             overlays+=( "designate-ha.yaml" )
             ;;

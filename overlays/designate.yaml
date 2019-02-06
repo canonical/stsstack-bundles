@@ -11,11 +11,7 @@ applications:
     options:
       debug: *debug
       openstack-origin: *openstack_origin
-      nova-domain: 'cloud.sts.'
-      neutron-domain: 'cloud.sts.'
-      nova-domain-email: 'stsstack@cloud.sts'
-      neutron-domain-email: 'stsstack@cloud.sts'
-      nameservers: 'ns1.example.com.'
+      nameservers: 'ns1.overcloud.stsstack.qa.1ss.'
   designate-bind:
     charm: cs:~openstack-charmers-next/designate-bind
     num_units: 1
