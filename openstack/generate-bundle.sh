@@ -74,6 +74,7 @@ do
             overlays+=( "neutron-vrrp.yaml" )
             ;;
         --keystone-v3)
+            # useful for <= pike since queens is v3 only
             overlays+=( "keystone-v3.yaml" )
             ;;
         --mysql-ha*)
@@ -81,10 +82,18 @@ do
             overlays+=( "mysql-ha.yaml" )
             ;;
         --ml2dns)
+            # this is internal dns integration, for external use --designate
             overlays+=( "neutron-ml2dns.yaml" )
             ;;
         --nova-cells)
-             overlays+=( "nova-cells.yaml" )
+            overlays+=( "nova-cells.yaml" )
+            ;;
+        --octavia)
+            # >= Rocky
+            overlays+=( "barbican.yaml" )
+            overlays+=( "vault.yaml" )
+            overlays+=( "vault-openstack.yaml" )
+            overlays+=( "octavia.yaml" )
             ;;
         --rabbitmq-server-ha*)
             get_units $1 __NUM_RABBIT_UNITS__ 3

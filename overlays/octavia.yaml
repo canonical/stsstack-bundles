@@ -1,0 +1,28 @@
+# Variables
+debug:                      &debug                     True
+openstack_origin:           &openstack_origin          __OS_ORIGIN__
+
+applications:
+  barbican-vault:
+    charm: cs:~openstack-charmers-next/barbican-vault
+  octavia:
+    charm: cs:~openstack-charmers-next/octavia
+    num_units: 1
+    options:
+      debug: *debug
+      openstack-origin: __OS_ORIGIN__
+  octavia-dashboard:
+    charm: cs:~openstack-charmers-next/octavia-dashboard
+relations:
+  - [mysql:shared-db, octavia:shared-db]
+  - [mysql:shared-db, barbican:shared-db]
+  - [mysql:shared-db, vault:shared-db]
+  - [keystone:identity-service, octavia:identity-service]
+  - [keystone:identity-service, barbican:identity-service]
+  - [rabbitmq-server:amqp, octavia:amqp]
+  - [rabbitmq-server:amqp, barbican:amqp]
+  - [neutron-api:neutron-load-balancer, octavia:neutron-api]
+  - [neutron-openvswitch:neutron-plugin, octavia:neutron-openvswitch]
+  - [openstack-dashboard:dashboard-plugin, octavia-dashboard:dashboard]
+  - [barbican-vault:secrets, barbican:secrets]
+  - [vault:secrets, barbican-vault:secrets-storage]
