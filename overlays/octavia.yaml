@@ -16,7 +16,6 @@ applications:
 relations:
   - [mysql:shared-db, octavia:shared-db]
   - [mysql:shared-db, barbican:shared-db]
-  - [mysql:shared-db, vault:shared-db]
   - [keystone:identity-service, octavia:identity-service]
   - [keystone:identity-service, barbican:identity-service]
   - [rabbitmq-server:amqp, octavia:amqp]
