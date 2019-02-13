@@ -4,9 +4,20 @@
 
 # vars
 opts=(
---template kubernetes.yaml.template
---path $0
+--internal-template kubernetes.yaml.template
+--internal-generator-path $0
 )
+f_rel_info=`mktemp`
+
+cleanup () { rm -f $f_rel_info; }
+trap cleanup EXIT
+
+# Series & Release Info
+cat << 'EOF' > $f_rel_info
+declare -A lts=( [bionic]=cdk )
+declare -A nonlts=( [cosmic]=cdk
+                    [disco]=cdk )
+EOF
 
 # defaults
 #parameters[]=
@@ -26,4 +37,4 @@ do
     shift
 done
 
-generate
+generate $f_rel_info

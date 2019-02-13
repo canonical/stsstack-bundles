@@ -25,11 +25,7 @@ list_bundles=false
 create_model=false
 use_stable_charms=false
 declare -a overlays=()
-declare -A lts=( [trusty]=icehouse
-                 [xenial]=mitaka
-                 [bionic]=queens )
-declare -A nonlts=( [cosmic]=rocky
-                    [disco]=stein )
+
 . `dirname $0`/helpers.sh
 
 while (($# > 0))
@@ -38,14 +34,6 @@ do
         --create-model)
             # creates a model using the value provided by --name
             create_model=true
-            ;;
-        --overlay)
-            overlays+=( $2 )
-            shift
-            ;;
-        --path)
-            path=$2
-            shift
             ;;
         --series|-s)
             series=$2
@@ -59,15 +47,6 @@ do
         --pocket|-p)
             # archive pocket e.g. proposed
             pocket=$2
-            shift
-            ;;
-        --template|-t)
-            template=$2
-            shift
-            ;;
-        --bundle-params)
-            # parameters passed by custom generators
-            params_path=$2
             shift
             ;;
         --name|-n)
@@ -88,6 +67,27 @@ do
             ;;
         --use-stable-charms)
             use_stable_charms=true
+            ;;
+        --internal-generator-path)
+            path=$2
+            shift
+            ;;
+        --internal-template)
+            template=$2
+            shift
+            ;;
+        --internal-bundle-params)
+            # parameters passed by custom generators
+            params_path=$2
+            shift
+            ;;
+        --internal-version-info)
+            . $2
+            shift
+            ;;
+        --internal-overlay)
+            overlays+=( $2 )
+            shift
             ;;
         -h|--help)
             _usage
@@ -142,6 +142,20 @@ nonltsmatch ()
     return 1
 }
 
+get_appversion ()
+{
+    release=$1
+    version=
+    [ -z "$release" ] && return 0
+    for ver in ${!app_versions[@]}; do    
+        if [[ "${app_versions[$ver]}" > "$release" ]]; then
+            version=$ver
+        fi
+    done
+    echo $version
+    return 0
+}
+
 subdir="/${bundle_name}"
 [ -n "${bundle_name}" ] || subdir=''
 bundles_dir=`dirname $path`/b$subdir
@@ -161,21 +175,22 @@ mkdir -p $bundles_dir
 # Replay ingores any args and just prints the previously generated command
 finish ()
 {
-if $replay; then
-    target=${bundles_dir}/command
-    echo -e "INFO: replaying last known command (from $target)\n"
-    [ -e "$target" ] || { echo "ERROR: $target does not exist"; exit 1; }
-fi
-echo "Command to deploy:"
-cat ${bundles_dir}/command
-if $run_command; then
-    eval `cat ${bundles_dir}/command`
-fi
-$replay && exit 0
+    if $replay; then
+        target=${bundles_dir}/command
+        echo -e "INFO: replaying last known command (from $target)\n"
+        [ -e "$target" ] || { echo "ERROR: $target does not exist"; exit 1; }
+    fi
+    echo "Command to deploy:"
+    cat ${bundles_dir}/command
+    if $run_command; then
+        . ${bundles_dir}/command
+    fi
+    $replay && exit 0
 }
 $replay && finish
 
-if [ -n "$release" ] && ! ltsmatch $series $release && ! nonltsmatch $series $release; then
+if [ -n "$release" ] && ! ltsmatch $series $release && \
+        ! nonltsmatch $series $release; then
     declare -a idx=( ${!lts[@]} )
     i=${#idx[@]}
     _series=${idx[$((--i))]}
@@ -197,7 +212,11 @@ if [ -n "$release" ] && ! ltsmatch $series $release && ! nonltsmatch $series $re
     fi
     series=$_series
 else
-    release=${lts[$series]:-${nonlts[$series]}}
+    release=${lts[$series]:-${nonlts[$series]:-}}
+    if [ -z "$release" ]; then
+        echo "No release found for series $series"
+        exit 1
+    fi
 fi
 
 source=''
@@ -249,9 +268,12 @@ if $use_stable_charms; then
 else
     msg="using dev/next charms"
 fi
+
+app_version=`get_appversion $release`
+[ -n "$app_version" ] && app_version="($app_version) "
 if ((${#overlays[@]})); then
     mkdir -p $bundles_dir/o
-    echo "Created $target bundle and overlays ($msg):"
+    echo "Created $target ${app_version}bundle and overlays ($msg):"
     for overlay in ${overlays[@]}; do
         [ "${overlay_dedup[$overlay]:-null}" = "null" ] || continue
         cp overlays/$overlay $bundles_dir/o
@@ -262,7 +284,7 @@ if ((${#overlays[@]})); then
     done
     echo ""
 else
-    echo -e "Created $target bundle ($msg)\n"
+    echo -e "Created $target ${app_version}bundle ($msg)\n"
 fi
 
 echo -e "juju deploy ${result} ${_overlays[@]:-}\n" > ${bundles_dir}/command

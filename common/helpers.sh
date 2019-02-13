@@ -52,15 +52,17 @@ OVERLAYS:
      available overlays.
 
 INTERNAL_OPTS (don't use these):
-     --bundle-params
+     --internal-bundle-params <path>
         (internal only) Bundle parameters passed by sub-generator
-     --overlay p
+     --internal-overlay <path>
         (internal only) Overlay to be added to deployment. Can be
         specified multiple times.
-     --path p
-        (internal only) Target bundle directory
-     -t, --template t
-        (internal only) Generated bundle templates.
+     --internal-generator-path <path>
+        (internal only) Bundle generator path.
+     --internal-template <path>
+        (internal only) Bundle generator base template.
+     --internal-version-info <path>
+        (internal only) 
 EOF
 list_opts
 }
@@ -81,20 +83,26 @@ get_param()
 
 generate()
 {
-for overlay in ${overlays[@]:-}; do
-    opts+=( "--overlay $overlay" )
-done
-ftmp=
-if ((${#parameters[@]})); then
-    ftmp=`mktemp`
-    echo -n "sed -i " > $ftmp
-    for p in ${!parameters[@]}; do
-        echo -n "-e 's/$p/${parameters[$p]}/g' " >> $ftmp
+    # path to file containing series/release info
+    (($#)) && opts+=( "--internal-version-info $1" )
+
+    for overlay in ${overlays[@]:-}; do
+        opts+=( "--internal-overlay $overlay" )
     done
-    opts+=( --bundle-params $ftmp )
-fi
-`dirname $0`/common/generate-bundle.sh ${opts[@]}
-[ -n "$ftmp" ] && rm $ftmp
+
+    ftmp=
+    if ((${#parameters[@]})); then
+        ftmp=`mktemp`
+        echo -n "sed -i " > $ftmp
+        for p in ${!parameters[@]}; do
+            echo -n "-e 's/$p/${parameters[$p]}/g' " >> $ftmp
+        done
+        opts+=( "--internal-bundle-params $ftmp" )
+    fi
+
+    `dirname $0`/common/generate-bundle.sh ${opts[@]}
+
+    [ -n "$ftmp" ] && rm $ftmp
 }
 
 list_overlays ()

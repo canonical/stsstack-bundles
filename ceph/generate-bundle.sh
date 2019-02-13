@@ -4,9 +4,22 @@
 
 # vars
 opts=(
---template ceph.yaml.template
---path $0
+--internal-template ceph.yaml.template
+--internal-generator-path $0
 )
+f_rel_info=`mktemp`
+
+cleanup () { rm -f $f_rel_info; }
+trap cleanup EXIT
+
+# Series & Release Info (see http://docs.ceph.com/docs/master/releases/)
+cat << 'EOF' > $f_rel_info
+declare -A app_versions=( [firefly]=icehouse
+                          [jewel]=mitaka
+                          [luminous]=pike
+                          [mimic]=rocky )
+EOF
+cat `dirname $0`/common/openstack_release_info.sh >> $f_rel_info
 
 # defaults
 parameters[__NUM_CEPH_MON_UNITS__]=1
@@ -55,4 +68,4 @@ do
     shift
 done
 
-generate
+generate $f_rel_info

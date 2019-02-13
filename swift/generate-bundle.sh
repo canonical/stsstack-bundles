@@ -4,9 +4,18 @@
 
 # vars
 opts=(
---template swift.yaml.template
---path $0
+--internal-template swift.yaml.template
+--internal-generator-path $0
 )
+f_rel_info=`mktemp`
+
+cleanup () { rm -f $f_rel_info; }
+trap cleanup EXIT
+
+# Series & Release Info
+cat << 'EOF' > $f_rel_info
+EOF
+cat `dirname $0`/common/openstack_release_info.sh >> $f_rel_info
 
 # defaults
 #parameters[]=
@@ -38,4 +47,4 @@ do
     shift
 done
 
-generate
+generate $f_rel_info

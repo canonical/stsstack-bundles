@@ -4,10 +4,19 @@
 
 # vars
 opts=(
---template openstack.yaml.template
---path $0
+--internal-template openstack.yaml.template
+--internal-generator-path $0
 )
 msgs=()
+f_rel_info=`mktemp`
+
+cleanup () { rm -f $f_rel_info; }
+trap cleanup EXIT
+
+# Series & Release Info
+cat << 'EOF' > $f_rel_info
+EOF
+cat `dirname $0`/common/openstack_release_info.sh >> $f_rel_info
 
 # defaults
 parameters[__NUM_COMPUTE_UNITS__]=1
@@ -104,7 +113,7 @@ do
             ;;
         --nova-network)
             # NOTE(hopem) yes this is a hack and we'll get rid of it hwen nova-network is finally no more
-            opts+=(--template openstack-nova-network.yaml.template)
+            opts+=( "--internal-template openstack-nova-network.yaml.template" )
             ;;
         --cinder-ha*)
             get_units $1 __NUM_CINDER_UNITS__ 3
@@ -205,4 +214,5 @@ if ((${#msgs[@]})); then
 read -p "Hit [ENTER] to continue"
 fi
 
-generate
+generate $f_rel_info
+
