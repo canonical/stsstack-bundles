@@ -31,6 +31,13 @@ do
         --graylog)
             overlays+=( "graylog.yaml ")
             ;;
+        --lma)
+            # Logging Monitoring and Analysis
+            overlays+=( "graylog.yaml ")
+            msgs+=( "NOTE: you will need to manually relate graylog (filebeat) to any services you want to monitor" )
+            overlays+=( "grafana.yaml ")
+            msgs+=( "NOTE: you will need to manually relate grafana (telegraf) to any services you want to monitor" )
+            ;;
         --num-mons|--num-ceph-mons)  #type:<int>
             parameters[__NUM_CEPH_MON_UNITS__]=$2
             shift

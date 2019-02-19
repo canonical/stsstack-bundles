@@ -74,6 +74,13 @@ do
         --ldap)
             overlays+=( "ldap.yaml" )
             ;;
+        --lma)
+            # Logging Monitoring and Analysis
+            overlays+=( "graylog.yaml ")
+            msgs+=( "NOTE: you will need to manually relate graylog (filebeat) to any services you want to monitor" )
+            overlays+=( "grafana.yaml ")
+            msgs+=( "NOTE: you will need to manually relate grafana (telegraf) to any services you want to monitor" )
+            ;;
         --neutron-fw-driver)  #type:[openvswitch|iptables_hybrid] (default=openvswitch)
             parameters[__NEUTRON_FW_DRIVER__]=$2
             shift
