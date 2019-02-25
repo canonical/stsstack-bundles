@@ -1,6 +1,7 @@
 #!/bin/bash -eu
 # imports
-. `dirname $0`/common/helpers.sh
+LIB_COMMON=`dirname $0`/common
+. $LIB_COMMON/helpers.sh
 
 # vars
 opts=(
@@ -19,7 +20,7 @@ declare -A app_versions=( [firefly]=icehouse
                           [luminous]=pike
                           [mimic]=rocky )
 EOF
-cat `dirname $0`/common/openstack_release_info.sh >> $f_rel_info
+cat $LIB_COMMON/openstack_release_info.sh >> $f_rel_info
 
 # defaults
 parameters[__NUM_CEPH_MON_UNITS__]=1
@@ -61,6 +62,7 @@ do
             overlays+=( "ceph-rgw-multisite.yaml" )
             ;;
         --vault)
+            assert_min_release queens "vault" $@
             overlays+=( "vault.yaml" )
             overlays+=( "vault-ceph.yaml" )
             ;;

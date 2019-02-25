@@ -1,6 +1,7 @@
 #!/bin/bash -eu
 # imports
-. `dirname $0`/common/helpers.sh
+LIB_COMMON=`dirname $0`/common
+. $LIB_COMMON/helpers.sh
 
 # vars
 opts=(
@@ -15,7 +16,7 @@ trap cleanup EXIT
 # Series & Release Info
 cat << 'EOF' > $f_rel_info
 EOF
-cat `dirname $0`/common/openstack_release_info.sh >> $f_rel_info
+cat $LIB_COMMON/openstack_release_info.sh >> $f_rel_info
 
 # defaults
 #parameters[]=
@@ -36,6 +37,7 @@ do
             msgs+=( "NOTE: you will need to manually relate grafana (telegraf) to any services you want to monitor" )
             ;;
         --vault)
+            assert_min_release queens "vault" $@
             overlays+=( "vault.yaml" )
             overlays+=( "vault-swift.yaml" )
             ;;

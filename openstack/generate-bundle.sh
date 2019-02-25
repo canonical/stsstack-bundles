@@ -1,6 +1,7 @@
 #!/bin/bash -eu
 # imports
-. `dirname $0`/common/helpers.sh
+LIB_COMMON=`dirname $0`/common
+. $LIB_COMMON/helpers.sh
 
 # vars
 opts=(
@@ -16,7 +17,7 @@ trap cleanup EXIT
 # Series & Release Info
 cat << 'EOF' > $f_rel_info
 EOF
-cat `dirname $0`/common/openstack_release_info.sh >> $f_rel_info
+cat $LIB_COMMON/openstack_release_info.sh >> $f_rel_info
 
 # defaults
 parameters[__NUM_COMPUTE_UNITS__]=1
@@ -32,9 +33,11 @@ do
             shift
             ;;
         --barbican)
+            assert_min_release queens "barbican" $@
             overlays+=( "barbican.yaml" )
             ;;
         --bgp)
+            assert_min_release queens "dynamic routing" $@
             overlays+=( "neutron-bgp.yaml" )
             ;;
         --ceph)
@@ -52,6 +55,7 @@ do
             overlays+=( "ceph-rgw-multisite.yaml" )
             ;;
         --designate)
+            assert_min_release ocata "designate" $@
             overlays+=( "neutron-ml2dns.yaml" )
             overlays+=( "memcached.yaml" )
             overlays+=( "designate.yaml" )
@@ -82,6 +86,7 @@ do
             msgs+=( "NOTE: you will need to manually relate grafana (telegraf) to any services you want to monitor" )
             ;;
         --neutron-fw-driver)  #type:[openvswitch|iptables_hybrid] (default=openvswitch)
+            assert_min_release newton "openvswitch driver" $@
             parameters[__NEUTRON_FW_DRIVER__]=$2
             shift
             ;;
@@ -102,10 +107,12 @@ do
             overlays+=( "neutron-ml2dns.yaml" )
             ;;
         --nova-cells)
+            assert_min_release rocky "nova cells" $@
             overlays+=( "nova-cells.yaml" )
             ;;
         --octavia)
             # >= Rocky
+            assert_min_release rocky "octavia" $@
             overlays+=( "barbican.yaml" )
             overlays+=( "vault.yaml" )
             overlays+=( "vault-openstack.yaml" )
@@ -167,6 +174,7 @@ do
             ;;
         --telemetry|--telemetry-gnocchi)
             # ceilometer + aodh + gnocchi (>= pike)
+            assert_min_release pike "gnocchi" $@ 
             overlays+=( "ceph.yaml" )
             overlays+=( "gnocchi.yaml" )
             overlays+=( "memcached.yaml" )
@@ -186,6 +194,7 @@ do
             overlays+=( "telemetry-ha.yaml" )
             ;;
         --vault)
+            assert_min_release queens "vault" $@
             overlays+=( "ceph.yaml" )
             overlays+=( "openstack-ceph.yaml" )
             overlays+=( "vault.yaml" )
@@ -222,4 +231,3 @@ read -p "Hit [ENTER] to continue"
 fi
 
 generate $f_rel_info
-

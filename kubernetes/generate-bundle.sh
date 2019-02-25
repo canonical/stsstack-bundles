@@ -1,6 +1,7 @@
 #!/bin/bash -eu
 # imports
-. `dirname $0`/common/helpers.sh
+LIB_COMMON=`dirname $0`/common
+. $LIB_COMMON/helpers.sh
 
 # vars
 opts=(

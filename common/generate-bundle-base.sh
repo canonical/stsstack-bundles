@@ -11,9 +11,7 @@
 #     Bionic + Stein UCA: ./generate-bundle.sh --release stein
 #
 #
-series=bionic
 series_provided=false
-release=
 pocket=
 template=
 path=
@@ -26,7 +24,10 @@ create_model=false
 use_stable_charms=false
 declare -a overlays=()
 
-. `dirname $0`/helpers.sh
+. $LIB_COMMON/helpers.sh
+
+series=`get_series`
+release=`get_release`
 
 while (($# > 0))
 do

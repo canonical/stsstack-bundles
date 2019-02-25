@@ -1,6 +1,10 @@
 declare -A parameters=()
 declare -a overlays=()
 
+DEFAULT_SERIES=bionic
+
+. $LIB_COMMON/openstack_release_info.sh
+
 _usage () {
 cat << EOF
 USAGE: `basename $0` INTERNAL_OPTS OPTIONS [OVERLAYS]
@@ -100,7 +104,7 @@ generate()
         opts+=( "--internal-bundle-params $ftmp" )
     fi
 
-    `dirname $0`/common/generate-bundle.sh ${opts[@]}
+    . $LIB_COMMON/generate-bundle-base.sh ${opts[@]}
 
     [ -n "$ftmp" ] && rm $ftmp
 }
@@ -116,4 +120,39 @@ list_opts ()
 {
     echo -e "\nBUNDLE OPTS:"
     sed -r 's/.+\s+(--[[:alnum:]\-]+).+#type:(.+)/      \1 \2/g;t;d' `basename $0`
+}
+
+get_series ()
+{
+    while (($#)); do
+        if [ "$1" = "-s" ] || [ "$1" = "--series" ]; then
+             echo $2
+             return 0
+        fi
+        shift
+    done
+    echo $DEFAULT_SERIES
+}
+
+get_release ()
+{
+    while (($#)); do
+        if [ "$1" = "-r" ] || [ "$1" = "--release" ]; then
+             echo $2
+             return 0
+        fi
+        shift
+    done
+}
+
+assert_min_release ()
+{
+    min=$1
+    msg=$2
+    shift 2
+    r=`get_release $@`
+    [ -n "$r" ] || r=${lts[`get_series $@`]:-${nonlts[`get_series $@`]:-""}}
+    [[ "$r" < $min ]] || return 0
+    echo "Min release '$min' required to be able to use $msg" 1>&2
+    exit 1
 }
