@@ -10,6 +10,6 @@ applications:
   neutron-gateway:
     options:
       dns-servers: *dns_servers
-  neutron-gateway:
+  neutron-openvswitch:
     options:
       dns-servers: *dns_servers
