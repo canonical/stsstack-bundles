@@ -59,7 +59,7 @@ applications:
       network-manager: Neutron
       openstack-origin: *openstack_origin
   neutron-gateway:
-    num_units: 1
+    num_units: __NUM_NEUTRON_GATEWAY_UNITS__ 
     charm: cs:~openstack-charmers-next/neutron-gateway
     constraints: mem=4G
     options:

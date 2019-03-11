@@ -1,4 +1,5 @@
 #!/bin/bash -eu
+CACHED_STDIN=( $@ )
 # imports
 LIB_COMMON=`dirname $0`/common
 . $LIB_COMMON/helpers.sh
@@ -22,6 +23,7 @@ cat $LIB_COMMON/openstack_release_info.sh >> $f_rel_info
 # defaults
 parameters[__NUM_COMPUTE_UNITS__]=1
 parameters[__NUM_CEPH_MON_UNITS__]=1
+parameters[__NUM_NEUTRON_GATEWAY_UNITS__]=1
 parameters[__NEUTRON_FW_DRIVER__]=openvswitch  # legacy is iptables_hybrid
 
 
@@ -33,11 +35,11 @@ do
             shift
             ;;
         --barbican)
-            assert_min_release queens "barbican" $@
+            assert_min_release queens "barbican" ${CACHED_STDIN[@]}
             overlays+=( "barbican.yaml" )
             ;;
         --bgp)
-            assert_min_release queens "dynamic routing" $@
+            assert_min_release queens "dynamic routing" ${CACHED_STDIN[@]}
             overlays+=( "neutron-bgp.yaml" )
             ;;
         --ceph)
@@ -55,13 +57,29 @@ do
             overlays+=( "ceph-rgw-multisite.yaml" )
             ;;
         --designate)
-            assert_min_release ocata "designate" $@
+            assert_min_release ocata "designate" ${CACHED_STDIN[@]}
             overlays+=( "neutron-ml2dns.yaml" )
             overlays+=( "memcached.yaml" )
             overlays+=( "designate.yaml" )
             ;;
         --dvr)
             overlays+=( "neutron-dvr.yaml" )
+            get_param __DVR_DATA_PORT__ 'Please provide DVR data-port (space-separated list of interface names or mac addresses): '
+            ;;
+        --dvr-snat)
+            assert_min_release queens "dvr-snat" ${CACHED_STDIN[@]}
+            overlays+=( "neutron-dvr.yaml" )
+            overlays+=( "neutron-dvr-snat.yaml" )
+            get_param __DVR_DATA_PORT__ 'Please provide DVR data-port (space-separated list of interface names or mac addresses): '
+            ;;
+        --dvr-snat-l3ha*)
+            assert_min_release queens "dvr-snat-l3ha" ${CACHED_STDIN[@]}
+            overlays+=( "neutron-l3ha.yaml" )
+            parameters[__NUM_AGENTS_PER_ROUTER__]=3
+            parameters[__NUM_COMPUTE_UNITS__]=3
+            parameters[__NUM_NEUTRON_GATEWAY_UNITS__]=0
+            overlays+=( "neutron-dvr.yaml" )
+            overlays+=( "neutron-dvr-snat.yaml" )
             get_param __DVR_DATA_PORT__ 'Please provide DVR data-port (space-separated list of interface names or mac addresses): '
             ;;
         --graylog)
@@ -86,13 +104,14 @@ do
             msgs+=( "NOTE: you will need to manually relate grafana (telegraf) to any services you want to monitor" )
             ;;
         --neutron-fw-driver)  #type:[openvswitch|iptables_hybrid] (default=openvswitch)
-            assert_min_release newton "openvswitch driver" $@
+            assert_min_release newton "openvswitch driver" ${CACHED_STDIN[@]}
             parameters[__NEUTRON_FW_DRIVER__]=$2
             shift
             ;;
-        --vrrp*)
+        --l3ha*)
             get_units $1 __NUM_NEUTRON_GATEWAY_UNITS__ 3
-            overlays+=( "neutron-vrrp.yaml" )
+            parameters[__NUM_AGENTS_PER_ROUTER__]=${parameters[__NUM_NEUTRON_GATEWAY_UNITS__]}
+            overlays+=( "neutron-l3ha.yaml" )
             ;;
         --keystone-v3)
             # useful for <= pike since queens is v3 only
@@ -107,12 +126,12 @@ do
             overlays+=( "neutron-ml2dns.yaml" )
             ;;
         --nova-cells)
-            assert_min_release rocky "nova cells" $@
+            assert_min_release rocky "nova cells" ${CACHED_STDIN[@]}
             overlays+=( "nova-cells.yaml" )
             ;;
         --octavia)
             # >= Rocky
-            assert_min_release rocky "octavia" $@
+            assert_min_release rocky "octavia" ${CACHED_STDIN[@]}
             overlays+=( "barbican.yaml" )
             overlays+=( "vault.yaml" )
             overlays+=( "vault-openstack.yaml" )
@@ -174,7 +193,7 @@ do
             ;;
         --telemetry|--telemetry-gnocchi)
             # ceilometer + aodh + gnocchi (>= pike)
-            assert_min_release pike "gnocchi" $@ 
+            assert_min_release pike "gnocchi" ${CACHED_STDIN[@]} 
             overlays+=( "ceph.yaml" )
             overlays+=( "gnocchi.yaml" )
             overlays+=( "memcached.yaml" )
@@ -194,7 +213,7 @@ do
             overlays+=( "telemetry-ha.yaml" )
             ;;
         --vault)
-            assert_min_release queens "vault" $@
+            assert_min_release queens "vault" ${CACHED_STDIN[@]}
             overlays+=( "ceph.yaml" )
             overlays+=( "openstack-ceph.yaml" )
             overlays+=( "vault.yaml" )
