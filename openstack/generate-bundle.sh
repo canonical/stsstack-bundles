@@ -73,13 +73,6 @@ do
             overlays+=( "neutron-l3ha.yaml" )
             get_param __DVR_DATA_PORT__ 'Please provide DVR data-port (space-separated list of interface names or mac addresses): '
             ;;
-        --dvr-snat*)
-            assert_min_release queens "dvr-snat" ${CACHED_STDIN[@]}
-            get_units $1 __NUM_COMPUTE_UNITS__ 1
-            overlays+=( "neutron-dvr.yaml" )
-            overlays+=( "neutron-dvr-snat.yaml" )
-            get_param __DVR_DATA_PORT__ 'Please provide DVR data-port (space-separated list of interface names or mac addresses): '
-            ;;
         --dvr-snat-l3ha*)
             assert_min_release queens "dvr-snat-l3ha" ${CACHED_STDIN[@]}
             get_units $1 __NUM_COMPUTE_UNITS__ 3
@@ -88,6 +81,13 @@ do
             overlays+=( "neutron-dvr-snat.yaml" )
             overlays+=( "neutron-l3ha.yaml" )
             parameters[__NUM_NEUTRON_GATEWAY_UNITS__]=0
+            get_param __DVR_DATA_PORT__ 'Please provide DVR data-port (space-separated list of interface names or mac addresses): '
+            ;;
+        --dvr-snat*)
+            assert_min_release queens "dvr-snat" ${CACHED_STDIN[@]}
+            get_units $1 __NUM_COMPUTE_UNITS__ 1
+            overlays+=( "neutron-dvr.yaml" )
+            overlays+=( "neutron-dvr-snat.yaml" )
             get_param __DVR_DATA_PORT__ 'Please provide DVR data-port (space-separated list of interface names or mac addresses): '
             ;;
         --graylog)
