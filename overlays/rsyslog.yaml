@@ -3,7 +3,7 @@ applications:
     charm: cs:~rsyslog-charmers/rsyslog
     num_units: 1
     options:
-      nova_logs: true
+      nova_logs: True
       protocol: udp
   rsyslog-forwarder-ha:
     charm: cs:~rsyslog-charmers/rsyslog-forwarder-ha

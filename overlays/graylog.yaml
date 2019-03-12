@@ -28,7 +28,7 @@ applications:
     num_units: 1
     constraints: mem=1G
     options:
-      backups_enabled: true
+      backups_enabled: True
       bind_ip: 0.0.0.0
 relations:
   - ['graylog', 'filebeat']

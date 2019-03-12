@@ -1,4 +1,9 @@
+# Variables
+dns_servers:                &dns_servers               '10.198.200.1'
+
 applications:
   neutron-openvswitch:
     options:
-      use-dvr-snat: true
+      use-dvr-snat: True
+      enable-local-dhcp-and-metadata: True
+      dns-servers: *dns_servers

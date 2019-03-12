@@ -1,4 +1,4 @@
 applications:
   neutron-openvswitch:
     options:
-      use-dvr-snat: true
+      use-dvr-snat: True

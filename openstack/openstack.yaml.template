@@ -77,6 +77,7 @@ applications:
       verbose: *verbose
       neutron-security-groups: True
       flat-network-providers: physnet1
+      enable-ml2-port-security: True
       openstack-origin: *openstack_origin
   neutron-openvswitch:
     charm: cs:~openstack-charmers-next/neutron-openvswitch

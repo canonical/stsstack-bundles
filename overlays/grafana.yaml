@@ -19,7 +19,7 @@ applications:
     num_units: 1
   telegraf:
     charm: cs:telegraf
-    expose: true
+    expose: True
     options:
       prometheus_output_port: default
 relations:

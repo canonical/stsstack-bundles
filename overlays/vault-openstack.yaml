@@ -1,6 +1,6 @@
 applications:
   nova-compute:
     options:
-      encrypt: true
+      encrypt: True
 relations:
   - ['nova-compute:secrets-storage', 'vault:secrets']
