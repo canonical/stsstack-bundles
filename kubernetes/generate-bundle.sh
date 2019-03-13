@@ -21,12 +21,17 @@ declare -A nonlts=( [cosmic]=cdk
 EOF
 
 # defaults
-#parameters[]=
+# defaults
+parameters[__NUM_CEPH_MON_UNITS__]=1
 
 trap_help ${CACHED_STDIN[@]}
 while (($# > 0))
 do
     case "$1" in
+        --ceph)
+            overlays+=( "ceph.yaml" )
+            overlays+=( "k8s-ceph.yaml" )
+            ;;
         --list-overlays)
             list_overlays
             exit
