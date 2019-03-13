@@ -1,0 +1,45 @@
+# -*- mode: yaml -*-
+series: __SERIES__
+
+applications:
+  ubuntu:
+    charm: cs:ubuntu
+    num_units: 1
+  landscape-server:
+    charm: cs:landscape-server
+    options:
+      install_sources: "['ppa:landscape/__LANDSCAPE_VERSION__']"
+    num_units: 1
+  landscape-rabbitmq-server:
+    charm: cs:rabbitmq-server
+    num_units: 1
+  landscape-postgresql:
+    charm: cs:postgresql
+    options:
+      extra_packages: python-apt postgresql-contrib postgresql-.*-debversion postgresql-plpython-.*
+      max_connections: 500
+      max_prepared_transactions: 500
+    num_units: 1
+  landscape-haproxy:
+    charm: cs:haproxy
+    options:
+      default_timeouts: "queue 60000, connect 5000, client 120000, server 120000"
+      services: ""
+      source: backports
+      ssl_cert: SELFSIGNED
+      global_default_bind_options: "no-tlsv10"
+    num_units: 1
+  landscape-client:
+    charm: cs:landscape-client
+    options:
+      account-name: "standalone"
+      origin: ppa:landscape/__LANDSCAPE_VERSION__
+relations:
+  - [ landscape-server, landscape-client ]
+  - [ landscape-rabbitmq-server, landscape-client ]
+  - [ landscape-postgresql, landscape-client ]
+  - [ landscape-haproxy, landscape-client ]
+  - [ landscape-server, landscape-rabbitmq-server ]
+  - [ landscape-server, landscape-haproxy ]
+  - [ "landscape-server:db", "landscape-postgresql:db-admin" ]
+  - [ ubuntu, landscape-client ]

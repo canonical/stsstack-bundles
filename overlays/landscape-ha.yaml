@@ -1,0 +1,7 @@
+applications:
+  landscape-server:
+    num_units: 2
+  landscape-rabbitmq-server:
+    num_units: 3
+  landscape-postgresql:
+    num_units: 2

@@ -113,7 +113,7 @@ list_overlays ()
 {
     echo "Supported overlays:"
     sed -r 's/.+\s+(--[[:alnum:]\-]+\*?).+/\1/g;t;d' `basename $0`| \
-        egrep -v "\--list-overlays|--num-compute|--num-ceph-mons|--neutron-fw-driver"
+        egrep -v "\--list-overlays|--num-compute|--num-ceph-mons|--neutron-fw-driver|--landscape-version"
 }
 
 list_opts ()
