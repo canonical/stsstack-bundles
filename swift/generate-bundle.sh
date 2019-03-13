@@ -22,7 +22,7 @@ cat $LIB_COMMON/openstack_release_info.sh >> $f_rel_info
 #parameters[]=
 overlays+=( swift.yaml )
 
-
+trap_help ${CACHED_STDIN[@]}
 while (($# > 0))
 do
     case "$1" in

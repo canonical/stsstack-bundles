@@ -156,3 +156,17 @@ assert_min_release ()
     echo "Min release '$min' required to be able to use $msg" 1>&2
     exit 1
 }
+
+trap_help ()
+{
+while (($# > 0))
+do
+    case "$1" in
+        -h|--help)
+            _usage
+            exit 0
+            ;;
+    esac
+    shift
+done
+}

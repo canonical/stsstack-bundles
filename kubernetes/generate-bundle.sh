@@ -23,7 +23,7 @@ EOF
 # defaults
 #parameters[]=
 
-
+trap_help ${CACHED_STDIN[@]}
 while (($# > 0))
 do
     case "$1" in
