@@ -1,4 +1,0 @@
-applications:
-  neutron-openvswitch:
-    options:
-      use-dvr-snat: True
