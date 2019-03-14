@@ -16,14 +16,16 @@ Usage:  <this script> <qty of instances> <glance image name>
 fi
 
 # Create Nova keypair. Don't clobber existing keyfile in case it is being used for multiple models at once.
-keyfile=~/testkey.pem
+prvkey=~/testkey.priv
+pubkey=~/testkey.pub
 if ! openstack keypair show testkey; then
-    if [ -r $keyfile ]; then
-        openstack keypair create testkey --private-key $keyfile
+    if [ -r $prvkey ] && [ -r $pubkey ]; then
+        openstack keypair create testkey --public-key $pubkey
     else
-        openstack keypair create testkey > $keyfile
+        openstack keypair create testkey > $prvkey
+        openstack keypair show testkey --public-key > $pubkey
     fi
-    chmod 600 $keyfile
+    chmod 600 $prvkey
 fi
 
 # Grab private network ID
