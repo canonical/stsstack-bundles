@@ -24,7 +24,7 @@ EOF
 # defaults
 parameters[__LANDSCAPE_VERSION__]="19.01"
 
-trap_help ${CACHED_STDIN[@]}
+trap_help ${CACHED_STDIN[@]:-""}
 while (($# > 0))
 do
     case "$1" in

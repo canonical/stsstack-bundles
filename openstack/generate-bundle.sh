@@ -26,7 +26,7 @@ parameters[__NUM_CEPH_MON_UNITS__]=1
 parameters[__NUM_NEUTRON_GATEWAY_UNITS__]=1
 parameters[__NEUTRON_FW_DRIVER__]=openvswitch  # legacy is iptables_hybrid
 
-trap_help ${CACHED_STDIN[@]}
+trap_help ${CACHED_STDIN[@]:-""}
 while (($# > 0))
 do
     case "$1" in

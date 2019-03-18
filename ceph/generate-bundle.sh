@@ -25,7 +25,7 @@ cat $LIB_COMMON/openstack_release_info.sh >> $f_rel_info
 # defaults
 parameters[__NUM_CEPH_MON_UNITS__]=1
 
-trap_help ${CACHED_STDIN[@]}
+trap_help ${CACHED_STDIN[@]:-""}
 while (($# > 0))
 do
     case "$1" in
