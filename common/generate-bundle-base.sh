@@ -186,7 +186,7 @@ finish ()
     if $run_command; then
         . ${bundles_dir}/command
     fi
-    $replay && exit 0
+    $replay && exit 0 || true
 }
 $replay && finish
 
