@@ -252,11 +252,13 @@ if $use_stable_charms; then
 fi
 }
 
-fout=`mktemp -d`/`basename $template| sed 's/.template//'`
+dtmp=`mktemp -d`
+fout=$dtmp/`basename $template| sed 's/.template//'`
 cp $template $fout
 render $fout
 
 mv $fout $bundles_dir
+rmdir $dtmp
 target=${series}-$release
 [ -z "$pocket" ] || target=${target}-$pocket
 result=$bundles_dir/`basename $fout`
