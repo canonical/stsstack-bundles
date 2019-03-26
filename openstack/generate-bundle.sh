@@ -152,6 +152,25 @@ do
         --rsyslog)
             overlays+=( "rsyslog.yaml" )
             ;;
+        --ssl)
+            if ! `has_opt '--replay' ${CACHED_STDIN[@]}`; then
+                (cd ssl; ./create_ca_cert.sh;)
+                parameters[__SSL_CA__]=`base64 ssl/results/cacert.pem| tr -d '\n'`
+                parameters[__SSL_CERT__]=`base64 ssl/results/servercert.pem| tr -d '\n'`
+                parameters[__SSL_KEY__]=`base64 ssl/results/serverkey.pem| tr -d '\n'`
+                # Make everything HA with 1 unit
+                overlays+=( "cinder-ha.yaml" )
+                overlays+=( "glance-ha.yaml" )
+                overlays+=( "keystone-ha.yaml" )
+                overlays+=( "neutron-api-ha.yaml" )
+                overlays+=( "nova-cloud-controller-ha.yaml" )
+                parameters[__NUM_CINDER_UNITS__]=1
+                parameters[__NUM_GLANCE_UNITS__]=1
+                parameters[__NUM_KEYSTONE_UNITS__]=1
+                parameters[__NUM_NEUTRON_API_UNITS__]=1
+                parameters[__NUM_NOVACC_UNITS__]=1
+            fi
+            ;;
         --nova-network)
             # NOTE(hopem) yes this is a hack and we'll get rid of it hwen nova-network is finally no more
             opts+=( "--internal-template openstack-nova-network.yaml.template" )

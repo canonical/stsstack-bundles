@@ -1,0 +1,64 @@
+HOME            = .
+RANDFILE        = $ENV::HOME/.rnd
+
+####################################################################
+[ req ]
+base_dir           = ./results
+default_bits       = 2048
+default_keyfile    = $base_dir/serverkey.pem
+distinguished_name = server_distinguished_name
+req_extensions     = server_req_extensions
+string_mask        = utf8only
+
+####################################################################
+[ server_distinguished_name ]
+countryName         = US
+countryName_default = US
+
+stateOrProvinceName         = US
+stateOrProvinceName_default = US
+
+localityName         = Austin
+localityName_default = Austin
+
+organizationName            = Cloud
+organizationName_default    = Cloud
+
+commonName           = 10.5.100.1
+commonName_default   = 10.5.100.1
+
+emailAddress         = test@example.com
+emailAddress_default = test@example.com
+
+####################################################################
+[ server_req_extensions ]
+
+subjectKeyIdentifier = hash
+basicConstraints     = CA:FALSE
+keyUsage             = digitalSignature, keyEncipherment
+subjectAltName       = @alternate_names
+nsComment            = "OpenSSL Generated Certificate"
+
+####################################################################
+[ alternate_names ]
+# Needs to include any possible VIP addresse we might use in a deployment
+IP.1  = 10.5.100.1
+IP.2  = 10.5.100.2
+IP.3  = 10.5.100.3
+IP.4  = 10.5.100.4
+IP.5  = 10.5.100.5
+IP.6  = 10.5.100.6
+IP.7  = 10.5.100.7
+IP.8  = 10.5.100.8
+IP.9  = 10.5.100.9
+IP.10 = 10.5.100.10
+IP.11 = 10.5.100.11
+IP.12 = 10.5.100.12
+IP.13 = 10.5.100.13
+IP.14 = 10.5.100.14
+IP.15 = 10.5.100.15
+IP.16 = 10.5.100.16
+IP.17 = 10.5.100.17
+IP.18 = 10.5.100.18
+IP.19 = 10.5.100.19
+IP.20 = 10.5.100.20

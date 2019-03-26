@@ -145,6 +145,22 @@ get_release ()
     done
 }
 
+has_opt ()
+{
+opt=$1
+shift
+while (($# > 0))
+do
+    case "$1" in
+        $opt)
+        return 0
+        ;;
+    esac
+    shift
+done
+return 1
+}
+
 assert_min_release ()
 {
     min=$1

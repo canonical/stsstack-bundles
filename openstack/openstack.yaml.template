@@ -12,6 +12,10 @@ openstack_origin:           &openstack_origin          __OS_ORIGIN__
 source:                     &source                    __SOURCE__
 num_compute_units:          &num_compute_units         __NUM_COMPUTE_UNITS__
 
+ssl_ca:                     &ssl_ca                    __SSL_CA__
+ssl_cert:                   &ssl_cert                  __SSL_CERT__
+ssl_key:                    &ssl_key                   __SSL_KEY__
+
 series: __SERIES__
 applications:
   rabbitmq-server:
@@ -30,6 +34,9 @@ applications:
       admin-password: openstack
       admin-token: ubuntutesting
       openstack-origin: *openstack_origin
+      ssl_ca: *ssl_ca
+      ssl_cert: *ssl_cert
+      ssl_key: *ssl_key
   openstack-dashboard:
     num_units: 1
     charm: cs:~openstack-charmers-next/openstack-dashboard
@@ -58,6 +65,9 @@ applications:
       verbose: *verbose
       network-manager: Neutron
       openstack-origin: *openstack_origin
+      ssl_ca: *ssl_ca
+      ssl_cert: *ssl_cert
+      ssl_key: *ssl_key
   neutron-gateway:
     num_units: __NUM_NEUTRON_GATEWAY_UNITS__ 
     charm: cs:~openstack-charmers-next/neutron-gateway
@@ -79,6 +89,9 @@ applications:
       flat-network-providers: physnet1
       enable-ml2-port-security: True
       openstack-origin: *openstack_origin
+      ssl_ca: *ssl_ca
+      ssl_cert: *ssl_cert
+      ssl_key: *ssl_key
   neutron-openvswitch:
     charm: cs:~openstack-charmers-next/neutron-openvswitch
     options:
@@ -97,6 +110,9 @@ applications:
       overwrite: "true"
       glance-api-version: 2
       openstack-origin: *openstack_origin
+      ssl_ca: *ssl_ca
+      ssl_cert: *ssl_cert
+      ssl_key: *ssl_key
   glance:
     num_units: 1
     charm: cs:~openstack-charmers-next/glance
@@ -105,6 +121,9 @@ applications:
       debug: *debug
       verbose: *verbose
       openstack-origin: *openstack_origin
+      ssl_ca: *ssl_ca
+      ssl_cert: *ssl_cert
+      ssl_key: *ssl_key
   mysql:
     num_units: 1
     charm: cs:~openstack-charmers-next/percona-cluster
