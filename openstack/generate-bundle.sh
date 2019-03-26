@@ -187,6 +187,7 @@ do
         --nova-cloud-controller-ha*)
             get_units $1 __NUM_NOVACC_UNITS__ 3
             overlays+=( "nova-cloud-controller-ha.yaml" )
+            overlays+=( "memcached.yaml" )
             ;;
         --openstack-dashboard-ha*)
             get_units $1 __NUM_HORIZON_UNITS__ 3
@@ -235,6 +236,7 @@ do
             overlays+=( "keystone-ha.yaml" )
             overlays+=( "neutron-api-ha.yaml" )
             overlays+=( "nova-cloud-controller-ha.yaml" )
+            overlays+=( "memcached.yaml" )
             overlays+=( "openstack-dashboard-ha.yaml" )
             overlays+=( "rabbitmq-server-ha.yaml" )
             overlays+=( "mysql-ha.yaml" )

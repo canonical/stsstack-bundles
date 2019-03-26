@@ -9,3 +9,4 @@ applications:
         cluster_count: __NUM_NOVACC_UNITS__
 relations:
   - [ nova-cloud-controller, nova-cloud-controller-hacluster ]
+  - [ nova-cloud-controller, memcached ]
