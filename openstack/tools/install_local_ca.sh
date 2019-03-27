@@ -1,4 +1,3 @@
 #!/bin/bash -eux
-sudo cp ssl/results/cacert.pem /etc/ssl/certs
-sudo chmod 644 /etc/ssl/certs/cacert.pem
-sudo update-ca-certificates --fresh
+sudo cp ssl/results/cacert.pem /usr/local/share/ca-certificates/cacert.crt
+sudo chmod 644 /usr/local/share/ca-certificates/cacert.crt
