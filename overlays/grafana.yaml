@@ -11,12 +11,6 @@ applications:
     charm: cs:prometheus2
     num_units: 1
     constraints: mem=1G
-  prometheus-openstack-exporter:
-    charm: cs:prometheus-openstack-exporter
-    num_units: 1
-  prometheus-ceph-exporter:
-    charm: cs:prometheus-ceph-exporter
-    num_units: 1
   telegraf:
     charm: cs:telegraf
     expose: True
@@ -25,10 +19,3 @@ applications:
 relations:
   - [ "prometheus:grafana-source", "grafana:grafana-source" ]
   - [ "prometheus:target", "telegraf:prometheus-client" ]
-  - [ "prometheus-openstack-exporter:identity-credentials", "keystone:identity-credentials" ]
-  - [ "prometheus-openstack-exporter:prometheus-openstack-exporter-service", "prometheus:target" ]
-  - [ prometheus-openstack-exporter, filebeat ]
-  - [ "prometheus-ceph-exporter:ceph-exporter", "prometheus:target" ]
-  - [ "prometheus-ceph-exporter:ceph", "ceph-mon:client" ]
-# NOTE: telegraf relations to services will need to be added manually e.g.
-# - [ telegraf, nova-compute ]

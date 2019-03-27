@@ -1,0 +1,9 @@
+applications:
+  prometheus-openstack-exporter:
+    charm: cs:prometheus-openstack-exporter
+    num_units: 1
+relations:
+  - [ "prometheus-ceph-exporter:ceph-exporter", "prometheus:target" ]
+  - [ "prometheus-ceph-exporter:ceph", "ceph-mon:client" ]
+  - [ telegraf, ceph-mon ]
+  - [ telegraf, ceph-osd ]

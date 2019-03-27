@@ -90,26 +90,34 @@ do
             overlays+=( "neutron-dvr-snat.yaml" )
             get_param __DVR_DATA_PORT__ 'Please provide DVR data-port (space-separated list of interface names or mac addresses): '
             ;;
+        --lma)
+            # Logging Monitoring and Analysis
+            overlays+=( "graylog.yaml ")
+            msgs+=( "NOTE: you will need to manually relate graylog (filebeat) to any services you want to monitor" )
+            overlays+=( "grafana.yaml ")
+            overlays+=( "prometheus-openstack.yaml ")
+            msgs+=( "NOTE: telegraf has been related to core openstack services but you may need to add to others you have in your deployment" )
+            if `has_opt '--ceph' ${CACHED_STDIN[@]}`; then
+                overlays+=( "prometheus-ceph.yaml ")
+            fi
+            ;;
         --graylog)
             overlays+=( "graylog.yaml ")
             msgs+=( "NOTE: you will need to manually relate graylog (filebeat) to any services you want to monitor" )
             ;;
         --grafana)
             overlays+=( "grafana.yaml ")
-            msgs+=( "NOTE: you will need to manually relate grafana (telegraf) to any services you want to monitor" )
+            overlays+=( "prometheus-openstack.yaml ")
+            if `has_opt '--ceph' ${CACHED_STDIN[@]}`; then
+                overlays+=( "prometheus-ceph.yaml ")
+            fi
+            msgs+=( "NOTE: telegraf has been related to core openstack services but you may need to add to others you have in your deployment" )
             ;;
         --heat)
             overlays+=( "heat.yaml ")
             ;;
         --ldap)
             overlays+=( "ldap.yaml" )
-            ;;
-        --lma)
-            # Logging Monitoring and Analysis
-            overlays+=( "graylog.yaml ")
-            msgs+=( "NOTE: you will need to manually relate graylog (filebeat) to any services you want to monitor" )
-            overlays+=( "grafana.yaml ")
-            msgs+=( "NOTE: you will need to manually relate grafana (telegraf) to any services you want to monitor" )
             ;;
         --neutron-fw-driver)  #type:[openvswitch|iptables_hybrid] (default=openvswitch)
             assert_min_release newton "openvswitch driver" ${CACHED_STDIN[@]}

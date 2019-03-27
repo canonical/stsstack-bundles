@@ -1,0 +1,13 @@
+applications:
+  prometheus-openstack-exporter:
+    charm: cs:prometheus-openstack-exporter
+    num_units: 1
+relations:
+  - [ "prometheus-openstack-exporter:identity-credentials", "keystone:identity-credentials" ]
+  - [ "prometheus-openstack-exporter:prometheus-openstack-exporter-service", "prometheus:target" ]
+  - [ telegraf, cinder ]
+  - [ telegraf, glance ]
+  - [ telegraf, keystone ]
+  - [ telegraf, neutron-api ]
+  - [ telegraf, neutron-gateway ]
+  - [ telegraf, nova-compute ]
