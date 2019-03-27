@@ -172,6 +172,7 @@ do
                 overlays+=( "keystone-ha.yaml" )
                 overlays+=( "neutron-api-ha.yaml" )
                 overlays+=( "nova-cloud-controller-ha.yaml" )
+                overlays+=( "memcached.yaml" )
                 parameters[__NUM_CINDER_UNITS__]=1
                 parameters[__NUM_GLANCE_UNITS__]=1
                 parameters[__NUM_KEYSTONE_UNITS__]=1
