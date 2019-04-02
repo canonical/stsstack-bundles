@@ -33,6 +33,7 @@ model_subdomain=`get_juju_model`
 MOD_PARAMS[__DNS_DOMAIN__]="${model_subdomain}.stsstack.qa.1ss."
 MOD_PARAMS[__DESIGNATE_NAMESERVERS__]="ns1.${MOD_PARAMS[__DNS_DOMAIN__]}"
 
+MOD_PARAMS[__CONSOLE_TYPE__]="novnc"
 # If using any variant of dvr-snat, there is no need for a neutron-gateway.
 # We also don't currently need it when using ovn
 
@@ -244,6 +245,15 @@ do
         --nova-cells)
             assert_min_release rocky "nova cells"
             MOD_OVERLAYS+=( "nova-cells.yaml" )
+            ;;
+        --nova-console*)
+            if ! has_opt --nova-cloud-controller-ha* && ! has_opt --designate ; then
+                # if there is no nova-cloud-controller HA nor designate, then
+                # this env won't have a memcached it needs to be added.
+                MOD_OVERLAYS+=( "memcached.yaml" )
+            fi
+            MOD_OVERLAYS+=( "nova-console.yaml" )
+            get_param $1 __CONSOLE_TYPE__ "REQUIRES: nova console access protocol:"
             ;;
         --octavia)
             # >= Rocky

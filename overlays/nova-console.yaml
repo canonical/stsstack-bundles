@@ -1,0 +1,6 @@
+applications:
+  nova-cloud-controller:
+    options:
+      console-access-protocol: __CONSOLE_TYPE__
+relations:
+  - [ nova-cloud-controller, memcached ]
