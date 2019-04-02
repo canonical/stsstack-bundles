@@ -80,11 +80,9 @@ do
             assert_min_release queens "dvr-snat-l3ha" ${CACHED_STDIN[@]}
             get_units $1 __NUM_COMPUTE_UNITS__ 3
             get_units $1 __NUM_AGENTS_PER_ROUTER__ 3
-            overlays+=( "neutron-dvr.yaml" )
             overlays+=( "neutron-dvr-snat.yaml" )
-            overlays+=( "neutron-l3ha.yaml" )
+            set -- $@ --dvr-l3ha:${parameters[__NUM_AGENTS_PER_ROUTER__]}
             parameters[__NUM_NEUTRON_GATEWAY_UNITS__]=0
-            get_param __DVR_DATA_PORT__ 'Please provide DVR data-port (space-separated list of interface names or mac addresses): '
             ;;
         --dvr-snat*)
             assert_min_release queens "dvr-snat" ${CACHED_STDIN[@]}
@@ -95,14 +93,7 @@ do
             ;;
         --lma)
             # Logging Monitoring and Analysis
-            overlays+=( "graylog.yaml ")
-            msgs+=( "NOTE: you will need to manually relate graylog (filebeat) to any services you want to monitor" )
-            overlays+=( "grafana.yaml ")
-            overlays+=( "prometheus-openstack.yaml ")
-            msgs+=( "NOTE: telegraf has been related to core openstack services but you may need to add to others you have in your deployment" )
-            if `has_opt '--ceph' ${CACHED_STDIN[@]}`; then
-                overlays+=( "prometheus-ceph.yaml ")
-            fi
+            set -- $@ --graylog --grafana
             ;;
         --graylog)
             overlays+=( "graylog.yaml ")
@@ -169,18 +160,10 @@ do
                 parameters[__SSL_CA__]=`base64 ssl/results/cacert.pem| tr -d '\n'`
                 parameters[__SSL_CERT__]=`base64 ssl/results/servercert.pem| tr -d '\n'`
                 parameters[__SSL_KEY__]=`base64 ssl/results/serverkey.pem| tr -d '\n'`
-                # Make everything HA with 1 unit
-                overlays+=( "cinder-ha.yaml" )
-                overlays+=( "glance-ha.yaml" )
-                overlays+=( "keystone-ha.yaml" )
-                overlays+=( "neutron-api-ha.yaml" )
-                overlays+=( "nova-cloud-controller-ha.yaml" )
-                overlays+=( "memcached.yaml" )
-                parameters[__NUM_CINDER_UNITS__]=1
-                parameters[__NUM_GLANCE_UNITS__]=1
-                parameters[__NUM_KEYSTONE_UNITS__]=1
-                parameters[__NUM_NEUTRON_API_UNITS__]=1
-                parameters[__NUM_NOVACC_UNITS__]=1
+                # Make everything HA with 1 unit (unless --ha has already been set)
+                if ! `has_opt '--ha[:0-9]*$' ${CACHED_STDIN[@]}`; then
+                    set -- $@ --ha:1
+                fi
             fi
             ;;
         --nova-network)
@@ -193,9 +176,7 @@ do
             ;;
         --designate-ha*)
             get_units $1 __NUM_DESIGNATE_UNITS__ 3
-            overlays+=( "memcached.yaml" )
-            overlays+=( "neutron-ml2dns.yaml" )
-            overlays+=( "designate.yaml" )
+            set -- $@ --designate
             overlays+=( "designate-ha.yaml" )
             ;;
         --glance-ha*)

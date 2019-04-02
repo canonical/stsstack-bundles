@@ -147,15 +147,11 @@ get_release ()
 
 has_opt ()
 {
-opt=$1
+opt="$1"
 shift
 while (($# > 0))
 do
-    case "$1" in
-        $opt)
-        return 0
-        ;;
-    esac
+    [[ "$1" =~ $opt ]] && return 0
     shift
 done
 return 1
