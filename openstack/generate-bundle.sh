@@ -260,17 +260,13 @@ do
             overlays+=( "vault-ceph.yaml" )
             overlays+=( "vault-openstack.yaml" )
             ;;
-        --ha)
-            # This is HA for services in the base bundle only.
-            overlays+=( "cinder-ha.yaml" )
-            overlays+=( "glance-ha.yaml" )
-            overlays+=( "keystone-ha.yaml" )
-            overlays+=( "neutron-api-ha.yaml" )
-            overlays+=( "nova-cloud-controller-ha.yaml" )
-            overlays+=( "memcached.yaml" )
-            overlays+=( "openstack-dashboard-ha.yaml" )
-            overlays+=( "rabbitmq-server-ha.yaml" )
-            overlays+=( "mysql-ha.yaml" )
+        --ha*)
+            get_units $1 __NUM_HA_UNITS__ 3
+            units=${parameters[__NUM_HA_UNITS__]}
+            # This is HA for "core" service apis only.
+            set -- $@ --cinder-ha:$units --glance-ha:$units \
+                      --keystone-ha:$units --neutron-api-ha:$units \
+                      --nova-cloud-controller-ha:$units
             ;;
         --list-overlays)
             list_overlays
