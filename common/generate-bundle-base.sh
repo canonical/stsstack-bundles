@@ -192,26 +192,23 @@ $replay && finish
 
 if [ -n "$release" ] && ! ltsmatch $series $release && \
         ! nonltsmatch $series $release; then
-    declare -a idx=( ${!lts[@]} )
-    i=${#idx[@]}
-    _series=${idx[$((--i))]}
-    series_plus_one=$_series
-    while ! [[ "$release" > "${lts[$_series]}" ]] && ((i>=0)); do
-        s=${idx[$((i))]}
-        if ! $series_provided && [ "${lts[$s]}" = "$release" ]; then
-            _series=$s
+
+    num_rels=${#lts_releases_sorted[@]}
+    newseries=""
+    for r in ${lts_releases_sorted[@]}; do
+        if [[ "$release" > "$r" ]]; then
+            newseries=${lts_rev[$r]}
             break
         fi
-        series_plus_one=$s
-        _series=${idx[$((--i))]}
     done
+
     # ensure correct series
     if $series_provided; then
-        if ! [ "$series" = "$_series" ]; then
-            echo "Series auto-corrected from '$series' to '$_series'"
+        if ! [ "$series" = "$newseries" ]; then
+            echo "Series auto-corrected from '$series' to '$newseries'"
         fi
     fi
-    series=$_series
+    series=$newseries
 else
     release=${lts[$series]:-${nonlts[$series]:-}}
     if [ -z "$release" ]; then
