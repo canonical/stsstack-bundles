@@ -71,18 +71,51 @@ EOF
 list_opts
 }
 
-get_units()
+get_optintarg ()
 {
-    units=`echo $1| sed -r 's/.+:([[:digit:]])/\1/;t;d'`
-    [ -n "$units" ] || units=$3
-    parameters[$2]=$units
+    # format we are looking for is --opt:intval
+    echo $1| sed -r 's/.+:([[:digit:]])/\1/;t;d'
+}
+
+get_optstrarg ()
+{
+    # format we are looking for is --opt:strval
+    echo $1| sed -r 's/.+:([[:alnum:]])/\1/;t;d'
 }
 
 get_param()
 {
-    read -p "$2" val
-    parameters[$1]="$val"
+    opt=$1
+    key=$2
+    msg=$3
+    default=${4:-""}
+
+    val=`get_optstrarg $1`
+    if [ -z "$val" ]; then
+        if [ -n "$default" ]; then
+            val="$default"
+        else
+            read -p "$3" val
+        fi
+    fi
+    parameters[$2]="$val"
 }
+
+
+get_units()
+{
+    opt=$1
+    key=$2
+    default=$3
+
+    # format we are looking for is --opt:val
+    val=`get_optintarg $1`
+    if [ -z "$val" ]; then
+        val="$default"
+    fi
+    parameters[$2]="$val"
+}
+
 
 
 generate()
