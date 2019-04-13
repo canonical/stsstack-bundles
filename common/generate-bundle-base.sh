@@ -148,8 +148,10 @@ get_appversion ()
     release=$1
     version=
     [ -z "$release" ] && return 0
-    for ver in ${!app_versions[@]}; do    
-        if [[ "${app_versions[$ver]}" > "$release" ]]; then
+    readarray -t app_vers_sorted_asc<<<"`echo ${!app_versions[@]}| tr ' ' '\n'| sort`"
+    for ver in ${app_vers_sorted_asc[@]}; do
+        rel=${app_versions[$ver]}
+        if ! [[ "$rel" > "$release" ]]; then
             version=$ver
         fi
     done
