@@ -33,7 +33,7 @@ trap_help ${CACHED_STDIN[@]:-""}
 while (($# > 0))
 do
     case "$1" in
-        --num-compute)  #type:<int>
+        --num-compute)  #__OPT__type:<int>
             parameters[__NUM_COMPUTE_UNITS__]=$2
             shift
             ;;
@@ -49,7 +49,7 @@ do
             overlays+=( "ceph.yaml" )
             overlays+=( "openstack-ceph.yaml" )
             ;;
-        --num-ceph-mons)  #type:<int>
+        --num-ceph-mons)  #__OPT__type:<int>
             parameters[__NUM_CEPH_MON_UNITS__]=$2
             shift
             ;;
@@ -113,7 +113,7 @@ do
         --ldap)
             overlays+=( "ldap.yaml" )
             ;;
-        --neutron-fw-driver)  #type:[openvswitch|iptables_hybrid] (default=openvswitch)
+        --neutron-fw-driver)  #__OPT__type:[openvswitch|iptables_hybrid] (default=openvswitch)
             assert_min_release newton "openvswitch driver" ${CACHED_STDIN[@]}
             parameters[__NEUTRON_FW_DRIVER__]=$2
             shift
@@ -249,7 +249,7 @@ do
                       --keystone-ha:$units --neutron-api-ha:$units \
                       --nova-cloud-controller-ha:$units
             ;;
-        --list-overlays)
+        --list-overlays)  #__OPT__
             list_overlays
             exit
             ;;

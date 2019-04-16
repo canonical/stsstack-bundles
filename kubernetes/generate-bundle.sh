@@ -32,7 +32,7 @@ do
             overlays+=( "ceph.yaml" )
             overlays+=( "k8s-ceph.yaml" )
             ;;
-        --list-overlays)
+        --list-overlays)  #__OPT__
             list_overlays
             exit
             ;;

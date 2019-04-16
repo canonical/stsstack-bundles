@@ -19,8 +19,6 @@ OPTIONS:
         List existing bundles.
      --list-overlays
         List supported overlays.
-     --list-opts
-        List extra options supported by bundle.
      -n, --name n
         Name for bundle. If this is not provided then the default bundle
         location is used.
@@ -145,14 +143,15 @@ generate()
 list_overlays ()
 {
     echo "Supported overlays:"
-    sed -r 's/.+\s+(--[[:alnum:]\-]+\*?).+/\1/g;t;d' `basename $0`| \
-        egrep -v "\--list-overlays|--num-compute|--num-ceph-mons|--neutron-fw-driver|--landscape-version"
+    grep -v __OPT__ `basename $0`| \
+        sed -r 's/.+\s+(--[[:alnum:]\-]+\*?)\).*/\1/g;t;d'
 }
 
 list_opts ()
 {
     echo -e "\nBUNDLE OPTS:"
-    sed -r 's/.+\s+(--[[:alnum:]\-]+).+#type:(.+)/      \1 \2/g;t;d' `basename $0`
+    grep __OPT__ `basename $0`| \
+        sed -r 's/.+\s+(--[[:alnum:]\-]+).+#__OPT__type:(.+)/      \1 \2/g;t;d'
 }
 
 get_series ()

@@ -45,7 +45,7 @@ do
             get_units $1 __NUM_SWIFT_PROXY_UNITS__ 3
             overlays+=( "swift-ha.yaml" )
             ;;
-        --list-overlays)
+        --list-overlays)  #__OPT__
             list_overlays
             exit
             ;;

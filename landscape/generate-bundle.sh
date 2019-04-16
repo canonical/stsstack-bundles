@@ -28,14 +28,14 @@ trap_help ${CACHED_STDIN[@]:-""}
 while (($# > 0))
 do
     case "$1" in
-        --landscape-version)  #type:<int>
+        --landscape-version)  #__OPT__type:<int>
             parameters[__LANDSCAPE_VERSION__]=$2
             shift
             ;;
         --ha)
             overlays+=( "landscape-ha.yaml" )
             ;;
-        --list-overlays)
+        --list-overlays)  #__OPT__
             list_overlays
             exit
             ;;
