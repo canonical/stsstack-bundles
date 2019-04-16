@@ -81,16 +81,23 @@ get_optstrarg ()
     echo $1| sed -r 's/.+:([[:alnum:]])/\1/;t;d'
 }
 
+get_param_forced()
+{
+    (($#==4)) && get_param "$@" true || \
+         get_param "$@" "" true
+}
+
 get_param()
 {
     opt=$1
     key=$2
     msg=$3
     default=${4:-""}
+    force=${5:-false}
 
     val=`get_optstrarg $1`
-    if [ -z "$val" ]; then
-        if [ -n "$default" ]; then
+    if [ -z "$val" ] || $force; then
+        if [ -n "$default" ] && ! $force; then
             val="$default"
         else
             read -p "$3" val
