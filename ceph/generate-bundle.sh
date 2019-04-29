@@ -24,6 +24,7 @@ cat $LIB_COMMON/openstack_release_info.sh >> $f_rel_info
 
 # defaults
 parameters[__NUM_CEPH_MON_UNITS__]=1
+parameters[__NUM_VAULT_UNITS__]=1  # there are > 1 vault* overlay so need to use a global with default
 
 trap_help ${CACHED_STDIN[@]:-""}
 while (($# > 0))
@@ -65,6 +66,11 @@ do
             assert_min_release queens "vault" $@
             overlays+=( "vault.yaml" )
             overlays+=( "vault-ceph.yaml" )
+            ;;
+        --vault-ha*)
+            get_units $1 __NUM_VAULT_UNITS__ 3
+            overlays+=( "vault-ha.yaml" )
+            set -- $@ --vault
             ;;
         --list-overlays)   #__OPT__
             list_overlays

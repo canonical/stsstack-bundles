@@ -19,7 +19,8 @@ EOF
 cat $LIB_COMMON/openstack_release_info.sh >> $f_rel_info
 
 # defaults
-#parameters[]=
+parameters[__NUM_VAULT_UNITS__]=1  # there are > 1 vault* overlay so need to use a global with default
+
 overlays+=( swift.yaml )
 
 trap_help ${CACHED_STDIN[@]:-""}
@@ -40,6 +41,11 @@ do
             assert_min_release queens "vault" $@
             overlays+=( "vault.yaml" )
             overlays+=( "vault-swift.yaml" )
+            ;;
+        --vault-ha*)
+            get_units $1 __NUM_VAULT_UNITS__ 3
+            overlays+=( "vault-ha.yaml" )
+            set -- $@ --vault
             ;;
         --ha*)
             get_units $1 __NUM_SWIFT_PROXY_UNITS__ 3

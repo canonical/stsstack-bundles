@@ -1,7 +1,7 @@
 applications:
   vault:
     charm: cs:~openstack-charmers-next/vault
-    num_units: 1
+    num_units: __NUM_VAULT_UNITS__
   easyrsa:
     charm: cs:~containers/easyrsa
     num_units: 1
