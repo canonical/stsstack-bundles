@@ -1,3 +1,9 @@
 applications:
   vault:
     vip: 10.5.100.15 
+  vault-hacluster:
+    charm: cs:~openstack-charmers-next/hacluster
+    options:
+        cluster_count: __NUM_VAULT_UNITS__
+relations:
+  - [ vault, vault-hacluster ]
