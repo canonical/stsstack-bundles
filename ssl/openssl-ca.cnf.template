@@ -42,7 +42,7 @@ default_ca	= CA_default		# The default ca section
 ####################################################################
 [ CA_default ]
 
-base_dir      = ./results
+base_dir      = __RESULTS_PATH__ 
 certificate   = $base_dir/cacert.pem   # The CA certifcate
 private_key   = $base_dir/privkey.pem    # The CA private key
 new_certs_dir = $base_dir              # Location for new certs after signing
@@ -102,7 +102,7 @@ emailAddress		= optional
 
 ####################################################################
 [ req ]
-base_dir			= ./results
+base_dir		= __RESULTS_PATH__
 default_bits		= 2048
 default_keyfile 	= $base_dir/privkey.pem
 distinguished_name	= req_distinguished_name

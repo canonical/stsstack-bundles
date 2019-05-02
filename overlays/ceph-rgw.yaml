@@ -4,6 +4,9 @@ verbose:                    &verbose                   True
 openstack_origin:           &openstack_origin          __OS_ORIGIN__
 source:                     &source                    __SOURCE__
 loglevel:                   &loglevel                  10
+ssl_ca:                     &ssl_ca                    __SSL_CA__
+ssl_cert:                   &ssl_cert                  __SSL_CERT__
+ssl_key:                    &ssl_key                   __SSL_KEY__
 
 applications:
   ceph-rgw:
@@ -13,6 +16,9 @@ applications:
     options:
       loglevel: *loglevel
       source: *source
+      ssl_ca: *ssl_ca
+      ssl_cert: *ssl_cert
+      ssl_key: *ssl_key
 relations:
   - [ ceph-rgw, keystone ]
   - [ ceph-rgw, ceph-mon ]

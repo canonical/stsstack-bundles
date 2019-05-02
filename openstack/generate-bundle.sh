@@ -161,7 +161,7 @@ do
             ;;
         --ssl)
             if ! `has_opt '--replay' ${CACHED_STDIN[@]}`; then
-                (cd ssl; ./create_ca_cert.sh;)
+                (cd ssl; ./create_ca_cert.sh openstack;)
                 parameters[__SSL_CA__]=`base64 ssl/results/cacert.pem| tr -d '\n'`
                 parameters[__SSL_CERT__]=`base64 ssl/results/servercert.pem| tr -d '\n'`
                 parameters[__SSL_KEY__]=`base64 ssl/results/serverkey.pem| tr -d '\n'`

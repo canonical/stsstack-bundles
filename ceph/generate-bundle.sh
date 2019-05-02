@@ -1,4 +1,5 @@
 #!/bin/bash -eu
+CACHED_STDIN=( $@ )
 # imports
 LIB_COMMON=`dirname $0`/common
 . $LIB_COMMON/helpers.sh
@@ -25,6 +26,9 @@ cat $LIB_COMMON/openstack_release_info.sh >> $f_rel_info
 # defaults
 parameters[__NUM_CEPH_MON_UNITS__]=1
 parameters[__NUM_VAULT_UNITS__]=1  # there are > 1 vault* overlay so need to use a global with default
+parameters[__SSL_CA__]=
+parameters[__SSL_CERT__]=
+parameters[__SSL_KEY__]=
 
 trap_help ${CACHED_STDIN[@]:-""}
 while (($# > 0))
@@ -43,6 +47,18 @@ do
         --num-mons|--num-ceph-mons)  #__OPT__type:<int>
             parameters[__NUM_CEPH_MON_UNITS__]=$2
             shift
+            ;;
+        --ssl)
+            if ! `has_opt '--replay' ${CACHED_STDIN[@]}`; then
+                (cd ssl; ./create_ca_cert.sh ceph;)
+                parameters[__SSL_CA__]=`base64 ssl/results/cacert.pem| tr -d '\n'`
+                parameters[__SSL_CERT__]=`base64 ssl/results/servercert.pem| tr -d '\n'`
+                parameters[__SSL_KEY__]=`base64 ssl/results/serverkey.pem| tr -d '\n'`
+                # Make everything HA with 1 unit (unless --ha has already been set)
+                if ! `has_opt '--rgw-ha[:0-9]*$' ${CACHED_STDIN[@]}`; then
+                    set -- $@ --rgw-ha:1
+                fi
+            fi
             ;;
         --rgw|--ceph-rgw)
             overlays+=( "ceph-rgw.yaml" )

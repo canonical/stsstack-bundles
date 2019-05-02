@@ -3,7 +3,7 @@ RANDFILE        = $ENV::HOME/.rnd
 
 ####################################################################
 [ req ]
-base_dir           = ./results
+base_dir           = __RESULTS_PATH__
 default_bits       = 2048
 default_keyfile    = $base_dir/serverkey.pem
 distinguished_name = server_distinguished_name

@@ -1,4 +1,5 @@
 #!/bin/bash -eu
+CACHED_STDIN=( $@ )
 # imports
 LIB_COMMON=`dirname $0`/common
 . $LIB_COMMON/helpers.sh
@@ -20,6 +21,9 @@ cat $LIB_COMMON/openstack_release_info.sh >> $f_rel_info
 
 # defaults
 parameters[__NUM_VAULT_UNITS__]=1  # there are > 1 vault* overlay so need to use a global with default
+parameters[__SSL_CA__]=
+parameters[__SSL_CERT__]=
+parameters[__SSL_KEY__]=
 
 overlays+=( swift.yaml )
 
@@ -36,6 +40,18 @@ do
             msgs+=( "NOTE: you will need to manually relate graylog (filebeat) to any services you want to monitor" )
             overlays+=( "grafana.yaml ")
             msgs+=( "NOTE: you will need to manually relate grafana (telegraf) to any services you want to monitor" )
+            ;;
+        --ssl)
+            if ! `has_opt '--replay' ${CACHED_STDIN[@]}`; then
+                (cd ssl; ./create_ca_cert.sh swift;)
+                parameters[__SSL_CA__]=`base64 ssl/results/cacert.pem| tr -d '\n'`
+                parameters[__SSL_CERT__]=`base64 ssl/results/servercert.pem| tr -d '\n'`
+                parameters[__SSL_KEY__]=`base64 ssl/results/serverkey.pem| tr -d '\n'`
+                # Make everything HA with 1 unit (unless --ha has already been set)
+                if ! `has_opt '--ha[:0-9]*$' ${CACHED_STDIN[@]}`; then
+                    set -- $@ --ha:1
+                fi
+            fi
             ;;
         --vault)
             assert_min_release queens "vault" $@
