@@ -62,15 +62,17 @@ do
             ;;
         --designate)
             assert_min_release ocata "designate" ${CACHED_STDIN[@]}
+            get_param $1 __BIND_DNS_FORWARDER__ 'Please provide designate-bind upstream dns server to forward requests to (leave blank to set later):'
             overlays+=( "neutron-ml2dns.yaml" )
             overlays+=( "memcached.yaml" )
             overlays+=( "designate.yaml" )
             ;;
         --dvr)
             overlays+=( "neutron-dvr.yaml" )
-            get_param $1 __DVR_DATA_PORT__ 'Please provide DVR data-port (space-separated list of interface names or mac addresses): '
+            get_param $1 __DVR_DATA_PORT__ 'Please provide compute host DVR data-port(s) (leave blank to set later): '
             ;;
         --dvr-l3ha*)
+            get_param_forced $1 __DVR_DATA_PORT__ 'Please provide compute host DVR data-port(s) (leave blank to set later): '
             get_units $1 __NUM_AGENTS_PER_ROUTER__ 3
             # if we are a dep then don't get gateway units
             if ! `has_opt '--dvr-snat-l3ha' ${CACHED_STDIN[@]}`; then
@@ -78,7 +80,6 @@ do
             fi
             overlays+=( "neutron-dvr.yaml" )
             overlays+=( "neutron-l3ha.yaml" )
-            get_param_forced $1 __DVR_DATA_PORT__ 'Please provide DVR data-port (space-separated list of interface names or mac addresses): '
             ;;
         --dvr-snat-l3ha*)
             assert_min_release queens "dvr-snat-l3ha" ${CACHED_STDIN[@]}
@@ -90,10 +91,10 @@ do
             ;;
         --dvr-snat*)
             assert_min_release queens "dvr-snat" ${CACHED_STDIN[@]}
+            get_param_forced $1 __DVR_DATA_PORT__ 'Please provide compute host DVR data-port(s) (leave blank to set later): '
             get_units $1 __NUM_COMPUTE_UNITS__ 1
             overlays+=( "neutron-dvr.yaml" )
             overlays+=( "neutron-dvr-snat.yaml" )
-            get_param_forced $1 __DVR_DATA_PORT__ 'Please provide DVR data-port (space-separated list of interface names or mac addresses): '
             parameters[__NUM_NEUTRON_GATEWAY_UNITS__]=0
             ;;
         --lma)
@@ -102,7 +103,7 @@ do
             ;;
         --graylog)
             overlays+=( "graylog.yaml ")
-            msgs+=( "NOTE: you will need to manually relate graylog (filebeat) to any services you want to monitor" )
+            msgs+=( "NOTE: you will need to manually relate graylog (filebeat) to any other services you want to monitor" )
             ;;
         --grafana)
             overlays+=( "grafana.yaml ")
