@@ -101,7 +101,13 @@ if __name__ == '__main__':
     applications = 'applications'
     if 'services' in service_config:
         applications = 'services'
-    for unit in service_config[applications][service]['units'].values():
+
+    units = service_config[applications][service].get('units', None)
+    if not units:
+        print("Application '{}' has no units to configure".format(service))
+        sys.exit(0)
+
+    for unit in units.values():
         if unit['public-address']:
             unit_addresses.append(unit['public-address'])
 
