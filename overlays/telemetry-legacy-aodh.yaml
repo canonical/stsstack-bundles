@@ -32,6 +32,7 @@ relations:
   - [ ceilometer, mongodb ]
   - [ ceilometer-agent, nova-compute ]
   - [ ceilometer-agent, ceilometer ]
+  - [ ceilometer-agent, rabbitmq-server ]
   - [ aodh, rabbitmq-server ]
   - [ aodh, mysql ]
   - [ aodh, keystone ]

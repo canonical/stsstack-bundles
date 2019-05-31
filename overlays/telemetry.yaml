@@ -27,6 +27,7 @@ relations:
   - [ "ceilometer:amqp", "rabbitmq-server:amqp" ]
   - [ ceilometer-agent, nova-compute ]
   - [ ceilometer-agent, ceilometer ]
+  - [ ceilometer-agent, rabbitmq-server ]
   - [ aodh, rabbitmq-server ]
   - [ aodh, mysql ]
   - [ aodh, keystone ]
