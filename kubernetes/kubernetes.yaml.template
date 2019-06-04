@@ -31,6 +31,10 @@ services:
     num_units: 3
     options:
       channel: 1.12/stable
+  openstack-integrator:
+    charm: cs:~containers/openstack-integrator
+    constraints: mem=1G
+    num_units: 1
 relations:
 - - kubernetes-master:kube-api-endpoint
   - kubeapi-load-balancer:apiserver
@@ -56,3 +60,7 @@ relations:
   - kubernetes-master:cni
 - - flannel:cni
   - kubernetes-worker:cni
+- - openstack-integrator:clients
+  - kubernetes-master:openstack
+- - openstack-integrator:clients
+  - kubernetes-worker:openstack
