@@ -55,9 +55,11 @@ do
             shift
             ;;
         --ceph-rgw)
+            overlays+=( "ceph.yaml" )
             overlays+=( "ceph-rgw.yaml" )
             ;;
         --ceph-rgw-multisite)
+            overlays+=( "ceph.yaml" )
             overlays+=( "ceph-rgw-multisite.yaml" )
             ;;
         --designate)
