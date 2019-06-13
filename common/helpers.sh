@@ -204,7 +204,7 @@ assert_min_release ()
     r=`get_release $@`
     [ -n "$r" ] || r=${lts[`get_series $@`]:-${nonlts[`get_series $@`]:-""}}
     [[ "$r" < "$min" ]] || return 0
-    echo "Min release '$min' required to be able to use $msg" 1>&2
+    echo "Min release '$min' required to be able to use $msg (currently using '$r')" 1>&2
     exit 1
 }
 
