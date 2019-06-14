@@ -1,3 +1,6 @@
+
+k8s_channel:                     &k8s_channel                    __CHANNEL__
+
 description: A highly-available, production-grade Kubernetes cluster.
 series: bionic
 services:
@@ -23,14 +26,14 @@ services:
     constraints: mem=2G
     num_units: 2
     options:
-      channel: 1.12/stable
+      channel: *k8s_channel
   kubernetes-worker:
     charm: cs:~containers/kubernetes-worker
     constraints: mem=4G
     expose: true
     num_units: 3
     options:
-      channel: 1.12/stable
+      channel: *k8s_channel
   openstack-integrator:
     charm: cs:~containers/openstack-integrator
     constraints: mem=1G

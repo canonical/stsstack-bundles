@@ -15,9 +15,12 @@ series_provided=false
 pocket=
 template=
 path=
+k8s_channel="latest/stable"
+charm_channel=
 params_path=
 bundle_name=
 replay=false
+is_k8s=false
 run_command=false
 list_bundles=false
 create_model=false
@@ -50,6 +53,11 @@ do
             pocket=$2
             shift
             ;;
+        --k8s-channel)
+            # which Kubernetes channel to set on deployment
+            k8s_channel=$2
+            shift
+            ;;
         --name|-n)
             # give bundle set a name and store under named dir
             bundle_name=$2
@@ -58,6 +66,10 @@ do
         --replay)
             # replay the last recorded command if exists
             replay=true
+            ;;
+        --K8S)
+            # marks this as a K8S deployment to use --channel=edge by default
+            is_k8s=true
             ;;
         --list)
             list_bundles=true
@@ -102,6 +114,10 @@ do
     esac
     shift
 done
+
+if ! $use_stable_charms && $is_k8s; then
+    charm_channel="edge"
+fi
 
 if $create_model; then
     if [ -z "$bundle_name" ]; then
@@ -237,9 +253,13 @@ os_origin=$source
 
 render () {
 # generic replacements
+tmp_path=$1
+fixed_channel=$(echo "$k8s_channel" | sed 's/\//\\\//g')
+fixed_channel=$(echo "$fixed_channel" | sed 's/\./\\\./g')
 sed -i -e "s/__SERIES__/$series/g" \
        -e "s/__OS_ORIGIN__/$os_origin/g" \
-       -e "s/__SOURCE__/$source/g" $1
+       -e "s/__SOURCE__/$source/g" \
+       -e "s/__CHANNEL__/$fixed_channel/g" $tmp_path
 
 # service-specific replacements
 if [ -n "$params_path" ]; then
@@ -289,5 +309,11 @@ else
     echo -e "Created $target ${app_version}bundle ($msg)\n"
 fi
 
-echo -e "juju deploy ${result} ${_overlays[@]:-}\n" > ${bundles_dir}/command
+channel_param=
+
+if [ -n "$charm_channel" ]; then
+    channel_param="--channel=$charm_channel"
+fi
+
+echo -e "juju deploy ${result} ${_overlays[@]:-} $channel_param \n " > ${bundles_dir}/command
 finish

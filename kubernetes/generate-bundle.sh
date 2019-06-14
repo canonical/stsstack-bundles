@@ -7,6 +7,7 @@ LIB_COMMON=`dirname $0`/common
 opts=(
 --internal-template kubernetes.yaml.template
 --internal-generator-path $0
+--K8S
 )
 f_rel_info=`mktemp`
 
