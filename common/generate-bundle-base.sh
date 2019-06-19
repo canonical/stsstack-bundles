@@ -276,11 +276,13 @@ if ((${#overlays[@]})); then
     for overlay in ${overlays[@]}; do
         [ "${overlay_dedup[$overlay]:-null}" = "null" ] || continue
         cp overlays/$overlay $bundles_dir/o
+        ((${#_overlays[@]}==0)) && _overlays+=("")  # left padding
         _overlays+=( --overlay $bundles_dir/o/$overlay )
         render $bundles_dir/o/$overlay
         overlay_dedup[$overlay]=true
         echo " + $overlay"
     done
+    ((${#_overlays[@]})) && _overlays+=("")  # right padding
     echo ""
 else
     echo -e "Created $target ${app_version}bundle ($msg)\n"
@@ -291,5 +293,5 @@ if [ -n "$charm_channel" ]; then
     channel_param="--channel=$charm_channel"
 fi
 
-echo -e "juju deploy ${result} ${_overlays[@]:-\b} ${channel_param}\n " > ${bundles_dir}/command
+echo -e "juju deploy ${result}${_overlays[@]:- }${channel_param}\n " > ${bundles_dir}/command
 finish
