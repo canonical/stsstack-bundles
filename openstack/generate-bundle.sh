@@ -2,26 +2,30 @@
 # imports
 LIB_COMMON=`dirname $0`/common
 . $LIB_COMMON/helpers.sh
-
-# This list provides a way to set "internal opts" i.e. the ones accepted by
-# the top-level generate-bundle.sh. The need to modify these should be rare.
-opts=(
---internal-template openstack.yaml.template
---internal-generator-path $0
-)
-msgs=()
 f_rel_info=`mktemp`
+msgs=()
 
 cleanup () { rm -f $f_rel_info; }
 trap cleanup EXIT
 
+# This list provides a way to set "internal opts" i.e. the ones accepted by
+# the top-level generate-bundle.sh. The need to modify these should be rare.
+declare -a opts=(
+--internal-template openstack.yaml.template
+--internal-generator-path `dirname $0`
+)
+
 # Series & Release Info
-cat << 'EOF' > $f_rel_info
-EOF
-cat $LIB_COMMON/openstack_release_info.sh >> $f_rel_info
+cat $LIB_COMMON/openstack_release_info.sh > $f_rel_info
+
+# Array list of overlays to use with this deployment.
+declare -a overlays=()
 
 # Bundle template parameters. These should correspond to variables set at the top
 # of yaml bundle and overlay templates.
+declare -A parameters=()
+parameters[__OS_ORIGIN__]=$os_origin
+parameters[__SOURCE__]=$source
 parameters[__NUM_COMPUTE_UNITS__]=1
 parameters[__NUM_CEPH_MON_UNITS__]=1
 parameters[__NUM_NEUTRON_GATEWAY_UNITS__]=1

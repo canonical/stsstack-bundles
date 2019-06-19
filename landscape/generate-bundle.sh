@@ -2,17 +2,17 @@
 # imports
 LIB_COMMON=`dirname $0`/common
 . $LIB_COMMON/helpers.sh
-
-# This list provides a way to set "internal opts" i.e. the ones accepted by
-# the top-level generate-bundle.sh. The need to modify these should be rare.
-opts=(
---internal-template landscape.yaml.template
---internal-generator-path $0
-)
 f_rel_info=`mktemp`
 
 cleanup () { rm -f $f_rel_info; }
 trap cleanup EXIT
+
+# This list provides a way to set "internal opts" i.e. the ones accepted by
+# the top-level generate-bundle.sh. The need to modify these should be rare.
+declare -a opts=(
+--internal-template landscape.yaml.template
+--internal-generator-path `dirname $0`
+)
 
 # Series & Release Info
 cat << 'EOF' > $f_rel_info
@@ -22,8 +22,12 @@ declare -A nonlts=( [cosmic]=landscape
                     [disco]=landscape )
 EOF
 
+# Array list of overlays to use with this deployment.
+declare -a overlays=()
+
 # Bundle template parameters. These should correspond to variables set at the top
 # of yaml bundle and overlay templates.
+declare -A parameters=()
 parameters[__LANDSCAPE_VERSION__]="19.01"
 
 trap_help ${CACHED_STDIN[@]:-""}

@@ -2,31 +2,35 @@
 # imports
 LIB_COMMON=`dirname $0`/common
 . $LIB_COMMON/helpers.sh
-
-# This list provides a way to set "internal opts" i.e. the ones accepted by
-# the top-level generate-bundle.sh. The need to modify these should be rare.
-opts=(
---internal-template swift.yaml.template
---internal-generator-path $0
-)
 f_rel_info=`mktemp`
 
 cleanup () { rm -f $f_rel_info; }
 trap cleanup EXIT
 
+# This list provides a way to set "internal opts" i.e. the ones accepted by
+# the top-level generate-bundle.sh. The need to modify these should be rare.
+declare -a opts=(
+--internal-template swift.yaml.template
+--internal-generator-path `dirname $0`
+)
+
 # Series & Release Info
-cat << 'EOF' > $f_rel_info
-EOF
-cat $LIB_COMMON/openstack_release_info.sh >> $f_rel_info
+cat $LIB_COMMON/openstack_release_info.sh > $f_rel_info
+
+# Array list of overlays to use with this deployment.
+declare -a overlays=()
+# We always add this overlay since it contains core apps for this module.
+overlays+=( swift.yaml )
 
 # Bundle template parameters. These should correspond to variables set at the top
 # of yaml bundle and overlay templates.
+declare -A parameters=()
+parameters[__OS_ORIGIN__]=$os_origin
+parameters[__SOURCE__]=$source
 parameters[__NUM_VAULT_UNITS__]=1  # there are > 1 vault* overlay so need to use a global with default
 parameters[__SSL_CA__]=
 parameters[__SSL_CERT__]=
 parameters[__SSL_KEY__]=
-
-overlays+=( swift.yaml )
 
 trap_help ${CACHED_STDIN[@]:-""}
 while (($# > 0))

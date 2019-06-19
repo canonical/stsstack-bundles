@@ -1,6 +1,3 @@
-declare -A parameters=()
-declare -a overlays=()
-
 CACHED_STDIN=( $@ )
 DEFAULT_SERIES=bionic
 
@@ -164,6 +161,17 @@ list_opts ()
         sed -r 's/.+\s+(--[[:alnum:]\-]+).+#__OPT__type:(.+)/      \1 \2/g;t;d'
 }
 
+has_series ()
+{
+    while (($#)); do
+        if [ "$1" = "-s" ] || [ "$1" = "--series" ]; then
+             return 0
+        fi
+        shift
+    done
+    return 1
+}
+
 get_series ()
 {
     while (($#)); do
@@ -186,6 +194,18 @@ get_release ()
         shift
     done
 }
+
+get_pocket ()
+{
+    while (($#)); do
+        if [ "$1" = "-p" ] || [ "$1" = "--pocket" ]; then
+             echo $2
+             return 0
+        fi
+        shift
+    done
+}
+
 
 has_opt ()
 {
@@ -211,6 +231,92 @@ assert_min_release ()
     exit 1
 }
 
+ltsmatch ()
+{
+    series="$1"
+    release="$2"
+
+    [ -n "$release" ] || return 0
+    for s in ${!lts[@]}; do
+        [ "$s" = "$series" ] && [ "${lts[$s]}" = "$release" ] && return 0
+    done
+    return 1
+}
+
+nonltsmatch ()
+{
+    series="$1"
+    release="$2"
+
+    [ -n "$release" ] || return 0
+    for s in ${!nonlts[@]}; do
+        [ "$s" = "$series" ] && [ "${nonlts[$s]}" = "$release" ] && return 0
+    done
+
+    return 1
+}
+
+ost_series_autocorrect ()
+{
+    series="$1"
+    release="$2"
+
+    if [ -n "$release" ] && ! ltsmatch "$series" "$release" && \
+            ! nonltsmatch "$series" "$release"; then
+        num_rels=${#lts_releases_sorted[@]}
+        newseries=""
+        for r in ${lts_releases_sorted[@]}; do
+            if [[ "$release" > "$r" ]]; then
+                newseries=${lts_rev[$r]}
+                break
+            fi
+        done
+
+        # ensure correct series
+        if ! has_series; then
+            if ! [ "$series" = "$newseries" ]; then
+                echo "Series auto-corrected from '$series' to '$newseries'" 1>&2
+            fi
+        fi
+        series=$newseries
+    fi
+    echo $series
+}
+
+ost_release_autocorrect ()
+{
+    series="$1"
+    release="$2"
+
+    # Attempt to auto-correct series/release name combination errors
+    if [ -z "$release" ] || { `ltsmatch "$series" "$release"` || \
+            `nonltsmatch "$series" "$release"`; }; then
+        release=${lts[$series]:-${nonlts[$series]:-}}
+        if [ -z "$release" ]; then
+            echo "No release found for series '$series'" 1>&2
+            exit 1
+        fi
+    fi
+    echo $release
+}
+
+get_appversion ()
+{
+    release="$1"
+    version=
+
+    [ -n "$release" ] || return 0
+    readarray -t app_vers_sorted_asc<<<"`echo ${!app_versions[@]}| tr ' ' '\n'| sort`"
+    for ver in ${app_vers_sorted_asc[@]}; do
+        rel=${app_versions[$ver]}
+        if ! [[ "$rel" > "$release" ]]; then
+            version=$ver
+        fi
+    done
+    echo $version
+    return 0
+}
+
 trap_help ()
 {
 while (($# > 0))
@@ -224,3 +330,30 @@ do
     shift
 done
 }
+
+pocket=`get_pocket $@`
+# get cli provided values or fallback to default
+series=`get_series $@`
+release=`get_release $@`
+
+# The following is openstack specific but applies to multiple bundle
+# modules so putting it here.
+series=`ost_series_autocorrect "$series" "$release"`
+release=`ost_release_autocorrect "$series" "$release"`
+if ! ltsmatch "$series" "$release" && ! nonltsmatch "$series" "$release" ; then
+    source="cloud:${series}-${release}"
+else
+    source=""
+fi
+if [ -n "$pocket" ]; then
+    if [ -n "$source" ]; then
+        source="${source}\/${pocket}"
+    else
+        source="$pocket";
+    fi
+fi
+if [ "$source" = "proposed" ]; then
+    os_origin="distro-proposed"
+else
+    os_origin="$source"
+fi

@@ -3,10 +3,11 @@
 # PLEASE AVOID PUTTING BUNDLE-SPECIFIC CODE IN HERE. INSTEAD USE THE INDIVIDUAL
 # BUNDLE GENERATORS.
 #
-series_provided=false
-pocket=
+. $LIB_COMMON/helpers.sh
+
+declare -a overlays=()
 template=
-path=
+generator_path=
 charm_channel=
 params_path=
 bundle_name=
@@ -15,12 +16,7 @@ run_command=false
 list_bundles=false
 create_model=false
 use_stable_charms=false
-declare -a overlays=()
 
-. $LIB_COMMON/helpers.sh
-
-series=`get_series`
-release=`get_release`
 
 while (($# > 0))
 do
@@ -34,17 +30,16 @@ do
             create_model=true
             ;;
         --series|-s)
-            series=$2
-            series_provided=true
+            # stub - see get_series
             shift
             ;;
         --release|-r)
-            release=$2
+            # stub - see get_release
             shift
             ;;
         --pocket|-p)
             # archive pocket e.g. proposed
-            pocket=$2
+            # stub - see get_pocket
             shift
             ;;
         --name|-n)
@@ -67,7 +62,7 @@ do
             use_stable_charms=true
             ;;
         --internal-generator-path)
-            path=$2
+            generator_path=$2
             shift
             ;;
         --internal-template)
@@ -100,79 +95,46 @@ do
     shift
 done
 
+if [ -z "$template" ]; then
+    echo "ERROR: no template provided with --template"
+    exit 1
+elif [ -z "$generator_path" ]; then
+    echo "ERROR: no generator path provided"
+    exit 1
+elif $create_model && [ -z "$bundle_name" ]; then
+    echo "ERROR: no --name provided so cannot create Juju model" 
+    exit 1
+fi
+
 if $create_model; then
-    if [ -z "$bundle_name" ]; then
-        echo "ERROR: no --name provided so cannot create Juju model" 
-        exit 1
+    if `juju list-models| egrep -q "^$bundle_name\* "`; then
+        echo -e "Juju model '$bundle_name' already exists and is the current context - skipping create\n"
+    elif `juju list-models| egrep -q "^$bundle_name "`; then
+        echo "Juju model '$bundle_name' already exists but is not the current context - switching context"
+        juju switch $bundle_name
+        echo ""
     else
-        if `juju list-models| egrep -q "^$bundle_name\* "`; then
-            echo -e "Juju model '$bundle_name' already exists and is the current context - skipping create\n"
-        elif `juju list-models| egrep -q "^$bundle_name "`; then
-            echo "Juju model '$bundle_name' already exists but is not the current context - switching context"
-            juju switch $bundle_name
-            echo ""
-        else
-            echo "Creating Juju model $bundle_name"
-            juju add-model $bundle_name
-            echo ""
-        fi
+        echo "Creating Juju model $bundle_name"
+        juju add-model $bundle_name
+        echo ""
     fi
 fi
 
-[ -z "$template" ] || [ -z "$path" ] && \
-    { echo "ERROR: no template provided with --template"; exit 1; }
-
-ltsmatch ()
-{
-    [ -z "$release" ] && return 0
-    for s in ${!lts[@]}; do
-        [ "$s" = "$1" ] && [ "${lts[$s]}" = "$2" ] && return 0
-    done
-    return 1
-}
-
-nonltsmatch ()
-{
-    [ -z "$release" ] && return 0
-    for s in ${!nonlts[@]}; do
-        [ "$s" = "$1" ] && [ "${nonlts[$s]}" = "$2" ] && return 0
-    done
-    return 1
-}
-
-get_appversion ()
-{
-    release=$1
-    version=
-    [ -z "$release" ] && return 0
-    readarray -t app_vers_sorted_asc<<<"`echo ${!app_versions[@]}| tr ' ' '\n'| sort`"
-    for ver in ${app_vers_sorted_asc[@]}; do
-        rel=${app_versions[$ver]}
-        if ! [[ "$rel" > "$release" ]]; then
-            version=$ver
-        fi
-    done
-    echo $version
-    return 0
-}
-
 subdir="/${bundle_name}"
 [ -n "${bundle_name}" ] || subdir=''
-bundles_dir=`dirname $path`/b$subdir
+bundles_dir=$generator_path/b$subdir
 if $list_bundles; then
-  if [ -d "$bundles_dir" ]; then
-    echo -e "Existing bundles:\n./b (default)"
-    find $bundles_dir/* -maxdepth 0 -type d| egrep -v "$bundles_dir/o$" 
-    echo ""
-  else
-    echo "There are currently no bundles."
-  fi
-  exit
+    if [ -d "$bundles_dir" ]; then
+        echo -e "Existing bundles:\n./b (default)"
+        find $bundles_dir/* -maxdepth 0 -type d| egrep -v "$bundles_dir/o$" 
+        echo ""
+    else
+        echo "There are currently no bundles."
+    fi
+    exit
 fi
-
 mkdir -p $bundles_dir
 
-# Replay ingores any args and just prints the previously generated command
 finish ()
 {
     if $replay; then
@@ -187,88 +149,59 @@ finish ()
     fi
     $replay && exit 0 || true
 }
+
+# Replay ignores any input args and just prints the previously generated
+# command.
 $replay && finish
 
-if [ -n "$release" ] && ! ltsmatch $series $release && \
-        ! nonltsmatch $series $release; then
-
-    num_rels=${#lts_releases_sorted[@]}
-    newseries=""
-    for r in ${lts_releases_sorted[@]}; do
-        if [[ "$release" > "$r" ]]; then
-            newseries=${lts_rev[$r]}
-            break
-        fi
-    done
-
-    # ensure correct series
-    if $series_provided; then
-        if ! [ "$series" = "$newseries" ]; then
-            echo "Series auto-corrected from '$series' to '$newseries'"
-        fi
-    fi
-    series=$newseries
-else
-    release=${lts[$series]:-${nonlts[$series]:-}}
-    if [ -z "$release" ]; then
-        echo "No release found for series $series"
-        exit 1
-    fi
-fi
-
-source=''
-if ! ltsmatch $series $release && ! nonltsmatch $series $release ; then
-  source="cloud:${series}-${release}"
-fi
-
-if [ -n "$pocket" ]; then
-  if [ -n "$source" ]; then
-    source="${source}\/${pocket}"
-  else
-    source="$pocket";
-  fi
-fi
-
-os_origin=$source
-[ "$os_origin" = "proposed" ] && os_origin="distro-proposed"
-
+# Each custom bundle generator can specify a set of parameters to apply to
+# bundle templates as variable. They are converted into a sed statement that
+# is passed in to here inside a file and run against the template(s). There is
+# therefore no need to add parameters to this function and they should only
+# be defined in the custom generators.
 render () {
-# generic replacements
-sed -i -e "s,__SERIES__,$series,g" \
-       -e "s,__OS_ORIGIN__,$os_origin,g" \
-       -e "s,__SOURCE__,$source,g" $1
+    # generic parameters only
+    sed -i "s,__SERIES__,$series,g" $1
 
-# service-specific replacements
-if [ -n "$params_path" ]; then
-    eval `cat $params_path` $1
-fi
+    # service-specific replacements
+    if [ -n "$params_path" ]; then
+        eval `cat $params_path` $1
+    fi
 
-if $use_stable_charms; then
-    sed -i -r 's,~openstack-charmers-next/,,g' $1
-fi
+    if $use_stable_charms; then
+        sed -i -r 's,~openstack-charmers-next/,,g' $1
+    fi
 }
 
+# Make copy of template, render, and store in named dir.
 dtmp=`mktemp -d`
-fout=$dtmp/`basename $template| sed 's,.template,,'`
-cp $template $fout
-render $fout
-
-mv $fout $bundles_dir
+template_path=$dtmp/`basename $template`
+bundle=${template_path%%.template}
+cp $template $bundle
+render $bundle
+mv $bundle $bundles_dir
 rmdir $dtmp
+
+base_bundle=$bundles_dir/`basename $bundle`
+
 target=${series}-$release
 [ -z "$pocket" ] || target=${target}-$pocket
-result=$bundles_dir/`basename $fout`
 
-# remove duplicate overlays
-declare -a _overlays=()
-declare -A overlay_dedup=()
 if $use_stable_charms; then
     msg="using stable charms"
 else
     msg="using dev/next charms"
 fi
 
-app_version=`get_appversion $release`
+channel_param=
+if [ -n "$charm_channel" ]; then
+    channel_param="--channel=$charm_channel"
+fi
+
+# Generate canonical (de-duped) list of --overlay args.
+declare -a _overlays=()
+declare -A overlay_dedup=()
+app_version=`get_appversion "$release"`
 [ -n "$app_version" ] && app_version="($app_version) "
 if ((${#overlays[@]})); then
     mkdir -p $bundles_dir/o
@@ -288,10 +221,5 @@ else
     echo -e "Created $target ${app_version}bundle ($msg)\n"
 fi
 
-channel_param=
-if [ -n "$charm_channel" ]; then
-    channel_param="--channel=$charm_channel"
-fi
-
-echo -e "juju deploy ${result}${_overlays[@]:- }${channel_param}\n " > ${bundles_dir}/command
+echo -e "juju deploy ${base_bundle}${_overlays[@]:- }${channel_param}\n " > ${bundles_dir}/command
 finish

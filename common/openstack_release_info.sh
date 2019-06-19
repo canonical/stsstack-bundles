@@ -1,10 +1,23 @@
+# This file contains ubuntu series names along with their openstack
+# counterpart release names. Each stable release of Ubuntu has a
+# contemporaneous release of Openstack shipped in its main archives. Each LTS
+# release of Ubuntu has the ability to install Openstack releases from between
+# LTS releases by using the Ubuntu Cloud Archive. Each cloud archive release
+# corresponds back to a release avaiable in a stable release of Ubuntu.
+#
+# More info on releases at https://ubuntu.com/about/release-cycle
+
+# TODO: keep these lists up-to-date with supported series
 declare -A lts=( [trusty]=icehouse
                  [xenial]=mitaka
-                 [bionic]=queens )
+                 [bionic]=queens
+)
 declare -A nonlts=( [cosmic]=rocky
-                    [disco]=stein )
+                    [disco]=stein
+                    [eoan]=train
+)
 
-# Reverse lookups
+# Reverse lookups (revision to series)
 declare -A lts_rev=()
 for s in ${!lts[@]}; do
     lts_rev[${lts[$s]}]=$s
@@ -13,7 +26,11 @@ declare -A nonlts_rev=()
 for s in ${!nonlts[@]}; do
     nonlts_rev[${nonlts[$s]}]=$s
 done
-# sorted alphabetically
-readarray -t lts_releases_sorted<<<"`echo -n ${lts[@]}| tr ' ' '\n' | sort -r`"
-readarray -t nonlts_releases_sorted<<<"`echo -n ${nonlts[@]}| tr ' ' '\n' | sort -r`"
-readarray -t all_releases_sorted<<<"`{ echo -n ${lts[@]}; echo " ${nonlts[@]}"; }| tr ' ' '\n'| sort -r`"
+
+# Alphabetically sorted arrays of release names
+readarray -t lts_releases_sorted<<<\
+"`echo -n ${lts[@]}| tr ' ' '\n' | sort -r`"
+readarray -t nonlts_releases_sorted<<<\
+"`echo -n ${nonlts[@]}| tr ' ' '\n' | sort -r`"
+readarray -t all_releases_sorted<<<"\
+`{ echo -n ${lts[@]}; echo " ${nonlts[@]}"; }| tr ' ' '\n'| sort -r`"

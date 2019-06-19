@@ -2,17 +2,20 @@
 # imports
 LIB_COMMON=`dirname $0`/common
 . $LIB_COMMON/helpers.sh
-
-# This list provides a way to set "internal opts" i.e. the ones accepted by
-# the top-level generate-bundle.sh. The need to modify these should be rare.
-opts=(
---internal-template kubernetes.yaml.template
---internal-generator-path $0
-)
 f_rel_info=`mktemp`
 
 cleanup () { rm -f $f_rel_info; }
 trap cleanup EXIT
+
+# This list provides a way to set "internal opts" i.e. the ones accepted by
+# the top-level generate-bundle.sh. The need to modify these should be rare.
+declare -a opts=(
+--internal-template kubernetes.yaml.template
+--internal-generator-path `dirname $0`
+)
+if ! `has_opt '--use-stable-charms' ${CACHED_STDIN[@]:-""}`; then
+    opts+=( "--charm-channel edge" )
+fi
 
 # Series & Release Info
 cat << 'EOF' > $f_rel_info
@@ -21,13 +24,14 @@ declare -A nonlts=( [cosmic]=cdk
                     [disco]=cdk )
 EOF
 
+# Array list of overlays to use with this deployment.
+declare -a overlays=()
+
 # Bundle template parameters. These should correspond to variables set at the top
 # of yaml bundle and overlay templates.
+declare -A parameters=()
 parameters[__NUM_CEPH_MON_UNITS__]=1
 parameters[__K8S_CHANNEL__]="latest/stable"
-if ! `has_opt '--use-stable-charms' ${CACHED_STDIN[@]:-""}`; then
-    opts+=( "--charm-channel edge" )
-fi
 
 trap_help ${CACHED_STDIN[@]:-""}
 while (($# > 0))
