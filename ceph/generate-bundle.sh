@@ -1,10 +1,10 @@
 #!/bin/bash -eu
-CACHED_STDIN=( $@ )
 # imports
 LIB_COMMON=`dirname $0`/common
 . $LIB_COMMON/helpers.sh
 
-# vars
+# This list provides a way to set "internal opts" i.e. the ones accepted by
+# the top-level generate-bundle.sh. The need to modify these should be rare.
 opts=(
 --internal-template ceph.yaml.template
 --internal-generator-path $0
@@ -23,7 +23,8 @@ declare -A app_versions=( [firefly]=icehouse
 EOF
 cat $LIB_COMMON/openstack_release_info.sh >> $f_rel_info
 
-# defaults
+# Bundle template parameters. These should correspond to variables set at the top
+# of yaml bundle and overlay templates.
 parameters[__NUM_CEPH_MON_UNITS__]=1
 parameters[__NUM_VAULT_UNITS__]=1  # there are > 1 vault* overlay so need to use a global with default
 parameters[__SSL_CA__]=

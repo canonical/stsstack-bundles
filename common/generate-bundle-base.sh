@@ -1,26 +1,16 @@
 #!/bin/bash -eu
 #
-# Author: edward.hope-morley@canonical.com
-#
-# Description: Use this tool to generate a Juju (2.x) native-format bundle e.g.
-#
-#     Xenial + Queens UCA: ./generate-bundle.sh --series xenial --release queens
-#
-#     Bionic (Queens) Proposed: ./generate-bundle.sh --series bionic --pocket proposed
-#
-#     Bionic + Stein UCA: ./generate-bundle.sh --release stein
-#
+# PLEASE AVOID PUTTING BUNDLE-SPECIFIC CODE IN HERE. INSTEAD USE THE INDIVIDUAL
+# BUNDLE GENERATORS.
 #
 series_provided=false
 pocket=
 template=
 path=
-k8s_channel="latest/stable"
 charm_channel=
 params_path=
 bundle_name=
 replay=false
-is_k8s=false
 run_command=false
 list_bundles=false
 create_model=false
@@ -35,6 +25,10 @@ release=`get_release`
 while (($# > 0))
 do
     case "$1" in
+        --charm-channel)
+            charm_channel=$2
+            shift
+            ;;
         --create-model)
             # creates a model using the value provided by --name
             create_model=true
@@ -53,11 +47,6 @@ do
             pocket=$2
             shift
             ;;
-        --k8s-channel)
-            # which Kubernetes channel to set on deployment
-            k8s_channel=$2
-            shift
-            ;;
         --name|-n)
             # give bundle set a name and store under named dir
             bundle_name=$2
@@ -66,10 +55,6 @@ do
         --replay)
             # replay the last recorded command if exists
             replay=true
-            ;;
-        --K8S)
-            # marks this as a K8S deployment to use --channel=edge by default
-            is_k8s=true
             ;;
         --list)
             list_bundles=true
@@ -114,10 +99,6 @@ do
     esac
     shift
 done
-
-if ! $use_stable_charms && $is_k8s; then
-    charm_channel="edge"
-fi
 
 if $create_model; then
     if [ -z "$bundle_name" ]; then
@@ -253,13 +234,9 @@ os_origin=$source
 
 render () {
 # generic replacements
-tmp_path=$1
-fixed_channel=$(echo "$k8s_channel" | sed 's/\//\\\//g')
-fixed_channel=$(echo "$fixed_channel" | sed 's/\./\\\./g')
-sed -i -e "s/__SERIES__/$series/g" \
-       -e "s/__OS_ORIGIN__/$os_origin/g" \
-       -e "s/__SOURCE__/$source/g" \
-       -e "s/__CHANNEL__/$fixed_channel/g" $tmp_path
+sed -i -e "s,__SERIES__,$series,g" \
+       -e "s,__OS_ORIGIN__,$os_origin,g" \
+       -e "s,__SOURCE__,$source,g" $1
 
 # service-specific replacements
 if [ -n "$params_path" ]; then
@@ -272,7 +249,7 @@ fi
 }
 
 dtmp=`mktemp -d`
-fout=$dtmp/`basename $template| sed 's/.template//'`
+fout=$dtmp/`basename $template| sed 's,.template,,'`
 cp $template $fout
 render $fout
 
@@ -310,10 +287,9 @@ else
 fi
 
 channel_param=
-
 if [ -n "$charm_channel" ]; then
     channel_param="--channel=$charm_channel"
 fi
 
-echo -e "juju deploy ${result} ${_overlays[@]:-} $channel_param \n " > ${bundles_dir}/command
+echo -e "juju deploy ${result} ${_overlays[@]:-\b} ${channel_param}\n " > ${bundles_dir}/command
 finish

@@ -10,6 +10,8 @@ cat << EOF
 USAGE: `basename $0` INTERNAL_OPTS OPTIONS [OVERLAYS]
 
 OPTIONS:
+     --charm-channel
+        Charm channel to deploy from (if supported).
      --create-model
         Create Juju model using --name. Switches to model if it already
         exists. If this is not provided then the current Juju model is used.
@@ -137,7 +139,7 @@ generate()
         ftmp=`mktemp`
         echo -n "sed -i " > $ftmp
         for p in ${!parameters[@]}; do
-            echo -n "-e 's/$p/${parameters[$p]}/g' " >> $ftmp
+            echo -n "-e 's,$p,${parameters[$p]},g' " >> $ftmp
         done
         opts+=( "--internal-bundle-params $ftmp" )
     fi

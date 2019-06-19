@@ -3,7 +3,8 @@
 LIB_COMMON=`dirname $0`/common
 . $LIB_COMMON/helpers.sh
 
-# vars
+# This list provides a way to set "internal opts" i.e. the ones accepted by
+# the top-level generate-bundle.sh. The need to modify these should be rare.
 opts=(
 --internal-template landscape.yaml.template
 --internal-generator-path $0
@@ -21,7 +22,8 @@ declare -A nonlts=( [cosmic]=landscape
                     [disco]=landscape )
 EOF
 
-# defaults
+# Bundle template parameters. These should correspond to variables set at the top
+# of yaml bundle and overlay templates.
 parameters[__LANDSCAPE_VERSION__]="19.01"
 
 trap_help ${CACHED_STDIN[@]:-""}
