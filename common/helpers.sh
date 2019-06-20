@@ -1,6 +1,7 @@
 declare -A parameters=()
 declare -a overlays=()
 
+CACHED_STDIN=( $@ )
 DEFAULT_SERIES=bionic
 
 . $LIB_COMMON/openstack_release_info.sh

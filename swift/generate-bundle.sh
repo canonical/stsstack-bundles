@@ -45,9 +45,10 @@ do
         --ssl)
             if ! `has_opt '--replay' ${CACHED_STDIN[@]}`; then
                 (cd ssl; ./create_ca_cert.sh swift;)
-                parameters[__SSL_CA__]=`base64 ssl/results/cacert.pem| tr -d '\n'`
-                parameters[__SSL_CERT__]=`base64 ssl/results/servercert.pem| tr -d '\n'`
-                parameters[__SSL_KEY__]=`base64 ssl/results/serverkey.pem| tr -d '\n'`
+                ssl_results="ssl/swift/results"
+                parameters[__SSL_CA__]=`base64 ${ssl_results}/cacert.pem| tr -d '\n'`
+                parameters[__SSL_CERT__]=`base64 ${ssl_results}/servercert.pem| tr -d '\n'`
+                parameters[__SSL_KEY__]=`base64 ${ssl_results}/serverkey.pem| tr -d '\n'`
                 # Make everything HA with 1 unit (unless --ha has already been set)
                 if ! `has_opt '--ha[:0-9]*$' ${CACHED_STDIN[@]}`; then
                     set -- $@ --ha:1
