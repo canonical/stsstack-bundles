@@ -11,10 +11,11 @@ applications:
     options:
       debug: *debug
       openstack-origin: *openstack_origin
-      nameservers: 'ns1.overcloud.stsstack.qa.1ss.'
+      nameservers: '__DESIGNATE_NAMESERVERS__'
   designate-bind:
     charm: cs:~openstack-charmers-next/designate-bind
     num_units: 1
+    constraints: mem=1G
     options:
       forwarders: __BIND_DNS_FORWARDER__
   neutron-api:

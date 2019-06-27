@@ -21,6 +21,10 @@ cat $LIB_COMMON/openstack_release_info.sh > $f_rel_info
 # Array list of overlays to use with this deployment.
 declare -a overlays=()
 
+# Try to use current model (or newly requested one) as subdomain name
+model_subdomain=`get_juju_model`
+[ -n "$model_subdomain" ] || model_subdomain="overcloud"
+
 # Bundle template parameters. These should correspond to variables set at the top
 # of yaml bundle and overlay templates.
 declare -A parameters=()
@@ -34,6 +38,10 @@ parameters[__NEUTRON_FW_DRIVER__]=openvswitch  # legacy is iptables_hybrid
 parameters[__SSL_CA__]=
 parameters[__SSL_CERT__]=
 parameters[__SSL_KEY__]=
+parameters[__DNS_DOMAIN__]="${model_subdomain}.stsstack.qa.1ss."
+parameters[__DESIGNATE_NAMESERVERS__]="ns1.${parameters[__DNS_DOMAIN__]}"
+parameters[__BIND_DNS_FORWARDER__]='10.198.200.1'
+parameters[__ML2_DNS_FORWARDER__]='10.198.200.1'
 
 trap_help ${CACHED_STDIN[@]:-""}
 while (($# > 0))
@@ -69,17 +77,21 @@ do
             ;;
         --designate)
             assert_min_release ocata "designate" ${CACHED_STDIN[@]}
-            get_param $1 __BIND_DNS_FORWARDER__ 'Please provide designate-bind upstream dns server to forward requests to (leave blank to set later):'
+            ns=${parameters[__BIND_DNS_FORWARDER__]}
+            msg="REQUIRED: designate-bind upstream dns server to forward requests to (default=$ns):"
+            get_param $1 __BIND_DNS_FORWARDER__ "$msg"
             overlays+=( "neutron-ml2dns.yaml" )
+            ns=${parameters[__ML2_DNS_FORWARDER__]}
+            msgs+=( "NOTE: you will need to set neutron-gateway dns-servers=<designate-bind unit address> post-deploy (current=$ns)" )
             overlays+=( "memcached.yaml" )
             overlays+=( "designate.yaml" )
             ;;
         --dvr)
             overlays+=( "neutron-dvr.yaml" )
-            get_param $1 __DVR_DATA_PORT__ 'Please provide compute host DVR data-port(s) (leave blank to set later): '
+            get_param $1 __DVR_DATA_PORT__ 'REQUIRED: compute host DVR data-port(s) (leave blank to set later): '
             ;;
         --dvr-l3ha*)
-            get_param_forced $1 __DVR_DATA_PORT__ 'Please provide compute host DVR data-port(s) (leave blank to set later): '
+            get_param_forced $1 __DVR_DATA_PORT__ 'REQUIRED: compute host DVR data-port(s) (leave blank to set later): '
             get_units $1 __NUM_AGENTS_PER_ROUTER__ 3
             # if we are a dep then don't get gateway units
             if ! `has_opt '--dvr-snat-l3ha' ${CACHED_STDIN[@]}`; then
@@ -98,7 +110,7 @@ do
             ;;
         --dvr-snat*)
             assert_min_release queens "dvr-snat" ${CACHED_STDIN[@]}
-            get_param_forced $1 __DVR_DATA_PORT__ 'Please provide compute host DVR data-port(s) (leave blank to set later): '
+            get_param_forced $1 __DVR_DATA_PORT__ 'REQUIRED: compute host DVR data-port(s) (leave blank to set later): '
             get_units $1 __NUM_COMPUTE_UNITS__ 1
             overlays+=( "neutron-dvr.yaml" )
             overlays+=( "neutron-dvr-snat.yaml" )
@@ -146,6 +158,9 @@ do
             ;;
         --ml2dns)
             # this is internal dns integration, for external use --designate
+            ns=${parameters[__ML2_DNS_FORWARDER__]}
+            msg="REQUIRED: ml2-dns upstream dns server to forward requests to (default=$ns):"
+            get_param $1 __ML2_DNS_FORWARDER__ "$msg"
             overlays+=( "neutron-ml2dns.yaml" )
             ;;
         --nova-cells)

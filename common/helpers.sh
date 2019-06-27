@@ -81,6 +81,18 @@ get_optstrarg ()
     echo $1| sed -r 's/.+:([[:alnum:]])/\1/;t;d'
 }
 
+get_optval ()
+{
+    opt=$1
+    shift
+    while (($#)); do
+        if [ "$1" = "$opt" ]; then
+            echo $2
+        fi
+        shift
+    done
+}
+
 get_param_forced()
 {
     (($#==4)) && get_param "$@" true || \
@@ -103,7 +115,7 @@ get_param()
             read -p "$3" val
         fi
     fi
-    parameters[$2]="$val"
+    [ -z "$val" ] || parameters[$2]="$val"
 }
 
 
@@ -329,6 +341,19 @@ do
     esac
     shift
 done
+}
+
+# get cli model name if available since it might not have been created yet.
+get_juju_model ()
+{
+if `has_opt --create-model ${CACHED_STDIN[@]}`; then
+    name="`get_optval --name ${CACHED_STDIN[@]}`"
+    if [ -n "$name" ]; then
+        echo $name
+    fi
+else
+    juju list-models 2>/dev/null| sed -r 's/^(.+)\* .+/\1/g;t;d'
+fi
 }
 
 pocket=`get_pocket $@`
