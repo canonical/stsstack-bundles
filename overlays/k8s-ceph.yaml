@@ -1,2 +1,3 @@
 relations:
-  - [ kubernetes-master, ceph-mon ]
+  - [ 'kubernetes-master:ceph-client', 'ceph-mon:client' ]
+  - [ 'kubernetes-master:ceph-storage', 'ceph-mon:admin' ]
