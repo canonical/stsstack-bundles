@@ -1,4 +1,5 @@
 CACHED_STDIN=( $@ )
+((${#CACHED_STDIN[@]})) || CACHED_STDIN=( "" )
 DEFAULT_SERIES=bionic
 
 . $LIB_COMMON/openstack_release_info.sh
@@ -13,6 +14,8 @@ OPTIONS:
      --create-model
         Create Juju model using --name. Switches to model if it already
         exists. If this is not provided then the current Juju model is used.
+     --model-config
+        Path to YAML config for the model to be created.
      -h, --help
         Display this help message.
      --list

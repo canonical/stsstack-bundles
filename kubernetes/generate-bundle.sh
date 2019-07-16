@@ -3,6 +3,7 @@
 LIB_COMMON=`dirname $0`/common
 . $LIB_COMMON/helpers.sh
 f_rel_info=`mktemp`
+msgs=()
 
 cleanup () { rm -f $f_rel_info; }
 trap cleanup EXIT
@@ -34,11 +35,19 @@ parameters[__NUM_CEPH_MON_UNITS__]=1
 parameters[__K8S_CHANNEL__]="latest/stable"
 parameters[__NUM_ETCD_UNITS__]=1
 
+
+# default for current stable is to use containerd
+# See https://ubuntu.com/kubernetes/docs/container-runtime
+if ! `has_opt '--k8s-channel' ${CACHED_STDIN[@]}` && \
+   ! `has_opt '--docker' ${CACHED_STDIN[@]}`; then
+    set -- $@ --containerd
+fi
+
 trap_help ${CACHED_STDIN[@]:-""}
 while (($# > 0))
 do
     case "$1" in
-        --k8s-channel)
+        --k8s-channel)  #__OPT__
             # which Kubernetes channel to set on deployment
             parameters[__K8S_CHANNEL__]="$2"
             shift
@@ -50,6 +59,16 @@ do
         --etcd-ha*)
             get_units $1 __NUM_ETCD_UNITS__ 1
             ;;
+        --containerd)
+            overlays+=( "k8s-containerd.yaml" )
+            ;;
+        --docker)
+            if `has_opt '--containerd' ${CACHED_STDIN[@]}`; then
+                echo "ERROR: you can't use --docker and --containerd at the same time"
+                exit 1
+            fi
+            overlays+=( "k8s-docker.yaml" )
+            ;;
         --list-overlays)  #__OPT__
             list_overlays
             exit
@@ -60,5 +79,12 @@ do
     esac
     shift
 done
+
+if ((${#msgs[@]})); then
+  for m in "${msgs[@]}"; do
+    echo -e "$m"
+  done
+read -p "Hit [ENTER] to continue"
+fi
 
 generate $f_rel_info

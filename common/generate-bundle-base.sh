@@ -16,6 +16,7 @@ run_command=false
 list_bundles=false
 create_model=false
 use_stable_charms=false
+model_config=
 
 
 while (($# > 0))
@@ -28,6 +29,11 @@ do
         --create-model)
             # creates a model using the value provided by --name
             create_model=true
+            ;;
+        --model-config)
+            # path to yaml config file
+            model_config=$2
+            shift
             ;;
         --series|-s)
             # stub - see get_series
@@ -118,6 +124,7 @@ if $create_model; then
         juju add-model $bundle_name
         echo ""
     fi
+    [ -e "$model_config" ] && juju model-config $model_config
 fi
 
 subdir="/${bundle_name}"
