@@ -117,7 +117,7 @@ do
             parameters[__NUM_NEUTRON_GATEWAY_UNITS__]=0
             ;;
         --lma)
-            # Logging Monitoring and Analysis
+            # Logging Monitoring and Alarming
             set -- $@ --graylog --grafana
             ;;
         --graylog)

@@ -40,7 +40,7 @@ do
             overlays+=( "graylog.yaml ")
             ;;
         --lma)
-            # Logging Monitoring and Analysis
+            # Logging Monitoring and Alarming
             overlays+=( "graylog.yaml ")
             msgs+=( "NOTE: you will need to manually relate graylog (filebeat) to any services you want to monitor" )
             overlays+=( "grafana.yaml ")
