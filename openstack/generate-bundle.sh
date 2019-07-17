@@ -43,6 +43,11 @@ parameters[__DESIGNATE_NAMESERVERS__]="ns1.${parameters[__DNS_DOMAIN__]}"
 parameters[__BIND_DNS_FORWARDER__]='10.198.200.1'
 parameters[__ML2_DNS_FORWARDER__]='10.198.200.1'
 
+# If using any variant of dvr-snat, there is no need for a neutron-gateway.
+if ! has_opt --dvr-snat* ${CACHED_STDIN[@]}; then
+    overlays+=( "neutron-gateway.yaml" )
+fi
+
 trap_help ${CACHED_STDIN[@]:-""}
 while (($# > 0))
 do
@@ -106,7 +111,6 @@ do
             get_units $1 __NUM_AGENTS_PER_ROUTER__ 3
             overlays+=( "neutron-dvr-snat.yaml" )
             set -- $@ --dvr-l3ha:${parameters[__NUM_AGENTS_PER_ROUTER__]}
-            parameters[__NUM_NEUTRON_GATEWAY_UNITS__]=0
             ;;
         --dvr-snat*)
             assert_min_release queens "dvr-snat" ${CACHED_STDIN[@]}
@@ -114,7 +118,6 @@ do
             get_units $1 __NUM_COMPUTE_UNITS__ 1
             overlays+=( "neutron-dvr.yaml" )
             overlays+=( "neutron-dvr-snat.yaml" )
-            parameters[__NUM_NEUTRON_GATEWAY_UNITS__]=0
             ;;
         --lma)
             # Logging Monitoring and Alarming

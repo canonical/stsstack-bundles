@@ -68,16 +68,6 @@ applications:
       ssl_ca: *ssl_ca
       ssl_cert: *ssl_cert
       ssl_key: *ssl_key
-  neutron-gateway:
-    num_units: __NUM_NEUTRON_GATEWAY_UNITS__ 
-    charm: cs:~openstack-charmers-next/neutron-gateway
-    constraints: mem=4G
-    options:
-      debug: *debug
-      verbose: *verbose
-      instance-mtu: 1300
-      bridge-mappings: physnet1:br-data
-      openstack-origin: *openstack_origin
   neutron-api:
     num_units: 1
     charm: cs:~openstack-charmers-next/neutron-api
@@ -152,14 +142,11 @@ relations:
   - [ cinder, rabbitmq-server ]
   - [ cinder, nova-cloud-controller ]
   - [ cinder, keystone ]
-  - [ neutron-gateway, nova-cloud-controller ]
   - [ "openstack-dashboard:identity-service", "keystone:identity-service" ]
-  - [ "neutron-gateway:amqp", rabbitmq-server ]
   - [ neutron-api, mysql ]
   - [ neutron-api, rabbitmq-server ]
   - [ neutron-api, nova-cloud-controller ]
   - [ neutron-api, neutron-openvswitch ]
   - [ neutron-api, keystone ]
-  - [ neutron-api, neutron-gateway ]
   - [ neutron-openvswitch, nova-compute ]
   - [ neutron-openvswitch, rabbitmq-server ]
