@@ -11,7 +11,7 @@ services:
   etcd:
     charm: cs:~containers/etcd
     constraints: mem=1G
-    num_units: 3
+    num_units: __NUM_ETCD_UNITS__ 
     options:
       channel: 3.2/stable
   flannel:

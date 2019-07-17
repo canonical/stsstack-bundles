@@ -32,6 +32,7 @@ declare -a overlays=()
 declare -A parameters=()
 parameters[__NUM_CEPH_MON_UNITS__]=1
 parameters[__K8S_CHANNEL__]="latest/stable"
+parameters[__NUM_ETCD_UNITS__]=1
 
 trap_help ${CACHED_STDIN[@]:-""}
 while (($# > 0))
@@ -45,6 +46,9 @@ do
         --ceph)
             overlays+=( "ceph.yaml" )
             overlays+=( "k8s-ceph.yaml" )
+            ;;
+        --etcd-ha*)
+            get_units $1 __NUM_ETCD_UNITS__ 1
             ;;
         --list-overlays)  #__OPT__
             list_overlays
