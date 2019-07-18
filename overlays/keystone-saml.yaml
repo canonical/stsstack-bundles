@@ -1,0 +1,13 @@
+applications:
+  keystone-saml-mellon:
+    charm: cs:~openstack-charmers-next/keystone-saml-mellon
+    options:
+      idp-name: 'samltest'
+      protocol-name: 'mapped'
+      user-facing-name: 'samltest.id'
+      nameid-formats: 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress'
+relations:
+  - [ keystone, keystone-saml-mellon ]
+  - [ openstack-dashboard, keystone-saml-mellon ]
+  - [ "openstack-dashboard:websso-trusted-dashboard", "keystone:websso-trusted-dashboard" ]
+# TODO: implement resources

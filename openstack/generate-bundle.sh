@@ -152,6 +152,9 @@ do
             # useful for <= pike since queens is v3 only
             overlays+=( "keystone-v3.yaml" )
             ;;
+        --keystone-saml)
+            overlays+=( "keystone-saml.yaml" )
+            ;;
         --mysql-ha*)
             get_units $1 __NUM_MYSQL_UNITS__ 3
             overlays+=( "mysql-ha.yaml" )
