@@ -182,10 +182,9 @@ render () {
     fi
 }
 render_resources_path () {
-    state_root="$1"
-    file="$2"
+    file="$1"
     name=`basename $file`
-    path=${state_root}/resources/${name%%.*}/
+    path=resources/${name%%.*}/
 
     sed -i -r "s,__RESOURCES_PATH__,$path,g" $file
 }
@@ -224,7 +223,7 @@ if [ -d "$resource_path" ]; then
     if [ -d "$resource_path/${name%%.yaml}" ]; then
         cp -r $resource_path/${name%%.yaml} $bundles_dir/resources
         # add absolute path for resources
-        render_resources_path $bundles_dir $bundles_dir/$name
+        render_resources_path $bundles_dir/$name
     fi
 fi
 # De-duplicate overlay list and create bundle structure.
@@ -245,7 +244,7 @@ if ((${#overlays[@]})); then
             mkdir -p $bundles_dir/resources
             cp -r $resource_path $bundles_dir/resources
             # add absolute path for resources
-            render_resources_path $bundles_dir $bundles_dir/o/$overlay
+            render_resources_path $bundles_dir/o/$overlay
         fi
     done
     ((${#overlay_opts[@]})) && overlay_opts+=("")  # right padding
