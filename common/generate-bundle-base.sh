@@ -184,7 +184,10 @@ render () {
 render_resources_path () {
     state_root="$1"
     file="$2"
-    sed -i -r "s,__RESOURCES_PATH__,${state_root}/resources/,g" $file
+    name=`basename $file`
+    path=${state_root}/resources/${name%%.*}/
+
+    sed -i -r "s,__RESOURCES_PATH__,$path,g" $file
 }
 
 target=${series}-$release
