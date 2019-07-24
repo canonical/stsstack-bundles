@@ -11,7 +11,7 @@ trap cleanup EXIT
 # the top-level generate-bundle.sh. The need to modify these should be rare.
 declare -a opts=(
 --internal-template swift.yaml.template
---internal-generator-path `dirname $0`
+--internal-module-path `dirname $0`
 )
 
 # Series & Release Info

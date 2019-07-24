@@ -6,8 +6,10 @@
 . $LIB_COMMON/helpers.sh
 
 declare -a overlays=()
+declare -A overlays_deduped=()
+declare -a overlay_opts=()
 template=
-generator_path=
+module_path=
 charm_channel=
 params_path=
 bundle_name=
@@ -67,8 +69,8 @@ do
         --use-stable-charms)
             use_stable_charms=true
             ;;
-        --internal-generator-path)
-            generator_path=$2
+        --internal-module-path)
+            module_path=$2
             shift
             ;;
         --internal-template)
@@ -104,8 +106,8 @@ done
 if [ -z "$template" ]; then
     echo "ERROR: no template provided with --template"
     exit 1
-elif [ -z "$generator_path" ]; then
-    echo "ERROR: no generator path provided"
+elif [ -z "$module_path" ]; then
+    echo "ERROR: no module name provided"
     exit 1
 elif $create_model && [ -z "$bundle_name" ]; then
     echo "ERROR: no --name provided so cannot create Juju model" 
@@ -129,7 +131,7 @@ fi
 
 subdir="/${bundle_name}"
 [ -n "${bundle_name}" ] || subdir=''
-bundles_dir=$generator_path/b$subdir
+bundles_dir=$module_path/b$subdir
 if $list_bundles; then
     if [ -d "$bundles_dir" ]; then
         echo -e "Existing bundles:\n./b (default)"
@@ -180,17 +182,6 @@ render () {
     fi
 }
 
-# Make copy of template, render, and store in named dir.
-dtmp=`mktemp -d`
-template_path=$dtmp/`basename $template`
-bundle=${template_path%%.template}
-cp $template $bundle
-render $bundle
-mv $bundle $bundles_dir
-rmdir $dtmp
-
-base_bundle=$bundles_dir/`basename $bundle`
-
 target=${series}-$release
 [ -z "$pocket" ] || target=${target}-$pocket
 
@@ -205,28 +196,54 @@ if [ -n "$charm_channel" ]; then
     channel_param="--channel=$charm_channel"
 fi
 
-# Generate canonical (de-duped) list of --overlay args.
-declare -a _overlays=()
-declare -A overlay_dedup=()
-app_version=`get_appversion "$release"`
-[ -n "$app_version" ] && app_version="($app_version) "
+app_release_name=`get_app_release_name "$release"`
+[ -n "$app_release_name" ] && app_release_name="($app_release_name) "
+
+# Make copy of base template, render, and store in named dir.
+dtmp=`mktemp -d`
+template_path=$dtmp/`basename $template`
+bundle=${template_path%%.template}
+cp $template $bundle
+render $bundle
+mv $bundle $bundles_dir
+rmdir $dtmp
+
+# Copy base bundle resources to bundles dir (if exists)
+resource_path=$module_path/resources/
+if [ -d "$resource_path" ]; then
+    mkdir -p $bundles_dir/resources
+    name=`basename $bundle`
+    if [ -d "$resource_path/${name%%.yaml}" ]; then
+        cp -r $resource_path/${name%%.yaml} $bundles_dir/resources/
+    fi
+fi
+# De-duplicate overlay list and create bundle structure.
 if ((${#overlays[@]})); then
     mkdir -p $bundles_dir/o
-    echo "Created $target ${app_version}bundle and overlays ($msg):"
+    msgs=()
     for overlay in ${overlays[@]}; do
-        [ "${overlay_dedup[$overlay]:-null}" = "null" ] || continue
+        [ "${overlays_deduped[$overlay]:-null}" = "null" ] || continue
         cp overlays/$overlay $bundles_dir/o
-        ((${#_overlays[@]}==0)) && _overlays+=("")  # left padding
-        _overlays+=( --overlay $bundles_dir/o/$overlay )
+        ((${#overlay_opts[@]}==0)) && overlay_opts+=("")  # left padding
+        overlay_opts+=( --overlay $bundles_dir/o/$overlay )
         render $bundles_dir/o/$overlay
-        overlay_dedup[$overlay]=true
-        echo " + $overlay"
+        overlays_deduped[$overlay]=true
+        msgs+=( " + $overlay\n" )
+        # Copy overla resources to bundles dir (if exists)
+        resource_path=$module_path/resources/${overlay%%.*}
+        if [ -d "$resource_path" ]; then
+            mkdir -p $bundles_dir/resources
+            cp -r $resource_path $bundles_dir/resources
+        fi
     done
-    ((${#_overlays[@]})) && _overlays+=("")  # right padding
-    echo ""
+    ((${#overlay_opts[@]})) && overlay_opts+=("")  # right padding
+
+    echo "Created $target ${app_release_name}bundle and overlays ($msg):"
+    echo -e " ${msgs[@]}"
 else
-    echo -e "Created $target ${app_version}bundle ($msg)\n"
+    echo -e "Created $target ${app_release_name}bundle ($msg)\n"
 fi
 
-echo -e "juju deploy ${base_bundle}${_overlays[@]:- }${channel_param}\n " > ${bundles_dir}/command
+base_bundle=$bundles_dir/`basename $bundle`
+echo -e "juju deploy ${base_bundle}${overlay_opts[@]:- }${channel_param}\n " > ${bundles_dir}/command
 finish

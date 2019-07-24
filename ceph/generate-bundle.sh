@@ -11,15 +11,15 @@ trap cleanup EXIT
 # the top-level generate-bundle.sh. The need to modify these should be rare.
 declare -a opts=(
 --internal-template ceph.yaml.template
---internal-generator-path `dirname $0`
+--internal-module-path `dirname $0`
 )
 
 # Series & Release Info (see http://docs.ceph.com/docs/master/releases/)
 cat << 'EOF' > $f_rel_info
-declare -A app_versions=( [firefly]=icehouse
-                          [jewel]=mitaka
-                          [luminous]=pike
-                          [mimic]=rocky )
+declare -A APP_RELEASE_NAMES=( [firefly]=icehouse
+                               [jewel]=mitaka
+                               [luminous]=pike
+                               [mimic]=rocky )
 EOF
 cat $LIB_COMMON/openstack_release_info.sh >> $f_rel_info
 

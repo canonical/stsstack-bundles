@@ -62,10 +62,10 @@ INTERNAL_OPTS (don't use these):
      --internal-overlay <path>
         (internal only) Overlay to be added to deployment. Can be
         specified multiple times.
-     --internal-generator-path <path>
-        (internal only) Bundle generator path.
+     --internal-module-path <path>
+        (internal only) Bundle module path.
      --internal-template <path>
-        (internal only) Bundle generator base template.
+        (internal only) Bundle base template.
      --internal-version-info <path>
         (internal only) 
 EOF
@@ -315,20 +315,22 @@ ost_release_autocorrect ()
     echo $release
 }
 
-get_appversion ()
+# Requires APP_RELEASE_NAMES set by module generate-bundle.sh
+get_app_release_name ()
 {
-    release="$1"
-    version=
+    ubuntu_release="$1"
+    release_name=
 
     [ -n "$release" ] || return 0
-    readarray -t app_vers_sorted_asc<<<"`echo ${!app_versions[@]}| tr ' ' '\n'| sort`"
-    for ver in ${app_vers_sorted_asc[@]}; do
-        rel=${app_versions[$ver]}
-        if ! [[ "$rel" > "$release" ]]; then
-            version=$ver
+    readarray -t names_sorted_asc<<<"`echo ${!APP_RELEASE_NAMES[@]}| \
+                                            tr ' ' '\n'| sort`"
+    for name in ${names_sorted_asc[@]}; do
+        rel=${APP_RELEASE_NAMES[$name]}
+        if ! [[ "$rel" > "$ubuntu_release" ]]; then
+            release_name=$name
         fi
     done
-    echo $version
+    echo $release_name
     return 0
 }
 

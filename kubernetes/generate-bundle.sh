@@ -12,7 +12,7 @@ trap cleanup EXIT
 # the top-level generate-bundle.sh. The need to modify these should be rare.
 declare -a opts=(
 --internal-template kubernetes.yaml.template
---internal-generator-path `dirname $0`
+--internal-module-path `dirname $0`
 )
 if ! `has_opt '--use-stable-charms' ${CACHED_STDIN[@]:-""}`; then
     opts+=( "--charm-channel edge" )
