@@ -181,6 +181,11 @@ render () {
         sed -i -r 's,~openstack-charmers-next/,,g' $1
     fi
 }
+render_resources_path () {
+    state_root="$1"
+    file="$2"
+    sed -i -r "s,__RESOURCES_PATH__,${state_root}/resources/,g" $file
+}
 
 target=${series}-$release
 [ -z "$pocket" ] || target=${target}-$pocket
@@ -214,7 +219,9 @@ if [ -d "$resource_path" ]; then
     mkdir -p $bundles_dir/resources
     name=`basename $bundle`
     if [ -d "$resource_path/${name%%.yaml}" ]; then
-        cp -r $resource_path/${name%%.yaml} $bundles_dir/resources/
+        cp -r $resource_path/${name%%.yaml} $bundles_dir/resources
+        # add absolute path for resources
+        render_resources_path $bundles_dir $bundles_dir/$name
     fi
 fi
 # De-duplicate overlay list and create bundle structure.
@@ -234,6 +241,8 @@ if ((${#overlays[@]})); then
         if [ -d "$resource_path" ]; then
             mkdir -p $bundles_dir/resources
             cp -r $resource_path $bundles_dir/resources
+            # add absolute path for resources
+            render_resources_path $bundles_dir $bundles_dir/o/$overlay
         fi
     done
     ((${#overlay_opts[@]})) && overlay_opts+=("")  # right padding
