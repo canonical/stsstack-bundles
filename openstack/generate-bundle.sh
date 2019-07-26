@@ -156,6 +156,7 @@ do
             overlays+=( "keystone-v3.yaml" )
             ;;
         --keystone-saml)
+            assert_min_release rocky "keystone saml" ${CACHED_STDIN[@]}
             overlays+=( "keystone-saml.yaml" )
             ;;
         --mysql-ha*)
