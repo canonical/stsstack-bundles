@@ -14,8 +14,10 @@ declare -a opts=(
 --internal-template kubernetes.yaml.template
 --internal-module-path `dirname $0`
 )
-if ! `has_opt '--use-stable-charms' ${CACHED_STDIN[@]:-""}`; then
-    opts+=( "--charm-channel edge" )
+if ! `has_opt '--charm-channel' ${CACHED_STDIN[@]}` && \
+        ! `has_opt '--use-stable-charms' ${CACHED_STDIN[@]}`; then
+    set -- $@ --charm-channel edge
+    CACHED_STDIN=( $@ )
 fi
 
 # Series & Release Info
@@ -34,6 +36,11 @@ declare -A parameters=()
 parameters[__NUM_CEPH_MON_UNITS__]=1
 parameters[__K8S_CHANNEL__]="latest/stable"
 parameters[__NUM_ETCD_UNITS__]=1
+parameters[__K8S_LB_VIPS__]=
+parameters[__K8S_MASTER_VIPS__]=
+parameters[__NUM_K8S_MASTER_UNITS__]=1
+parameters[__NUM_K8S_WORKER_UNITS__]=2
+parameters[__NUM_K8S_LB_UNITS__]=1
 
 
 # default for current stable is to use containerd
@@ -41,7 +48,23 @@ parameters[__NUM_ETCD_UNITS__]=1
 if ! `has_opt '--k8s-channel' ${CACHED_STDIN[@]}` && \
    ! `has_opt '--docker' ${CACHED_STDIN[@]}`; then
     set -- $@ --containerd
+    CACHED_STDIN=( $@ )
 fi
+
+check_hacluster_channel ()
+{
+    charm_channel="`get_optval --charm-channel ${CACHED_STDIN[@]}`"
+    if [ -n "$charm_channel" ] && [ "$charm_channel" != "stable" ]; then
+        # NOTE(dosaboy): https://bugs.launchpad.net/juju/+bug/1832873
+        msgs+=( "\nIMPORTANT: you are using the $charm_channel charm channel but hacluster is not published to that channel. Either switch to stable channel or post-upgrade hacluster to stable channel.\n" )
+    fi
+}
+
+# default overlay setup
+if ! `has_opt '--master-ha' ${CACHED_STDIN[@]}`; then
+    overlays+=( "k8s-lb.yaml"  )
+fi
+
 
 trap_help ${CACHED_STDIN[@]:-""}
 while (($# > 0))
@@ -68,6 +91,32 @@ do
                 exit 1
             fi
             overlays+=( "k8s-docker.yaml" )
+            ;;
+        --lb-ha*)
+            if `has_opt '--master-ha' ${CACHED_STDIN[@]}`; then
+                echo "ERROR: you can't do --master-ha and --lb-ha at the same time."
+                exit 1
+            fi
+            msg="REQUIRED: VIP(s) to use for kubeapi_lb hacluster (leave blank to set later): "
+            get_param_forced $1 __K8S_LB_VIPS__ "$msg"
+            get_units $1 __NUM_K8S_LB_UNITS__ 1
+            overlays+=( "k8s-lb-ha.yaml" )
+            check_hacluster_channel
+            ;;
+        --master-ha*)
+            if `has_opt '--lb-ha' ${CACHED_STDIN[@]}`; then
+                echo "ERROR: you can't do --lb-ha and --master-ha at the same time."
+                exit 1
+            fi
+            msg="REQUIRED: VIP(s) to use for k8s master hacluster (leave blank to set later): "
+            get_param_forced $1 __K8S_MASTER_VIPS__ "$msg"
+            get_units $1 __NUM_K8S_MASTER_UNITS__ 1
+            overlays+=( "k8s-master-ha.yaml" )
+            check_hacluster_channel
+            ;;
+        --num-workers)
+            parameters[__NUM_K8S_WORKER_UNITS__]=$2
+            shift
             ;;
         --list-overlays)  #__OPT__
             list_overlays

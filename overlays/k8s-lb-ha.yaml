@@ -1,0 +1,10 @@
+applications:
+  kubeapi-load-balancer:
+    options:
+      ha-cluster-vip: __K8S_LB_VIPS__
+  kubeapi-lb-hacluster:
+    charm: cs:~openstack-charmers-next/hacluster
+    options:
+      cluster_count: __NUM_K8S_LB_UNITS__
+relations:
+  - [ kubeapi-lb-hacluster, kubeapi-load-balancer ]
