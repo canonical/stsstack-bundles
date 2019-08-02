@@ -9,7 +9,7 @@ read answer
 
 source ~/novarc
 echo "Fetching vms for model..."
-readarray -t vms<<<"`openstack server list -c ID -c Name -f value| egrep "juju-.+-${model}-.+"| awk '{print $1}'`"
+readarray -t vms<<<"`openstack server list -c ID -c Name -f value| egrep "juju-.+-${model}-[0-9]+"| awk '{print $1}'`"
 echo "Powering on ${#vms[@]} vms"
 openstack server start ${vms[@]}
 echo "Done."
