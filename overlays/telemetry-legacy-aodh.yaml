@@ -26,9 +26,9 @@ applications:
     num_units: 1
     constraints: mem=1G
 relations:
-  - [ ceilometer, "keystone:identity-service" ]
-  - [ ceilometer, "keystone:identity-credentials" ]
-  - [ "ceilometer:amqp", "rabbitmq-server:amqp" ]
+  - [ ceilometer, 'keystone:identity-service' ]
+  - [ ceilometer, 'keystone:identity-credentials' ]
+  - [ 'ceilometer:amqp', 'rabbitmq-server:amqp' ]
   - [ ceilometer, mongodb ]
   - [ ceilometer-agent, nova-compute ]
   - [ ceilometer-agent, ceilometer ]

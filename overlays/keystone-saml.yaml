@@ -8,10 +8,10 @@ applications:
       nameid-formats: 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress'
       subject-confirmation-data-address-check: false
     resources:
-      idp-metadata: "__RESOURCES_PATH__idp-metadata.xml"
-      sp-signing-keyinfo: "__RESOURCES_PATH__sp-signing-keyinfo.xml"
-      sp-private-key: "__RESOURCES_PATH__sp-private-key.pem"
+      idp-metadata: '__RESOURCES_PATH__idp-metadata.xml'
+      sp-signing-keyinfo: '__RESOURCES_PATH__sp-signing-keyinfo.xml'
+      sp-private-key: '__RESOURCES_PATH__sp-private-key.pem'
 relations:
-  - [ "keystone:keystone-fid-service-provider", "keystone-saml-mellon:keystone-fid-service-provider" ]
-  - [ "openstack-dashboard:websso-fid-service-provider", "keystone-saml-mellon:websso-fid-service-provider" ]
-  - [ "openstack-dashboard:websso-trusted-dashboard", "keystone:websso-trusted-dashboard" ]
+  - [ 'keystone:keystone-fid-service-provider', 'keystone-saml-mellon:keystone-fid-service-provider' ]
+  - [ 'openstack-dashboard:websso-fid-service-provider', 'keystone-saml-mellon:websso-fid-service-provider' ]
+  - [ 'openstack-dashboard:websso-trusted-dashboard', 'keystone:websso-trusted-dashboard' ]

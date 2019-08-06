@@ -31,10 +31,10 @@ applications:
       backups_enabled: True
       bind_ip: 0.0.0.0
 relations:
-  - ['graylog', 'filebeat']
-  - ['graylog', 'elasticsearch']
-  - ['graylog', 'mongodb:database']
-  - ['elasticsearch:juju-info', 'filebeat:beats-host']
-  - ['mongodb', 'filebeat']
+  - [ graylog, filebeat ]
+  - [ graylog, elasticsearch ]
+  - [ graylog, 'mongodb:database' ]
+  - [ 'elasticsearch:juju-info', 'filebeat:beats-host' ]
+  - [ mongodb, filebeat ]
 # NOTE: filebeat relations to services will need to be added manually e.g.
 # - [ filebeat, ceph-mon ]

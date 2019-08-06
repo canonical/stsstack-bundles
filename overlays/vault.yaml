@@ -11,6 +11,6 @@ applications:
     options:
       channel: 3.1/stable
 relations:
-  - ['mysql:shared-db', 'vault:shared-db']
-  - ['etcd:db', 'vault:etcd']
-  - ['etcd:certificates', 'easyrsa:client']
+  - [ 'mysql:shared-db', 'vault:shared-db' ]
+  - [ 'etcd:db', 'vault:etcd' ]
+  - [ 'etcd:certificates', 'easyrsa:client' ]

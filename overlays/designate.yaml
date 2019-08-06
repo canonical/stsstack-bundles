@@ -27,4 +27,4 @@ relations:
   - [ designate, rabbitmq-server ]
   - [ designate, designate-bind ]
   - [ designate, memcached ]
-  - [ "designate:dnsaas", "neutron-api:external-dns" ]
+  - [ 'designate:dnsaas', 'neutron-api:external-dns' ]

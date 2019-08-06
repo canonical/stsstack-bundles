@@ -2,7 +2,5 @@ applications:
   docker:
     charm: cs:~containers/docker
 relations:
-- - docker:docker
-  - kubernetes-worker:container-runtime
-- - docker:docker
-  - kubernetes-master:container-runtime
+  - [ 'docker:docker', 'kubernetes-worker:container-runtime' ]
+  - [ 'docker:docker', 'kubernetes-master:container-runtime' ]

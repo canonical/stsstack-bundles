@@ -22,9 +22,9 @@ applications:
       debug: *debug
       openstack-origin: *openstack_origin
 relations:
-  - [ ceilometer, "keystone:identity-service" ]
-  - [ ceilometer, "keystone:identity-credentials" ]
-  - [ "ceilometer:amqp", "rabbitmq-server:amqp" ]
+  - [ ceilometer, 'keystone:identity-service' ]
+  - [ ceilometer, 'keystone:identity-credentials' ]
+  - [ 'ceilometer:amqp', 'rabbitmq-server:amqp' ]
   - [ ceilometer-agent, nova-compute ]
   - [ ceilometer-agent, ceilometer ]
   - [ ceilometer-agent, rabbitmq-server ]

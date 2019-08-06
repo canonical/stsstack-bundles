@@ -16,6 +16,6 @@ applications:
       openstack-origin: *openstack_origin
 relations:
   - [ neutron-gateway, nova-cloud-controller ]
-  - [ "neutron-gateway:amqp", rabbitmq-server ]
+  - [ 'neutron-gateway:amqp', rabbitmq-server ]
   - [ neutron-api, neutron-gateway ]
 
