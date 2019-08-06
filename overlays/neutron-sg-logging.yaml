@@ -1,0 +1,4 @@
+applications:
+  neutron-api:
+    options:
+      enable-security-group-logging: true

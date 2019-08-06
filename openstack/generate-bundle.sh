@@ -206,6 +206,10 @@ do
             # NOTE(hopem) yes this is a hack and we'll get rid of it hwen nova-network is finally no more
             opts+=( "--internal-template openstack-nova-network.yaml.template" )
             ;;
+        --neutron-sg-logging)
+            assert_min_release queens "neutron-sg-logging" ${CACHED_STDIN[@]}
+            overlays+=( "neutron-sg-logging.yaml" )            
+            ;;
         --cinder-ha*)
             get_units $1 __NUM_CINDER_UNITS__ 3
             overlays+=( "cinder-ha.yaml" )
