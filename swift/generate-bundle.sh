@@ -31,6 +31,7 @@ parameters[__NUM_VAULT_UNITS__]=1  # there are > 1 vault* overlay so need to use
 parameters[__SSL_CA__]=
 parameters[__SSL_CERT__]=
 parameters[__SSL_KEY__]=
+parameters[__ETCD_SNAP_CHANNEL__]='latest/stable'
 
 trap_help ${CACHED_STDIN[@]:-""}
 while (($# > 0))
@@ -64,9 +65,14 @@ do
             overlays+=( "vault.yaml" )
             overlays+=( "vault-swift.yaml" )
             ;;
+        --etcd-channel)
+            parameters[__ETCD_SNAP_CHANNEL__]=$2
+            shift
+            ;;
         --vault-ha*)
             get_units $1 __NUM_VAULT_UNITS__ 3
             overlays+=( "vault-ha.yaml" )
+            overlays+=( "vault-etcd.yaml" )
             set -- $@ --vault
             ;;
         --ha*)

@@ -42,6 +42,7 @@ parameters[__DNS_DOMAIN__]="${model_subdomain}.stsstack.qa.1ss."
 parameters[__DESIGNATE_NAMESERVERS__]="ns1.${parameters[__DNS_DOMAIN__]}"
 parameters[__BIND_DNS_FORWARDER__]='10.198.200.1'
 parameters[__ML2_DNS_FORWARDER__]='10.198.200.1'
+parameters[__ETCD_SNAP_CHANNEL__]='latest/stable'
 
 # If using any variant of dvr-snat, there is no need for a neutron-gateway.
 if ! has_opt --dvr-snat* ${CACHED_STDIN[@]}; then
@@ -275,15 +276,18 @@ do
             ;;
         --vault)
             assert_min_release queens "vault" ${CACHED_STDIN[@]}
-            overlays+=( "ceph.yaml" )
-            overlays+=( "openstack-ceph.yaml" )
             overlays+=( "vault.yaml" )
-            overlays+=( "vault-ceph.yaml" )
             overlays+=( "vault-openstack.yaml" )
+            has_opt '--ceph' ${CACHED_STDIN[@]} && overlays+=( "vault-ceph.yaml" )
+            ;;
+        --etcd-channel)
+            parameters[__ETCD_SNAP_CHANNEL__]=$2
+            shift
             ;;
         --vault-ha*)
             get_units $1 __NUM_VAULT_UNITS__ 3
             overlays+=( "vault-ha.yaml" )
+            overlays+=( "vault-etcd.yaml" )
             set -- $@ --vault
             ;;
         --ha*)

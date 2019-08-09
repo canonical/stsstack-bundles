@@ -1,0 +1,12 @@
+applications:
+  easyrsa:
+    charm: cs:~containers/easyrsa
+    num_units: 1
+  etcd:
+    charm: cs:etcd
+    num_units: 1
+    options:
+      channel: __ETCD_SNAP_CHANNEL__
+relations:
+  - [ 'etcd:db', 'vault:etcd' ]
+  - [ 'etcd:certificates', 'easyrsa:client' ]
