@@ -31,6 +31,7 @@ parameters[__NUM_VAULT_UNITS__]=1  # there are > 1 vault* overlay so need to use
 parameters[__SSL_CA__]=
 parameters[__SSL_CERT__]=
 parameters[__SSL_KEY__]=
+parameters[__NUM_ETCD_UNITS__]=1
 parameters[__ETCD_SNAP_CHANNEL__]='latest/stable'
 
 trap_help ${CACHED_STDIN[@]:-""}
@@ -71,7 +72,10 @@ do
             ;;
         --vault-ha*)
             get_units $1 __NUM_VAULT_UNITS__ 3
+            get_units $1 __NUM_ETCD_UNITS__ 3
             overlays+=( "vault-ha.yaml" )
+            overlays+=( "etcd.yaml" )
+            overlays+=( "etcd-easyrsa.yaml" )
             overlays+=( "vault-etcd.yaml" )
             set -- $@ --vault
             ;;

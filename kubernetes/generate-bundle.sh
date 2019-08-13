@@ -41,7 +41,7 @@ parameters[__K8S_MASTER_VIPS__]=
 parameters[__NUM_K8S_MASTER_UNITS__]=1
 parameters[__NUM_K8S_WORKER_UNITS__]=2
 parameters[__NUM_K8S_LB_UNITS__]=1
-
+parameters[__ETCD_SNAP_CHANNEL__]='latest/stable'
 
 # default for current stable is to use containerd
 # See https://ubuntu.com/kubernetes/docs/container-runtime
@@ -64,7 +64,9 @@ check_hacluster_channel ()
 if ! `has_opt '--master-ha' ${CACHED_STDIN[@]}`; then
     overlays+=( "k8s-lb.yaml"  )
 fi
-
+if ! `has_opt '--vault*' ${CACHED_STDIN[@]}`; then
+    overlays+=( "easyrsa.yaml" "k8s-easyrsa.yaml" )
+fi
 
 trap_help ${CACHED_STDIN[@]:-""}
 while (($# > 0))
@@ -113,6 +115,25 @@ do
             get_units $1 __NUM_K8S_MASTER_UNITS__ 1
             overlays+=( "k8s-master-ha.yaml" )
             check_hacluster_channel
+            ;;
+        --vault)
+            overlays+=( "vault.yaml" )
+            overlays+=( "mysql.yaml" )
+            overlays+=( "k8s-vault.yaml" )
+            has_opt '--ceph' ${CACHED_STDIN[@]} && overlays+=( "vault-ceph.yaml" )
+            ;;
+        --etcd-channel)
+            parameters[__ETCD_SNAP_CHANNEL__]=$2
+            shift
+            ;;
+        --vault-ha*)
+            get_units $1 __NUM_VAULT_UNITS__ 3
+            get_units $1 __NUM_ETCD_UNITS__ 3
+            overlays+=( "vault-ha.yaml" )
+            overlays+=( "etcd.yaml" )
+            overlays+=( "etcd-easyrsa.yaml" )
+            overlays+=( "vault-etcd.yaml" )
+            set -- $@ --vault
             ;;
         --num-workers)
             parameters[__NUM_K8S_WORKER_UNITS__]=$2

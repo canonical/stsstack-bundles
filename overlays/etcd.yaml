@@ -1,0 +1,6 @@
+applications:
+  etcd:
+    charm: cs:etcd
+    num_units: __NUM_ETCD_UNITS__
+    options:
+      channel: __ETCD_SNAP_CHANNEL__

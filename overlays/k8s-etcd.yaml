@@ -1,0 +1,3 @@
+relations:
+  - [ 'kubernetes-master:etcd', 'etcd:db' ]
+  - [ 'flannel:etcd', 'etcd:db' ]

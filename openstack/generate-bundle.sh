@@ -34,6 +34,7 @@ parameters[__NUM_COMPUTE_UNITS__]=1
 parameters[__NUM_CEPH_MON_UNITS__]=1
 parameters[__NUM_NEUTRON_GATEWAY_UNITS__]=1
 parameters[__NUM_VAULT_UNITS__]=1  # there are > 1 vault* overlay so need to use a global with default
+parameters[__NUM_ETCD_UNITS__]=1
 parameters[__NEUTRON_FW_DRIVER__]=openvswitch  # legacy is iptables_hybrid
 parameters[__SSL_CA__]=
 parameters[__SSL_CERT__]=
@@ -286,7 +287,10 @@ do
             ;;
         --vault-ha*)
             get_units $1 __NUM_VAULT_UNITS__ 3
+            get_units $1 __NUM_ETCD_UNITS__ 3
             overlays+=( "vault-ha.yaml" )
+            overlays+=( "etcd.yaml" )
+            overlays+=( "etcd-easyrsa.yaml" )
             overlays+=( "vault-etcd.yaml" )
             set -- $@ --vault
             ;;
