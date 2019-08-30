@@ -61,6 +61,10 @@ do
         --barbican)
             assert_min_release queens "barbican" ${CACHED_STDIN[@]}
             overlays+=( "barbican.yaml" )
+            # always use barbican-vault for now since that is the most common
+            # use-case.
+            overlays+=( "barbican-vault.yaml" )
+            set -- $@ --vault
             ;;
         --bgp)
             assert_min_release queens "dynamic routing" ${CACHED_STDIN[@]}
@@ -179,9 +183,6 @@ do
         --octavia)
             # >= Rocky
             assert_min_release rocky "octavia" ${CACHED_STDIN[@]}
-            overlays+=( "barbican.yaml" )
-            overlays+=( "vault.yaml" )
-            overlays+=( "vault-openstack.yaml" )
             overlays+=( "octavia.yaml" )
             ;;
         --rabbitmq-server-ha*)

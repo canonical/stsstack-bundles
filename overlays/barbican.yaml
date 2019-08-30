@@ -12,7 +12,7 @@ applications:
       debug: *debug
       openstack-origin: *openstack_origin
 relations:
-  - [ barbican, rabbitmq-server ]
-  - [ barbican, mysql ]
-  - [ barbican, keystone ]
+  - [ barbican:amqp, rabbitmq-server:amqp ]
+  - [ barbican:shared-db, mysql:shared-db ]
+  - [ barbican:identity-service, keystone:identity-service ]
 
