@@ -35,6 +35,7 @@ parameters[__NUM_CEPH_MON_UNITS__]=1
 parameters[__NUM_NEUTRON_GATEWAY_UNITS__]=1
 parameters[__NUM_VAULT_UNITS__]=1  # there are > 1 vault* overlay so need to use a global with default
 parameters[__NUM_ETCD_UNITS__]=1
+parameters[__NUM_OCTAVIA_UNITS__]=1
 parameters[__NEUTRON_FW_DRIVER__]=openvswitch  # legacy is iptables_hybrid
 parameters[__SSL_CA__]=
 parameters[__SSL_CERT__]=
@@ -44,6 +45,7 @@ parameters[__DESIGNATE_NAMESERVERS__]="ns1.${parameters[__DNS_DOMAIN__]}"
 parameters[__BIND_DNS_FORWARDER__]='10.198.200.1'
 parameters[__ML2_DNS_FORWARDER__]='10.198.200.1'
 parameters[__ETCD_SNAP_CHANNEL__]='latest/stable'
+parameters[__OCTAVIA_RETROFIT_UCA__]='rocky'  # charm defaults to rocky since it's the first version supported
 
 # If using any variant of dvr-snat, there is no need for a neutron-gateway.
 if ! has_opt --dvr-snat* ${CACHED_STDIN[@]}; then
@@ -184,6 +186,26 @@ do
             # >= Rocky
             assert_min_release rocky "octavia" ${CACHED_STDIN[@]}
             overlays+=( "octavia.yaml" )
+            if ! has_opt --no-octavia-diskimage-retrofit ${CACHED_STDIN[@]}; then
+                # By default we let retrofit use images uploaded by the post-deploy configure script.
+                overlays+=( "octavia-diskimage-retrofit.yaml" )
+                parameters[__OCTAVIA_RETROFIT_UCA__]=`get_uca_release ${CACHED_STDIN[@]}`
+                if ! has_opt --octavia-diskimage-retrofit-glance-simplestreams ${CACHED_STDIN[@]}; then
+                   overlays+=( "octavia-diskimage-retrofit-glance.yaml" )
+                fi
+                msgs+=( "NOTE: do 'juju run-action octavia-diskimage-retrofit/0 --wait retrofit-image image-id=<uuid>' with id of glance image to be used for amphorae" )
+            fi
+            ;;
+        --octavia-ha*)
+            get_units $1 __NUM_OCTAVIA_UNITS__ 3
+            overlays+=( "octavia-ha.yaml" )
+            ;;
+        --octavia-diskimage-retrofit-glance-simplestreams)  #__OPT__
+            check_opt_conflict $1 --no-octavia-diskimage-retrofit ${CACHED_STDIN[@]}
+            overlays+=( "glance-simplestreams-sync.yaml" )
+            overlays+=( "octavia-diskimage-retrofit-glance-simplestreams.yaml" )
+            ;;
+        --no-octavia-diskimage-retrofit)  #__OPT__
             ;;
         --rabbitmq-server-ha*)
             get_units $1 __NUM_RABBIT_UNITS__ 3
@@ -316,9 +338,11 @@ do
 done
 
 if ((${#msgs[@]})); then
+echo ""
   for m in "${msgs[@]}"; do
     echo -e "$m"
   done
+echo ""
 read -p "Hit [ENTER] to continue"
 fi
 

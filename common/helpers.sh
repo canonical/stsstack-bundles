@@ -173,7 +173,8 @@ list_opts ()
 {
     echo -e "\nBUNDLE OPTS:"
     grep __OPT__ `basename $0`| \
-        sed -r 's/.+\s+(--[[:alnum:]\-]+).+#__OPT__type:(.+)/      \1 \2/g;t;d'
+        sed -r -e 's/.+\s+(--[[:alnum:]\-]+).+#__OPT__type:(.+)/      \1 \2/g' \
+               -e 's/.+\s+(--[[:alnum:]\-]+).+#__OPT__$/      \1/g;t;d'
 }
 
 has_series ()
@@ -210,6 +211,18 @@ get_release ()
     done
 }
 
+get_uca_release ()
+{
+    r=`get_release $@`
+    s=`get_series $@`
+    # no release means its lts so no uca
+    [ -n "$r" ] || return
+    # lts s+r means no uca
+    ltsmatch "$s" "$r" && return
+    # else its uca
+    echo $release
+}
+
 get_pocket ()
 {
     while (($#)); do
@@ -232,6 +245,17 @@ do
     shift
 done
 return 1
+}
+
+check_opt_conflict ()
+{
+    good=$1
+    shift
+    bad=$1
+    shift
+    `has_opt $bad $@` || return 0
+    echo "ERROR: option $good conflicts with $bad"
+    exit 1
 }
 
 assert_min_release ()

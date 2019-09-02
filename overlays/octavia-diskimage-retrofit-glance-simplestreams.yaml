@@ -1,0 +1,3 @@
+relations:
+  - [ octavia-diskimage-retrofit:juju-info, glance-simplestreams-sync:juju-info ]
+

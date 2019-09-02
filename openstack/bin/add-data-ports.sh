@@ -10,7 +10,7 @@ readarray -t instances<<<"`juju status $application --format=json| jq -r '.machi
 
 declare -A requires=()
 require_count=0
-echo "Checking nova-compute units: ${instances[@]}"
+echo "Checking $application unit instances: ${instances[@]}"
 for inst in "${instances[@]}"; do
     num_ports="`openstack port list --server $inst| grep ACTIVE| wc -l`"
     if ((num_ports>1)); then

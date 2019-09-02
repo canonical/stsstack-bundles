@@ -1,0 +1,13 @@
+# Variables
+debug:                      &debug                     True
+
+applications:
+  octavia-diskimage-retrofit:
+    charm: cs:~openstack-charmers-next/octavia-diskimage-retrofit
+    options:
+      debug: *debug
+      amp-image-tag: octavia-amphora 
+      retrofit-uca-pocket: __OCTAVIA_RETROFIT_UCA__
+relations:
+  - [ octavia-diskimage-retrofit:identity-credentials, keystone:identity-credentials ]
+
