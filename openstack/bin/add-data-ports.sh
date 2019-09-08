@@ -21,7 +21,7 @@ for inst in "${instances[@]}"; do
     fi
 done
 
-if ((require_count>0)); then
+if ((require_count)); then
     # Get extant free ports
     readarray -t ports<<<"`openstack port list| grep data-port| grep DOWN| awk '{print $2}'`"
     [ -n "${ports[0]}" ] || ports=()
@@ -30,12 +30,14 @@ if ((require_count>0)); then
     else
         delta=$require_count
     fi
+    if ((delta>0)); then
+        echo "Creating $delta new ports"
+        for ((i=0;i<$delta;i++)); do
+            openstack port create data-port --network ${OS_PROJECT_NAME}_admin_net
+        done
+    fi
 
-    echo "Creating $delta new ports" 
-    for ((i=0;i<$delta;i++)); do
-        openstack port create data-port --network ${OS_PROJECT_NAME}_admin_net
-    done
-
+    declare -a mac_addrs=()
     readarray -t ports<<<"`openstack port list| grep data-port| grep DOWN| awk '{print $2}'`"
     i=0
     for inst in "${instances[@]}"; do
@@ -43,7 +45,11 @@ if ((require_count>0)); then
         port=${ports[$((i++))]}
         echo "Adding port $port to server $inst"
         openstack server add port $inst $port
+        mac_addrs+=( "br-data:`openstack port show -c mac_address -f value $port`" )
     done
+    echo "Updating neutron-openvswitch data-port"
+    m="${mac_addrs[@]}"
+    juju config neutron-openvswitch data-port="$m"
 else
     echo "All instances have > 1 port already - nothing to do"
 fi

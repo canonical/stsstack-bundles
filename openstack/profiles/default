@@ -24,8 +24,8 @@ NS_ARG=""
 # Accept network type as first parameter, assume gre if unspecified
 net_type=${1:-"gre"}
 
-# If not on bare metal, add extra port to overcloud neutron-gateway and configure charm to use it
-if [[ "${BARE_METAL^^}" != "TRUE" ]]; then
+# add extra port to overcloud neutron-gateway (if exists) and configure charm to use it
+if ((`juju status neutron-gateway --format=json| jq .machines[]| wc -l`)); then
     source ~/novarc
     ./bin/post-deploy-config neutron-gateway
 fi
