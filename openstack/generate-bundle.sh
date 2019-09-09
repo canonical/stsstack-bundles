@@ -49,11 +49,11 @@ parameters[__OCTAVIA_RETROFIT_UCA__]='rocky'  # charm defaults to rocky since it
 parameters[__GSSS_SWIFT_ENABLED__]=false  # glance-simplestreams-sync can optionally store index data in swift
 
 # If using any variant of dvr-snat, there is no need for a neutron-gateway.
-if ! has_opt --dvr-snat* ${CACHED_STDIN[@]}; then
+if ! has_opt --dvr-snat*; then
     overlays+=( "neutron-gateway.yaml" )
 fi
 
-trap_help ${CACHED_STDIN[@]:-""}
+trap_help $@
 while (($# > 0))
 do
     case "$1" in
@@ -62,15 +62,15 @@ do
             shift
             ;;
         --barbican)
-            assert_min_release queens "barbican" ${CACHED_STDIN[@]}
+            assert_min_release queens "barbican"
             overlays+=( "barbican.yaml" )
             # always use barbican-vault for now since that is the most common
             # use-case.
             overlays+=( "barbican-vault.yaml" )
-            set -- $@ --vault
+            set -- $@ --vault && cache $@
             ;;
         --bgp)
-            assert_min_release queens "dynamic routing" ${CACHED_STDIN[@]}
+            assert_min_release queens "dynamic routing"
             overlays+=( "neutron-bgp.yaml" )
             ;;
         --ceph)
@@ -90,7 +90,7 @@ do
             overlays+=( "ceph-rgw-multisite.yaml" )
             ;;
         --designate)
-            assert_min_release ocata "designate" ${CACHED_STDIN[@]}
+            assert_min_release ocata "designate"
             ns=${parameters[__BIND_DNS_FORWARDER__]}
             msg="REQUIRED: designate-bind upstream dns server to forward requests to (default=$ns):"
             get_param $1 __BIND_DNS_FORWARDER__ "$msg"
@@ -107,31 +107,31 @@ do
         --dvr-l3ha*)
             get_units $1 __NUM_AGENTS_PER_ROUTER__ 3
             # if we are a dep then don't get gateway units
-            if ! `has_opt --dvr-snat-l3ha* ${CACHED_STDIN[@]}`; then
+            if ! `has_opt --dvr-snat-l3ha*`; then
                 get_units $1 __NUM_NEUTRON_GATEWAY_UNITS__ 3
             fi
-            has_opt --dvr ${CACHED_STDIN[@]} || set -- $@ --dvr
+            has_opt --dvr || { set -- $@ --dvr && cache $@; }
             overlays+=( "neutron-l3ha.yaml" )
             ;;
         --dvr-snat-l3ha*)
-            assert_min_release queens "dvr-snat-l3ha" ${CACHED_STDIN[@]}
+            assert_min_release queens "dvr-snat-l3ha"
             get_units $1 __NUM_COMPUTE_UNITS__ 3
             get_units $1 __NUM_AGENTS_PER_ROUTER__ 3
             overlays+=( "neutron-dvr-snat.yaml" )
-            has_opt --dvr-snat* ${CACHED_STDIN[@]} || \
-                set -- $@ --dvr-snat:${parameters[__NUM_COMPUTE_UNITS__]}
-            set -- $@ --dvr-l3ha:${parameters[__NUM_AGENTS_PER_ROUTER__]}
+            has_opt --dvr-snat* || \
+                { set -- $@ --dvr-snat:${parameters[__NUM_COMPUTE_UNITS__]} && cache $@; }
+            set -- $@ --dvr-l3ha:${parameters[__NUM_AGENTS_PER_ROUTER__]} && cache $@
             ;;
         --dvr-snat*)
-            assert_min_release queens "dvr-snat" ${CACHED_STDIN[@]}
+            assert_min_release queens "dvr-snat"
             get_units $1 __NUM_COMPUTE_UNITS__ 1
-            has_opt --dvr ${CACHED_STDIN[@]} || set -- $@ --dvr
+            has_opt --dvr || { set -- $@ --dvr && cache $@; }
             overlays+=( "neutron-dvr-snat.yaml" )
             ;;
         --lma)
             # Logging Monitoring and Alarming
-            set -- $@ --graylog --grafana
-            ;;
+            set -- $@ --graylog --grafana && cache $@
+           ;;
         --graylog)
             overlays+=( "graylog.yaml ")
             msgs+=( "NOTE: you will need to manually relate graylog (filebeat) to any other services you want to monitor" )
@@ -139,19 +139,19 @@ do
         --grafana)
             overlays+=( "grafana.yaml ")
             overlays+=( "prometheus-openstack.yaml ")
-            if `has_opt --ceph ${CACHED_STDIN[@]}`; then
+            if `has_opt --ceph`; then
                 overlays+=( "prometheus-ceph.yaml ")
             fi
             msgs+=( "NOTE: telegraf has been related to core openstack services but you may need to add to others you have in your deployment" )
             ;;
         --nagios)
             overlays+=( "nagios.yaml ")
-            if `has_opt '--ceph' ${CACHED_STDIN[@]}`; then
+            if `has_opt --ceph`; then
                 overlays+=( "nagios-ceph.yaml ")
             fi
             # If using any variant of dvr-snat, there is no need to relate
             # nagios to neutron-gateway
-            if ! has_opt --dvr-snat* ${CACHED_STDIN[@]}; then
+            if ! has_opt --dvr-snat*; then
                 overlays+=( "nagios-neutron-gateway.yaml" )
             fi
             ;;
@@ -162,7 +162,7 @@ do
             overlays+=( "ldap.yaml" )
             ;;
         --neutron-fw-driver)  #__OPT__type:[openvswitch|iptables_hybrid] (default=openvswitch)
-            assert_min_release newton "openvswitch driver" ${CACHED_STDIN[@]}
+            assert_min_release newton "openvswitch driver"
             parameters[__NEUTRON_FW_DRIVER__]=$2
             shift
             ;;
@@ -176,7 +176,7 @@ do
             overlays+=( "keystone-v3.yaml" )
             ;;
         --keystone-saml)
-            assert_min_release rocky "keystone saml" ${CACHED_STDIN[@]}
+            assert_min_release rocky "keystone saml"
             overlays+=( "keystone-saml.yaml" )
             ;;
         --mysql-ha*)
@@ -191,18 +191,18 @@ do
             overlays+=( "neutron-ml2dns.yaml" )
             ;;
         --nova-cells)
-            assert_min_release rocky "nova cells" ${CACHED_STDIN[@]}
+            assert_min_release rocky "nova cells"
             overlays+=( "nova-cells.yaml" )
             ;;
         --octavia)
             # >= Rocky
-            assert_min_release rocky "octavia" ${CACHED_STDIN[@]}
+            assert_min_release rocky "octavia"
             overlays+=( "octavia.yaml" )
-            if ! has_opt --no-octavia-diskimage-retrofit ${CACHED_STDIN[@]}; then
+            if ! has_opt --no-octavia-diskimage-retrofit; then
                 # By default we let retrofit use images uploaded by the post-deploy configure script.
                 overlays+=( "octavia-diskimage-retrofit.yaml" )
-                parameters[__OCTAVIA_RETROFIT_UCA__]=`get_uca_release ${CACHED_STDIN[@]}`
-                if ! has_opt --octavia-diskimage-retrofit-glance-simplestreams ${CACHED_STDIN[@]}; then
+                parameters[__OCTAVIA_RETROFIT_UCA__]=`get_uca_release`
+                if ! has_opt --octavia-diskimage-retrofit-glance-simplestreams; then
                    overlays+=( "octavia-diskimage-retrofit-glance.yaml" )
                 fi
                 msgs+=( "NOTE: do 'juju run-action octavia-diskimage-retrofit/0 --wait retrofit-image image-id=<uuid>' with id of glance image to be used for amphorae" )
@@ -213,15 +213,15 @@ do
             overlays+=( "octavia-ha.yaml" )
             ;;
         --octavia-diskimage-retrofit-glance-simplestreams)  #__OPT__
-            check_opt_conflict $1 --no-octavia-diskimage-retrofit ${CACHED_STDIN[@]}
-            set -- $@ --glance-simplestreams
+            check_opt_conflict $1 --no-octavia-diskimage-retrofit
+            set -- $@ --glance-simplestreams && cache $@
             overlays+=( "octavia-diskimage-retrofit-glance-simplestreams.yaml" )
             ;;
         --no-octavia-diskimage-retrofit)  #__OPT__
             ;;
         --glance-simplestreams-swift)
             parameters[__GSSS_SWIFT_ENABLED__]=true
-            set -- $@ --glance-simplestreams --ceph-rgw
+            set -- $@ --glance-simplestreams --ceph-rgw && cache $@
             ;;
         --glance-simplestreams)
             overlays+=( "glance-simplestreams-sync.yaml" )
@@ -234,15 +234,15 @@ do
             overlays+=( "rsyslog.yaml" )
             ;;
         --ssl)
-            if ! `has_opt --replay ${CACHED_STDIN[@]}`; then
+            if ! `has_opt --replay`; then
                 (cd ssl; ./create_ca_cert.sh openstack;)
                 ssl_results="ssl/openstack/results"
                 parameters[__SSL_CA__]=`base64 ${ssl_results}/cacert.pem| tr -d '\n'`
                 parameters[__SSL_CERT__]=`base64 ${ssl_results}/servercert.pem| tr -d '\n'`
                 parameters[__SSL_KEY__]=`base64 ${ssl_results}/serverkey.pem| tr -d '\n'`
                 # Make everything HA with 1 unit (unless --ha has already been set)
-                if ! `has_opt '--ha[:0-9]*$' ${CACHED_STDIN[@]}`; then
-                    set -- $@ --ha:1
+                if ! `has_opt '--ha[:0-9]*$'`; then
+                    set -- $@ --ha:1 && cache $@
                 fi
             fi
             ;;
@@ -251,7 +251,7 @@ do
             opts+=( "--internal-template openstack-nova-network.yaml.template" )
             ;;
         --neutron-sg-logging)
-            assert_min_release queens "neutron-sg-logging" ${CACHED_STDIN[@]}
+            assert_min_release queens "neutron-sg-logging"
             overlays+=( "neutron-sg-logging.yaml" )            
             ;;
         --cinder-ha*)
@@ -260,7 +260,7 @@ do
             ;;
         --designate-ha*)
             get_units $1 __NUM_DESIGNATE_UNITS__ 3
-            set -- $@ --designate
+            set -- $@ --designate && cache $@
             overlays+=( "designate-ha.yaml" )
             ;;
         --glance-ha*)
@@ -298,7 +298,7 @@ do
             ;;
         --telemetry|--telemetry-gnocchi)
             # ceilometer + aodh + gnocchi (>= pike)
-            assert_min_release pike "gnocchi" ${CACHED_STDIN[@]} 
+            assert_min_release pike "gnocchi" 
             overlays+=( "ceph.yaml" )
             overlays+=( "gnocchi.yaml" )
             overlays+=( "memcached.yaml" )
@@ -318,10 +318,10 @@ do
             overlays+=( "telemetry-ha.yaml" )
             ;;
         --vault)
-            assert_min_release queens "vault" ${CACHED_STDIN[@]}
+            assert_min_release queens "vault"
             overlays+=( "vault.yaml" )
             overlays+=( "vault-openstack.yaml" )
-            has_opt --ceph ${CACHED_STDIN[@]} && overlays+=( "vault-ceph.yaml" )
+            has_opt --ceph && overlays+=( "vault-ceph.yaml" )
             ;;
         --etcd-channel)
             parameters[__ETCD_SNAP_CHANNEL__]=$2
@@ -335,7 +335,7 @@ do
             overlays+=( "easyrsa.yaml" )
             overlays+=( "etcd-easyrsa.yaml" )
             overlays+=( "vault-etcd.yaml" )
-            set -- $@ --vault
+            set -- $@ --vault && cache $@
             ;;
         --ha*)
             get_units $1 __NUM_HA_UNITS__ 3
@@ -343,7 +343,7 @@ do
             # This is HA for "core" service apis only.
             set -- $@ --cinder-ha:$units --glance-ha:$units \
                       --keystone-ha:$units --neutron-api-ha:$units \
-                      --nova-cloud-controller-ha:$units
+                      --nova-cloud-controller-ha:$units && cache $@
             ;;
         --list-overlays)  #__OPT__
             list_overlays

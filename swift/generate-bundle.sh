@@ -34,7 +34,7 @@ parameters[__SSL_KEY__]=
 parameters[__NUM_ETCD_UNITS__]=1
 parameters[__ETCD_SNAP_CHANNEL__]='latest/stable'
 
-trap_help ${CACHED_STDIN[@]:-""}
+trap_help $@
 while (($# > 0))
 do
     case "$1" in
@@ -49,15 +49,15 @@ do
             msgs+=( "NOTE: you will need to manually relate grafana (telegraf) to any services you want to monitor" )
             ;;
         --ssl)
-            if ! `has_opt '--replay' ${CACHED_STDIN[@]}`; then
+            if ! `has_opt '--replay'`; then
                 (cd ssl; ./create_ca_cert.sh swift;)
                 ssl_results="ssl/swift/results"
                 parameters[__SSL_CA__]=`base64 ${ssl_results}/cacert.pem| tr -d '\n'`
                 parameters[__SSL_CERT__]=`base64 ${ssl_results}/servercert.pem| tr -d '\n'`
                 parameters[__SSL_KEY__]=`base64 ${ssl_results}/serverkey.pem| tr -d '\n'`
                 # Make everything HA with 1 unit (unless --ha has already been set)
-                if ! `has_opt '--ha[:0-9]*$' ${CACHED_STDIN[@]}`; then
-                    set -- $@ --ha:1
+                if ! `has_opt '--ha[:0-9]*$'`; then
+                    set -- $@ --ha:1 && cache $@
                 fi
             fi
             ;;
@@ -78,7 +78,7 @@ do
             overlays+=( "easyrsa.yaml" )
             overlays+=( "etcd-easyrsa.yaml" )
             overlays+=( "vault-etcd.yaml" )
-            set -- $@ --vault
+            set -- $@ --vault && cache $@
             ;;
         --ha*)
             get_units $1 __NUM_SWIFT_PROXY_UNITS__ 3

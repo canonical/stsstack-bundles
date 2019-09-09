@@ -1,4 +1,4 @@
-CACHED_STDIN=( $@ )
+export CACHED_STDIN=( $@ )
 ((${#CACHED_STDIN[@]})) || CACHED_STDIN=( "" )
 DEFAULT_SERIES=bionic
 
@@ -87,13 +87,15 @@ get_optstrarg ()
 get_optval ()
 {
     opt=$1
-    shift
+    _f () {
     while (($#)); do
         if [ "$1" = "$opt" ]; then
             echo $2
         fi
         shift
     done
+    }
+    _f ${CACHED_STDIN[@]}
 }
 
 get_param_forced()
@@ -213,8 +215,8 @@ get_release ()
 
 get_uca_release ()
 {
-    r=`get_release $@`
-    s=`get_series $@`
+    r=`get_release ${CACHED_STDIN[@]}`
+    s=`get_series ${CACHED_STDIN[@]}`
     # no release means its lts so no uca
     [ -n "$r" ] || return
     # lts s+r means no uca
@@ -234,26 +236,34 @@ get_pocket ()
     done
 }
 
+cache ()
+{
+    # ensure cached opts contains any new ones
+    declare -A dict
+    for e in ${CACHED_STDIN[@]}; do dict[$e]=false; done
+    for e in $@; do [ -n ${dict[$e]:-""} ] || CACHED_STDIN+=( $e ); done
+}
 
 has_opt ()
 {
-opt="$1"
-shift
-while (($# > 0))
-do
-    [[ "$1" = $opt ]] && return 0
-    shift
-done
-return 1
+    opt="$1"
+    _f () {
+    while (($# > 0))
+    do
+        [[ "$1" = $opt ]] && return 0
+        shift
+    done
+    return 1
+    }
+    _f ${CACHED_STDIN[@]}
+    return $?
 }
 
 check_opt_conflict ()
 {
     good=$1
-    shift
-    bad=$1
-    shift
-    `has_opt $bad $@` || return 0
+    bad=$2
+    `has_opt $bad` || return 0
     echo "ERROR: option $good conflicts with $bad"
     exit 1
 }
@@ -262,9 +272,8 @@ assert_min_release ()
 {
     min=$1
     msg=$2
-    shift 2
-    r=`get_release $@`
-    [ -n "$r" ] || r=${lts[`get_series $@`]:-${nonlts[`get_series $@`]:-""}}
+    r=`get_release ${CACHED_STDIN[@]}`
+    [ -n "$r" ] || r=${lts[`get_series ${CACHED_STDIN[@]}`]:-${nonlts[`get_series ${CACHED_STDIN[@]}`]:-""}}
     [[ "$r" < "$min" ]] || return 0
     echo "Min release '$min' required to be able to use $msg (currently using '$r')" 1>&2
     exit 1
@@ -375,8 +384,8 @@ done
 # get cli model name if available since it might not have been created yet.
 get_juju_model ()
 {
-if `has_opt --create-model ${CACHED_STDIN[@]}`; then
-    name="`get_optval --name ${CACHED_STDIN[@]}`"
+if `has_opt --create-model`; then
+    name="`get_optval --name`"
     if [ -n "$name" ]; then
         echo $name
     fi

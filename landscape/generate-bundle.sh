@@ -30,7 +30,7 @@ declare -a overlays=()
 declare -A parameters=()
 parameters[__LANDSCAPE_VERSION__]="19.01"
 
-trap_help ${CACHED_STDIN[@]:-""}
+trap_help $@
 while (($# > 0))
 do
     case "$1" in
