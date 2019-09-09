@@ -34,6 +34,10 @@ if ! has_opt --dvr-snat*; then
     MOD_OVERLAYS+=( "neutron-gateway.yaml" )
 fi
 
+if ! has_opt --no-ml2dns && ! has_opt --designate*; then
+    set -- $@ --ml2dns && cache $@
+fi
+
 while (($# > 0))
 do
     case "$1" in
@@ -165,11 +169,16 @@ do
             get_units $1 __NUM_MYSQL_UNITS__ 3
             MOD_OVERLAYS+=( "mysql-ha.yaml" )
             ;;
+        --no-ml2dns)  #__OPT__
+            ;;
         --ml2dns)
             # this is internal dns integration, for external use --designate
             msg="REQUIRED: ml2-dns upstream dns server to forward requests to:"
             get_param $1 __ML2_DNS_FORWARDER__ "$msg"
             MOD_OVERLAYS+=( "neutron-ml2dns.yaml" )
+            if ! has_opt --dvr-snat*; then
+                overlays+=( "neutron-ml2dns-gateway.yaml" )
+            fi
             ;;
         --nova-cells)
             assert_min_release rocky "nova cells"

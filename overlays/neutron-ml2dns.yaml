@@ -7,9 +7,6 @@ applications:
     options:
       enable-ml2-dns: True
       dns-domain: *dns_domain
-  neutron-gateway:
-    options:
-      dns-servers: *dns_servers
   neutron-openvswitch:
     options:
       dns-servers: *dns_servers
