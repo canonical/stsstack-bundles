@@ -228,7 +228,7 @@ opt="$1"
 shift
 while (($# > 0))
 do
-    [[ "$1" =~ $opt ]] && return 0
+    [[ "$1" = $opt ]] && return 0
     shift
 done
 return 1

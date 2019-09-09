@@ -98,17 +98,16 @@ do
             overlays+=( "designate.yaml" )
             ;;
         --dvr)
-            overlays+=( "neutron-dvr.yaml" )
             get_param $1 __DVR_DATA_PORT__ 'REQUIRED: compute host DVR data-port(s) (leave blank to set later): '
+            overlays+=( "neutron-dvr.yaml" )
             ;;
         --dvr-l3ha*)
-            get_param_forced $1 __DVR_DATA_PORT__ 'REQUIRED: compute host DVR data-port(s) (leave blank to set later): '
             get_units $1 __NUM_AGENTS_PER_ROUTER__ 3
             # if we are a dep then don't get gateway units
-            if ! `has_opt '--dvr-snat-l3ha' ${CACHED_STDIN[@]}`; then
+            if ! `has_opt --dvr-snat-l3ha* ${CACHED_STDIN[@]}`; then
                 get_units $1 __NUM_NEUTRON_GATEWAY_UNITS__ 3
             fi
-            overlays+=( "neutron-dvr.yaml" )
+            has_opt --dvr ${CACHED_STDIN[@]} || set -- $@ --dvr
             overlays+=( "neutron-l3ha.yaml" )
             ;;
         --dvr-snat-l3ha*)
@@ -116,13 +115,14 @@ do
             get_units $1 __NUM_COMPUTE_UNITS__ 3
             get_units $1 __NUM_AGENTS_PER_ROUTER__ 3
             overlays+=( "neutron-dvr-snat.yaml" )
+            has_opt --dvr-snat* ${CACHED_STDIN[@]} || \
+                set -- $@ --dvr-snat:${parameters[__NUM_COMPUTE_UNITS__]}
             set -- $@ --dvr-l3ha:${parameters[__NUM_AGENTS_PER_ROUTER__]}
             ;;
         --dvr-snat*)
             assert_min_release queens "dvr-snat" ${CACHED_STDIN[@]}
-            get_param_forced $1 __DVR_DATA_PORT__ 'REQUIRED: compute host DVR data-port(s) (leave blank to set later): '
             get_units $1 __NUM_COMPUTE_UNITS__ 1
-            overlays+=( "neutron-dvr.yaml" )
+            has_opt --dvr ${CACHED_STDIN[@]} || set -- $@ --dvr
             overlays+=( "neutron-dvr-snat.yaml" )
             ;;
         --lma)
@@ -136,7 +136,7 @@ do
         --grafana)
             overlays+=( "grafana.yaml ")
             overlays+=( "prometheus-openstack.yaml ")
-            if `has_opt '--ceph' ${CACHED_STDIN[@]}`; then
+            if `has_opt --ceph ${CACHED_STDIN[@]}`; then
                 overlays+=( "prometheus-ceph.yaml ")
             fi
             msgs+=( "NOTE: telegraf has been related to core openstack services but you may need to add to others you have in your deployment" )
@@ -193,7 +193,7 @@ do
             overlays+=( "rsyslog.yaml" )
             ;;
         --ssl)
-            if ! `has_opt '--replay' ${CACHED_STDIN[@]}`; then
+            if ! `has_opt --replay ${CACHED_STDIN[@]}`; then
                 (cd ssl; ./create_ca_cert.sh openstack;)
                 ssl_results="ssl/openstack/results"
                 parameters[__SSL_CA__]=`base64 ${ssl_results}/cacert.pem| tr -d '\n'`
@@ -280,7 +280,7 @@ do
             assert_min_release queens "vault" ${CACHED_STDIN[@]}
             overlays+=( "vault.yaml" )
             overlays+=( "vault-openstack.yaml" )
-            has_opt '--ceph' ${CACHED_STDIN[@]} && overlays+=( "vault-ceph.yaml" )
+            has_opt --ceph ${CACHED_STDIN[@]} && overlays+=( "vault-ceph.yaml" )
             ;;
         --etcd-channel)
             parameters[__ETCD_SNAP_CHANNEL__]=$2
