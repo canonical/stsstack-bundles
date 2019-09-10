@@ -19,12 +19,39 @@ function upload_image {
         wget -O ~/images/$image_file ${http_root}/${image_file}
     }
 
+    # Downloaded images are in qcow2 format already, so we
+    # convert them to raw if specified format is not qcow2.
+    if [ "$image_format" == "raw" ]; then
+        convert_image_to_raw $image_name $image_file
+        image_name=$image_name-raw
+        image_file=$image_name.img
+    fi
+
     openstack image show $image_name || {
         openstack image create --public \
             --container-format=bare --disk-format=$image_format \
             --file=${HOME}/images/$image_file  $image_name \
             --property architecture=$image_arch
     }
+}
+
+function convert_image_to_raw {
+    _image_name=$1-raw
+    _image_file=$2
+
+    [ -f ~/images/$_image_name.img ] || {
+        previous_set_builtin=$-
+        set +e
+        qemu-img convert -f qcow2 -O raw ${HOME}/images/$_image_file ${HOME}/images/$_image_name.img
+        exit_code=$?
+        set -$previous_set_builtin
+        if [ "$exit_code" != "0" ]; then
+            echo "Failed to convert image, deleting file if exists"
+            rm ${HOME}/images/$_image_name.img
+            exit 1
+        fi
+    }
+
 }
 
 # Upload Image for Multi-Hypervisor Clouds
