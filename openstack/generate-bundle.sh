@@ -144,6 +144,17 @@ do
             fi
             msgs+=( "NOTE: telegraf has been related to core openstack services but you may need to add to others you have in your deployment" )
             ;;
+        --nagios)
+            overlays+=( "nagios.yaml ")
+            if `has_opt '--ceph' ${CACHED_STDIN[@]}`; then
+                overlays+=( "nagios-ceph.yaml ")
+            fi
+            # If using any variant of dvr-snat, there is no need to relate
+            # nagios to neutron-gateway
+            if ! has_opt --dvr-snat* ${CACHED_STDIN[@]}; then
+                overlays+=( "nagios-neutron-gateway.yaml" )
+            fi
+            ;;
         --heat)
             overlays+=( "heat.yaml ")
             ;;

@@ -1,0 +1,3 @@
+relations:
+  - [ nrpe, ceph-mon ]
+  - [ nrpe, ceph-osd ]

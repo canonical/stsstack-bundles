@@ -1,0 +1,17 @@
+applications:
+  nagios:
+    charm: cs:nagios
+    options:
+      password: ubuntu
+  nrpe:
+    charm: cs:nrpe
+    options:
+      nagios_hostname_type: "host"
+relations:
+  - [ nrpe, nagios]
+  - [ nrpe, nova-compute]
+  - [ nrpe, nova-cloud-controller]
+  - [ nrpe, neutron-api ]
+  - [ nrpe, cinder ]
+  - [ nrpe, glance ]
+  - [ nrpe, keystone ]

@@ -1,0 +1,2 @@
+relations:
+  - [ nrpe, neutron-gateway ]
