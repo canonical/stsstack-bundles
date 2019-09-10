@@ -61,6 +61,10 @@ check_hacluster_channel ()
 }
 
 # default overlay setup
+overlays+=(
+    "etcd.yaml"
+    "k8s-etcd.yaml"
+)
 if ! `has_opt '--master-ha' ${CACHED_STDIN[@]}`; then
     overlays+=( "k8s-lb.yaml"  )
 fi
@@ -130,7 +134,6 @@ do
             get_units $1 __NUM_VAULT_UNITS__ 3
             get_units $1 __NUM_ETCD_UNITS__ 3
             overlays+=( "vault-ha.yaml" )
-            overlays+=( "etcd.yaml" )
             overlays+=( "easyrsa.yaml" )
             overlays+=( "etcd-easyrsa.yaml" )
             overlays+=( "vault-etcd.yaml" )
