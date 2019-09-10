@@ -46,6 +46,7 @@ parameters[__BIND_DNS_FORWARDER__]='10.198.200.1'
 parameters[__ML2_DNS_FORWARDER__]='10.198.200.1'
 parameters[__ETCD_SNAP_CHANNEL__]='latest/stable'
 parameters[__OCTAVIA_RETROFIT_UCA__]='rocky'  # charm defaults to rocky since it's the first version supported
+parameters[__GSSS_SWIFT_ENABLED__]=false  # glance-simplestreams-sync can optionally store index data in swift
 
 # If using any variant of dvr-snat, there is no need for a neutron-gateway.
 if ! has_opt --dvr-snat* ${CACHED_STDIN[@]}; then
@@ -202,10 +203,17 @@ do
             ;;
         --octavia-diskimage-retrofit-glance-simplestreams)  #__OPT__
             check_opt_conflict $1 --no-octavia-diskimage-retrofit ${CACHED_STDIN[@]}
-            overlays+=( "glance-simplestreams-sync.yaml" )
+            set -- $@ --glance-simplestreams
             overlays+=( "octavia-diskimage-retrofit-glance-simplestreams.yaml" )
             ;;
         --no-octavia-diskimage-retrofit)  #__OPT__
+            ;;
+        --glance-simplestreams-swift)
+            parameters[__GSSS_SWIFT_ENABLED__]=true
+            set -- $@ --glance-simplestreams --ceph-rgw
+            ;;
+        --glance-simplestreams)
+            overlays+=( "glance-simplestreams-sync.yaml" )
             ;;
         --rabbitmq-server-ha*)
             get_units $1 __NUM_RABBIT_UNITS__ 3

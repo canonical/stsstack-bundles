@@ -14,7 +14,7 @@ applications:
           item_filters: ['release~(bionic)',
                          'arch~(x86_64|amd64)',
                          'ftype~(disk1.img|disk.img)']}]
-      use_swift: false 
+      use_swift: __GSSS_SWIFT_ENABLED__
 relations:
   - [ glance-simplestreams-sync:identity-service, keystone:identity-service ]
 
