@@ -2,5 +2,8 @@ applications:
   vault:
     charm: cs:~openstack-charmers-next/vault
     num_units: __NUM_VAULT_UNITS__
+    options:
+      totally-unsecure-auto-unlock: true
+      auto-generate-root-ca-cert: true
 relations:
   - [ 'mysql:shared-db', 'vault:shared-db' ]

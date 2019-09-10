@@ -1,3 +1,4 @@
 relations:
   - [ 'kubernetes-master:certificates', 'easyrsa:client' ]
   - [ 'kubernetes-worker:certificates', 'easyrsa:client' ]
+  - [ 'kubeapi-load-balancer:certificates', 'easyrsa:client' ]

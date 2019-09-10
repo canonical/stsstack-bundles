@@ -8,4 +8,3 @@ relations:
   - [ 'kubernetes-master:kube-api-endpoint', 'kubeapi-load-balancer:apiserver' ]
   - [ 'kubernetes-master:loadbalancer', 'kubeapi-load-balancer:loadbalancer' ]
   - [ 'kubernetes-worker:kube-api-endpoint', 'kubeapi-load-balancer:website' ]
-  - [ 'kubeapi-load-balancer:certificates', 'easyrsa:client' ]
