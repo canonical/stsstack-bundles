@@ -5,8 +5,7 @@ applications:
     expose: true
     num_units: __NUM_K8S_LB_UNITS__
 relations:
-  [ 'kubernetes-master:kube-api-endpoint', 'kubeapi-load-balancer:apiserver' ]
-  [ 'kubernetes-master:loadbalancer', 'kubeapi-load-balancer:loadbalancer' ]
-  [ 'kubernetes-worker:kube-api-endpoint', 'kubeapi-load-balancer:website' ]
-  [ 'kubeapi-load-balancer:certificates', 'easyrsa:client' ]
-
+  - [ 'kubernetes-master:kube-api-endpoint', 'kubeapi-load-balancer:apiserver' ]
+  - [ 'kubernetes-master:loadbalancer', 'kubeapi-load-balancer:loadbalancer' ]
+  - [ 'kubernetes-worker:kube-api-endpoint', 'kubeapi-load-balancer:website' ]
+  - [ 'kubeapi-load-balancer:certificates', 'easyrsa:client' ]

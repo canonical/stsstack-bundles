@@ -1,5 +1,5 @@
 relations:
- - ['etcd:certificates', 'vault:client']
- - ['kubernetes-master:certificates', 'vault:client']
- - ['kubernetes-worker:certificates', 'vault:client']
- - ['kubeapi-load-balancer:certificates', 'vault:client']
+ - ['etcd:certificates', 'vault:certificates']
+ - ['kubernetes-master:certificates', 'vault:certificates']
+ - ['kubernetes-worker:certificates', 'vault:certificates']
+ - ['kubeapi-load-balancer:certificates', 'vault:certificates']
