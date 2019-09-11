@@ -1,7 +1,9 @@
+# See https://ubuntu.com/kubernetes/docs/hacluster
+
 applications:
   kubeapi-load-balancer:
     options:
-      ha-cluster-vip: __K8S_LB_VIPS__
+      ha-cluster-vip: 10.5.100.1
   kubeapi-lb-hacluster:
     charm: cs:~openstack-charmers-next/hacluster
     options:
