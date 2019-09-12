@@ -36,8 +36,6 @@ declare -A parameters=()
 parameters[__NUM_CEPH_MON_UNITS__]=1
 parameters[__K8S_CHANNEL__]="latest/stable"
 parameters[__NUM_ETCD_UNITS__]=1
-parameters[__K8S_LB_VIPS__]=
-parameters[__K8S_MASTER_VIPS__]=
 parameters[__NUM_K8S_MASTER_UNITS__]=1
 parameters[__NUM_K8S_WORKER_UNITS__]=2
 parameters[__NUM_K8S_LB_UNITS__]=1
@@ -63,13 +61,15 @@ check_hacluster_channel ()
 # default overlay setup
 overlays+=(
     "etcd.yaml"
+    "etcd-easyrsa.yaml"
+    "easyrsa.yaml"
     "k8s-etcd.yaml"
 )
 if ! `has_opt '--master-ha' ${CACHED_STDIN[@]}`; then
     overlays+=( "k8s-lb.yaml"  )
 fi
 if ! `has_opt '--vault*' ${CACHED_STDIN[@]}`; then
-    overlays+=( "easyrsa.yaml" "k8s-easyrsa.yaml" )
+    overlays+=( "k8s-easyrsa.yaml" )
 fi
 
 trap_help ${CACHED_STDIN[@]:-""}
@@ -98,25 +98,25 @@ do
             fi
             overlays+=( "k8s-docker.yaml" )
             ;;
-        --lb-ha*)
+        --lb-ha-hacluster*|--lb-ha-keepalived*)
             if `has_opt '--master-ha' ${CACHED_STDIN[@]}`; then
-                echo "ERROR: you can't do --master-ha and --lb-ha at the same time."
+                echo "ERROR: you can't do --master-ha and ${1%%:*} at the same time."
                 exit 1
             fi
-            msg="REQUIRED: VIP(s) to use for kubeapi_lb hacluster (leave blank to set later): "
-            get_param_forced $1 __K8S_LB_VIPS__ "$msg"
-            get_units $1 __NUM_K8S_LB_UNITS__ 1
-            overlays+=( "k8s-lb-ha.yaml" )
-            check_hacluster_channel
+            get_units $1 __NUM_K8S_LB_UNITS__ 3
+            if has_opt --lb-ha-keepalived* ${CACHED_STDIN[@]}; then
+                overlays+=( "k8s-lb-ha-keepalived.yaml" )
+            else
+                overlays+=( "k8s-lb-ha-hacluster.yaml" )
+                check_hacluster_channel
+            fi
             ;;
         --master-ha*)
             if `has_opt '--lb-ha' ${CACHED_STDIN[@]}`; then
                 echo "ERROR: you can't do --lb-ha and --master-ha at the same time."
                 exit 1
             fi
-            msg="REQUIRED: VIP(s) to use for k8s master hacluster (leave blank to set later): "
-            get_param_forced $1 __K8S_MASTER_VIPS__ "$msg"
-            get_units $1 __NUM_K8S_MASTER_UNITS__ 1
+            get_units $1 __NUM_K8S_MASTER_UNITS__ 3
             overlays+=( "k8s-master-ha.yaml" )
             check_hacluster_channel
             ;;
@@ -134,8 +134,6 @@ do
             get_units $1 __NUM_VAULT_UNITS__ 3
             get_units $1 __NUM_ETCD_UNITS__ 3
             overlays+=( "vault-ha.yaml" )
-            overlays+=( "easyrsa.yaml" )
-            overlays+=( "etcd-easyrsa.yaml" )
             overlays+=( "vault-etcd.yaml" )
             set -- $@ --vault
             ;;

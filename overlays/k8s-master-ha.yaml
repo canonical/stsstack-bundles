@@ -1,7 +1,7 @@
 applications:
   kubernetes-master:
     options:
-      ha-cluster-vip: __K8S_MASTER_VIPS__
+      ha-cluster-vip: 10.5.200.1
   kubernetes-master-hacluster:
     charm: cs:~openstack-charmers-next/hacluster
     options:

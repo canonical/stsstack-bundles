@@ -1,0 +1,20 @@
+# See https://ubuntu.com/kubernetes/docs/keepalived
+
+applications:
+  kubeapi-lb-keepalived:
+    charm: cs:~containers/keepalived
+    options:
+      virtual_ip: 10.5.100.1
+      vip_hostname: 10.5.100.1
+  kubeapi-load-balancer:
+    options:
+      extra_sans: 10.5.100.1
+  kubernetes-master:
+    options:
+      extra_sans: 10.5.100.1
+relations:
+  - [ kubeapi-lb-keepalived:juju-info, kubeapi-load-balancer:juju-info ]
+  - [ kubeapi-lb-keepalived:lb-sink, kubeapi-load-balancer:website ]
+  - [ kubeapi-lb-keepalived:loadbalancer, kubernetes-master:loadbalancer ]
+  - [ kubeapi-lb-keepalived:website, kubernetes-worker:kube-api-endpoint ]
+
