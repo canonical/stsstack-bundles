@@ -100,6 +100,8 @@ get_optval ()
 
 get_param_forced()
 {
+    has_opt --replay && return
+
     (($#==4)) && get_param "$@" true || \
          get_param "$@" "" true
 }
@@ -111,6 +113,8 @@ get_param()
     msg=$3
     default=${4:-""}
     force=${5:-false}
+
+    has_opt --replay && return
 
     val=`get_optstrarg $1`
     if [ -z "$val" ] || $force; then
