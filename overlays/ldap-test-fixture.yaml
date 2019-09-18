@@ -1,0 +1,4 @@
+applications:
+  ldap-test-fixture:
+    charm: cs:~openstack-charmers/ldap-test-fixture
+    num_units: 1

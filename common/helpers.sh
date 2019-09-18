@@ -116,6 +116,9 @@ get_param()
 
     has_opt --replay && return
 
+    # ensure message has a space at end
+    if [ -n "$msg" ] && [ "${msg: -1}" != " " ]; then msg="$msg "; fi
+
     val=`get_optstrarg $1`
     if [ -z "$val" ] || $force; then
         if [ -n "$default" ] && ! $force; then

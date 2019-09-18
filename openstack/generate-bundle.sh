@@ -47,6 +47,7 @@ parameters[__ML2_DNS_FORWARDER__]='10.198.200.1'
 parameters[__ETCD_SNAP_CHANNEL__]='latest/stable'
 parameters[__OCTAVIA_RETROFIT_UCA__]='rocky'  # charm defaults to rocky since it's the first version supported
 parameters[__GSSS_SWIFT_ENABLED__]=false  # glance-simplestreams-sync can optionally store index data in swift
+parameters[__LDAP_SERVER__]=''
 
 # If using any variant of dvr-snat, there is no need for a neutron-gateway.
 if ! has_opt --dvr-snat*; then
@@ -101,7 +102,7 @@ do
             overlays+=( "designate.yaml" )
             ;;
         --dvr)
-            get_param $1 __DVR_DATA_PORT__ 'REQUIRED: compute host DVR data-port(s) (leave blank to set later): '
+            get_param $1 __DVR_DATA_PORT__ 'REQUIRED: compute host DVR data-port(s) (leave blank to set later):'
             overlays+=( "neutron-dvr.yaml" )
             ;;
         --dvr-l3ha*)
@@ -159,7 +160,10 @@ do
             overlays+=( "heat.yaml ")
             ;;
         --ldap)
+            msg="REQUIRED: address of ldap server (leave blank to set later):"
+            get_param $1 __LDAP_SERVER__ "$msg"
             overlays+=( "ldap.yaml" )
+            overlays+=( "ldap-test-fixture.yaml" )
             ;;
         --neutron-fw-driver)  #__OPT__type:[openvswitch|iptables_hybrid] (default=openvswitch)
             assert_min_release newton "openvswitch driver"
