@@ -57,15 +57,13 @@ OVERLAYS:
      available overlays.
 
 INTERNAL_OPTS (don't use these):
-     --internal-bundle-params <path>
-        (internal only) Bundle parameters passed by sub-generator
+     --internal-bundle-config <path>
+        (internal only) Bundle config passed by sub-generator
+     --internal-bundle-config-renderer <path>
+        (internal only) Bundle config renderer passed by sub-generator
      --internal-overlay <path>
         (internal only) Overlay to be added to deployment. Can be
         specified multiple times.
-     --internal-module-path <path>
-        (internal only) Bundle module path.
-     --internal-template <path>
-        (internal only) Bundle base template.
      --internal-version-info <path>
         (internal only) 
 EOF
@@ -75,13 +73,13 @@ list_opts
 get_optintarg ()
 {
     # format we are looking for is --opt:intval
-    echo $1| sed -r 's/.+:([[:digit:]])/\1/;t;d'
+    echo $1| sed -r 's/.+:([[:digit:]]+)/\1/;t;d'
 }
 
 get_optstrarg ()
 {
     # format we are looking for is --opt:strval
-    echo $1| sed -r 's/.+:([[:alnum:]])/\1/;t;d'
+    echo $1| sed -r 's/.+:([[:alnum:]]+)/\1/;t;d'
 }
 
 get_optval ()
@@ -124,7 +122,8 @@ get_param()
         if [ -n "$default" ] && ! $force; then
             val="$default"
         else
-            read -p "$msg" val
+            current="`get_bundle_existing_config $key`"
+            read -e -p "$msg" -i "$current" val
         fi
     fi
     [ -z "$val" ] || parameters[$key]="$val"
@@ -156,19 +155,25 @@ generate()
         opts+=( "--internal-overlay $overlay" )
     done
 
-    ftmp=
+    config_render_tmpfile=
+    config_yaml_tmpfile=
     if ((${#parameters[@]})); then
-        ftmp=`mktemp`
-        echo -n "sed -i " > $ftmp
+        config_tmpfile=`mktemp`
+        config_render_tmpfile=`mktemp`
+        echo -n "sed -i " > $config_render_tmpfile
         for p in ${!parameters[@]}; do
-            echo -n "-e 's,$p,${parameters[$p]},g' " >> $ftmp
+            echo -n "-e 's,$p,${parameters[$p]},g' " >> $config_render_tmpfile
+            echo "${p}: \"${parameters[$p]}\"" >> $config_tmpfile
         done
-        opts+=( "--internal-bundle-params $ftmp" )
+        opts+=( "--internal-bundle-config-renderer $config_render_tmpfile"
+                "--internal-bundle-config $config_tmpfile"
+               )
     fi
 
     . $LIB_COMMON/generate-bundle-base.sh ${opts[@]}
 
-    [ -n "$ftmp" ] && rm $ftmp
+    [ -n "$config_render_tmpfile" ] && rm $config_render_tmpfile
+    [ -n "$config_yaml_tmpfile" ] && rm $config_yaml_tmpfile
 }
 
 list_overlays ()
@@ -388,6 +393,23 @@ do
 done
 }
 
+get_bundle_state_dir ()
+{
+    bundle_name="`get_optval --name`"
+    [ -n "$bundle_name" ] || bundle_name="`get_optval -n`"
+    subdir="/$bundle_name"
+    [ -n "$bundle_name" ] || subdir=''
+    echo $INTERNAL_MODULE_PATH/b$subdir
+}
+
+get_bundle_existing_config ()
+{
+    key="$1"
+    conf=`get_bundle_state_dir`/config
+    [ -r "$conf" ] || return 0
+    sed -r "s/^$key: \"(.+)\".*/\1/g;t;d" $conf
+}
+
 # get cli model name if available since it might not have been created yet.
 get_juju_model ()
 {
@@ -427,3 +449,15 @@ if [ "$source" = "proposed" ]; then
 else
     os_origin="$source"
 fi
+
+print_msgs ()
+{
+    if ((${#msgs[@]})); then
+    echo ""
+      for m in "${msgs[@]}"; do
+        echo -e "$m"
+      done
+    echo ""
+    read -p "Hit [ENTER] to continue"
+    fi
+}

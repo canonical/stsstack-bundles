@@ -3,23 +3,26 @@
 LIB_COMMON=`dirname $0`/common
 . $LIB_COMMON/helpers.sh
 f_rel_info=`mktemp`
-msgs=()
 
 cleanup () { rm -f $f_rel_info; }
 trap cleanup EXIT
 
+# Globals
+export INTERNAL_MODULE_PATH=`dirname $0`
+export INTERNAL_BASE_TEMPLATE=openstack.yaml.template
+
+# Collection of messages to display at the end
+declare -a msgs=()
+
 # This list provides a way to set "internal opts" i.e. the ones accepted by
 # the top-level generate-bundle.sh. The need to modify these should be rare.
-declare -a opts=(
---internal-template openstack.yaml.template
---internal-module-path `dirname $0`
-)
-
-# Series & Release Info
-cat $LIB_COMMON/openstack_release_info.sh > $f_rel_info
+declare -a opts=()
 
 # Array list of overlays to use with this deployment.
 declare -a overlays=()
+
+# Series & Release Info
+cat $LIB_COMMON/openstack_release_info.sh > $f_rel_info
 
 # Try to use current model (or newly requested one) as subdomain name
 model_subdomain=`get_juju_model`
@@ -42,6 +45,7 @@ parameters[__SSL_CERT__]=
 parameters[__SSL_KEY__]=
 parameters[__DNS_DOMAIN__]="${model_subdomain}.stsstack.qa.1ss."
 parameters[__DESIGNATE_NAMESERVERS__]="ns1.${parameters[__DNS_DOMAIN__]}"
+parameters[__DVR_DATA_PORT__]=''
 parameters[__BIND_DNS_FORWARDER__]='10.198.200.1'
 parameters[__ML2_DNS_FORWARDER__]='10.198.200.1'
 parameters[__ETCD_SNAP_CHANNEL__]='latest/stable'
@@ -252,7 +256,7 @@ do
             ;;
         --nova-network)
             # NOTE(hopem) yes this is a hack and we'll get rid of it hwen nova-network is finally no more
-            opts+=( "--internal-template openstack-nova-network.yaml.template" )
+            export INTERNAL_BASE_TEMPLATE=openstack-nova-network.yaml.template
             ;;
         --neutron-sg-logging)
             assert_min_release queens "neutron-sg-logging"
@@ -360,13 +364,5 @@ do
     shift
 done
 
-if ((${#msgs[@]})); then
-echo ""
-  for m in "${msgs[@]}"; do
-    echo -e "$m"
-  done
-echo ""
-read -p "Hit [ENTER] to continue"
-fi
-
+print_msgs
 generate $f_rel_info

@@ -8,10 +8,10 @@
 declare -a overlays=()
 declare -A overlays_deduped=()
 declare -a overlay_opts=()
-template=
-module_path=
+template=$INTERNAL_BASE_TEMPLATE
+module_path=$INTERNAL_MODULE_PATH
 charm_channel=
-params_path=
+bundle_config_path=
 bundle_name=
 replay=false
 run_command=false
@@ -69,17 +69,14 @@ do
         --use-stable-charms)
             use_stable_charms=true
             ;;
-        --internal-module-path)
-            module_path=$2
+        --internal-bundle-config)
+            # bundle config passed by custom generators
+            bundle_config_path=$2
             shift
             ;;
-        --internal-template)
-            template=$2
-            shift
-            ;;
-        --internal-bundle-params)
-            # parameters passed by custom generators
-            params_path=$2
+        --internal-bundle-config-renderer)
+            # bundle config renderer passed by custom generators
+            bundle_config_renderer_path=$2
             shift
             ;;
         --internal-version-info)
@@ -129,9 +126,8 @@ if $create_model; then
     [ -e "$model_config" ] && juju model-config $model_config
 fi
 
-subdir="/${bundle_name}"
-[ -n "${bundle_name}" ] || subdir=''
-bundles_dir=$module_path/b$subdir
+bundles_dir=`get_bundle_state_dir`
+
 if $list_bundles; then
     if [ -d "$bundles_dir" ]; then
         echo -e "Existing bundles:\n./b (default)"
@@ -164,7 +160,7 @@ finish ()
 $replay && finish
 
 # Each custom bundle generator can specify a set of parameters to apply to
-# bundle templates as variable. They are converted into a sed statement that
+# bundle templates as variables. They are converted into a sed statement that
 # is passed in to here inside a file and run against the template(s). There is
 # therefore no need to add parameters to this function and they should only
 # be defined in the custom generators.
@@ -173,14 +169,15 @@ render () {
     sed -i "s,__SERIES__,$series,g" $1
 
     # service-specific replacements
-    if [ -n "$params_path" ]; then
-        eval `cat $params_path` $1
+    if [ -n "$bundle_config_renderer_path" ]; then
+        eval `cat $bundle_config_renderer_path` $1
     fi
 
     if $use_stable_charms; then
         sed -i -r 's,~openstack-charmers-next/,,g' $1
     fi
 }
+
 render_resources_path () {
     file="$1"
     name=`basename $file`
@@ -213,6 +210,8 @@ bundle=${template_path%%.template}
 cp $template $bundle
 render $bundle
 mv $bundle $bundles_dir
+[ -r "$bundle_config_path" ] && \
+    cp $bundle_config_path $bundles_dir/config
 rmdir $dtmp
 
 # Copy base bundle resources to bundles dir (if exists)
@@ -229,7 +228,7 @@ fi
 # De-duplicate overlay list and create bundle structure.
 if ((${#overlays[@]})); then
     mkdir -p $bundles_dir/o
-    msgs=()
+    declare -a msgs=()
     for overlay in ${overlays[@]}; do
         [ "${overlays_deduped[$overlay]:-null}" = "null" ] || continue
         cp overlays/$overlay $bundles_dir/o

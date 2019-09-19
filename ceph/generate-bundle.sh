@@ -7,12 +7,16 @@ f_rel_info=`mktemp`
 cleanup () { rm -f $f_rel_info; }
 trap cleanup EXIT
 
+# Globals
+export INTERNAL_MODULE_PATH=`dirname $0`
+export INTERNAL_BASE_TEMPLATE=ceph.yaml.template
+
+# Collection of messages to display at the end
+declare -a msgs=()
+
 # This list provides a way to set "internal opts" i.e. the ones accepted by
 # the top-level generate-bundle.sh. The need to modify these should be rare.
-declare -a opts=(
---internal-template ceph.yaml.template
---internal-module-path `dirname $0`
-)
+declare -a opts=()
 
 # Series & Release Info (see http://docs.ceph.com/docs/master/releases/)
 cat << 'EOF' > $f_rel_info
@@ -118,4 +122,5 @@ do
     shift
 done
 
+print_msgs
 generate $f_rel_info

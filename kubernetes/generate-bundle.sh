@@ -3,17 +3,21 @@
 LIB_COMMON=`dirname $0`/common
 . $LIB_COMMON/helpers.sh
 f_rel_info=`mktemp`
-msgs=()
 
 cleanup () { rm -f $f_rel_info; }
 trap cleanup EXIT
 
+# Globals
+export INTERNAL_MODULE_PATH=`dirname $0`
+export INTERNAL_BASE_TEMPLATE=kubernetes.yaml.template
+
+# Collection of messages to display at the end
+declare -a msgs=()
+
 # This list provides a way to set "internal opts" i.e. the ones accepted by
 # the top-level generate-bundle.sh. The need to modify these should be rare.
-declare -a opts=(
---internal-template kubernetes.yaml.template
---internal-module-path `dirname $0`
-)
+declare -a opts=()
+
 if ! `has_opt '--charm-channel'` && \
         ! `has_opt '--use-stable-charms'`; then
     set -- $@ --charm-channel edge && cache $@
@@ -74,7 +78,7 @@ trap_help $@
 while (($# > 0))
 do
     case "$1" in
-        --k8s-channel)  #__OPT__
+        --k8s-channel)  #__OPT__type:<str>
             # which Kubernetes channel to set on deployment
             parameters[__K8S_CHANNEL__]="$2"
             shift
@@ -124,7 +128,7 @@ do
             overlays+=( "k8s-vault.yaml" )
             has_opt '--ceph' && overlays+=( "vault-ceph.yaml" )
             ;;
-        --etcd-channel)
+        --etcd-channel)  #__OPT__type:<str>
             parameters[__ETCD_SNAP_CHANNEL__]=$2
             shift
             ;;
@@ -135,7 +139,7 @@ do
             overlays+=( "vault-etcd.yaml" )
             set -- $@ --vault && cache $@
             ;;
-        --num-workers)
+        --num-workers)  #__OPT__type:<int>
             parameters[__NUM_K8S_WORKER_UNITS__]=$2
             shift
             ;;
@@ -150,11 +154,5 @@ do
     shift
 done
 
-if ((${#msgs[@]})); then
-  for m in "${msgs[@]}"; do
-    echo -e "$m"
-  done
-read -p "Hit [ENTER] to continue"
-fi
-
+print_msgs
 generate $f_rel_info
