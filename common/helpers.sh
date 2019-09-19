@@ -119,15 +119,15 @@ get_param()
     # ensure message has a space at end
     if [ -n "$msg" ] && [ "${msg: -1}" != " " ]; then msg="$msg "; fi
 
-    val=`get_optstrarg $1`
+    val=`get_optstrarg $opt`
     if [ -z "$val" ] || $force; then
         if [ -n "$default" ] && ! $force; then
             val="$default"
         else
-            read -p "$3" val
+            read -p "$msg" val
         fi
     fi
-    [ -z "$val" ] || parameters[$2]="$val"
+    [ -z "$val" ] || parameters[$key]="$val"
 }
 
 
@@ -138,11 +138,11 @@ get_units()
     default=$3
 
     # format we are looking for is --opt:val
-    val=`get_optintarg $1`
+    val=`get_optintarg $opt`
     if [ -z "$val" ]; then
         val="$default"
     fi
-    parameters[$2]="$val"
+    parameters[$key]="$val"
 }
 
 
