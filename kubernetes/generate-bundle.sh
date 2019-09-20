@@ -91,13 +91,11 @@ do
             get_units $1 __NUM_ETCD_UNITS__ 1
             ;;
         --containerd)
+            check_opt_conflict $1 --docker
             overlays+=( "k8s-containerd.yaml" )
             ;;
         --docker)
-            if `has_opt '--containerd'`; then
-                echo "ERROR: you can't use --docker and --containerd at the same time"
-                exit 1
-            fi
+            check_opt_conflict $1 --containerd
             overlays+=( "k8s-docker.yaml" )
             ;;
         --lb-ha-hacluster*|--lb-ha-keepalived*)
