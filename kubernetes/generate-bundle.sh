@@ -70,6 +70,10 @@ overlays+=(
 if ! `has_opt '--master-ha*'`; then
     overlays+=( "k8s-lb.yaml"  )
 fi
+# default to flannel cni
+if ! `has_opt '--calico'` && ! `has_opt '--canal'`; then
+    overlays+=( "k8s-cni-flannel.yaml" )
+fi
 if ! `has_opt '--vault*'`; then
     overlays+=( "k8s-easyrsa.yaml" )
 fi
@@ -97,6 +101,14 @@ do
         --docker)
             check_opt_conflict $1 --containerd
             overlays+=( "k8s-docker.yaml" )
+            ;;
+        --calico)
+            check_opt_conflict $1 --canal
+            overlays+=( "k8s-cni-calico.yaml" )
+            ;;
+        --canal)
+            check_opt_conflict $1 --calico
+            overlays+=( "k8s-cni-canal.yaml" )
             ;;
         --lb-ha-hacluster*|--lb-ha-keepalived*)
             if `has_opt '--master-ha*'`; then

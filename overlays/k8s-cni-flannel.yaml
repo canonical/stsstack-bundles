@@ -1,0 +1,7 @@
+applications:
+  flannel:
+    charm: cs:~containers/flannel
+relations:
+  - [ 'flannel:cni', 'kubernetes-master:cni' ]
+  - [ 'flannel:cni', 'kubernetes-worker:cni' ]
+  - [ 'flannel:etcd', 'etcd:db' ]

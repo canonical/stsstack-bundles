@@ -1,0 +1,7 @@
+applications:
+  calico:
+    charm: cs:~containers/calico
+relations:
+  - [ 'calico:cni', 'kubernetes-master:cni' ]
+  - [ 'calico:cni', 'kubernetes-worker:cni' ]
+  - [ 'calico:etcd', 'etcd:db' ]

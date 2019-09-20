@@ -1,0 +1,7 @@
+applications:
+  canal:
+    charm: cs:~containers/canal
+relations:
+  - [ 'canal:cni', 'kubernetes-master:cni' ]
+  - [ 'canal:cni', 'kubernetes-worker:cni' ]
+  - [ 'canal:etcd', 'etcd:db' ]
