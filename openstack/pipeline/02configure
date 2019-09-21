@@ -1,0 +1,340 @@
+#!/bin/bash
+# NOTE: global variables must be first defined in 01setup
+
+# Bundle template MOD_PARAMS. These should correspond to variables set at the top
+# of yaml bundle and overlay templates.
+MOD_PARAMS[__OS_ORIGIN__]=$os_origin
+MOD_PARAMS[__SOURCE__]=$source
+MOD_PARAMS[__NUM_COMPUTE_UNITS__]=1
+MOD_PARAMS[__NUM_CEPH_MON_UNITS__]=1
+MOD_PARAMS[__NUM_NEUTRON_GATEWAY_UNITS__]=1
+MOD_PARAMS[__NUM_VAULT_UNITS__]=1  # there are > 1 vault* overlay so need to use a global with default
+MOD_PARAMS[__NUM_ETCD_UNITS__]=1
+MOD_PARAMS[__NUM_OCTAVIA_UNITS__]=1
+MOD_PARAMS[__NEUTRON_FW_DRIVER__]=openvswitch  # legacy is iptables_hybrid
+MOD_PARAMS[__SSL_CA__]=
+MOD_PARAMS[__SSL_CERT__]=
+MOD_PARAMS[__SSL_KEY__]=
+MOD_PARAMS[__DVR_DATA_PORT__]=''
+MOD_PARAMS[__BIND_DNS_FORWARDER__]='10.198.200.1'
+MOD_PARAMS[__ML2_DNS_FORWARDER__]='10.198.200.1'
+MOD_PARAMS[__ETCD_SNAP_CHANNEL__]='latest/stable'
+MOD_PARAMS[__OCTAVIA_RETROFIT_UCA__]='rocky'  # charm defaults to rocky since it's the first version supported
+MOD_PARAMS[__GSSS_SWIFT_ENABLED__]=false  # glance-simplestreams-sync can optionally store index data in swift
+MOD_PARAMS[__LDAP_SERVER__]=''
+
+# Try to use current model (or newly requested one) as subdomain name
+model_subdomain=`get_juju_model`
+[ -n "$model_subdomain" ] || model_subdomain="overcloud"
+MOD_PARAMS[__DNS_DOMAIN__]="${model_subdomain}.stsstack.qa.1ss."
+MOD_PARAMS[__DESIGNATE_NAMESERVERS__]="ns1.${MOD_PARAMS[__DNS_DOMAIN__]}"
+
+# If using any variant of dvr-snat, there is no need for a neutron-gateway.
+if ! has_opt --dvr-snat*; then
+    MOD_OVERLAYS+=( "neutron-gateway.yaml" )
+fi
+
+while (($# > 0))
+do
+    case "$1" in
+        --num-compute)  #__OPT__type:<int>
+            MOD_PARAMS[__NUM_COMPUTE_UNITS__]=$2
+            shift
+            ;;
+        --barbican)
+            assert_min_release queens "barbican"
+            MOD_OVERLAYS+=( "barbican.yaml" )
+            # always use barbican-vault for now since that is the most common
+            # use-case.
+            MOD_OVERLAYS+=( "barbican-vault.yaml" )
+            set -- $@ --vault && cache $@
+            ;;
+        --bgp)
+            assert_min_release queens "dynamic routing"
+            MOD_OVERLAYS+=( "neutron-bgp.yaml" )
+            ;;
+        --ceph)
+            MOD_OVERLAYS+=( "ceph.yaml" )
+            MOD_OVERLAYS+=( "openstack-ceph.yaml" )
+            ;;
+        --num-ceph-mons)  #__OPT__type:<int>
+            MOD_PARAMS[__NUM_CEPH_MON_UNITS__]=$2
+            shift
+            ;;
+        --ceph-rgw)
+            MOD_OVERLAYS+=( "ceph.yaml" )
+            MOD_OVERLAYS+=( "ceph-rgw.yaml" )
+            ;;
+        --ceph-rgw-multisite)
+            MOD_OVERLAYS+=( "ceph.yaml" )
+            MOD_OVERLAYS+=( "ceph-rgw-multisite.yaml" )
+            ;;
+        --designate)
+            assert_min_release ocata "designate"
+            msg="REQUIRED: designate-bind upstream dns server to forward requests to:"
+            get_param $1 __BIND_DNS_FORWARDER__ "$msg"
+            MOD_OVERLAYS+=( "neutron-ml2dns.yaml" )
+            ns=${MOD_PARAMS[__ML2_DNS_FORWARDER__]}
+            MOD_MSGS+=( "NOTE: you will need to set neutron-gateway dns-servers=<designate-bind unit address> post-deploy (current=$ns)" )
+            MOD_OVERLAYS+=( "memcached.yaml" )
+            MOD_OVERLAYS+=( "designate.yaml" )
+            ;;
+        --dvr)
+            get_param $1 __DVR_DATA_PORT__ 'REQUIRED: compute host DVR data-port(s) (leave blank to set later):'
+            MOD_OVERLAYS+=( "neutron-dvr.yaml" )
+            ;;
+        --dvr-l3ha*)
+            get_units $1 __NUM_AGENTS_PER_ROUTER__ 3
+            # if we are a dep then don't get gateway units
+            if ! `has_opt --dvr-snat-l3ha*`; then
+                get_units $1 __NUM_NEUTRON_GATEWAY_UNITS__ 3
+            fi
+            has_opt --dvr || { set -- $@ --dvr && cache $@; }
+            MOD_OVERLAYS+=( "neutron-l3ha.yaml" )
+            ;;
+        --dvr-snat-l3ha*)
+            assert_min_release queens "dvr-snat-l3ha"
+            get_units $1 __NUM_COMPUTE_UNITS__ 3
+            get_units $1 __NUM_AGENTS_PER_ROUTER__ 3
+            MOD_OVERLAYS+=( "neutron-dvr-snat.yaml" )
+            has_opt --dvr-snat* || \
+                { set -- $@ --dvr-snat:${MOD_PARAMS[__NUM_COMPUTE_UNITS__]} && cache $@; }
+            set -- $@ --dvr-l3ha:${MOD_PARAMS[__NUM_AGENTS_PER_ROUTER__]} && cache $@
+            ;;
+        --dvr-snat*)
+            assert_min_release queens "dvr-snat"
+            get_units $1 __NUM_COMPUTE_UNITS__ 1
+            has_opt --dvr || { set -- $@ --dvr && cache $@; }
+            MOD_OVERLAYS+=( "neutron-dvr-snat.yaml" )
+            ;;
+        --lma)
+            # Logging Monitoring and Alarming
+            set -- $@ --graylog --grafana && cache $@
+           ;;
+        --graylog)
+            MOD_OVERLAYS+=( "graylog.yaml ")
+            MOD_MSGS+=( "NOTE: you will need to manually relate graylog (filebeat) to any other services you want to monitor" )
+            ;;
+        --grafana)
+            MOD_OVERLAYS+=( "grafana.yaml ")
+            MOD_OVERLAYS+=( "prometheus-openstack.yaml ")
+            if `has_opt --ceph`; then
+                MOD_OVERLAYS+=( "prometheus-ceph.yaml ")
+            fi
+            MOD_MSGS+=( "NOTE: telegraf has been related to core openstack services but you may need to add to others you have in your deployment" )
+            ;;
+        --nagios)
+            MOD_OVERLAYS+=( "nagios.yaml ")
+            if `has_opt --ceph`; then
+                MOD_OVERLAYS+=( "nagios-ceph.yaml ")
+            fi
+            # If using any variant of dvr-snat, there is no need to relate
+            # nagios to neutron-gateway
+            if ! has_opt --dvr-snat*; then
+                MOD_OVERLAYS+=( "nagios-neutron-gateway.yaml" )
+            fi
+            ;;
+        --heat)
+            MOD_OVERLAYS+=( "heat.yaml ")
+            ;;
+        --ldap)
+            msg="REQUIRED: address of ldap server (leave blank to set later):"
+            get_param $1 __LDAP_SERVER__ "$msg"
+            MOD_OVERLAYS+=( "ldap.yaml" )
+            MOD_OVERLAYS+=( "ldap-test-fixture.yaml" )
+            ;;
+        --neutron-fw-driver)  #__OPT__type:[openvswitch|iptables_hybrid] (default=openvswitch)
+            assert_min_release newton "openvswitch driver"
+            MOD_PARAMS[__NEUTRON_FW_DRIVER__]=$2
+            shift
+            ;;
+        --l3ha*)
+            get_units $1 __NUM_NEUTRON_GATEWAY_UNITS__ 3
+            get_units $1 __NUM_AGENTS_PER_ROUTER__ 3
+            MOD_OVERLAYS+=( "neutron-l3ha.yaml" )
+            ;;
+        --keystone-v3)
+            # useful for <= pike since queens is v3 only
+            MOD_OVERLAYS+=( "keystone-v3.yaml" )
+            ;;
+        --keystone-saml)
+            assert_min_release rocky "keystone saml"
+            MOD_OVERLAYS+=( "keystone-saml.yaml" )
+            ;;
+        --mysql-ha*)
+            get_units $1 __NUM_MYSQL_UNITS__ 3
+            MOD_OVERLAYS+=( "mysql-ha.yaml" )
+            ;;
+        --ml2dns)
+            # this is internal dns integration, for external use --designate
+            msg="REQUIRED: ml2-dns upstream dns server to forward requests to:"
+            get_param $1 __ML2_DNS_FORWARDER__ "$msg"
+            MOD_OVERLAYS+=( "neutron-ml2dns.yaml" )
+            ;;
+        --nova-cells)
+            assert_min_release rocky "nova cells"
+            MOD_OVERLAYS+=( "nova-cells.yaml" )
+            ;;
+        --octavia)
+            # >= Rocky
+            assert_min_release rocky "octavia"
+            MOD_OVERLAYS+=( "octavia.yaml" )
+            if ! has_opt --no-octavia-diskimage-retrofit; then
+                # By default we let retrofit use images uploaded by the post-deploy configure script.
+                MOD_OVERLAYS+=( "octavia-diskimage-retrofit.yaml" )
+                MOD_PARAMS[__OCTAVIA_RETROFIT_UCA__]=`get_uca_release`
+                if ! has_opt --octavia-diskimage-retrofit-glance-simplestreams; then
+                   MOD_OVERLAYS+=( "octavia-diskimage-retrofit-glance.yaml" )
+                fi
+                MOD_MSGS+=( "NOTE: do 'juju run-action octavia-diskimage-retrofit/0 --wait retrofit-image image-id=<uuid>' with id of glance image to be used for amphorae" )
+            fi
+            ;;
+        --octavia-ha*)
+            get_units $1 __NUM_OCTAVIA_UNITS__ 3
+            MOD_OVERLAYS+=( "octavia-ha.yaml" )
+            ;;
+        --octavia-diskimage-retrofit-glance-simplestreams)  #__OPT__
+            check_opt_conflict $1 --no-octavia-diskimage-retrofit
+            set -- $@ --glance-simplestreams && cache $@
+            MOD_OVERLAYS+=( "octavia-diskimage-retrofit-glance-simplestreams.yaml" )
+            ;;
+        --no-octavia-diskimage-retrofit)  #__OPT__
+            ;;
+        --glance-simplestreams-swift)
+            MOD_PARAMS[__GSSS_SWIFT_ENABLED__]=true
+            set -- $@ --glance-simplestreams --ceph-rgw && cache $@
+            ;;
+        --glance-simplestreams)
+            MOD_OVERLAYS+=( "glance-simplestreams-sync.yaml" )
+            ;;
+        --rabbitmq-server-ha*)
+            get_units $1 __NUM_RABBIT_UNITS__ 3
+            MOD_OVERLAYS+=( "rabbitmq-server-ha.yaml" )
+            ;;
+        --rsyslog)
+            MOD_OVERLAYS+=( "rsyslog.yaml" )
+            ;;
+        --ssl)
+            if ! `has_opt --replay`; then
+                (cd ssl; ./create_ca_cert.sh openstack;)
+                ssl_results="ssl/openstack/results"
+                MOD_PARAMS[__SSL_CA__]=`base64 ${ssl_results}/cacert.pem| tr -d '\n'`
+                MOD_PARAMS[__SSL_CERT__]=`base64 ${ssl_results}/servercert.pem| tr -d '\n'`
+                MOD_PARAMS[__SSL_KEY__]=`base64 ${ssl_results}/serverkey.pem| tr -d '\n'`
+                # Make everything HA with 1 unit (unless --ha has already been set)
+                if ! `has_opt '--ha[:0-9]*$'`; then
+                    set -- $@ --ha:1 && cache $@
+                fi
+            fi
+            ;;
+        --nova-network)
+            # NOTE(hopem) yes this is a hack and we'll get rid of it hwen nova-network is finally no more
+            export MOD_BASE_TEMPLATE=openstack-nova-network.yaml.template
+            ;;
+        --neutron-sg-logging)
+            assert_min_release queens "neutron-sg-logging"
+            MOD_OVERLAYS+=( "neutron-sg-logging.yaml" )            
+            ;;
+        --cinder-ha*)
+            get_units $1 __NUM_CINDER_UNITS__ 3
+            MOD_OVERLAYS+=( "cinder-ha.yaml" )
+            ;;
+        --designate-ha*)
+            get_units $1 __NUM_DESIGNATE_UNITS__ 3
+            set -- $@ --designate && cache $@
+            MOD_OVERLAYS+=( "designate-ha.yaml" )
+            ;;
+        --glance-ha*)
+            get_units $1 __NUM_GLANCE_UNITS__ 3
+            MOD_OVERLAYS+=( "glance-ha.yaml" )
+            ;;
+        --heat-ha*)
+            get_units $1 __NUM_HEAT_UNITS__ 3
+            MOD_OVERLAYS+=( "heat.yaml ")
+            MOD_OVERLAYS+=( "heat-ha.yaml ")
+            ;;
+        --keystone-ha*)
+            get_units $1 __NUM_KEYSTONE_UNITS__ 3
+            MOD_OVERLAYS+=( "keystone-ha.yaml" )
+            ;;
+        --neutron-api-ha*)
+            get_units $1 __NUM_NEUTRON_API_UNITS__ 3
+            MOD_OVERLAYS+=( "neutron-api-ha.yaml" )
+            ;;
+        --nova-cloud-controller-ha*)
+            get_units $1 __NUM_NOVACC_UNITS__ 3
+            MOD_OVERLAYS+=( "nova-cloud-controller-ha.yaml" )
+            MOD_OVERLAYS+=( "memcached.yaml" )
+            ;;
+        --openstack-dashboard-ha*)
+            get_units $1 __NUM_HORIZON_UNITS__ 3
+            MOD_OVERLAYS+=( "openstack-dashboard-ha.yaml" )
+            ;;
+        --swift)
+            MOD_OVERLAYS+=( "swift.yaml" )
+            ;;
+        --swift-ha*)
+            get_units $1 __NUM_SWIFT_PROXY_UNITS__ 3
+            MOD_OVERLAYS+=( "swift-ha.yaml" )
+            ;;
+        --telemetry|--telemetry-gnocchi)
+            # ceilometer + aodh + gnocchi (>= pike)
+            assert_min_release pike "gnocchi" 
+            MOD_OVERLAYS+=( "ceph.yaml" )
+            MOD_OVERLAYS+=( "gnocchi.yaml" )
+            MOD_OVERLAYS+=( "memcached.yaml" )
+            MOD_OVERLAYS+=( "telemetry.yaml" )
+            ;;
+        --telemetry-legacy-aodh)
+            # ceilometer + aodh + mongodb (<= pike)
+            MOD_OVERLAYS+=( "telemetry-legacy-aodh.yaml" )
+            ;;
+        --telemetry-legacy)
+            # ceilometer + mongodb (<= pike)
+            MOD_OVERLAYS+=( "telemetry-legacy.yaml" )
+            ;;
+        --telemetry-ha*)
+            get_units $1 __NUM_TELEMETRY_UNITS__ 3
+            MOD_OVERLAYS+=( "telemetry.yaml" )
+            MOD_OVERLAYS+=( "telemetry-ha.yaml" )
+            ;;
+        --vault)
+            assert_min_release queens "vault"
+            MOD_OVERLAYS+=( "vault.yaml" )
+            MOD_OVERLAYS+=( "vault-openstack.yaml" )
+            has_opt --ceph && MOD_OVERLAYS+=( "vault-ceph.yaml" )
+            ;;
+        --etcd-channel)
+            MOD_PARAMS[__ETCD_SNAP_CHANNEL__]=$2
+            shift
+            ;;
+        --vault-ha*)
+            get_units $1 __NUM_VAULT_UNITS__ 3
+            get_units $1 __NUM_ETCD_UNITS__ 3
+            MOD_OVERLAYS+=( "vault-ha.yaml" )
+            MOD_OVERLAYS+=( "etcd.yaml" )
+            MOD_OVERLAYS+=( "easyrsa.yaml" )
+            MOD_OVERLAYS+=( "etcd-easyrsa.yaml" )
+            MOD_OVERLAYS+=( "vault-etcd.yaml" )
+            set -- $@ --vault && cache $@
+            ;;
+        --ha*)
+            get_units $1 __NUM_HA_UNITS__ 3
+            units=${MOD_PARAMS[__NUM_HA_UNITS__]}
+            # This is HA for "core" service apis only.
+            set -- $@ --cinder-ha:$units --glance-ha:$units \
+                      --keystone-ha:$units --neutron-api-ha:$units \
+                      --nova-cloud-controller-ha:$units && cache $@
+            ;;
+        --list-overlays)  #__OPT__
+            list_overlays
+            exit
+            ;;
+        *)
+            MOD_UNKNOWN_OPTS+=( $1 )
+            ;;
+    esac
+    shift
+done
+
+print_msgs

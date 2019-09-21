@@ -1,0 +1,27 @@
+#!/bin/bash
+# NOTE: global variables must be first defined in 01setup
+
+MOD_PARAMS[__LANDSCAPE_VERSION__]="19.01"
+
+while (($# > 0))
+do
+    case "$1" in
+        --landscape-version)  #__OPT__type:<int>
+            MOD_PARAMS[__LANDSCAPE_VERSION__]=$2
+            shift
+            ;;
+        --ha)
+            MOD_OVERLAYS+=( "landscape-ha.yaml" )
+            ;;
+        --list-overlays)  #__OPT__
+            list_overlays
+            exit
+            ;;
+        *)
+            MOD_UNKNOWN_OPTS+=( $1 )
+            ;;
+    esac
+    shift
+done
+
+print_msgs

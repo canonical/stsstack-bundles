@@ -1,0 +1,28 @@
+#!/bin/bash
+LIB_COMMON=`dirname $0`/common
+. $LIB_COMMON/helpers
+
+trap_help
+
+#cleanup () { :; }
+#trap cleanup EXIT
+
+# Globals
+export MOD_PATH=`dirname $0`
+export MOD_BASE_TEMPLATE=kubernetes.yaml.template
+
+# opts that 02configure does not recognise that get passed to the generator
+export -a MOD_UNKNOWN_OPTS=()
+
+# Collection of messages to display at the end
+export -a MOD_MSGS=()
+
+# Array list of overlays to use with this deployment.
+export -a MOD_OVERLAYS=()
+
+export -A MOD_PARAMS=()
+
+# Series & Release Info
+export -A lts=( [bionic]=cdk )
+export -A nonlts=( [disco]=cdk
+                   [eoan]=cdk )

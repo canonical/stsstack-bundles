@@ -1,0 +1,138 @@
+#!/bin/bash -eu
+# NOTE: global variables must be first defined in 01setup
+
+# Bundle template MOD_PARAMS. These should correspond to variables set at the top
+# of yaml bundle and overlay templates.
+MOD_PARAMS[__NUM_CEPH_MON_UNITS__]=1
+MOD_PARAMS[__K8S_CHANNEL__]="latest/stable"
+MOD_PARAMS[__NUM_ETCD_UNITS__]=1
+MOD_PARAMS[__NUM_K8S_MASTER_UNITS__]=1
+MOD_PARAMS[__NUM_K8S_WORKER_UNITS__]=2
+MOD_PARAMS[__NUM_K8S_LB_UNITS__]=1
+MOD_PARAMS[__ETCD_SNAP_CHANNEL__]='latest/stable'
+
+if ! `has_opt '--charm-channel'` && \
+        ! `has_opt '--use-stable-charms'`; then
+    set -- $@ --charm-channel edge && cache $@
+fi
+
+# default for current stable is to use containerd
+# See https://ubuntu.com/kubernetes/docs/container-runtime
+if ! `has_opt '--k8s-channel'` && \
+       ! `has_opt '--docker'`; then
+    set -- $@ --containerd && cache $@
+fi
+
+check_hacluster_channel ()
+{
+    charm_channel="`get_optval --charm-channel`"
+    if [ -n "$charm_channel" ] && [ "$charm_channel" != "stable" ]; then
+        # NOTE(dosaboy): https://bugs.launchpad.net/juju/+bug/1832873
+        MOD_MSGS+=( "\nIMPORTANT: you are using the $charm_channel charm channel but hacluster is not published to that channel. Either switch to stable channel or post-upgrade hacluster to stable channel.\n" )
+    fi
+}
+
+# default overlay setup
+MOD_OVERLAYS+=(
+    "etcd.yaml"
+    "etcd-easyrsa.yaml"
+    "easyrsa.yaml"
+    "k8s-etcd.yaml"
+)
+if ! `has_opt '--master-ha*'`; then
+    MOD_OVERLAYS+=( "k8s-lb.yaml"  )
+fi
+# default to flannel cni
+if ! `has_opt '--calico'` && ! `has_opt '--canal'`; then
+    MOD_OVERLAYS+=( "k8s-cni-flannel.yaml" )
+fi
+if ! `has_opt '--vault*'`; then
+    MOD_OVERLAYS+=( "k8s-easyrsa.yaml" )
+fi
+
+while (($# > 0))
+do
+    case "$1" in
+        --k8s-channel)  #__OPT__type:<str>
+            # which Kubernetes channel to set on deployment
+            MOD_PARAMS[__K8S_CHANNEL__]="$2"
+            shift
+            ;;
+        --ceph)
+            MOD_OVERLAYS+=( "ceph.yaml" )
+            MOD_OVERLAYS+=( "k8s-ceph.yaml" )
+            ;;
+        --etcd-ha*)
+            get_units $1 __NUM_ETCD_UNITS__ 1
+            ;;
+        --containerd)
+            check_opt_conflict $1 --docker
+            MOD_OVERLAYS+=( "k8s-containerd.yaml" )
+            ;;
+        --docker)
+            check_opt_conflict $1 --containerd
+            MOD_OVERLAYS+=( "k8s-docker.yaml" )
+            ;;
+        --calico)
+            check_opt_conflict $1 --canal
+            MOD_OVERLAYS+=( "k8s-cni-calico.yaml" )
+            ;;
+        --canal)
+            check_opt_conflict $1 --calico
+            MOD_OVERLAYS+=( "k8s-cni-canal.yaml" )
+            ;;
+        --lb-ha-hacluster*|--lb-ha-keepalived*)
+            if `has_opt '--master-ha*'`; then
+                echo "ERROR: you can't do --master-ha and ${1%%:*} at the same time."
+                exit 1
+            fi
+            get_units $1 __NUM_K8S_LB_UNITS__ 3
+            if has_opt --lb-ha-keepalived*; then
+                MOD_OVERLAYS+=( "k8s-lb-ha-keepalived.yaml" )
+            else
+                MOD_OVERLAYS+=( "k8s-lb-ha-hacluster.yaml" )
+                check_hacluster_channel
+            fi
+            ;;
+        --master-ha*)
+            if `has_opt '--lb-ha*'`; then
+                echo "ERROR: you can't do --lb-ha and --master-ha at the same time."
+                exit 1
+            fi
+            get_units $1 __NUM_K8S_MASTER_UNITS__ 3
+            MOD_OVERLAYS+=( "k8s-master-ha.yaml" )
+            check_hacluster_channel
+            ;;
+        --vault)
+            MOD_OVERLAYS+=( "vault.yaml" )
+            MOD_OVERLAYS+=( "mysql.yaml" )
+            MOD_OVERLAYS+=( "k8s-vault.yaml" )
+            has_opt '--ceph' && MOD_OVERLAYS+=( "vault-ceph.yaml" )
+            ;;
+        --etcd-channel)  #__OPT__type:<str>
+            MOD_PARAMS[__ETCD_SNAP_CHANNEL__]=$2
+            shift
+            ;;
+        --vault-ha*)
+            get_units $1 __NUM_VAULT_UNITS__ 3
+            get_units $1 __NUM_ETCD_UNITS__ 3
+            MOD_OVERLAYS+=( "vault-ha.yaml" )
+            MOD_OVERLAYS+=( "vault-etcd.yaml" )
+            set -- $@ --vault && cache $@
+            ;;
+        --num-workers)  #__OPT__type:<int>
+            MOD_PARAMS[__NUM_K8S_WORKER_UNITS__]=$2
+            shift
+            ;;
+        --list-overlays)  #__OPT__
+            list_overlays
+            exit
+            ;;
+        *)
+            MOD_UNKNOWN_OPTS+=( $1 )
+            ;;
+    esac
+    shift
+done
+
+print_msgs

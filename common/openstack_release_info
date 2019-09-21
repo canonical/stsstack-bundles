@@ -1,3 +1,4 @@
+#!/bin/bash
 # This file contains ubuntu series names along with their openstack
 # counterpart release names. Each stable release of Ubuntu has a
 # contemporaneous release of Openstack shipped in its main archives. Each LTS

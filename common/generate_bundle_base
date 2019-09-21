@@ -1,17 +1,11 @@
-#!/bin/bash -eu
+#!/bin/bash
 #
 # PLEASE AVOID PUTTING BUNDLE-SPECIFIC CODE IN HERE. INSTEAD USE THE INDIVIDUAL
 # BUNDLE GENERATORS.
 #
-. $LIB_COMMON/helpers.sh
-
-declare -a overlays=()
 declare -A overlays_deduped=()
 declare -a overlay_opts=()
-template=$INTERNAL_BASE_TEMPLATE
-module_path=$INTERNAL_MODULE_PATH
 charm_channel=
-bundle_config_path=
 bundle_name=
 replay=false
 run_command=false
@@ -69,24 +63,6 @@ do
         --use-stable-charms)
             use_stable_charms=true
             ;;
-        --internal-bundle-config)
-            # bundle config passed by custom generators
-            bundle_config_path=$2
-            shift
-            ;;
-        --internal-bundle-config-renderer)
-            # bundle config renderer passed by custom generators
-            bundle_config_renderer_path=$2
-            shift
-            ;;
-        --internal-version-info)
-            . $2
-            shift
-            ;;
-        --internal-overlay)
-            overlays+=( $2 )
-            shift
-            ;;
         -h|--help)
             _usage
             exit 0
@@ -100,10 +76,10 @@ do
     shift
 done
 
-if [ -z "$template" ]; then
+if [ -z "$MOD_BASE_TEMPLATE" ]; then
     echo "ERROR: no template provided with --template"
     exit 1
-elif [ -z "$module_path" ]; then
+elif [ -z "$MOD_PATH" ]; then
     echo "ERROR: no module name provided"
     exit 1
 elif $create_model && [ -z "$bundle_name" ]; then
@@ -131,7 +107,7 @@ bundles_dir=`get_bundle_state_dir`
 if $list_bundles; then
     if [ -d "$bundles_dir" ]; then
         echo -e "Existing bundles:\n./b (default)"
-        find $bundles_dir/* -maxdepth 0 -type d| egrep -v "$bundles_dir/o$" 
+        find $bundles_dir/* -maxdepth 0 -type d| egrep -v "$bundles_dir/o$|resources" 
         echo ""
     else
         echo "There are currently no bundles."
@@ -169,8 +145,8 @@ render () {
     sed -i "s,__SERIES__,$series,g" $1
 
     # service-specific replacements
-    if [ -n "$bundle_config_renderer_path" ]; then
-        eval `cat $bundle_config_renderer_path` $1
+    if [ -n "$INTERNAL_BUNDLE_CONFIG_RENDERER" ]; then
+        eval `cat $INTERNAL_BUNDLE_CONFIG_RENDERER` $1
     fi
 
     if $use_stable_charms; then
@@ -205,17 +181,17 @@ app_release_name=`get_app_release_name "$release"`
 
 # Make copy of base template, render, and store in named dir.
 dtmp=`mktemp -d`
-template_path=$dtmp/`basename $template`
+template_path=$dtmp/`basename $MOD_BASE_TEMPLATE`
 bundle=${template_path%%.template}
-cp $template $bundle
+cp $MOD_BASE_TEMPLATE $bundle
 render $bundle
 mv $bundle $bundles_dir
-[ -r "$bundle_config_path" ] && \
-    cp $bundle_config_path $bundles_dir/config
+[ -r "$INTERNAL_BUNDLE_CONFIG" ] && \
+    cp $INTERNAL_BUNDLE_CONFIG $bundles_dir/config
 rmdir $dtmp
 
 # Copy base bundle resources to bundles dir (if exists)
-resource_path=$module_path/resources/
+resource_path=$MOD_PATH/resources/
 if [ -d "$resource_path" ]; then
     mkdir -p $bundles_dir/resources
     name=`basename $bundle`
@@ -226,10 +202,10 @@ if [ -d "$resource_path" ]; then
     fi
 fi
 # De-duplicate overlay list and create bundle structure.
-if ((${#overlays[@]})); then
+if ((${#MOD_OVERLAYS[@]})); then
     mkdir -p $bundles_dir/o
     declare -a msgs=()
-    for overlay in ${overlays[@]}; do
+    for overlay in ${MOD_OVERLAYS[@]}; do
         [ "${overlays_deduped[$overlay]:-null}" = "null" ] || continue
         cp overlays/$overlay $bundles_dir/o
         ((${#overlay_opts[@]}==0)) && overlay_opts+=("")  # left padding
@@ -238,7 +214,7 @@ if ((${#overlays[@]})); then
         overlays_deduped[$overlay]=true
         msgs+=( " + $overlay\n" )
         # Copy overla resources to bundles dir (if exists)
-        resource_path=$module_path/resources/${overlay%%.*}
+        resource_path=$MOD_PATH/resources/${overlay%%.*}
         if [ -d "$resource_path" ]; then
             mkdir -p $bundles_dir/resources
             cp -r $resource_path $bundles_dir/resources

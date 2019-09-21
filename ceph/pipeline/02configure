@@ -1,0 +1,92 @@
+#!/bin/bash
+# Bundle template parameters. These should correspond to variables set at the top
+# of yaml bundle and overlay templates.
+MOD_PARAMS[__OS_ORIGIN__]=$os_origin
+MOD_PARAMS[__SOURCE__]=$source
+MOD_PARAMS[__NUM_CEPH_MON_UNITS__]=1
+MOD_PARAMS[__NUM_VAULT_UNITS__]=1  # there are > 1 vault* overlay so need to use a global with default
+MOD_PARAMS[__SSL_CA__]=
+MOD_PARAMS[__SSL_CERT__]=
+MOD_PARAMS[__SSL_KEY__]=
+MOD_PARAMS[__NUM_ETCD_UNITS__]=1
+MOD_PARAMS[__ETCD_SNAP_CHANNEL__]='latest/stable'
+
+while (($# > 0))
+do
+    case "$1" in
+        --graylog)
+            MOD_OVERLAYS+=( "graylog.yaml ")
+            ;;
+        --lma)
+            # Logging Monitoring and Analysis
+            MOD_OVERLAYS+=( "graylog.yaml ")
+            MOD_MSGS+=( "NOTE: you will need to manually relate graylog (filebeat) to any services you want to monitor" )
+            MOD_OVERLAYS+=( "grafana.yaml ")
+            MOD_MSGS+=( "NOTE: you will need to manually relate grafana (telegraf) to any services you want to monitor" )
+            ;;
+        --num-mons|--num-ceph-mons)  #__OPT__type:<int>
+            MOD_PARAMS[__NUM_CEPH_MON_UNITS__]=$2
+            shift
+            ;;
+        --ssl)
+            if ! `has_opt '--replay'`; then
+                (cd ssl; ./create_ca_cert.sh ceph;)
+                ssl_results="ssl/ceph/results"
+                MOD_PARAMS[__SSL_CA__]=`base64 ${ssl_results}/cacert.pem| tr -d '\n'`
+                MOD_PARAMS[__SSL_CERT__]=`base64 ${ssl_results}/servercert.pem| tr -d '\n'`
+                MOD_PARAMS[__SSL_KEY__]=`base64 ${ssl_results}/serverkey.pem| tr -d '\n'`
+                # Make everything HA with 1 unit (unless --ha has already been set)
+                if ! `has_opt '--rgw-ha[:0-9]*$'`; then
+                    set -- $@ --rgw-ha:1 && cache $@
+                fi
+            fi
+            ;;
+        --rgw|--ceph-rgw)
+            MOD_OVERLAYS+=( "ceph-rgw.yaml" )
+            ;;
+        --rgw-ha*|--ceph-rgw-ha*)
+            get_units $1 __NUM_CEPH_RGW_UNITS__ 3
+            MOD_OVERLAYS+=( "ceph-rgw.yaml" )
+            MOD_OVERLAYS+=( "ceph-rgw-ha.yaml" )
+            ;;
+        --rgw-multisite|--ceph-rgw-multisite)
+            MOD_OVERLAYS+=( "ceph-rgw.yaml" )
+            MOD_OVERLAYS+=( "ceph-rgw-multisite.yaml" )
+            ;;
+        --rgw-multisite-ha*|--ceph-rgw-multisite*)
+            get_units $1 __NUM_CEPH_RGW_UNITS__ 3
+            MOD_OVERLAYS+=( "ceph-rgw.yaml" )
+            MOD_OVERLAYS+=( "ceph-rgw-ha.yaml" )
+            MOD_OVERLAYS+=( "ceph-rgw-multisite.yaml" )
+            ;;
+        --vault)
+            assert_min_release queens "vault" $@
+            MOD_OVERLAYS+=( "vault.yaml" )
+            MOD_OVERLAYS+=( "vault-ceph.yaml" )
+            ;;
+        --etcd-channel)
+            MOD_PARAMS[__ETCD_SNAP_CHANNEL__]=$2
+            shift
+            ;;
+        --vault-ha*)
+            get_units $1 __NUM_VAULT_UNITS__ 3
+            get_units $1 __NUM_ETCD_UNITS__ 3
+            MOD_OVERLAYS+=( "vault-ha.yaml" )
+            MOD_OVERLAYS+=( "etcd.yaml" )
+            MOD_OVERLAYS+=( "easyrsa.yaml" )
+            MOD_OVERLAYS+=( "etcd-easyrsa.yaml" )
+            MOD_OVERLAYS+=( "vault-etcd.yaml" )
+            set -- $@ --vault && cache $@
+            ;;
+        --list-overlays)   #__OPT__
+            list_overlays
+            exit
+            ;;
+        *)
+            MOD_UNKNOWN_OPTS+=( $1 )
+            ;;
+    esac
+    shift
+done
+
+print_msgs

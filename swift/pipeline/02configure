@@ -1,0 +1,78 @@
+#!/bin/bash
+# NOTE: global variables must be first defined in 01setup
+
+# Bundle template parameters. These should correspond to variables set at the top
+# of yaml bundle and overlay templates.
+MOD_PARAMS[__OS_ORIGIN__]=$os_origin
+MOD_PARAMS[__SOURCE__]=$source
+MOD_PARAMS[__NUM_VAULT_UNITS__]=1  # there are > 1 vault* overlay so need to use a global with default
+MOD_PARAMS[__SSL_CA__]=
+MOD_PARAMS[__SSL_CERT__]=
+MOD_PARAMS[__SSL_KEY__]=
+MOD_PARAMS[__NUM_ETCD_UNITS__]=1
+MOD_PARAMS[__ETCD_SNAP_CHANNEL__]='latest/stable'
+
+# We always add this overlay since it contains core apps for this module.
+MOD_OVERLAYS+=( swift.yaml )
+
+while (($# > 0))
+do
+    case "$1" in
+        --graylog)
+            MOD_OVERLAYS+=( "graylog.yaml ")
+            ;;
+        --lma)
+            # Logging Monitoring and Alarming
+            MOD_OVERLAYS+=( "graylog.yaml ")
+            MOD_MSGS+=( "NOTE: you will need to manually relate graylog (filebeat) to any services you want to monitor" )
+            MOD_OVERLAYS+=( "grafana.yaml ")
+            MOD_MSGS+=( "NOTE: you will need to manually relate grafana (telegraf) to any services you want to monitor" )
+            ;;
+        --ssl)
+            if ! `has_opt '--replay'`; then
+                (cd ssl; ./create_ca_cert.sh swift;)
+                ssl_results="ssl/swift/results"
+                MOD_PARAMS[__SSL_CA__]=`base64 ${ssl_results}/cacert.pem| tr -d '\n'`
+                MOD_PARAMS[__SSL_CERT__]=`base64 ${ssl_results}/servercert.pem| tr -d '\n'`
+                MOD_PARAMS[__SSL_KEY__]=`base64 ${ssl_results}/serverkey.pem| tr -d '\n'`
+                # Make everything HA with 1 unit (unless --ha has already been set)
+                if ! `has_opt '--ha[:0-9]*$'`; then
+                    set -- $@ --ha:1 && cache $@
+                fi
+            fi
+            ;;
+        --vault)
+            assert_min_release queens "vault" $@
+            MOD_OVERLAYS+=( "vault.yaml" )
+            MOD_OVERLAYS+=( "vault-swift.yaml" )
+            ;;
+        --etcd-channel)
+            MOD_PARAMS[__ETCD_SNAP_CHANNEL__]=$2
+            shift
+            ;;
+        --vault-ha*)
+            get_units $1 __NUM_VAULT_UNITS__ 3
+            get_units $1 __NUM_ETCD_UNITS__ 3
+            MOD_OVERLAYS+=( "vault-ha.yaml" )
+            MOD_OVERLAYS+=( "etcd.yaml" )
+            MOD_OVERLAYS+=( "easyrsa.yaml" )
+            MOD_OVERLAYS+=( "etcd-easyrsa.yaml" )
+            MOD_OVERLAYS+=( "vault-etcd.yaml" )
+            set -- $@ --vault && cache $@
+            ;;
+        --ha*)
+            get_units $1 __NUM_SWIFT_PROXY_UNITS__ 3
+            MOD_OVERLAYS+=( "swift-ha.yaml" )
+            ;;
+        --list-overlays)  #__OPT__
+            list_overlays
+            exit
+            ;;
+        *)
+            MOD_UNKNOWN_OPTS+=( $1 )
+            ;;
+    esac
+    shift
+done
+
+print_msgs

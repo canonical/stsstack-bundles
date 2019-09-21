@@ -1,12 +1,13 @@
+#!/bin/bash
 export CACHED_STDIN=( $@ )
 ((${#CACHED_STDIN[@]})) || CACHED_STDIN=( "" )
 DEFAULT_SERIES=bionic
 
-. $LIB_COMMON/openstack_release_info.sh
+. $LIB_COMMON/openstack_release_info
 
 _usage () {
 cat << EOF
-USAGE: `basename $0` INTERNAL_OPTS OPTIONS [OVERLAYS]
+USAGE: `basename $0` OPTIONS [OVERLAYS]
 
 OPTIONS:
      --charm-channel
@@ -55,17 +56,6 @@ OVERLAYS:
      will give you six units of myoverlay. This is useful for overlays
      that provide HA or scale-out services. See --list-overlays for
      available overlays.
-
-INTERNAL_OPTS (don't use these):
-     --internal-bundle-config <path>
-        (internal only) Bundle config passed by sub-generator
-     --internal-bundle-config-renderer <path>
-        (internal only) Bundle config renderer passed by sub-generator
-     --internal-overlay <path>
-        (internal only) Overlay to be added to deployment. Can be
-        specified multiple times.
-     --internal-version-info <path>
-        (internal only) 
 EOF
 list_opts
 }
@@ -96,21 +86,12 @@ get_optval ()
     _f ${CACHED_STDIN[@]}
 }
 
-get_param_forced()
-{
-    has_opt --replay && return
-
-    (($#==4)) && get_param "$@" true || \
-         get_param "$@" "" true
-}
-
 get_param()
 {
     opt=$1
     key=$2
     msg=$3
-    default=${4:-""}
-    force=${5:-false}
+    default="${MOD_PARAMS[$key]}"
 
     has_opt --replay && return
 
@@ -118,15 +99,12 @@ get_param()
     if [ -n "$msg" ] && [ "${msg: -1}" != " " ]; then msg="$msg "; fi
 
     val=`get_optstrarg $opt`
-    if [ -z "$val" ] || $force; then
-        if [ -n "$default" ] && ! $force; then
-            val="$default"
-        else
-            current="`get_bundle_existing_config $key`"
-            read -e -p "$msg" -i "$current" val
-        fi
+    if [ -z "$val" ]; then
+        current="`get_bundle_existing_config $key`"
+        [ -z "$current" ] && [ -n "$default" ] && val=$default
+        read -e -p "$msg" -i "$current" val
     fi
-    [ -z "$val" ] || parameters[$key]="$val"
+    [ -z "$val" ] || MOD_PARAMS[$key]="$val"
 }
 
 
@@ -141,52 +119,23 @@ get_units()
     if [ -z "$val" ]; then
         val="$default"
     fi
-    parameters[$key]="$val"
+    MOD_PARAMS[$key]="$val"
 }
 
-
-
-generate()
-{
-    # path to file containing series/release info
-    (($#)) && opts+=( "--internal-version-info $1" )
-
-    for overlay in ${overlays[@]:-}; do
-        opts+=( "--internal-overlay $overlay" )
-    done
-
-    config_render_tmpfile=
-    config_yaml_tmpfile=
-    if ((${#parameters[@]})); then
-        config_tmpfile=`mktemp`
-        config_render_tmpfile=`mktemp`
-        echo -n "sed -i " > $config_render_tmpfile
-        for p in ${!parameters[@]}; do
-            echo -n "-e 's,$p,${parameters[$p]},g' " >> $config_render_tmpfile
-            echo "${p}: \"${parameters[$p]}\"" >> $config_tmpfile
-        done
-        opts+=( "--internal-bundle-config-renderer $config_render_tmpfile"
-                "--internal-bundle-config $config_tmpfile"
-               )
-    fi
-
-    . $LIB_COMMON/generate-bundle-base.sh ${opts[@]}
-
-    [ -n "$config_render_tmpfile" ] && rm $config_render_tmpfile
-    [ -n "$config_yaml_tmpfile" ] && rm $config_yaml_tmpfile
-}
 
 list_overlays ()
 {
     echo "Supported overlays:"
-    grep -v __OPT__ `basename $0`| \
+    script=`dirname $0`/pipeline/02configure
+    grep -v __OPT__ $script| \
         sed -r 's/.+\s+(--[[:alnum:]\-]+\*?)\).*/\1/g;t;d'
 }
 
 list_opts ()
 {
     echo -e "\nBUNDLE OPTS:"
-    grep __OPT__ `basename $0`| \
+    script=`dirname $0`/pipeline/02configure
+    grep __OPT__ $script| \
         sed -r -e 's/.+\s+(--[[:alnum:]\-]+).+#__OPT__type:(.+)/      \1 \2/g' \
                -e 's/.+\s+(--[[:alnum:]\-]+).+#__OPT__$/      \1/g;t;d'
 }
@@ -381,15 +330,15 @@ get_app_release_name ()
 
 trap_help ()
 {
-while (($# > 0))
+i=0
+while ((i < ${#CACHED_STDIN[@]}))
 do
-    case "$1" in
+    case "${#CACHED_STDIN[$((i++))]}" in
         -h|--help)
             _usage
             exit 0
             ;;
     esac
-    shift
 done
 }
 
@@ -399,7 +348,7 @@ get_bundle_state_dir ()
     [ -n "$bundle_name" ] || bundle_name="`get_optval -n`"
     subdir="/$bundle_name"
     [ -n "$bundle_name" ] || subdir=''
-    echo $INTERNAL_MODULE_PATH/b$subdir
+    echo $MOD_PATH/b$subdir
 }
 
 get_bundle_existing_config ()
@@ -452,9 +401,9 @@ fi
 
 print_msgs ()
 {
-    if ((${#msgs[@]})); then
+    if ((${#MOD_MSGS[@]})); then
     echo ""
-      for m in "${msgs[@]}"; do
+      for m in "${MOD_MSGS[@]}"; do
         echo -e "$m"
       done
     echo ""
