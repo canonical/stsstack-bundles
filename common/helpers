@@ -408,5 +408,6 @@ print_msgs ()
       done
     echo ""
     read -p "Hit [ENTER] to continue"
+    echo ""
     fi
 }
