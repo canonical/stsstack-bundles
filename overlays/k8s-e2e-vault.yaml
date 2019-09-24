@@ -1,0 +1,2 @@
+relations:
+  - [ 'e2e', 'vault:certificates' ]

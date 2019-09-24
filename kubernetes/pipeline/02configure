@@ -81,6 +81,14 @@ do
             check_opt_conflict $1 --calico
             MOD_OVERLAYS+=( "k8s-cni-canal.yaml" )
             ;;
+        --e2e)
+            MOD_OVERLAYS+=( "k8s-e2e.yaml" )
+            if ! `has_opt '--vault*'`; then
+                MOD_OVERLAYS+=( "k8s-e2e-easyrsa.yaml" )
+            else
+                MOD_OVERLAYS+=( "k8s-e2e-vault.yaml" )
+            fi
+            ;;
         --lb-ha-hacluster*|--lb-ha-keepalived*)
             if `has_opt '--master-ha*'`; then
                 echo "ERROR: you can't do --master-ha and ${1%%:*} at the same time."
