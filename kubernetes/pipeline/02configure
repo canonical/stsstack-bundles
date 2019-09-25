@@ -18,8 +18,7 @@ fi
 
 # default for current stable is to use containerd
 # See https://ubuntu.com/kubernetes/docs/container-runtime
-if ! `has_opt '--k8s-channel'` && \
-       ! `has_opt '--docker'`; then
+if ! `has_opt '--docker'`; then
     set -- $@ --containerd && cache $@
 fi
 
