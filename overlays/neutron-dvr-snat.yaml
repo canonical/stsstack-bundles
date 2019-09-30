@@ -1,5 +1,5 @@
 # Variables
-dns_servers:                &dns_servers               '10.198.200.1'
+dns_servers:                &dns_servers               '__ML2_DNS_FORWARDER__'
 
 applications:
   neutron-openvswitch:

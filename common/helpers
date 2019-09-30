@@ -411,3 +411,10 @@ print_msgs ()
     echo ""
     fi
 }
+
+get_local_upstream_dns ()
+{
+    server="`systemd-resolve --status 2>/dev/null| sed -r 's/\s+DNS Servers:\s+([[:digit:]]+)/\1/g;t;d'`"
+    (($?==0)) && echo $server && return 0
+    echo "10.198.200.1"  # stsstack upstream dns
+}
