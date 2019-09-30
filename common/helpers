@@ -101,7 +101,7 @@ get_param()
     val=`get_optstrarg $opt`
     if [ -z "$val" ]; then
         current="`get_bundle_existing_config $key`"
-        [ -z "$current" ] && [ -n "$default" ] && val=$default
+        [ -z "$current" ] && [ -n "$default" ] && current=$default
         read -e -p "$msg" -i "$current" val
     fi
     [ -z "$val" ] || MOD_PARAMS[$key]="$val"
