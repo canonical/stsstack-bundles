@@ -48,7 +48,7 @@ fi
 # Download images if not already present
 mkdir -vp ~/images
 #upload_image cloudimages trusty trusty-server-cloudimg-amd64-disk1.img &
-upload_image cloudimages xenial xenial-server-cloudimg-amd64-disk1.img &
+#upload_image cloudimages xenial xenial-server-cloudimg-amd64-disk1.img &
 upload_image cloudimages bionic bionic-server-cloudimg-amd64.img &
 upload_image swift cirros cirros-0.4.0-x86_64-disk.img &
 upload_image swift cirros2 cirros-0.3.5-x86_64-disk.img &
