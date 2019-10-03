@@ -22,6 +22,7 @@ function upload_image {
     # Downloaded images are in qcow2 format already, so we
     # convert them to raw if specified format is not qcow2.
     if [ "$image_format" == "raw" ]; then
+        dpkg -S qemu-img &>/dev/null || sudo apt install qemu-utils -y
         convert_image_to_raw $image_name $image_file
         image_name=$image_name-raw
         image_file=$image_name.img
