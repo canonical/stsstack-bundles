@@ -1,0 +1,7 @@
+# Variables
+
+applications:
+  octavia-dashboard:
+    charm: cs:~openstack-charmers-next/octavia-dashboard
+relations:
+  - [ octavia-dashboard:dashboard, openstack-dashboard:dashboard-plugin ]

@@ -1,0 +1,13 @@
+# Variables
+openstack_origin:           &openstack_origin          __OS_ORIGIN__
+
+applications:
+  openstack-dashboard:
+    num_units: 1
+    charm: cs:~openstack-charmers-next/openstack-dashboard
+    constraints: mem=1G
+    options:
+      openstack-origin: *openstack_origin
+      webroot: '/'
+relations:
+  - [ "openstack-dashboard:identity-service", "keystone:identity-service" ]

@@ -164,6 +164,9 @@ do
         --keystone-saml)
             assert_min_release rocky "keystone saml"
             MOD_OVERLAYS+=( "keystone-saml.yaml" )
+            if ! has_opt --openstack-dashboard*; then
+                set -- $@ --openstack-dashboard && cache $@
+            fi
             ;;
         --mysql-ha*)
             get_units $1 __NUM_MYSQL_UNITS__ 3
@@ -188,6 +191,9 @@ do
             # >= Rocky
             assert_min_release rocky "octavia"
             MOD_OVERLAYS+=( "octavia.yaml" )
+            if has_opt --openstack-dashboard*; then
+                MOD_OVERLAYS+=( "octavia-dashboard.yaml" )
+            fi
             if ! has_opt --no-octavia-diskimage-retrofit; then
                 # By default we let retrofit use images uploaded by the post-deploy configure script.
                 MOD_OVERLAYS+=( "octavia-diskimage-retrofit.yaml" )
@@ -275,8 +281,21 @@ do
             MOD_OVERLAYS+=( "nova-cloud-controller-ha.yaml" )
             MOD_OVERLAYS+=( "memcached.yaml" )
             ;;
+        --openstack-dashboard)
+            MOD_OVERLAYS+=( "openstack-dashboard.yaml" )
+            # Ensure that we re-run --ha if it has already run so that it
+            # picks up the fact that dashboard has been added (possibly by
+            # another hook as a dependency).
+            ha_units=${MOD_PARAMS[__NUM_HA_UNITS__]:-null}
+            if has_opt --ha && [ "$ha_units" != "null" ]; then
+                set -- $@ --ha:$ha_units && cache $@
+            fi
+            ;;
         --openstack-dashboard-ha*)
             get_units $1 __NUM_HORIZON_UNITS__ 3
+            if ! has_opt --openstack-dashboard; then
+                set -- $@ --openstack-dashboard && cache $@
+            fi
             MOD_OVERLAYS+=( "openstack-dashboard-ha.yaml" )
             ;;
         --swift)
@@ -334,6 +353,9 @@ do
             set -- $@ --cinder-ha:$units --glance-ha:$units \
                       --keystone-ha:$units --neutron-api-ha:$units \
                       --nova-cloud-controller-ha:$units && cache $@
+            if has_opt --openstack-dashboard; then
+                set -- $@ --openstack-dashboard-ha:$units && cache $@
+            fi
             ;;
         --list-overlays)  #__OPT__
             list_overlays

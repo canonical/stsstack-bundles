@@ -37,13 +37,6 @@ applications:
       ssl_ca: *ssl_ca
       ssl_cert: *ssl_cert
       ssl_key: *ssl_key
-  openstack-dashboard:
-    num_units: 1
-    charm: cs:~openstack-charmers-next/openstack-dashboard
-    constraints: mem=1G
-    options:
-      openstack-origin: *openstack_origin
-      webroot: '/'
   nova-compute:
     charm: cs:~openstack-charmers-next/nova-compute
     num_units: *num_compute_units
@@ -142,7 +135,6 @@ relations:
   - [ cinder, rabbitmq-server ]
   - [ cinder, nova-cloud-controller ]
   - [ cinder, keystone ]
-  - [ "openstack-dashboard:identity-service", "keystone:identity-service" ]
   - [ neutron-api, mysql ]
   - [ neutron-api, rabbitmq-server ]
   - [ neutron-api, nova-cloud-controller ]

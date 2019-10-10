@@ -9,12 +9,9 @@ applications:
     options:
       debug: *debug
       openstack-origin: __OS_ORIGIN__
-  octavia-dashboard:
-    charm: cs:~openstack-charmers-next/octavia-dashboard
 relations:
   - [ octavia:shared-db, mysql:shared-db ]
   - [ octavia:identity-service, keystone:identity-service ]
   - [ octavia:amqp, rabbitmq-server:amqp ]
   - [ octavia:neutron-api, neutron-api:neutron-load-balancer ]
   - [ octavia:neutron-openvswitch, neutron-openvswitch:neutron-plugin ]
-  - [ octavia-dashboard:dashboard, openstack-dashboard:dashboard-plugin ]
