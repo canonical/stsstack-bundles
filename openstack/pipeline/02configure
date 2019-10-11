@@ -177,7 +177,7 @@ do
             get_param $1 __ML2_DNS_FORWARDER__ "$msg"
             MOD_OVERLAYS+=( "neutron-ml2dns.yaml" )
             if ! has_opt --dvr-snat*; then
-                overlays+=( "neutron-ml2dns-gateway.yaml" )
+                MOD_OVERLAYS+=( "neutron-ml2dns-gateway.yaml" )
             fi
             ;;
         --nova-cells)
