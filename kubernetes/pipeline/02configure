@@ -49,6 +49,10 @@ if ! `has_opt '--vault*'`; then
     MOD_OVERLAYS+=( "k8s-easyrsa.yaml" )
 fi
 
+if ! `has_opt --no-trust` && [[ "$JUJU_VERSION" > "2.6.3" ]]; then
+    MOD_OVERLAYS+=( "k8s-openstack-integrator-trust.yaml" )
+fi
+
 while (($# > 0))
 do
     case "$1" in
