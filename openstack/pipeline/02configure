@@ -22,6 +22,7 @@ MOD_PARAMS[__ETCD_SNAP_CHANNEL__]='latest/stable'
 MOD_PARAMS[__OCTAVIA_RETROFIT_UCA__]='rocky'  # charm defaults to rocky since it's the first version supported
 MOD_PARAMS[__GSSS_SWIFT_ENABLED__]=false  # glance-simplestreams-sync can optionally store index data in swift
 MOD_PARAMS[__LDAP_SERVER__]=''
+MOD_PARAMS[__OVERLAY_TYPE__]='gre'  # this is the charm default
 
 # Try to use current model (or newly requested one) as subdomain name
 model_subdomain=`get_juju_model`
@@ -212,6 +213,10 @@ do
             check_opt_conflict $1 --no-octavia-diskimage-retrofit
             set -- $@ --glance-simplestreams && cache $@
             MOD_OVERLAYS+=( "octavia-diskimage-retrofit-glance-simplestreams.yaml" )
+            ;;
+        --overlay-type) #__OPT__type:<str>
+            MOD_PARAMS[__OVERLAY_TYPE__]="$2"
+            shift
             ;;
         --no-octavia-diskimage-retrofit)  #__OPT__
             ;;
