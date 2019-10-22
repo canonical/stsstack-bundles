@@ -25,30 +25,30 @@ applications:
     constraints: mem=1G
     options:
       zone: 1
-      block-device: vdb
-      overwrite: 'true'
-      ephemeral-unmount: '/mnt' 
+      block-device: 'dummy'
       openstack-origin: *openstack_origin
+    storage:
+      block-devices: cinder,10G,1
   swift-storage-z2:
     num_units: 1
     charm: cs:~openstack-charmers-next/swift-storage
     constraints: mem=1G
     options:
       zone: 2
-      block-device: vdb
-      overwrite: 'true'
-      ephemeral-unmount: '/mnt' 
+      block-device: 'dummy'
       openstack-origin: *openstack_origin
+    storage:
+      block-devices: cinder,10G,1
   swift-storage-z3:
     num_units: 1
     charm: cs:~openstack-charmers-next/swift-storage
     constraints: mem=1G
     options:
       zone: 3
-      block-device: vdb
-      overwrite: 'true'
-      ephemeral-unmount: '/mnt' 
+      block-device: 'dummy'
       openstack-origin: *openstack_origin
+    storage:
+      block-devices: cinder,10G,1
 relations:
   - [ swift-proxy, keystone ]
   - [ swift-proxy, swift-storage-z1 ]
