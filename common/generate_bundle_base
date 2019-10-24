@@ -231,5 +231,5 @@ else
 fi
 
 base_bundle=$bundles_dir/`basename $bundle`
-echo -e "juju deploy ${base_bundle}${overlay_opts[@]:- }${channel_param}\n " > ${bundles_dir}/command
+echo -e "juju deploy${JUJU_DEPLOY_OPTS} ${base_bundle}${overlay_opts[@]:- }${channel_param}\n " > ${bundles_dir}/command
 finish

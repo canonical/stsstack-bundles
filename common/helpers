@@ -4,6 +4,7 @@ export CACHED_STDIN=( $@ )
 DEFAULT_SERIES=bionic
 
 JUJU_VERSION="`juju --version 2>/dev/null| sed -r 's/^([[:digit:]\.]+).*/\1/g'`"
+JUJU_DEPLOY_OPTS=""
 
 . $LIB_COMMON/openstack_release_info
 
