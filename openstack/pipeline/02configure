@@ -39,6 +39,11 @@ if ! has_opt --no-ml2dns && ! has_opt --designate*; then
     set -- $@ --ml2dns && cache $@
 fi
 
+# Can be optionally used by R and S but that is handled as opt
+if has_min_release train placement; then
+    MOD_OVERLAYS+=( "placement.yaml" )
+fi
+
 while (($# > 0))
 do
     case "$1" in
@@ -254,6 +259,10 @@ do
         --neutron-sg-logging)
             assert_min_release queens "neutron-sg-logging"
             MOD_OVERLAYS+=( "neutron-sg-logging.yaml" )            
+            ;;
+        --placement)
+            assert_min_release rocky "placement"
+            MOD_OVERLAYS+=( "placement.yaml" )
             ;;
         --cinder-ha*)
             get_units $1 __NUM_CINDER_UNITS__ 3

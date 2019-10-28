@@ -233,13 +233,18 @@ check_opt_conflict ()
 
 assert_min_release ()
 {
-    min=$1
-    msg=$2
+    min="$1"
+    feature_name="$2"
     r=`get_release ${CACHED_STDIN[@]}`
     [ -n "$r" ] || r=${lts[`get_series ${CACHED_STDIN[@]}`]:-${nonlts[`get_series ${CACHED_STDIN[@]}`]:-""}}
     [[ "$r" < "$min" ]] || return 0
-    echo "Min release '$min' required to be able to use $msg (currently using '$r')" 1>&2
+    echo "Min release '$min' required to be able to use $feature_name (currently using '$r')" 1>&2
     exit 1
+}
+
+has_min_release ()
+{
+    return $(assert_min_release $@ &>/dev/null)
 }
 
 ltsmatch ()
