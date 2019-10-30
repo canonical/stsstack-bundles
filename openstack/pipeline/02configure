@@ -16,6 +16,7 @@ MOD_PARAMS[__SSL_CA__]=
 MOD_PARAMS[__SSL_CERT__]=
 MOD_PARAMS[__SSL_KEY__]=
 MOD_PARAMS[__DVR_DATA_PORT__]=''
+MOD_PARAMS[__OVN_DATA_PORT__]=''
 MOD_PARAMS[__BIND_DNS_FORWARDER__]=`get_local_upstream_dns`
 MOD_PARAMS[__ML2_DNS_FORWARDER__]=`get_local_upstream_dns`
 MOD_PARAMS[__ETCD_SNAP_CHANNEL__]='latest/stable'
@@ -31,8 +32,13 @@ MOD_PARAMS[__DNS_DOMAIN__]="${model_subdomain}.stsstack.qa.1ss."
 MOD_PARAMS[__DESIGNATE_NAMESERVERS__]="ns1.${MOD_PARAMS[__DNS_DOMAIN__]}"
 
 # If using any variant of dvr-snat, there is no need for a neutron-gateway.
-if ! has_opt --dvr-snat*; then
+# We also don't currently need it when using ovn
+if ! has_opt --dvr-snat* && ! has_opt --ovn; then
     MOD_OVERLAYS+=( "neutron-gateway.yaml" )
+fi
+
+if ! has_opt --ovn*; then
+    MOD_OVERLAYS+=( "neutron-openvswitch.yaml" )
 fi
 
 if ! has_opt --no-ml2dns && ! has_opt --designate*; then
@@ -185,8 +191,11 @@ do
             msg="REQUIRED: ml2-dns upstream dns server to forward requests to:"
             get_param $1 __ML2_DNS_FORWARDER__ "$msg"
             MOD_OVERLAYS+=( "neutron-ml2dns.yaml" )
-            if ! has_opt --dvr-snat*; then
-                MOD_OVERLAYS+=( "neutron-ml2dns-gateway.yaml" )
+            if ! has_opt --ovn; then
+                if ! has_opt --dvr-snat*; then
+                    MOD_OVERLAYS+=( "neutron-ml2dns-gateway.yaml" )
+                fi
+                MOD_OVERLAYS+=( "neutron-ml2dns-openvswitch.yaml" )
             fi
             ;;
         --nova-cells)
@@ -258,7 +267,15 @@ do
             ;;
         --neutron-sg-logging)
             assert_min_release queens "neutron-sg-logging"
-            MOD_OVERLAYS+=( "neutron-sg-logging.yaml" )            
+            MOD_OVERLAYS+=( "neutron-sg-logging.yaml" )
+            ;;
+        --ovn)
+            assert_min_release stein "ovn"
+            get_param $1 __OVN_DATA_PORT__ 'REQUIRED: ovn-chassis interface-bridge-mappings (leave blank to set later):'
+            MOD_OVERLAYS+=( "neutron-ovn.yaml" )
+            if ! has_opt --vault*; then
+                set -- $@ --vault && cache $@
+            fi
             ;;
         --placement)
             assert_min_release rocky "placement"

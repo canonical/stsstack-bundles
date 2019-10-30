@@ -21,11 +21,15 @@ install_packages
 NS_ARG=""
 [ "`juju config neutron-api enable-ml2-dns`" = "true" ] && unset NAMESERVER || NS_ARG="-N $NAMESERVER"
 
-# Accept network type as first parameter, assume gre if unspecified
-net_type=${1:-"gre"}
+if ((`juju status ovn-chassis --format=json 2>/dev/null| jq '.machines| length'`)); then
+    # ovn defaults to geneve
+    net_type=${1:-"geneve"}
+else
+    net_type=${1:-"gre"}
+fi
 
 # add extra port to overcloud neutron-gateway (if exists) and configure charm to use it
-if ((`juju status neutron-gateway --format=json| jq .machines[]| wc -l`)); then
+if ((`juju status neutron-gateway --format=json 2>/dev/null| jq '.machines| length'`)); then
     source ~/novarc
     ./bin/post-deploy-config neutron-gateway
 fi

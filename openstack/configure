@@ -1,21 +1,2 @@
 #!/bin/sh
-
-valid="default stsstack"
-
-usage() {
-  echo "$0 <profile>"
-  echo "\tdefault (stsstack) is used if no profile is selected"
-  echo "\tvalid profiles = $valid"
-}
-
-if [ -z $1 ]; then
-  ./profiles/stsstack
-else
-  if test "${valid#*$1}" != "$valid"; then
-    profile=$1
-    shift
-    ./profiles/$profile $@
-  else
-    usage
-  fi
-fi
+./profiles/stsstack

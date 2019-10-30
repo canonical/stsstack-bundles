@@ -10,6 +10,16 @@ declare -A requires=()
 . ~/novarc
 readarray -t instances<<<"`juju status $application --format=json| jq -r '.machines[].\"instance-id\"'`"
 
+if [ "$application" = "ovn-chassis" ] && \
+        ((`juju status ovn-chassis --format=json 2>/dev/null| jq '.machines| length'`)); then
+    optname="interface-bridge-mappings"
+    # See https://bugs.launchpad.net/charm-ovn-chassis/+bug/1850956
+    optval_order=1
+else
+    optname="data-port"
+    optval_order=0
+fi
+
 require_count=0
 echo "Checking $application unit instances: ${instances[@]}"
 for inst in "${instances[@]}"; do
@@ -34,10 +44,11 @@ if ((require_count)); then
     else
         delta=$require_count
     fi
+
     if ((delta)); then
         echo "Creating $delta new ports"
         for ((i=0;i<$delta;i++)); do
-            openstack port create data-port --network ${OS_PROJECT_NAME}_admin_net
+            openstack port create data-port --network ${OS_PROJECT_NAME}_admin_net --no-fixed-ip
         done
     fi
 
@@ -49,15 +60,22 @@ if ((require_count)); then
         port=${ports[$((i++))]}
         echo "Adding port $port to server $inst"
         openstack server add port $inst $port
-        mac_addrs+=( "br-data:`openstack port show -c mac_address -f value $port`" )
+        mac_addrs+=( "`openstack port show -c mac_address -f value $port`" )
     done
-    echo "Updating neutron-openvswitch data-port"
-    cfg="`juju config neutron-openvswitch data-port`"
-    for m in "${mac_addrs[@]}"; do
-        echo "$cfg"| grep -q "$m" && continue 
-        cfg+=" $m"
+    echo "Updating $application $optname"
+    cfg="`juju config $application $optname`"
+    [ -n "$cfg" ] && first=false || first=true
+    for mac in "${mac_addrs[@]}"; do
+        echo "$cfg"| grep -q "$mac" && continue
+        ! $first && cfg+=" " || first=false
+        if ((optval_order==0)); then
+            cfg+="br-data:$mac"
+        else
+            cfg+="${mac}:br-data"
+        fi
     done
-    juju config neutron-openvswitch data-port="$cfg"
+    echo "Setting $application ${optname}='$cfg'"
+    juju config $application ${optname}="$cfg"
 else
     echo "All instances have > 1 port already - nothing to do"
 fi

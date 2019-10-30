@@ -1,12 +1,8 @@
 # Variables
 dns_domain:                 &dns_domain                '__DNS_DOMAIN__'
-dns_servers:                &dns_servers               '__ML2_DNS_FORWARDER__'
 
 applications:
   neutron-api:
     options:
       enable-ml2-dns: True
       dns-domain: *dns_domain
-  neutron-openvswitch:
-    options:
-      dns-servers: *dns_servers
