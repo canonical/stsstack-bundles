@@ -10,10 +10,14 @@ MOD_PARAMS[__NUM_K8S_MASTER_UNITS__]=1
 MOD_PARAMS[__NUM_K8S_WORKER_UNITS__]=2
 MOD_PARAMS[__NUM_K8S_LB_UNITS__]=1
 MOD_PARAMS[__ETCD_SNAP_CHANNEL__]='latest/stable'
+MOD_PARAMS[__CHARM_CHANNEL__]=
 
+# NOTE: the k8s charms publish to stable and edge so its fine to default to
+#       edge but other charms e.g. openstack charms like ceph-mon do not so if
+#       they are used we must override and use stable.
 if ! `has_opt '--charm-channel'` && \
         ! `has_opt '--use-stable-charms'`; then
-    set -- $@ --charm-channel edge && cache $@
+    MOD_PARAMS[__CHARM_CHANNEL__]=edge
 fi
 
 # default for current stable is to use containerd
@@ -67,6 +71,8 @@ do
         --ceph)
             MOD_OVERLAYS+=( "ceph.yaml" )
             MOD_OVERLAYS+=( "k8s-ceph.yaml" )
+            # NOTE: force stable since these charms are not published to edge
+            MOD_PARAMS[__CHARM_CHANNEL__]=stable
             ;;
         --etcd-ha*)
             get_units $1 __NUM_ETCD_UNITS__ 1
@@ -122,6 +128,8 @@ do
             MOD_OVERLAYS+=( "mysql.yaml" )
             MOD_OVERLAYS+=( "k8s-vault.yaml" )
             has_opt '--ceph' && MOD_OVERLAYS+=( "vault-ceph.yaml" )
+            # NOTE: force stable since these charms are not published to edge
+            MOD_PARAMS[__CHARM_CHANNEL__]=stable
             ;;
         --etcd-channel)  #__OPT__type:<str>
             MOD_PARAMS[__ETCD_SNAP_CHANNEL__]=$2
@@ -148,5 +156,12 @@ do
     esac
     shift
 done
+
+# We do this here in case there was a need to override.
+charm_channel="${MOD_PARAMS[__CHARM_CHANNEL__]}"
+if [ -n "$charm_channel" ]; then
+    set -- $@ --charm-channel $charm_channel && cache $@
+    MOD_UNKNOWN_OPTS+=( --charm-channel $charm_channel )
+fi
 
 print_msgs
