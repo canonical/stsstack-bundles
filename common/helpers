@@ -338,16 +338,15 @@ get_app_release_name ()
 
 trap_help ()
 {
-i=0
-while ((i < ${#CACHED_STDIN[@]}))
-do
-    case "${#CACHED_STDIN[$((i++))]}" in
-        -h|--help)
-            _usage
-            exit 0
-            ;;
-    esac
-done
+    i=0
+    while ((i < ${#CACHED_STDIN[@]})); do
+        case "${CACHED_STDIN[$((i++))]}" in
+            -h|--help)
+                _usage
+                exit 0
+                ;;
+        esac
+    done
 }
 
 get_bundle_state_dir ()
