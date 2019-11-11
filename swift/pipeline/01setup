@@ -12,7 +12,7 @@ export MOD_PATH=`dirname $0`
 export MOD_BASE_TEMPLATE=swift.yaml.template
 
 # opts that 02configure does not recognise that get passed to the generator
-export -a MOD_UNKNOWN_OPTS=()
+export -a MOD_PASSTHROUGH_OPTS=()
 
 # Collection of messages to display at the end
 export -a MOD_MSGS=()

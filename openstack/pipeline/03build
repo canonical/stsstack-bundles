@@ -11,7 +11,7 @@ if ((${#MOD_PARAMS[@]})); then
     done
 fi
 
-. $LIB_COMMON/generate_bundle_base ${MOD_UNKNOWN_OPTS[@]:-}
+. $LIB_COMMON/generate_bundle_base ${MOD_PASSTHROUGH_OPTS[@]:-}
 
 for f in $INTERNAL_BUNDLE_CONFIG_RENDERER $INTERNAL_BUNDLE_CONFIG; do
     [ -n "$f" ] && [ -r "$f" ] && rm -f $f
