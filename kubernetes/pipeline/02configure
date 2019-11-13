@@ -56,7 +56,7 @@ fi
 
 # See https://bugs.launchpad.net/juju/+bug/1849636 for reason why we
 # need min 2.7
-if ! `has_opt --no-trust` && [[ "$JUJU_VERSION" > "2.7" ]]; then
+if ! `has_opt --no-trust` && [[ ! "$JUJU_VERSION" < "2.7" ]]; then
     MOD_OVERLAYS+=( "k8s-openstack-integrator-trust.yaml" )
     JUJU_DEPLOY_OPTS=" --trust"
 fi
