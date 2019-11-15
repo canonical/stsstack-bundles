@@ -130,8 +130,12 @@ list_overlays ()
 {
     echo "Supported overlays:"
     script=`dirname $0`/pipeline/02configure
+    {
     grep -v __OPT__ $script| \
-        sed -r 's/.+\s+(--[[:alnum:]\-]+\*?)\).*/\1/g;t;d'
+        sed -r 's/.+\s+(--[[:alnum:]\-]+\*?)[\)\|].*/\1/g;t;d'
+    grep -v __OPT__ $script| \
+        sed -r 's/.+\|(--[[:alnum:]\-]+\*?)\).*/\1/g;t;d'
+    } | sort -u
 }
 
 list_opts ()
