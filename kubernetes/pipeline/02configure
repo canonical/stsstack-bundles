@@ -76,7 +76,7 @@ do
             MOD_PARAMS[__CHARM_CHANNEL__]=stable
             ;;
         --etcd-ha*)
-            get_units $1 __NUM_ETCD_UNITS__ 1
+            get_units $1 __NUM_ETCD_UNITS__ 3
             ;;
         --containerd)
             check_opt_conflict $1 --docker
@@ -138,7 +138,6 @@ do
             ;;
         --vault-ha*)
             get_units $1 __NUM_VAULT_UNITS__ 3
-            get_units $1 __NUM_ETCD_UNITS__ 3
             MOD_OVERLAYS+=( "vault-ha.yaml" )
             MOD_OVERLAYS+=( "vault-etcd.yaml" )
             set -- $@ --vault && cache $@
