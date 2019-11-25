@@ -27,8 +27,11 @@ do
             create_model=true
             ;;
         --model-config)
-            # path to yaml config file
-            model_config=$2
+            if [ -z "$model_config" ]; then
+                model_config="$2"
+            else
+                model_config+=" $2"
+            fi
             shift
             ;;
         --series|-s)
@@ -99,8 +102,8 @@ if $create_model; then
         juju add-model $bundle_name
         echo ""
     fi
-    [ -e "$model_config" ] && juju model-config $model_config
 fi
+[ -n "$model_config" ] && juju model-config $model_config
 
 bundles_dir=`get_bundle_state_dir`
 

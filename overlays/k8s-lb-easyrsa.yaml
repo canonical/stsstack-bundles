@@ -1,0 +1,2 @@
+relations:
+  - [ 'kubeapi-load-balancer:certificates', 'easyrsa:client' ]

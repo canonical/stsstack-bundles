@@ -19,7 +19,7 @@ OPTIONS:
         Create Juju model using --name. Switches to model if it already
         exists. If this is not provided then the current Juju model is used.
      --model-config
-        Path to YAML config for the model to be created.
+        Juju model config <key>=<value> (can be provided multiple times).
      -h, --help
         Display this help message.
      --list

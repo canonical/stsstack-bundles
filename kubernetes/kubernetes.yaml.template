@@ -6,6 +6,7 @@ applications:
   kubernetes-master:
     charm: cs:~containers/kubernetes-master
     constraints: mem=2G
+    expose: true
     num_units: __NUM_K8S_MASTER_UNITS__
     options:
       channel: *k8s_channel

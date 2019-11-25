@@ -43,7 +43,7 @@ MOD_OVERLAYS+=(
     "easyrsa.yaml"
     "k8s-etcd.yaml"
 )
-if ! has_opt --master-ha*; then
+if ! has_opt --master-ha* && ! has_opt --lb-octavia; then
     MOD_OVERLAYS+=( "k8s-lb.yaml"  )
 fi
 # default to flannel cni
@@ -52,6 +52,9 @@ if ! has_opt --calico && ! has_opt --canal; then
 fi
 if ! has_opt --vault*; then
     MOD_OVERLAYS+=( "k8s-easyrsa.yaml" )
+    if ! `has_opt '--lb-octavia'`; then
+        MOD_OVERLAYS+=( "k8s-lb-easyrsa.yaml" )
+    fi
 fi
 
 # See https://bugs.launchpad.net/juju/+bug/1849636 for reason why we
@@ -103,6 +106,7 @@ do
             fi
             ;;
         --lb-ha-hacluster*|--lb-ha-keepalived*)
+            check_opt_conflict $1 --lb-octavia
             if has_opt --master-ha*; then
                 echo "ERROR: you can't do --master-ha and ${1%%:*} at the same time."
                 exit 1
@@ -114,6 +118,19 @@ do
                 MOD_OVERLAYS+=( "k8s-lb-ha-hacluster.yaml" )
                 check_hacluster_channel
             fi
+            ;;
+        --lb-octavia)
+            check_opt_conflict $1 '--lb-ha-hacluster*'
+            check_opt_conflict $1 '--lb-ha-keepalived*'
+            MOD_OVERLAYS+=( "k8s-octavia-lb.yaml" )
+            echo "INFO: juju model will use network with port security enabled (since octavia needs it)."
+            if [ -r ~/novarc ]; then
+                OS_PROJECT_NAME=`sed -r 's/.+OS_PROJECT_NAME=(.+)/\1/g;t;d' ~/novarc`
+                MOD_PASSTHROUGH_OPTS+=( --model-config "network=${OS_PROJECT_NAME}_port_sec_enabled" )
+            else
+                echo "WARNING: ~/novarc not found - unable to setup octavia tenant network"
+            fi
+            echo ""
             ;;
         --master-ha*)
             if has_opt --lb-ha*; then
@@ -144,6 +161,10 @@ do
             ;;
         --num-workers)  #__OPT__type:<int>
             MOD_PARAMS[__NUM_K8S_WORKER_UNITS__]=$2
+            shift
+            ;;
+        --num-masters)  #__OPT__type:<int>
+            MOD_PARAMS[__NUM_K8S_MASTER_UNITS__]=$2
             shift
             ;;
         --list-overlays)  #__OPT__
