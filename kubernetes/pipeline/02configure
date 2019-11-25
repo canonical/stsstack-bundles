@@ -16,14 +16,14 @@ MOD_PARAMS[__CHARM_CHANNEL__]=
 # NOTE: the k8s charms publish to stable and edge so its fine to default to
 #       edge but other charms e.g. openstack charms like ceph-mon do not so if
 #       they are used we must override and use stable.
-if ! `has_opt '--charm-channel'` && \
-        ! `has_opt '--use-stable-charms'`; then
+if ! has_opt --charm-channel && \
+        ! has_opt --use-stable-charms; then
     MOD_PARAMS[__CHARM_CHANNEL__]=edge
 fi
 
 # default for current stable is to use containerd
 # See https://ubuntu.com/kubernetes/docs/container-runtime
-if ! `has_opt '--docker'`; then
+if ! has_opt --docker; then
     set -- $@ --containerd && cache $@
 fi
 
@@ -43,20 +43,20 @@ MOD_OVERLAYS+=(
     "easyrsa.yaml"
     "k8s-etcd.yaml"
 )
-if ! `has_opt '--master-ha*'`; then
+if ! has_opt --master-ha*; then
     MOD_OVERLAYS+=( "k8s-lb.yaml"  )
 fi
 # default to flannel cni
-if ! `has_opt '--calico'` && ! `has_opt '--canal'`; then
+if ! has_opt --calico && ! has_opt --canal; then
     MOD_OVERLAYS+=( "k8s-cni-flannel.yaml" )
 fi
-if ! `has_opt '--vault*'`; then
+if ! has_opt --vault*; then
     MOD_OVERLAYS+=( "k8s-easyrsa.yaml" )
 fi
 
 # See https://bugs.launchpad.net/juju/+bug/1849636 for reason why we
 # need min 2.7
-if ! `has_opt --no-trust` && [[ ! "$JUJU_VERSION" < "2.7" ]]; then
+if ! has_opt --no-trust && [[ ! "$JUJU_VERSION" < "2.7" ]]; then
     MOD_OVERLAYS+=( "k8s-openstack-integrator-trust.yaml" )
     JUJU_DEPLOY_OPTS=" --trust"
 fi
@@ -96,14 +96,14 @@ do
             ;;
         --e2e)
             MOD_OVERLAYS+=( "k8s-e2e.yaml" )
-            if ! `has_opt '--vault*'`; then
+            if ! has_opt --vault*; then
                 MOD_OVERLAYS+=( "k8s-e2e-easyrsa.yaml" )
             else
                 MOD_OVERLAYS+=( "k8s-e2e-vault.yaml" )
             fi
             ;;
         --lb-ha-hacluster*|--lb-ha-keepalived*)
-            if `has_opt '--master-ha*'`; then
+            if has_opt --master-ha*; then
                 echo "ERROR: you can't do --master-ha and ${1%%:*} at the same time."
                 exit 1
             fi
@@ -116,7 +116,7 @@ do
             fi
             ;;
         --master-ha*)
-            if `has_opt '--lb-ha*'`; then
+            if has_opt --lb-ha*; then
                 echo "ERROR: you can't do --lb-ha and --master-ha at the same time."
                 exit 1
             fi
@@ -128,7 +128,7 @@ do
             MOD_OVERLAYS+=( "vault.yaml" )
             MOD_OVERLAYS+=( "mysql.yaml" )
             MOD_OVERLAYS+=( "k8s-vault.yaml" )
-            has_opt '--ceph' && MOD_OVERLAYS+=( "vault-ceph.yaml" )
+            has_opt --ceph && MOD_OVERLAYS+=( "vault-ceph.yaml" )
             # NOTE: force stable since these charms are not published to edge
             MOD_PARAMS[__CHARM_CHANNEL__]=stable
             ;;

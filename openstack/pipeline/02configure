@@ -96,7 +96,7 @@ do
         --dvr-l3ha*)
             get_units $1 __NUM_AGENTS_PER_ROUTER__ 3
             # if we are a dep then don't get gateway units
-            if ! `has_opt --dvr-snat-l3ha*`; then
+            if ! has_opt --dvr-snat-l3ha*; then
                 get_units $1 __NUM_NEUTRON_GATEWAY_UNITS__ 3
             fi
             has_opt --dvr || { set -- $@ --dvr && cache $@; }
@@ -128,14 +128,14 @@ do
         --grafana)
             MOD_OVERLAYS+=( "grafana.yaml ")
             MOD_OVERLAYS+=( "prometheus-openstack.yaml ")
-            if `has_opt --ceph`; then
+            if has_opt --ceph; then
                 MOD_OVERLAYS+=( "prometheus-ceph.yaml ")
             fi
             MOD_MSGS+=( "NOTE: telegraf has been related to core openstack services but you may need to add to others you have in your deployment" )
             ;;
         --nagios)
             MOD_OVERLAYS+=( "nagios.yaml ")
-            if `has_opt --ceph`; then
+            if has_opt --ceph; then
                 MOD_OVERLAYS+=( "nagios-ceph.yaml ")
             fi
             # If using any variant of dvr-snat, there is no need to relate
@@ -240,14 +240,14 @@ do
             MOD_OVERLAYS+=( "rsyslog.yaml" )
             ;;
         --ssl)
-            if ! `has_opt --replay`; then
+            if ! has_opt --replay; then
                 (cd ssl; ./create_ca_cert.sh openstack;)
                 ssl_results="ssl/openstack/results"
                 MOD_PARAMS[__SSL_CA__]=`base64 ${ssl_results}/cacert.pem| tr -d '\n'`
                 MOD_PARAMS[__SSL_CERT__]=`base64 ${ssl_results}/servercert.pem| tr -d '\n'`
                 MOD_PARAMS[__SSL_KEY__]=`base64 ${ssl_results}/serverkey.pem| tr -d '\n'`
                 # Make everything HA with 1 unit (unless --ha has already been set)
-                if ! `has_opt '--ha[:0-9]*$'`; then
+                if ! has_opt '--ha[:0-9]*$'; then
                     set -- $@ --ha:1 && cache $@
                 fi
             fi
