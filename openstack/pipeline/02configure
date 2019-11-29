@@ -52,7 +52,7 @@ do
             shift
             ;;
         --barbican)
-            assert_min_release queens "barbican"
+            assert_min_release rocky "barbican"
             MOD_OVERLAYS+=( "barbican.yaml" )
             # always use barbican-vault for now since that is the most common
             # use-case.
