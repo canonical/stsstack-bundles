@@ -45,6 +45,11 @@ if ! has_opt --no-ml2dns && ! has_opt --designate*; then
     set -- $@ --ml2dns && cache $@
 fi
 
+# if not using mysql-innodb-cluster, then push the mysql overlay into the stack
+if ! has_opt --mysql-innodb-cluster*; then
+    MOD_OVERLAYS+=( "mysql.yaml" )
+fi
+
 # Can be optionally used by R and S but that is handled as opt
 if has_min_release train placement; then
     MOD_OVERLAYS+=( "placement.yaml" )
@@ -183,6 +188,12 @@ do
         --mysql-ha*)
             get_units $1 __NUM_MYSQL_UNITS__ 3
             MOD_OVERLAYS+=( "mysql-ha.yaml" )
+            ;;
+        --mysql-innodb-cluster*)
+            assert_min_release train mysql-innodb-cluster
+            # NOTE: 3 is actually the absolute minimum units required
+            get_units $1 __NUM_MYSQL_UNITS__ 3
+            MOD_OVERLAYS+=( "mysql-innodb-cluster.yaml")
             ;;
         --no-ml2dns)  #__OPT__
             ;;
