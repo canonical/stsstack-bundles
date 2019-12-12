@@ -7,7 +7,7 @@ source ~/novarc
 echo "Fetching vms for model '${model}'..."
 readarray -t vms<<<"`openstack server list -c ID -c Name -f value| egrep "juju-.+-${model}-[0-9]+"| awk '{print $1}'`"
 
-echo -e "Power off ${#vms[@]} instances for model '${model}'\nContinue? [y/N] "
+echo -en "Power off ${#vms[@]} instances for model '${model}'\nContinue? [y/N]"
 read answer
 [ "${answer,,}" = "y" ] || { echo "aborted"; exit 0; }
 
