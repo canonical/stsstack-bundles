@@ -1,0 +1,7 @@
+applications:
+  openstack-service-checks:
+    charm: cs:~canonical-bootstack/openstack-service-checks
+    num_units: 1
+relations:
+  - [ openstack-service-checks:identity-credentials, keystone:identity-credentials ]
+  - [ openstack-service-checks, nrpe ]
