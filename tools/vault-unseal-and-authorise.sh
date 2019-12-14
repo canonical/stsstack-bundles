@@ -1,6 +1,6 @@
 #!/bin/bash -ux
 
-sudo snap install vault
+which vault > /dev/null || sudo snap install vault
 
 model=`juju show-model --format=json| jq -r '.| keys[]'`
 model_uuid=`juju show-model --format=json| jq -r '.[]."model-uuid"'`

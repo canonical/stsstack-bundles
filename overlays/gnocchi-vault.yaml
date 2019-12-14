@@ -1,0 +1,2 @@
+relations:
+  - [ gnocchi:certificates, vault ]

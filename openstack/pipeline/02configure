@@ -356,11 +356,15 @@ do
             ;;
         --telemetry|--telemetry-gnocchi)
             # ceilometer + aodh + gnocchi (>= pike)
-            assert_min_release pike "gnocchi" 
+            assert_min_release pike "gnocchi"
             MOD_OVERLAYS+=( "ceph.yaml" )
             MOD_OVERLAYS+=( "gnocchi.yaml" )
             MOD_OVERLAYS+=( "memcached.yaml" )
             MOD_OVERLAYS+=( "telemetry.yaml" )
+
+            if has_opt --vault; then
+                MOD_OVERLAYS+=( "gnocchi-vault.yaml" )
+            fi
             ;;
         --telemetry-legacy-aodh)
             # ceilometer + aodh + mongodb (<= pike)
