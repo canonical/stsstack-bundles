@@ -1,6 +1,7 @@
 applications:
   nagios:
     charm: cs:nagios
+    num_units: 1
     options:
       password: ubuntu
   nrpe:
