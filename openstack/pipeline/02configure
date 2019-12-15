@@ -155,6 +155,13 @@ do
                 MOD_OVERLAYS+=( "nagios-neutron-gateway.yaml" )
             fi
             ;;
+        --openstack-service-checks)
+            MOD_OVERLAYS+=( "openstack-service-checks.yaml" )
+            # openstack-service-checks depends on nagios+nrpe
+            if ! has_opt --nagios; then
+                set -- $@ --nagios && cache $@
+            fi
+            ;;
         --heat)
             MOD_OVERLAYS+=( "heat.yaml ")
             ;;
