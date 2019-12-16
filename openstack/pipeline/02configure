@@ -241,7 +241,7 @@ do
             get_units $1 __NUM_OCTAVIA_UNITS__ 3
             MOD_OVERLAYS+=( "octavia-ha.yaml" )
             ;;
-        --octavia-diskimage-retrofit-glance-simplestreams)  #__OPT__
+        --octavia-diskimage-retrofit-glance-simplestreams)
             check_opt_conflict $1 --no-octavia-diskimage-retrofit
             set -- $@ --glance-simplestreams && cache $@
             MOD_OVERLAYS+=( "octavia-diskimage-retrofit-glance-simplestreams.yaml" )
