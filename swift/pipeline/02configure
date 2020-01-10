@@ -11,6 +11,8 @@ MOD_PARAMS[__SSL_CERT__]=
 MOD_PARAMS[__SSL_KEY__]=
 MOD_PARAMS[__NUM_ETCD_UNITS__]=1
 MOD_PARAMS[__ETCD_SNAP_CHANNEL__]='latest/stable'
+MOD_PARAMS[__GRAYLOG_SNAP_CHANNEL__]='3/stable'
+MOD_PARAMS[__GRAFANA_SNAP_CHANNEL__]='stable'
 
 # We always add this overlay since it contains core apps for this module.
 MOD_OVERLAYS+=( swift.yaml )
@@ -18,8 +20,16 @@ MOD_OVERLAYS+=( swift.yaml )
 while (($# > 0))
 do
     case "$1" in
+        --graylog-channel)  #__OPT__type:<str>
+            MOD_PARAMS[__GRAYLOG_SNAP_CHANNEL__]="$2"
+            shift
+            ;;
         --graylog)
             MOD_OVERLAYS+=( "graylog.yaml ")
+            ;;
+        --grafana-channel)  #__OPT__type:<str>
+            MOD_PARAMS[__GRAFANA_SNAP_CHANNEL__]="$2"
+            shift
             ;;
         --lma)
             # Logging Monitoring and Alarming
@@ -46,7 +56,7 @@ do
             MOD_OVERLAYS+=( "vault.yaml" )
             MOD_OVERLAYS+=( "vault-swift.yaml" )
             ;;
-        --etcd-channel)
+        --etcd-channel)  #__OPT__type:<str>
             MOD_PARAMS[__ETCD_SNAP_CHANNEL__]=$2
             shift
             ;;

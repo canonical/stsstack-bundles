@@ -20,6 +20,8 @@ MOD_PARAMS[__OVN_DATA_PORT__]=''
 MOD_PARAMS[__BIND_DNS_FORWARDER__]=`get_local_upstream_dns`
 MOD_PARAMS[__ML2_DNS_FORWARDER__]=`get_local_upstream_dns`
 MOD_PARAMS[__ETCD_SNAP_CHANNEL__]='latest/stable'
+MOD_PARAMS[__GRAYLOG_SNAP_CHANNEL__]='3/stable'
+MOD_PARAMS[__GRAFANA_SNAP_CHANNEL__]='stable'
 MOD_PARAMS[__OCTAVIA_RETROFIT_UCA__]='rocky'  # charm defaults to rocky since it's the first version supported
 MOD_PARAMS[__GSSS_SWIFT_ENABLED__]=false  # glance-simplestreams-sync can optionally store index data in swift
 MOD_PARAMS[__LDAP_SERVER__]=''
@@ -141,10 +143,18 @@ do
         --lma)
             # Logging Monitoring and Alarming
             set -- $@ --graylog --grafana && cache $@
-           ;;
+            ;;
+        --graylog-channel)  #__OPT__type:<str>
+            MOD_PARAMS[__GRAYLOG_SNAP_CHANNEL__]="$2"
+            shift
+            ;;
         --graylog)
             MOD_OVERLAYS+=( "graylog.yaml ")
             MOD_MSGS+=( "NOTE: you will need to manually relate graylog (filebeat) to any other services you want to monitor" )
+            ;;
+        --grafana-channel)  #__OPT__type:<str>
+            MOD_PARAMS[__GRAFANA_SNAP_CHANNEL__]="$2"
+            shift
             ;;
         --grafana)
             MOD_OVERLAYS+=( "grafana.yaml ")
@@ -398,7 +408,7 @@ do
             MOD_OVERLAYS+=( "vault-openstack.yaml" )
             has_opt --ceph && MOD_OVERLAYS+=( "vault-ceph.yaml" )
             ;;
-        --etcd-channel)
+        --etcd-channel)  #__OPT__type:<str>
             MOD_PARAMS[__ETCD_SNAP_CHANNEL__]=$2
             shift
             ;;

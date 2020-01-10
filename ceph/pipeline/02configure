@@ -10,12 +10,22 @@ MOD_PARAMS[__SSL_CERT__]=
 MOD_PARAMS[__SSL_KEY__]=
 MOD_PARAMS[__NUM_ETCD_UNITS__]=1
 MOD_PARAMS[__ETCD_SNAP_CHANNEL__]='latest/stable'
+MOD_PARAMS[__GRAYLOG_SNAP_CHANNEL__]='3/stable'
+MOD_PARAMS[__GRAFANA_SNAP_CHANNEL__]='stable'
 
 while (($# > 0))
 do
     case "$1" in
+        --graylog-channel)  #__OPT__type:<str>
+            MOD_PARAMS[__GRAYLOG_SNAP_CHANNEL__]="$2"
+            shift
+            ;;
         --graylog)
             MOD_OVERLAYS+=( "graylog.yaml ")
+            ;;
+        --grafana-channel)  #__OPT__type:<str>
+            MOD_PARAMS[__GRAFANA_SNAP_CHANNEL__]="$2"
+            shift
             ;;
         --lma)
             # Logging Monitoring and Analysis
@@ -64,7 +74,7 @@ do
             MOD_OVERLAYS+=( "vault.yaml" )
             MOD_OVERLAYS+=( "vault-ceph.yaml" )
             ;;
-        --etcd-channel)
+        --etcd-channel)  #__OPT__type:<str>
             MOD_PARAMS[__ETCD_SNAP_CHANNEL__]=$2
             shift
             ;;
