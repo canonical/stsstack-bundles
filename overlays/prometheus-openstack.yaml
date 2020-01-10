@@ -9,5 +9,4 @@ relations:
   - [ telegraf, glance ]
   - [ telegraf, keystone ]
   - [ telegraf, neutron-api ]
-  - [ telegraf, neutron-gateway ]
   - [ telegraf, nova-compute ]

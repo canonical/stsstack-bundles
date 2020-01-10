@@ -33,7 +33,17 @@ MOD_PARAMS[__DESIGNATE_NAMESERVERS__]="ns1.${MOD_PARAMS[__DNS_DOMAIN__]}"
 
 # If using any variant of dvr-snat, there is no need for a neutron-gateway.
 # We also don't currently need it when using ovn
-if ! has_opt --dvr-snat* && ! has_opt --ovn; then
+
+is_neutron_gateway_required ()
+{
+    if ! has_opt --dvr-snat* && ! has_opt --ovn; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+if is_neutron_gateway_required; then
     MOD_OVERLAYS+=( "neutron-gateway.yaml" )
 fi
 
@@ -139,6 +149,9 @@ do
         --grafana)
             MOD_OVERLAYS+=( "grafana.yaml ")
             MOD_OVERLAYS+=( "prometheus-openstack.yaml ")
+            if is_neutron_gateway_required; then
+                MOD_OVERLAYS+=( "prometheus-openstack-neutron-gateway.yaml ")
+            fi
             if has_opt --ceph; then
                 MOD_OVERLAYS+=( "prometheus-ceph.yaml ")
             fi
@@ -151,7 +164,7 @@ do
             fi
             # If using any variant of dvr-snat, there is no need to relate
             # nagios to neutron-gateway
-            if ! has_opt --dvr-snat*; then
+            if is_neutron_gateway_required; then
                 MOD_OVERLAYS+=( "nagios-neutron-gateway.yaml" )
             fi
             ;;
@@ -210,7 +223,7 @@ do
             get_param $1 __ML2_DNS_FORWARDER__ "$msg"
             MOD_OVERLAYS+=( "neutron-ml2dns.yaml" )
             if ! has_opt --ovn; then
-                if ! has_opt --dvr-snat*; then
+                if is_neutron_gateway_required; then
                     MOD_OVERLAYS+=( "neutron-ml2dns-gateway.yaml" )
                 fi
                 MOD_OVERLAYS+=( "neutron-ml2dns-openvswitch.yaml" )
