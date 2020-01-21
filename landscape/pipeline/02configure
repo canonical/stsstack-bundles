@@ -3,6 +3,8 @@
 
 MOD_PARAMS[__LANDSCAPE_VERSION__]="19.01"
 
+# Skip processing input if it includes exclusive passthrough options
+! has_excl_passthrough_opt && \
 while (($# > 0))
 do
     case "$1" in
@@ -12,10 +14,6 @@ do
             ;;
         --ha)
             MOD_OVERLAYS+=( "landscape-ha.yaml" )
-            ;;
-        --list-overlays)  #__OPT__
-            list_overlays
-            exit
             ;;
         *)
             MOD_PASSTHROUGH_OPTS+=( $1 )

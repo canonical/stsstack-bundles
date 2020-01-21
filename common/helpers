@@ -10,7 +10,7 @@ JUJU_DEPLOY_OPTS=""
 
 _usage () {
 cat << EOF
-USAGE: `basename $0` OPTIONS [OVERLAYS]
+USAGE: `basename $0` OPTIONS [OVERLAYS] [MODULE_OPTS]
 
 OPTIONS:
      --charm-channel
@@ -18,14 +18,16 @@ OPTIONS:
      --create-model
         Create Juju model using --name. Switches to model if it already
         exists. If this is not provided then the current Juju model is used.
-     --model-config
-        Juju model config <key>=<value> (can be provided multiple times).
+     --defaults
+        Use module config defaults and don't ask for input.
      -h, --help
         Display this help message.
      --list
         List existing bundles.
      --list-overlays
         List supported overlays.
+     --model-config
+        Juju model config <key>=<value> (can be provided multiple times).
      -n, --name n
         Name for bundle. If this is not provided then the default bundle
         location is used.
@@ -60,7 +62,18 @@ OVERLAYS:
      that provide HA or scale-out services. See --list-overlays for
      available overlays.
 EOF
-list_opts
+list_module_opts
+}
+
+has_excl_passthrough_opt ()
+{
+    for opt in --list --list-overlays --replay --help; do
+        if has_opt $opt; then
+            MOD_PASSTHROUGH_OPTS+=( $opt )
+            return 0
+        fi
+    done
+    return 1
 }
 
 get_optintarg ()
@@ -96,7 +109,7 @@ get_param()
     msg=$3
     default="${MOD_PARAMS[$key]}"
 
-    has_opt --replay && return
+    { has_opt --replay || has_opt --defaults; } && return
 
     # ensure message has a space at end
     if [ -n "$msg" ] && [ "${msg: -1}" != " " ]; then msg="$msg "; fi
@@ -138,13 +151,13 @@ list_overlays ()
     } | sort -u
 }
 
-list_opts ()
+list_module_opts ()
 {
-    echo -e "\nBUNDLE OPTS:"
+    echo -e "\nMODULE OPTS:"
     script=`dirname $0`/pipeline/02configure
     grep __OPT__ $script| \
         sed -r -e 's/.+\s+(--[[:alnum:]\-]+).+#__OPT__type:(.+)/      \1 \2/g' \
-               -e 's/.+\s+(--[[:alnum:]\-]+).+#__OPT__$/      \1/g;t;d'
+               -e 's/.+\s+(--[[:alnum:]\-]+).+#__OPT__$/      \1/g;t;d'| sort -k 1
 }
 
 has_series ()
@@ -353,13 +366,18 @@ trap_help ()
     done
 }
 
+get_bundle_state_root ()
+{
+    echo $MOD_PATH/b
+}
+
 get_bundle_state_dir ()
 {
     bundle_name="`get_optval --name`"
     [ -n "$bundle_name" ] || bundle_name="`get_optval -n`"
     subdir="/$bundle_name"
     [ -n "$bundle_name" ] || subdir=''
-    echo $MOD_PATH/b$subdir
+    echo `get_bundle_state_root`$subdir
 }
 
 get_bundle_existing_config ()

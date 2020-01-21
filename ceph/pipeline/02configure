@@ -13,6 +13,8 @@ MOD_PARAMS[__ETCD_SNAP_CHANNEL__]='latest/stable'
 MOD_PARAMS[__GRAYLOG_SNAP_CHANNEL__]='3/stable'
 MOD_PARAMS[__GRAFANA_SNAP_CHANNEL__]='stable'
 
+# Skip processing input if it includes exclusive passthrough options
+! has_excl_passthrough_opt && \
 while (($# > 0))
 do
     case "$1" in
@@ -39,16 +41,14 @@ do
             shift
             ;;
         --ssl)
-            if ! has_opt --replay; then
-                (cd ssl; ./create_ca_cert.sh ceph;)
-                ssl_results="ssl/ceph/results"
-                MOD_PARAMS[__SSL_CA__]=`base64 ${ssl_results}/cacert.pem| tr -d '\n'`
-                MOD_PARAMS[__SSL_CERT__]=`base64 ${ssl_results}/servercert.pem| tr -d '\n'`
-                MOD_PARAMS[__SSL_KEY__]=`base64 ${ssl_results}/serverkey.pem| tr -d '\n'`
-                # Make everything HA with 1 unit (unless --ha has already been set)
-                if ! has_opt '--rgw-ha[:0-9]*$'; then
-                    set -- $@ --rgw-ha:1 && cache $@
-                fi
+            (cd ssl; ./create_ca_cert.sh ceph;)
+            ssl_results="ssl/ceph/results"
+            MOD_PARAMS[__SSL_CA__]=`base64 ${ssl_results}/cacert.pem| tr -d '\n'`
+            MOD_PARAMS[__SSL_CERT__]=`base64 ${ssl_results}/servercert.pem| tr -d '\n'`
+            MOD_PARAMS[__SSL_KEY__]=`base64 ${ssl_results}/serverkey.pem| tr -d '\n'`
+            # Make everything HA with 1 unit (unless --ha has already been set)
+            if ! has_opt '--rgw-ha[:0-9]*$'; then
+                set -- $@ --rgw-ha:1 && cache $@
             fi
             ;;
         --rgw|--ceph-rgw)

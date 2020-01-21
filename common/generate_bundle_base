@@ -26,6 +26,9 @@ do
             # creates a model using the value provided by --name
             create_model=true
             ;;
+        --defaults)
+            # boolean stub (see usage for explanation)
+            ;;
         --model-config)
             if [ -z "$model_config" ]; then
                 model_config="$2"
@@ -58,6 +61,10 @@ do
             ;;
         --list)
             list_bundles=true
+            ;;
+        --list-overlays)
+            list_overlays
+            exit
             ;;
         --run)
             # deploy bundle once generated
@@ -108,9 +115,10 @@ fi
 bundles_dir=`get_bundle_state_dir`
 
 if $list_bundles; then
-    if [ -d "$bundles_dir" ]; then
+    state_root=`get_bundle_state_root`
+    if [ -d "$state_root" ]; then
         echo -e "Existing bundles:\n./b (default)"
-        find $bundles_dir/* -maxdepth 0 -type d| egrep -v "$bundles_dir/o$|resources" 
+        find $state_root/* -maxdepth 0 -type d| egrep -v "/o$|resources" 
         echo ""
     else
         echo "There are currently no bundles."

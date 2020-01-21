@@ -67,6 +67,8 @@ if has_min_release train placement; then
     MOD_OVERLAYS+=( "placement.yaml" )
 fi
 
+# Skip processing input if it includes exclusive passthrough options
+! has_excl_passthrough_opt && \
 while (($# > 0))
 do
     case "$1" in
@@ -290,16 +292,14 @@ do
             MOD_OVERLAYS+=( "rsyslog.yaml" )
             ;;
         --ssl)
-            if ! has_opt --replay; then
-                (cd ssl; ./create_ca_cert.sh openstack;)
-                ssl_results="ssl/openstack/results"
-                MOD_PARAMS[__SSL_CA__]=`base64 ${ssl_results}/cacert.pem| tr -d '\n'`
-                MOD_PARAMS[__SSL_CERT__]=`base64 ${ssl_results}/servercert.pem| tr -d '\n'`
-                MOD_PARAMS[__SSL_KEY__]=`base64 ${ssl_results}/serverkey.pem| tr -d '\n'`
-                # Make everything HA with 1 unit (unless --ha has already been set)
-                if ! has_opt '--ha[:0-9]*$'; then
-                    set -- $@ --ha:1 && cache $@
-                fi
+            (cd ssl; ./create_ca_cert.sh openstack;)
+            ssl_results="ssl/openstack/results"
+            MOD_PARAMS[__SSL_CA__]=`base64 ${ssl_results}/cacert.pem| tr -d '\n'`
+            MOD_PARAMS[__SSL_CERT__]=`base64 ${ssl_results}/servercert.pem| tr -d '\n'`
+            MOD_PARAMS[__SSL_KEY__]=`base64 ${ssl_results}/serverkey.pem| tr -d '\n'`
+            # Make everything HA with 1 unit (unless --ha has already been set)
+            if ! has_opt '--ha[:0-9]*$'; then
+                set -- $@ --ha:1 && cache $@
             fi
             ;;
         --nova-network)
@@ -432,10 +432,6 @@ do
             if has_opt --openstack-dashboard; then
                 set -- $@ --openstack-dashboard-ha:$units && cache $@
             fi
-            ;;
-        --list-overlays)  #__OPT__
-            list_overlays
-            exit
             ;;
         *)
             MOD_PASSTHROUGH_OPTS+=( $1 )
