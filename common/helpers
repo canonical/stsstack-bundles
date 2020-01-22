@@ -104,6 +104,16 @@ get_optval ()
 
 get_param()
 {
+    # Description: function first checks $opt to see if it has a :<value>
+    #              suffix and if it does, sets MOD_PARAMS[key]=value. As
+    #              a fallback user input is requested with message
+    #              displayed. If a default is available, it is used to
+    #              pre-fill the request field.
+    #
+    # @arg: opt - stdin opt arg
+    # @arg: key - internal state key used to store value persistently
+    # @arg: msg - message to display
+
     local opt=$1
     local key=$2
     local msg=$3
