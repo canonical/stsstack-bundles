@@ -166,9 +166,9 @@ render () {
 }
 
 render_resources_path () {
-    file="$1"
-    name=`basename $file`
-    path=resources/${name%%.*}/
+    local file="$1"
+    local name=`basename $file`
+    local path=resources/${name%%.*}/
 
     sed -i -r "s,__RESOURCES_PATH__,$path,g" $file
 }

@@ -90,7 +90,7 @@ get_optstrarg ()
 
 get_optval ()
 {
-    opt=$1
+    local opt=$1
     _f () {
     while (($#)); do
         if [ "$1" = "$opt" ]; then
@@ -104,10 +104,12 @@ get_optval ()
 
 get_param()
 {
-    opt=$1
-    key=$2
-    msg=$3
-    default="${MOD_PARAMS[$key]}"
+    local opt=$1
+    local key=$2
+    local msg=$3
+    local default="${MOD_PARAMS[$key]}"
+    local val
+    local current
 
     { has_opt --replay || has_opt --defaults; } && return
 
@@ -126,12 +128,12 @@ get_param()
 
 get_units()
 {
-    opt=$1
-    key=$2
-    default=$3
+    local opt=$1
+    local key=$2
+    local default=$3
 
     # format we are looking for is --opt:val
-    val=`get_optintarg $opt`
+    local val=`get_optintarg $opt`
     if [ -z "$val" ]; then
         val="$default"
     fi
@@ -142,7 +144,7 @@ get_units()
 list_overlays ()
 {
     echo "Supported overlays:"
-    script=`dirname $0`/pipeline/02configure
+    local script=`dirname $0`/pipeline/02configure
     {
     grep -v __OPT__ $script| \
         sed -r 's/.+\s+(--[[:alnum:]\-]+\*?)[\)\|].*/\1/g;t;d'
@@ -153,8 +155,9 @@ list_overlays ()
 
 list_module_opts ()
 {
+    local script=`dirname $0`/pipeline/02configure
+
     echo -e "\nMODULE OPTS:"
-    script=`dirname $0`/pipeline/02configure
     grep __OPT__ $script| \
         sed -r -e 's/.+\s+(--[[:alnum:]\-]+).+#__OPT__type:(.+)/      \1 \2/g' \
                -e 's/.+\s+(--[[:alnum:]\-]+).+#__OPT__$/      \1/g;t;d'| sort -k 1
@@ -196,8 +199,8 @@ get_release ()
 
 get_uca_release ()
 {
-    r=`get_release ${CACHED_STDIN[@]}`
-    s=`get_series ${CACHED_STDIN[@]}`
+    local r=`get_release ${CACHED_STDIN[@]}`
+    local s=`get_series ${CACHED_STDIN[@]}`
     # no release means its lts so no uca
     [ -n "$r" ] || return
     # lts s+r means no uca
@@ -227,14 +230,14 @@ cache ()
 
 has_opt ()
 {
-    opt="$1"
+    local opt="$1"
     _f () {
-    while (($# > 0))
-    do
-        [[ "$1" = $opt ]] && return 0
-        shift
-    done
-    return 1
+        while (($# > 0))
+        do
+            [[ "$1" = $opt ]] && return 0
+            shift
+        done
+        return 1
     }
     _f ${CACHED_STDIN[@]}
     return $?
@@ -242,8 +245,8 @@ has_opt ()
 
 check_opt_conflict ()
 {
-    good=$1
-    bad=$2
+    local good=$1
+    local bad=$2
     `has_opt $bad` || return 0
     echo "ERROR: option $good conflicts with $bad"
     exit 1
@@ -251,9 +254,10 @@ check_opt_conflict ()
 
 assert_min_release ()
 {
-    min="$1"
-    feature_name="$2"
-    r=`get_release ${CACHED_STDIN[@]}`
+    local min="$1"
+    local feature_name="$2"
+    local r=`get_release ${CACHED_STDIN[@]}`
+
     [ -n "$r" ] || r=${lts[`get_series ${CACHED_STDIN[@]}`]:-${nonlts[`get_series ${CACHED_STDIN[@]}`]:-""}}
     [[ "$r" < "$min" ]] || return 0
     echo "Min release '$min' required to be able to use $feature_name (currently using '$r')" 1>&2
@@ -267,8 +271,8 @@ has_min_release ()
 
 ltsmatch ()
 {
-    series="$1"
-    release="$2"
+    local series="$1"
+    local release="$2"
 
     [ -n "$release" ] || return 0
     for s in ${!lts[@]}; do
@@ -279,8 +283,8 @@ ltsmatch ()
 
 nonltsmatch ()
 {
-    series="$1"
-    release="$2"
+    local series="$1"
+    local release="$2"
 
     [ -n "$release" ] || return 0
     for s in ${!nonlts[@]}; do
@@ -292,8 +296,8 @@ nonltsmatch ()
 
 ost_series_autocorrect ()
 {
-    series="$1"
-    release="$2"
+    local series="$1"
+    local release="$2"
 
     if [ -n "$release" ] && ! ltsmatch "$series" "$release" && \
             ! nonltsmatch "$series" "$release"; then
@@ -319,8 +323,8 @@ ost_series_autocorrect ()
 
 ost_release_autocorrect ()
 {
-    series="$1"
-    release="$2"
+    local series="$1"
+    local release="$2"
 
     # Attempt to auto-correct series/release name combination errors
     if [ -z "$release" ] || { `ltsmatch "$series" "$release"` || \
@@ -337,8 +341,8 @@ ost_release_autocorrect ()
 # Requires APP_RELEASE_NAMES set by module generate-bundle.sh
 get_app_release_name ()
 {
-    ubuntu_release="$1"
-    release_name=
+    local ubuntu_release="$1"
+    local release_name=
 
     [ -n "$release" ] || return 0
     readarray -t names_sorted_asc<<<"`echo ${!APP_RELEASE_NAMES[@]}| \
@@ -355,7 +359,7 @@ get_app_release_name ()
 
 trap_help ()
 {
-    i=0
+    local i=0
     while ((i < ${#CACHED_STDIN[@]})); do
         case "${CACHED_STDIN[$((i++))]}" in
             -h|--help)
@@ -373,17 +377,17 @@ get_bundle_state_root ()
 
 get_bundle_state_dir ()
 {
-    bundle_name="`get_optval --name`"
+    local bundle_name="`get_optval --name`"
     [ -n "$bundle_name" ] || bundle_name="`get_optval -n`"
-    subdir="/$bundle_name"
+    local subdir="/$bundle_name"
     [ -n "$bundle_name" ] || subdir=''
     echo `get_bundle_state_root`$subdir
 }
 
 get_bundle_existing_config ()
 {
-    key="$1"
-    conf=`get_bundle_state_dir`/config
+    local key="$1"
+    local conf=`get_bundle_state_dir`/config
     [ -r "$conf" ] || return 0
     sed -r "s/^$key: \"(.+)\".*/\1/g;t;d" $conf
 }
@@ -391,14 +395,14 @@ get_bundle_existing_config ()
 # get cli model name if available since it might not have been created yet.
 get_juju_model ()
 {
-if `has_opt --create-model`; then
-    name="`get_optval --name`"
-    if [ -n "$name" ]; then
-        echo $name
+    if `has_opt --create-model`; then
+        local name="`get_optval --name`"
+        if [ -n "$name" ]; then
+            echo $name
+        fi
+    else
+        juju list-models 2>/dev/null| sed -r 's/^(.+)\* .+/\1/g;t;d'
     fi
-else
-    juju list-models 2>/dev/null| sed -r 's/^(.+)\* .+/\1/g;t;d'
-fi
 }
 
 pocket=`get_pocket $@`
@@ -431,19 +435,19 @@ fi
 print_msgs ()
 {
     if ((${#MOD_MSGS[@]})); then
-    echo ""
-      for m in "${MOD_MSGS[@]}"; do
-        echo -e "$m"
-      done
-    echo ""
-    read -p "Hit [ENTER] to continue"
-    echo ""
+        echo ""
+        for m in "${MOD_MSGS[@]}"; do
+            echo -e "$m"
+        done
+        echo ""
+        read -p "Hit [ENTER] to continue"
+        echo ""
     fi
 }
 
 get_local_upstream_dns ()
 {
-    server="`systemd-resolve --status 2>/dev/null| sed -r 's/\s+DNS Servers:\s+([[:digit:]]+)/\1/g;t;d'`"
+    local server="`systemd-resolve --status 2>/dev/null| sed -r 's/\s+DNS Servers:\s+([[:digit:]]+)/\1/g;t;d'`"
     (($?==0)) && echo $server && return 0
     echo "10.198.200.1"  # stsstack upstream dns
 }
