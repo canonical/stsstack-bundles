@@ -247,11 +247,7 @@ do
             MOD_OVERLAYS+=( "nova-cells.yaml" )
             ;;
         --nova-console*)
-            if ! has_opt --nova-cloud-controller-ha* && ! has_opt --designate ; then
-                # if there is no nova-cloud-controller HA nor designate, then
-                # this env won't have a memcached it needs to be added.
-                MOD_OVERLAYS+=( "memcached.yaml" )
-            fi
+            MOD_OVERLAYS+=( "memcached.yaml" )
             MOD_OVERLAYS+=( "nova-console.yaml" )
             get_param $1 __CONSOLE_TYPE__ "REQUIRES: nova console access protocol:"
             ;;
