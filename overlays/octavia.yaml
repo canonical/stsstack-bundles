@@ -9,6 +9,8 @@ applications:
     options:
       debug: *debug
       openstack-origin: __OS_ORIGIN__
+      amp-ssh-key-name: amphora-backdoor
+      amp-ssh-pub-key: '__AMPHORA_SSH_PUB_KEY__'
 relations:
   - [ octavia:shared-db, mysql:shared-db ]
   - [ octavia:identity-service, keystone:identity-service ]

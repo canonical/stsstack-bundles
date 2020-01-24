@@ -157,7 +157,7 @@ render () {
 
     # service-specific replacements
     if [ -n "$INTERNAL_BUNDLE_CONFIG_RENDERER" ]; then
-        eval `cat $INTERNAL_BUNDLE_CONFIG_RENDERER` $1
+        eval `cat $INTERNAL_BUNDLE_CONFIG_RENDERER` "$1"
     fi
 
     if $use_stable_charms; then
