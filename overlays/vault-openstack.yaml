@@ -2,5 +2,7 @@ applications:
   nova-compute:
     options:
       encrypt: True
+    storage:
+      ephemeral-device: cinder,10G,1
 relations:
   - ['nova-compute:secrets-storage', 'vault:secrets']
