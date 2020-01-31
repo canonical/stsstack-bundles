@@ -456,4 +456,8 @@ do
     shift
 done
 
+target=${series}-$release
+[ -z "$pocket" ] || target=${target}-$pocket
+MOD_PASSTHROUGH_OPTS+=( --release-name $target )
+
 print_msgs

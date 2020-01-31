@@ -99,4 +99,10 @@ do
     shift
 done
 
+app_release_name=`get_app_release_name "$release"`
+target=${series}-${release}
+[ -z "$pocket" ] || target=${target}-$pocket
+target=$target/$app_release_name
+MOD_PASSTHROUGH_OPTS+=( --release-name $target )
+
 print_msgs

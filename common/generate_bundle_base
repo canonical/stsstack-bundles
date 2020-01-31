@@ -73,6 +73,10 @@ do
         --use-stable-charms)
             use_stable_charms=true
             ;;
+        --release-name)
+            target_release_name="$2"
+            shift
+            ;;
         -h|--help)
             _usage
             exit 0
@@ -129,6 +133,8 @@ mkdir -p $bundles_dir
 
 finish ()
 {
+    local target
+
     if $replay; then
         target=${bundles_dir}/command
         echo -e "INFO: replaying last known command (from $target)\n"
@@ -173,9 +179,6 @@ render_resources_path () {
     sed -i -r "s,__RESOURCES_PATH__,$path,g" $file
 }
 
-target=${series}-$release
-[ -z "$pocket" ] || target=${target}-$pocket
-
 if $use_stable_charms; then
     msg="using stable charms"
 else
@@ -186,9 +189,6 @@ channel_param=
 if [ -n "$charm_channel" ]; then
     channel_param="--channel=$charm_channel"
 fi
-
-app_release_name=`get_app_release_name "$release"`
-[ -n "$app_release_name" ] && app_release_name="($app_release_name) "
 
 # Make copy of base template, render, and store in named dir.
 dtmp=`mktemp -d`
@@ -235,10 +235,10 @@ if ((${#MOD_OVERLAYS[@]})); then
     done
     ((${#overlay_opts[@]})) && overlay_opts+=("")  # right padding
 
-    echo "Created $target ${app_release_name}bundle and overlays ($msg):"
+    echo "Created $target_release_name bundle and overlays ($msg):"
     echo -e " ${msgs[@]}"
 else
-    echo -e "Created $target ${app_release_name}bundle ($msg)\n"
+    echo -e "Created $target_release_name bundle ($msg)\n"
 fi
 
 base_bundle=$bundles_dir/`basename $bundle`
