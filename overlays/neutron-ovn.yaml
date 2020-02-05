@@ -22,7 +22,7 @@ applications:
     charm: cs:~openstack-charmers-next/ovn-chassis
     options:
       ovn-bridge-mappings: physnet1:br-data
-      interface-bridge-mappings: __OVN_DATA_PORT__
+      bridge-interface-mappings: __OVN_DATA_PORT__
 relations:
   - [ neutron-api-plugin-ovn:neutron-plugin, neutron-api:neutron-plugin-api-subordinate ]
   - [ neutron-api-plugin-ovn:ovsdb-cms, ovn-central:ovsdb-cms ]

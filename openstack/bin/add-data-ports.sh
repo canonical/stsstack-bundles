@@ -12,12 +12,9 @@ readarray -t instances<<<"`juju status $application --format=json| jq -r '.machi
 
 if [ "$application" = "ovn-chassis" ] && \
         ((`juju status ovn-chassis --format=json 2>/dev/null| jq '.machines| length'`)); then
-    optname="interface-bridge-mappings"
-    # See https://bugs.launchpad.net/charm-ovn-chassis/+bug/1850956
-    optval_order=1
+    optname="bridge-interface-mappings"
 else
     optname="data-port"
-    optval_order=0
 fi
 
 require_count=0
@@ -68,11 +65,7 @@ if ((require_count)); then
     for mac in "${mac_addrs[@]}"; do
         echo "$cfg"| grep -q "$mac" && continue
         ! $first && cfg+=" " || first=false
-        if ((optval_order==0)); then
-            cfg+="br-data:$mac"
-        else
-            cfg+="${mac}:br-data"
-        fi
+        cfg+="br-data:$mac"
     done
     echo "Setting $application ${optname}='$cfg'"
     juju config $application ${optname}="$cfg"
