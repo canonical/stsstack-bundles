@@ -3,6 +3,6 @@ applications:
     options:
       encrypt: True
     storage:
-      ephemeral-device: cinder,10G,1
+      ephemeral-device: cinder,50G,1
 relations:
   - ['nova-compute:secrets-storage', 'vault:secrets']
