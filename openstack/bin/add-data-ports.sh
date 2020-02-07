@@ -4,8 +4,20 @@
 # application unit host such each unit has one (and only one)
 # extra port.
 #
-application=${1:-neutron-openvswitch}
+application=${1:-""}
 declare -A requires=()
+
+# if no app name provided, assume neutron-openvswitch then ovn-chassis
+if [ -z "$application" ]; then
+    for app in neutron-openvswitch ovn-chassis; do
+        count=`juju status --format=json| jq -r ".applications[]| select(.\"charm-name\"==\"$app\")"| wc -l`   
+        ((count==0)) && continue    
+        application=$app
+        break
+    done
+fi
+
+echo "Managing ports for $application units"
 
 . ~/novarc
 readarray -t instances<<<"`juju status $application --format=json| jq -r '.machines[].\"instance-id\"'`"
