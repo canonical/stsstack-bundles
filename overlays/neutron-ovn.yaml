@@ -14,7 +14,7 @@ applications:
       dns-servers: *dns_servers
   ovn-central:
     charm: cs:~openstack-charmers-next/ovn-central
-    constraints: mem=1G
+    constraints: mem=2G
     num_units: 3
     options:
       source: *openstack_origin
