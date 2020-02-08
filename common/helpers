@@ -70,6 +70,8 @@ has_excl_passthrough_opt ()
     for opt in --list --list-overlays --replay --help; do
         if has_opt $opt; then
             MOD_PASSTHROUGH_OPTS+=( $opt )
+            # need to ensure --run gets passed through since it can be used with --replay
+            has_opt --run && MOD_PASSTHROUGH_OPTS+=( --run )
             return 0
         fi
     done
