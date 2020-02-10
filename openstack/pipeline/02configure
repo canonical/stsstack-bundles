@@ -327,7 +327,7 @@ do
             MOD_OVERLAYS+=( "neutron-sg-logging.yaml" )
             ;;
         --ovn)
-            assert_min_release stein "ovn"
+            assert_min_release train "ovn"
             get_param $1 __OVN_DATA_PORT__ 'REQUIRED: ovn-chassis bridge-interface-mappings (leave blank to set later):'
             MOD_OVERLAYS+=( "neutron-ovn.yaml" )
             if ! has_opt --vault*; then
