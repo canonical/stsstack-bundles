@@ -4,6 +4,7 @@
 # Bundle template MOD_PARAMS. These should correspond to variables set at the top
 # of yaml bundle and overlay templates.
 MOD_PARAMS[__NUM_CEPH_MON_UNITS__]=1
+MOD_PARAMS[__CEPH_INTERFACE__]='ceph-mon'
 MOD_PARAMS[__K8S_CHANNEL__]="latest/stable"
 MOD_PARAMS[__NUM_ETCD_UNITS__]=1
 MOD_PARAMS[__NUM_K8S_MASTER_UNITS__]=1
@@ -79,6 +80,12 @@ do
             MOD_OVERLAYS+=( "k8s-ceph.yaml" )
             # NOTE: force stable since these charms are not published to edge
             MOD_PARAMS[__CHARM_CHANNEL__]=stable
+            ;;
+        --ceph-proxy)
+            MOD_PARAMS[__CEPH_INTERFACE__]='ceph-proxy'
+            MOD_OVERLAYS+=( "ceph-proxy.yaml" )
+	    MOD_MSGS+=("NOTE: once ceph has finished deploying do the following: juju config admin-key=<key> fsid=<fsid> monitor-hosts=<mon-addr-list>'")
+            MOD_MSGS+=( "Example: juju config ceph-proxy admin-key=AQALEzleKLCNDBAAxrOY8WbxF2B7lDx0TaswGA== fsid=e5e6aee2-4719-11ea-8264-fa163e50d5d1 monitor-hosts='10.5.0.11:6789 10.5.0.12:6789 10.5.0.13:6789'" )
             ;;
         --etcd-ha*)
             get_units $1 __NUM_ETCD_UNITS__ 3

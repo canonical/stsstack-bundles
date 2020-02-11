@@ -1,3 +1,6 @@
+# Variables
+ceph_interface:             &ceph_interface            __CEPH_INTERFACE__
+
 relations:
-  - [ 'kubernetes-master:ceph-client', 'ceph-mon:client' ]
   - [ 'kubernetes-master:ceph-storage', 'ceph-mon:admin' ]
+  - [ 'kubernetes-master:ceph-client', *ceph_interface ]

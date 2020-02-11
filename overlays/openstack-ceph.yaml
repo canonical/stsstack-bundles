@@ -1,10 +1,12 @@
 # Variables
 source:                     &source                    __SOURCE__
 loglevel:                   &loglevel                  10
+ceph_interface:             &ceph_interface            __CEPH_INTERFACE__
 
 applications:
   nova-compute:
     options:
+      force-raw-images: True
       libvirt-image-backend: rbd
   cinder:
     options:
@@ -15,8 +17,8 @@ applications:
   cinder-ceph:
     charm: cs:~openstack-charmers-next/cinder-ceph
 relations:
-  - [ glance, ceph-mon ]
+  - [ glance, *ceph_interface ]
   - [ cinder, cinder-ceph ]
-  - [ cinder-ceph, ceph-mon ]
+  - [ cinder-ceph, *ceph_interface ]
   - [ nova-compute, cinder-ceph ]
-  - [ nova-compute, ceph-mon ]
+  - [ nova-compute, *ceph_interface ]

@@ -1,0 +1,15 @@
+# Variables
+debug:                      &debug                     True
+verbose:                    &verbose                   True
+openstack_origin:           &openstack_origin          __OS_ORIGIN__
+source:                     &source                    __SOURCE__
+loglevel:                   &loglevel                  10
+
+applications:
+  ceph-proxy:
+    charm: cs:~openstack-charmers-next/ceph-proxy
+    num_units: 1
+    constraints: mem=1G
+    options:
+      loglevel: *loglevel
+      source: *source
