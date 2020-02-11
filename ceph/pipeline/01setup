@@ -1,11 +1,5 @@
 #!/bin/bash
-LIB_COMMON=`dirname $0`/common
-. $LIB_COMMON/helpers
-
 trap_help
-
-#cleanup () { :; }
-#trap cleanup EXIT
 
 # Globals
 export MOD_PATH=`dirname $0`

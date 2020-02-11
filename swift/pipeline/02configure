@@ -75,7 +75,9 @@ do
             MOD_OVERLAYS+=( "swift-ha.yaml" )
             ;;
         *)
-            MOD_PASSTHROUGH_OPTS+=( $1 )
+            echo "ERROR: invalid input '$1'"
+            _usage
+            exit 1
             ;;
     esac
     shift

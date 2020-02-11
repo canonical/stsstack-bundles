@@ -1,12 +1,38 @@
 #!/bin/bash
-export CACHED_STDIN=( $@ )
-((${#CACHED_STDIN[@]})) || CACHED_STDIN=( "" )
+declare -a CACHED_STDIN=( $@ )
+declare -A MASTER_OPTS=(
+    [CHARM_CHANNEL]=stable
+    [MODEL_CONFIG]=''
+    [BUNDLE_NAME]=''
+    [TARGET_RELEASE_NAME]=''
+)
 DEFAULT_SERIES=bionic
-
 JUJU_VERSION="`juju --version 2>/dev/null| sed -r 's/^([[:digit:]\.]+).*/\1/g'`"
 JUJU_DEPLOY_OPTS=""
 
 . $LIB_COMMON/openstack_release_info
+
+list_module_opts ()
+{
+    local script=`dirname $0`/pipeline/02configure
+
+    echo -e "\nMODULE OPTS:"
+    grep __OPT__ $script| \
+        sed -r -e 's/.+\s+(--[[:alnum:]\-]+).+#__OPT__type:(.+)/      \1 \2/g' \
+               -e 's/.+\s+(--[[:alnum:]\-]+).+#__OPT__$/      \1/g;t;d'| sort -k 1
+}
+
+list_overlays ()
+{
+    echo "Supported overlays:"
+    local script=`dirname $0`/pipeline/02configure
+    {
+    grep -v __OPT__ $script| \
+        sed -r 's/.+\s+(--[[:alnum:]\-]+\*?)[\)\|].*/\1/g;t;d'
+    grep -v __OPT__ $script| \
+        sed -r 's/.+\|(--[[:alnum:]\-]+\*?)\).*/\1/g;t;d'
+    } | sort -u
+}
 
 _usage () {
 cat << EOF
@@ -65,13 +91,99 @@ EOF
 list_module_opts
 }
 
+update_master_opts ()
+{
+    # Parse master cli opts to catch any additions or updates.
+    # This is typically called after the module opts have been
+    # processed and it is therefore not expected/allowed that there
+    # are unknown opts.
+    ERROR_ON_UNKNOWN_OPT=true
+    filter_master_opts $@
+}
+
+declare -a FILTERED=()
+filter_master_opts ()
+{
+    # Parses command line input and filters out "master" opts i.e. not
+    # module-specific opts (that get parsed in their respective module)
+    #
+    # The output/result is a refreshed array of input args/opts which
+    # is what should be passed as input to the module pipelines.
+    #
+    # By default unrecognised args are added to the result set but
+    # it may be required to raise an error for such args and for
+    # this purpose we use a ERROR_ON_UNKNOWN_OPT global variable.
+
+    declare -a filtered=()
+    local ERROR_ON_UNKNOWN_OPT=${ERROR_ON_UNKNOWN_OPT:-false}
+
+    while (($# > 0)); do 
+        case "$1" in
+            --charm-channel)
+                MASTER_OPTS[CHARM_CHANNEL]="$2"
+                shift
+                ;;
+            --model-config)
+                if [ -z "${MASTER_OPTS[MODEL_CONFIG]}" ]; then
+                    MASTER_OPTS[MODEL_CONFIG]="$2"
+                else
+                    MASTER_OPTS[MODEL_CONFIG]+=" $2"
+                fi
+                shift
+                ;;
+            --name|-n)
+                # give bundle set a name and store under named dir
+                MASTER_OPTS[BUNDLE_NAME]="$2"
+                shift
+                ;;
+            --list-overlays)
+                list_overlays
+                exit
+                ;;
+            --release-name)
+                MASTER_OPTS[TARGET_RELEASE_NAME]="$2"
+                shift
+                ;;
+            --create-model|--defaults|--list|--replay|--run|--use-stable-charms)
+                # boolean stubs - use has_opt()
+                ;;
+            --series|-s)
+                # stub - use get_series()
+                shift
+                ;;
+            --release|-r)
+                # stub - use get_release()
+                shift
+                ;;
+            --pocket|-p)
+                # stub - use get_pocket()
+                shift
+                ;;
+            -h|--help)
+                _usage
+                exit 0
+                ;;
+            *)
+                if $ERROR_ON_UNKNOWN_OPT; then
+                    echo "ERROR: invalid input '$1'"
+                    _usage
+                    exit 1
+                fi
+                FILTERED+=( $1 )
+                ;;
+        esac
+        shift
+    done
+}
+# Update $@ with filtered set of opts
+filter_master_opts ${CACHED_STDIN[@]}
+set -- ${FILTERED[@]}
+
 has_excl_passthrough_opt ()
 {
+    # the existence of any one of these overrides any other input.
     for opt in --list --list-overlays --replay --help; do
         if has_opt $opt; then
-            MOD_PASSTHROUGH_OPTS+=( $opt )
-            # need to ensure --run gets passed through since it can be used with --replay
-            has_opt --run && MOD_PASSTHROUGH_OPTS+=( --run )
             return 0
         fi
     done
@@ -152,29 +264,6 @@ get_units()
     MOD_PARAMS[$key]="$val"
 }
 
-
-list_overlays ()
-{
-    echo "Supported overlays:"
-    local script=`dirname $0`/pipeline/02configure
-    {
-    grep -v __OPT__ $script| \
-        sed -r 's/.+\s+(--[[:alnum:]\-]+\*?)[\)\|].*/\1/g;t;d'
-    grep -v __OPT__ $script| \
-        sed -r 's/.+\|(--[[:alnum:]\-]+\*?)\).*/\1/g;t;d'
-    } | sort -u
-}
-
-list_module_opts ()
-{
-    local script=`dirname $0`/pipeline/02configure
-
-    echo -e "\nMODULE OPTS:"
-    grep __OPT__ $script| \
-        sed -r -e 's/.+\s+(--[[:alnum:]\-]+).+#__OPT__type:(.+)/      \1 \2/g' \
-               -e 's/.+\s+(--[[:alnum:]\-]+).+#__OPT__$/      \1/g;t;d'| sort -k 1
-}
-
 has_series ()
 {
     while (($#)); do
@@ -188,6 +277,7 @@ has_series ()
 
 get_series ()
 {
+    _get () {
     while (($#)); do
         if [ "$1" = "-s" ] || [ "$1" = "--series" ]; then
              echo $2
@@ -195,24 +285,29 @@ get_series ()
         fi
         shift
     done
-    echo $DEFAULT_SERIES
+    }
+    r="`_get ${CACHED_STDIN[@]}`"
+    [ -n "$r" ] || echo $DEFAULT_SERIES
 }
 
 get_release ()
 {
-    while (($#)); do
-        if [ "$1" = "-r" ] || [ "$1" = "--release" ]; then
-             echo $2
-             return 0
-        fi
-        shift
-    done
+    _get () {
+        while (($#)); do
+            if [ "$1" = "-r" ] || [ "$1" = "--release" ]; then
+                 echo $2
+                 return 0
+            fi
+            shift
+        done
+    }
+    _get ${CACHED_STDIN[@]}
 }
 
 get_uca_release ()
 {
-    local r=`get_release ${CACHED_STDIN[@]}`
-    local s=`get_series ${CACHED_STDIN[@]}`
+    local r=`get_release`
+    local s=`get_series`
     # no release means its lts so no uca
     [ -n "$r" ] || return
     # lts s+r means no uca
@@ -268,7 +363,7 @@ assert_min_release ()
 {
     local min="$1"
     local feature_name="$2"
-    local r=`get_release ${CACHED_STDIN[@]}`
+    local r=`get_release`
 
     [ -n "$r" ] || r=${lts[`get_series ${CACHED_STDIN[@]}`]:-${nonlts[`get_series ${CACHED_STDIN[@]}`]:-""}}
     [[ "$r" < "$min" ]] || return 0
@@ -417,10 +512,10 @@ get_juju_model ()
     fi
 }
 
-pocket=`get_pocket $@`
+pocket=`get_pocket`
 # get cli provided values or fallback to default
-series=`get_series $@`
-release=`get_release $@`
+series=`get_series`
+release=`get_release`
 
 # The following is openstack specific but applies to multiple bundle
 # modules so putting it here.

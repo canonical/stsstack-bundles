@@ -5,90 +5,9 @@
 #
 declare -A overlays_deduped=()
 declare -a overlay_opts=()
-charm_channel=
-bundle_name=
-replay=false
-run_command=false
-list_bundles=false
-create_model=false
-use_stable_charms=false
-model_config=
 
-
-while (($# > 0))
-do
-    case "$1" in
-        --charm-channel)
-            charm_channel=$2
-            shift
-            ;;
-        --create-model)
-            # creates a model using the value provided by --name
-            create_model=true
-            ;;
-        --defaults)
-            # boolean stub (see usage for explanation)
-            ;;
-        --model-config)
-            if [ -z "$model_config" ]; then
-                model_config="$2"
-            else
-                model_config+=" $2"
-            fi
-            shift
-            ;;
-        --series|-s)
-            # stub - see get_series
-            shift
-            ;;
-        --release|-r)
-            # stub - see get_release
-            shift
-            ;;
-        --pocket|-p)
-            # archive pocket e.g. proposed
-            # stub - see get_pocket
-            shift
-            ;;
-        --name|-n)
-            # give bundle set a name and store under named dir
-            bundle_name=$2
-            shift
-            ;;
-        --replay)
-            # replay the last recorded command if exists
-            replay=true
-            ;;
-        --list)
-            list_bundles=true
-            ;;
-        --list-overlays)
-            list_overlays
-            exit
-            ;;
-        --run)
-            # deploy bundle once generated
-            run_command=true
-            ;;
-        --use-stable-charms)
-            use_stable_charms=true
-            ;;
-        --release-name)
-            target_release_name="$2"
-            shift
-            ;;
-        -h|--help)
-            _usage
-            exit 0
-            ;;
-        *)
-            echo "ERROR: invalid input '$1'"
-            _usage
-            exit 1
-            ;;
-    esac
-    shift
-done
+# Catch any changes/additions to master opts
+update_master_opts ${MOD_PASSTHROUGH_OPTS[@]}
 
 if [ -z "$MOD_BASE_TEMPLATE" ]; then
     echo "ERROR: no template provided with --template"
@@ -96,29 +15,29 @@ if [ -z "$MOD_BASE_TEMPLATE" ]; then
 elif [ -z "$MOD_PATH" ]; then
     echo "ERROR: no module name provided"
     exit 1
-elif $create_model && [ -z "$bundle_name" ]; then
+elif has_opt --create-model && [ -z "${MASTER_OPTS[BUNDLE_NAME]}" ]; then
     echo "ERROR: no --name provided so cannot create Juju model" 
     exit 1
 fi
 
-if $create_model; then
-    if `juju list-models| egrep -q "^$bundle_name\* "`; then
-        echo -e "Juju model '$bundle_name' already exists and is the current context - skipping create\n"
-    elif `juju list-models| egrep -q "^$bundle_name "`; then
-        echo "Juju model '$bundle_name' already exists but is not the current context - switching context"
-        juju switch $bundle_name
+if has_opt --create-model; then
+    if `juju list-models| egrep -q "^${MASTER_OPTS[BUNDLE_NAME]}\* "`; then
+        echo -e "Juju model '${MASTER_OPTS[BUNDLE_NAME]}' already exists and is the current context - skipping create\n"
+    elif `juju list-models| egrep -q "^${MASTER_OPTS[BUNDLE_NAME]} "`; then
+        echo "Juju model '${MASTER_OPTS[BUNDLE_NAME]}' already exists but is not the current context - switching context"
+        juju switch ${MASTER_OPTS[BUNDLE_NAME]}
         echo ""
     else
-        echo "Creating Juju model $bundle_name"
-        juju add-model $bundle_name
+        echo "Creating Juju model ${MASTER_OPTS[BUNDLE_NAME]}"
+        juju add-model ${MASTER_OPTS[BUNDLE_NAME]}
         echo ""
     fi
 fi
-[ -n "$model_config" ] && juju model-config $model_config
+[ -n "${MASTER_OPTS[MODEL_CONFIG]}" ] && juju model-config ${MASTER_OPTS[MODEL_CONFIG]}
 
 bundles_dir=`get_bundle_state_dir`
 
-if $list_bundles; then
+if has_opt --list; then
     state_root=`get_bundle_state_root`
     if [ -d "$state_root" ]; then
         echo -e "Existing bundles:\n./b (default)"
@@ -135,22 +54,22 @@ finish ()
 {
     local target
 
-    if $replay; then
+    if has_opt --replay; then
         target=${bundles_dir}/command
         echo -e "INFO: replaying last known command (from $target)\n"
         [ -e "$target" ] || { echo "ERROR: $target does not exist"; exit 1; }
     fi
     echo "Command to deploy:"
     cat ${bundles_dir}/command
-    if $run_command; then
+    if has_opt --run; then
         . ${bundles_dir}/command
     fi
-    $replay && exit 0 || true
+    has_opt --replay && exit 0 || true
 }
 
 # Replay ignores any input args and just prints the previously generated
 # command.
-$replay && finish
+has_opt --replay && finish
 
 # Each custom bundle generator can specify a set of parameters to apply to
 # bundle templates as variables. They are converted into a sed statement that
@@ -166,7 +85,7 @@ render () {
         eval `cat $INTERNAL_BUNDLE_CONFIG_RENDERER` "$1"
     fi
 
-    if $use_stable_charms; then
+    if has_opt --use-stable-charms; then
         sed -i -r 's,~openstack-charmers-next/,,g' $1
     fi
 }
@@ -179,15 +98,15 @@ render_resources_path () {
     sed -i -r "s,__RESOURCES_PATH__,$path,g" $file
 }
 
-if $use_stable_charms; then
+if has_opt --use-stable-charms; then
     msg="using stable charms"
 else
     msg="using dev/next charms"
 fi
 
 channel_param=
-if [ -n "$charm_channel" ]; then
-    channel_param="--channel=$charm_channel"
+if [ -n "${MASTER_OPTS[CHARM_CHANNEL]}" ]; then
+    channel_param="--channel=${MASTER_OPTS[CHARM_CHANNEL]}"
 fi
 
 # Make copy of base template, render, and store in named dir.
@@ -235,10 +154,10 @@ if ((${#MOD_OVERLAYS[@]})); then
     done
     ((${#overlay_opts[@]})) && overlay_opts+=("")  # right padding
 
-    echo "Created $target_release_name bundle and overlays ($msg):"
+    echo "Created ${MASTER_OPTS[TARGET_RELEASE_NAME]} bundle and overlays ($msg):"
     echo -e " ${msgs[@]}"
 else
-    echo -e "Created $target_release_name bundle ($msg)\n"
+    echo -e "Created ${MASTER_OPTS[TARGET_RELEASE_NAME]} bundle ($msg)\n"
 fi
 
 base_bundle=$bundles_dir/`basename $bundle`

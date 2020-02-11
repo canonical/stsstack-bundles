@@ -100,7 +100,9 @@ do
             MOD_MSGS+=( "Example: juju config ceph-proxy admin-key=AQALEzleKLCNDBAAxrOY8WbxF2B7lDx0TaswGA== fsid=e5e6aee2-4719-11ea-8264-fa163e50d5d1 monitor-hosts='10.5.0.11:6789 10.5.0.12:6789 10.5.0.13:6789'" )
             ;;
         *)
-            MOD_PASSTHROUGH_OPTS+=( $1 )
+            echo "ERROR: invalid input '$1'"
+            _usage
+            exit 1
             ;;
     esac
     shift

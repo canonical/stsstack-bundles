@@ -177,7 +177,9 @@ do
             shift
             ;;
         *)
-            MOD_PASSTHROUGH_OPTS+=( $1 )
+            echo "ERROR: invalid input '$1'"
+            _usage
+            exit 1
             ;;
     esac
     shift
