@@ -1,18 +1,32 @@
+#!/bin/bash -eu
+juju_status_json_cache=`mktemp`
+cleanup () { rm -rf $juju_status_json_cache; }
+trap cleanup EXIT KILL
+
+# cache juju status
+juju status --format=json > $juju_status_json_cache
+
 _OS_PARAMS=$(env | awk 'BEGIN {FS="="} /^OS_/ {print $1;}' | paste -sd ' ')
 for param in $_OS_PARAMS; do
-  unset $param
+    unset $param
 done
 
 keystone_addr=`juju config keystone vip`
-# TODO(hopem): remove fix for bug 1789415 once released
-if [ -z "$keystone_addr" ] || [ "$keystone_addr" = "<nil>" ]; then
-  keystone_addr=`juju run --unit keystone/0 unit-get private-address`
+if [ -z "$keystone_addr" ]; then
+    keystone_addr=`jq -r '.applications.keystone.units."keystone/0"."public-address"' $juju_status_json_cache`
 fi
 
+# config-based ssl
 ssl_cert=`juju config keystone ssl_cert`
-# TODO(hopem): remove fix for bug 1789415 once released
-if [ -n "$ssl_cert" ] && [ "$ssl_cert" != "<nil>" ]; then
+if [ -n "$ssl_cert" ]; then
   export OS_AUTH_PROTOCOL=https
+else
+    # Vault-based ssl
+    if ((`jq -r '.applications[]| select(."charm-name"=="vault")' $juju_status_json_cache| wc -l`)); then
+        if `jq -r .applications.vault.relations.certificates[] $juju_status_json_cache| grep -q keystone`; then
+            export OS_AUTH_PROTOCOL=https
+        fi
+    fi
 fi
 
 unset _OS_PARAMS
@@ -24,7 +38,7 @@ export OS_REGION_NAME=RegionOne
 api_ver="`juju config keystone preferred-api-version`"
 rel="`juju config keystone openstack-origin| sed -r 's/.+-(.+)/\1/g'`"
 rel="`echo -e "$rel\nqueens"| sort| head -n 1`"
-series=`juju status keystone --format=json| jq .machines[].series| tr -d '"'`
+series=`jq -r '.applications| to_entries[]| select(.key=="keystone")| .value| .series' $juju_status_json_cache`
 if [ "$api_ver" = "3" ] || [[ "${rel%%/*}" > "pike" ]] || \
     { [[ "$series" > "artful" ]] && [[ "$series" < "trusty" ]]; }; then
 export OS_AUTH_URL=${OS_AUTH_PROTOCOL:-http}://${keystone_addr}:5000/v3

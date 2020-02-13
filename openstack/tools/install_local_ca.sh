@@ -1,13 +1,12 @@
 #!/bin/bash -eux
 local_ca_crt_path=${1:-ssl/openstack/results/cacert.pem}
-use_vault=${2:-false}
 
 ftmp=`mktemp`
 
 cleanup () { rm -f $ftmp; }
 trap cleanup EXIT INT
 
-if $use_vault || ! [ -e "$local_ca_crt_path" ]; then
+if ((`juju status --format=json| jq -r '.applications[]| select(."charm-name"=="vault")'| wc -l`)); then
     echo "Fetching CA cert from vault"
     juju run-action --format=json vault/leader get-root-ca --wait | jq -r .[].results.output > $ftmp
     local_ca_crt_path=$ftmp
