@@ -287,7 +287,8 @@ get_series ()
     done
     }
     r="`_get ${CACHED_STDIN[@]}`"
-    [ -n "$r" ] || echo $DEFAULT_SERIES
+    [ -n "$r" ] || r="$DEFAULT_SERIES"
+    echo $r
 }
 
 get_release ()
