@@ -73,7 +73,7 @@ fi
 get_amphora_ssh_pub_key ()
 {
     if ! [ -e $HOME/.ssh/id_amphora ]; then
-        ssh-keygen -t rsa -f $HOME/.ssh/id_amphora -P ""
+        ssh-keygen -q -t rsa -f $HOME/.ssh/id_amphora -P ""
     fi
     base64 -w 0 $HOME/.ssh/id_amphora.pub
 }
