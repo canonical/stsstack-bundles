@@ -234,6 +234,11 @@ do
                 set -- $@ --openstack-dashboard && cache $@
             fi
             ;;
+        --manila)
+            assert_min_release rocky "manila"
+            MOD_OVERLAYS+=( "manila.yaml" )
+            set -- $@ --ceph && cache $@
+            ;;
         --mysql-ha*)
             get_units $1 __NUM_MYSQL_UNITS__ 3
             MOD_OVERLAYS+=( "mysql-ha.yaml" )
