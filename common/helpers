@@ -40,7 +40,9 @@ USAGE: `basename $0` OPTIONS [OVERLAYS] [MODULE_OPTS]
 
 OPTIONS:
      --charm-channel
-        Charm channel to deploy from (if supported).
+        Charm channel to deploy from (if supported). Be aware that this
+        applies to all charms being deployed which means they must all
+        have a release available in the channel specified.
      --create-model
         Create Juju model using --name. Switches to model if it already
         exists. If this is not provided then the current Juju model is used.
@@ -56,22 +58,27 @@ OPTIONS:
         Juju model config <key>=<value> (can be provided multiple times).
      -n, --name n
         Name for bundle. If this is not provided then the default bundle
-        location is used.
+        location is used. This is also used as the name of the model when
+        using --create-model.
      -p, --pocket p
-        Archive pocket to install packages from e.g. "proposed".
+        Archive pocket to install packages from e.g. "proposed". Default is
+        main.
      -r, --release r
-        Openstack release. This allows UCA to be used otherwise base archive
-        of release is used.
+        Openstack release. This allows UCA to be installed and used otherwise
+        you get the release shipped with the version of Ubuntu you are using.
+        Note that this only applies to LTS releases of Ubuntu.
      --replay
         Replay last command for bundle --name (or default bundle if no name
-        provided).
+        provided). This skips the regeneration of a bundle if for example you
+        want to re-run an existing one that has perhaps been manually
+        modified.
      --run
-        Automatically execute the generated deployment command.
+        Go ahead and Juju deploy the generate bundle.
      -s, --series s
         Ubuntu series.
     --use-stable-charms
         By default the development (cs:~openstack-charmers-next) version of
-        the charms are used where available. Use this flag if you want to
+        Openstack charms are used where available. Use this flag if you want to
         use the stable (released) charms i.e. cs:<charm>.
 
 OVERLAYS:
@@ -79,12 +86,12 @@ OVERLAYS:
      specified as --<overlayname> using the name of an overlay as found in
      the output of running ./generate-bundle.sh --list-overlays.
 
-     Note that overlays listed with a asterisk at the end of the name
+     Note that overlays listed with an asterisk at the end of the name
      support having a number of units specified using a colon e.g.
 
      ./generate-bundle.sh --myoverlay:6
 
-     will give you six units of myoverlay. This is useful for overlays
+     will give you num_units:6 in myoverlay. This is useful for overlays
      that provide HA or scale-out services. See --list-overlays for
      available overlays.
 EOF
