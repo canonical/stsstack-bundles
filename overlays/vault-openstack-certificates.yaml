@@ -1,0 +1,6 @@
+relations:
+  - ['cinder:certificates', 'vault:certificates']
+  - ['glance:certificates', 'vault:certificates']
+  - ['keystone:certificates', 'vault:certificates']
+  - ['neutron-api:certificates', 'vault:certificates']
+  - ['nova-cloud-controller:certificates', 'vault:certificates']

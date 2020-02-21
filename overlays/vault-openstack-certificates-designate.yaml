@@ -1,0 +1,2 @@
+relations:
+  - ['designate:certificates', 'vault:certificates']

@@ -443,7 +443,13 @@ do
         --vault)
             assert_min_release queens "vault"
             MOD_OVERLAYS+=( "vault.yaml" )
-            MOD_OVERLAYS+=( "vault-openstack.yaml" )
+            MOD_OVERLAYS+=( "vault-openstack-secrets.yaml" )
+            if ! has_opt --ssl; then
+                MOD_OVERLAYS+=( "vault-openstack-certificates.yaml" )
+                for opt in --heat --octavia --barbican --designate; do
+                    has_opt $opt && MOD_OVERLAYS+=( "vault-openstack-certificates-${opt##--}.yaml" )
+                done
+            fi
             has_opt --ceph && MOD_OVERLAYS+=( "vault-ceph.yaml" )
             ;;
         --etcd-channel)  #__OPT__type:<str>
