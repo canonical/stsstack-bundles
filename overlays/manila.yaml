@@ -5,12 +5,6 @@ openstack_origin:           &openstack_origin          __OS_ORIGIN__
 loglevel:                   &loglevel                  10
 
 applications:
-  ceph-fs:
-    charm: cs:~openstack-charmers-next/ceph-fs
-    num_units: 2
-    options:
-      source: *openstack_origin
-      loglevel: *loglevel
   manila-ganesha:
     charm: cs:~openstack-charmers-next/manila-ganesha
     num_units: 1
@@ -28,7 +22,6 @@ applications:
       default-share-backend: cephfsnfs1
       share-protocols: NFS
 relations:
-  - [ ceph-mon, ceph-fs ]
   - [ ceph-mon, manila-ganesha ]
   - [ manila-ganesha, mysql ]
   - [ manila-ganesha, rabbitmq-server ]
@@ -37,4 +30,3 @@ relations:
   - [ manila, rabbitmq-server ]
   - [ manila, keystone ]
   - [ manila, mysql ] 
-

@@ -99,6 +99,15 @@ do
 	    MOD_MSGS+=("NOTE: once ceph has finished deploying do the following: juju config admin-key=<key> fsid=<fsid> monitor-hosts=<mon-addr-list>'")
             MOD_MSGS+=( "Example: juju config ceph-proxy admin-key=AQALEzleKLCNDBAAxrOY8WbxF2B7lDx0TaswGA== fsid=e5e6aee2-4719-11ea-8264-fa163e50d5d1 monitor-hosts='10.5.0.11:6789 10.5.0.12:6789 10.5.0.13:6789'" )
             ;;
+        --ceph-fs)
+            assert_min_release ocata "ceph-mds"
+            MOD_OVERLAYS+=( "ceph-fs.yaml" )
+            ;;
+        --ceph-fs-ha*)
+            assert_min_release ocata "ceph-mds"
+            get_units $1 __NUM_CEPH_FS_UNITS__ 3
+            MOD_OVERLAYS+=( "ceph-fs.yaml" )
+            ;;
         *)
             echo "ERROR: invalid input '$1'"
             _usage

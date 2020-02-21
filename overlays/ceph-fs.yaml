@@ -1,0 +1,14 @@
+# Variables
+source:                     &source                    __SOURCE__
+loglevel:                   &loglevel                  10
+ceph_interface:             &ceph_interface            __CEPH_INTERFACE__
+
+applications:
+  ceph-fs:
+    charm: cs:~openstack-charmers-next/ceph-fs
+    num_units: __NUM_CEPH_FS_UNITS__
+    options:
+      loglevel: *loglevel
+      source: *source
+relations:
+  - [ ceph-fs, *ceph_interface ]
