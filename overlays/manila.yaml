@@ -22,7 +22,7 @@ applications:
       default-share-backend: cephfsnfs1
       share-protocols: NFS
 relations:
-  - [ ceph-mon, manila-ganesha ]
+  - [ manila-ganesha, __CEPH_INTERFACE__ ]
   - [ manila-ganesha, mysql ]
   - [ manila-ganesha, rabbitmq-server ]
   - [ manila-ganesha, keystone ]

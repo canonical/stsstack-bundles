@@ -7,7 +7,6 @@ loglevel:                   &loglevel                  10
 ssl_ca:                     &ssl_ca                    __SSL_CA__
 ssl_cert:                   &ssl_cert                  __SSL_CERT__
 ssl_key:                    &ssl_key                   __SSL_KEY__
-ceph_interface:             &ceph_interface            __CEPH_INTERFACE__
 
 applications:
   ceph-rgw:
@@ -22,4 +21,4 @@ applications:
       ssl_key: *ssl_key
 relations:
   - [ ceph-rgw, keystone ]
-  - [ ceph-rgw, *ceph_interface ]
+  - [ ceph-rgw, __CEPH_INTERFACE__ ]

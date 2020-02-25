@@ -10,7 +10,6 @@ loglevel:                   &loglevel                  20
 openstack_origin:           &openstack_origin          __OS_ORIGIN__
 source:                     &source                    __SOURCE__
 num_mon_units:              &num_mon_units             __NUM_CEPH_MON_UNITS__
-ceph_interface:             &ceph_interface            __CEPH_INTERFACE__
 
 series: __SERIES__
 applications:
@@ -67,4 +66,4 @@ relations:
   - [ ceph-mon, ceph-osd ]
   - [ glance, mysql ]
   - [ glance, keystone ]
-  - [ glance, *ceph_interface]
+  - [ glance, __CEPH_INTERFACE__]

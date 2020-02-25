@@ -1,7 +1,6 @@
 # Variables
 source:                     &source                    __SOURCE__
 loglevel:                   &loglevel                  10
-ceph_interface:             &ceph_interface            __CEPH_INTERFACE__
 
 applications:
   ceph-fs:
@@ -11,4 +10,4 @@ applications:
       loglevel: *loglevel
       source: *source
 relations:
-  - [ ceph-fs, *ceph_interface ]
+  - [ ceph-fs, __CEPH_INTERFACE__ ]

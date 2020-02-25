@@ -1,7 +1,6 @@
 # Variables
 source:                     &source                    __SOURCE__
 loglevel:                   &loglevel                  10
-ceph_interface:             &ceph_interface            __CEPH_INTERFACE__
 
 applications:
   ceph-rgw:
@@ -25,4 +24,4 @@ applications:
       config-flags: '{"global":{"rgw override bucket index max shards":"8"}, "client.radosgw.gateway": {"rgw zone": "west", "rgw zonegroup": "west", "rgw cache enabled":"true","rgw cache lru size":"10000" }}'
 relations:
   - [ ceph-rgw-alt, keystone ]
-  - [ ceph-rgw-alt, *ceph_interface ]
+  - [ ceph-rgw-alt, __CEPH_INTERFACE__ ]

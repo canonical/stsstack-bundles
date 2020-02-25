@@ -1,3 +1,3 @@
 relations:
-  - [ nrpe, ceph-mon ]
+  - [ nrpe, __CEPH_INTERFACE__ ]
   - [ nrpe, ceph-osd ]

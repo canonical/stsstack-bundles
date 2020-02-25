@@ -1,7 +1,6 @@
 # Variables
 source:                     &source                    __SOURCE__
 loglevel:                   &loglevel                  10
-ceph_interface:             &ceph_interface            __CEPH_INTERFACE__
 
 applications:
   nova-compute:
@@ -17,8 +16,8 @@ applications:
   cinder-ceph:
     charm: cs:~openstack-charmers-next/cinder-ceph
 relations:
-  - [ glance, *ceph_interface ]
+  - [ glance, __CEPH_INTERFACE__ ]
   - [ cinder, cinder-ceph ]
-  - [ cinder-ceph, *ceph_interface ]
+  - [ cinder-ceph, __CEPH_INTERFACE__ ]
   - [ nova-compute, cinder-ceph ]
-  - [ nova-compute, *ceph_interface ]
+  - [ nova-compute, __CEPH_INTERFACE__ ]

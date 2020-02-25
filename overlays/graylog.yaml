@@ -38,4 +38,4 @@ relations:
   - [ 'elasticsearch:juju-info', 'filebeat:beats-host' ]
   - [ mongodb, filebeat ]
 # NOTE: filebeat relations to services will need to be added manually e.g.
-# - [ filebeat, ceph-mon ]
+# - [ filebeat, __CEPH_INTERFACE__ ]

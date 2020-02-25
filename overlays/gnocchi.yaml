@@ -12,7 +12,7 @@ applications:
       debug: *debug
       openstack-origin: *openstack_origin
 relations:
-  - [ gnocchi, ceph-mon ]
+  - [ gnocchi, __CEPH_INTERFACE__ ]
   - [ gnocchi, mysql ]
   - [ gnocchi, rabbitmq-server ]
   - [ gnocchi, memcached ]
