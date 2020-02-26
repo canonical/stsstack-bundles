@@ -132,14 +132,6 @@ do
             check_opt_conflict $1 '--lb-ha-hacluster*'
             check_opt_conflict $1 '--lb-ha-keepalived*'
             MOD_OVERLAYS+=( "k8s-octavia-lb.yaml" )
-            echo "INFO: juju model will use network with port security enabled (since octavia needs it)."
-            if [ -r ~/novarc ]; then
-                OS_PROJECT_NAME=`sed -r 's/.+OS_PROJECT_NAME=(.+)/\1/g;t;d' ~/novarc`
-                MOD_PASSTHROUGH_OPTS+=( --model-config "network=${OS_PROJECT_NAME}_port_sec_enabled" )
-            else
-                echo "WARNING: ~/novarc not found - unable to setup octavia tenant network"
-            fi
-            echo ""
             ;;
         --master-ha*)
             if has_opt --lb-ha*; then
@@ -196,5 +188,15 @@ target=$series
 [ -z "$pocket" ] || target=${target}-$pocket
 target=${target}:${MOD_PARAMS[__K8S_CHANNEL__]}
 MOD_PASSTHROUGH_OPTS+=( --release-name $target )
+
+if ! has_opt --*-ha*; then
+    if [ -r ~/novarc ]; then
+        echo "INFO: juju model will use network with port security enabled."
+        OS_PROJECT_NAME=`sed -r 's/.+OS_PROJECT_NAME=(.+)/\1/g;t;d' ~/novarc`
+        MOD_PASSTHROUGH_OPTS+=( --model-config "network=${OS_PROJECT_NAME}_port_sec_enabled" )
+    else
+        echo "WARNING: ~/novarc not found - unable to setup octavia tenant network"
+    fi
+fi
 
 print_msgs
