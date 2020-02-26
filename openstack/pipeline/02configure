@@ -7,6 +7,7 @@ MOD_PARAMS[__OS_ORIGIN__]=$os_origin
 MOD_PARAMS[__SOURCE__]=$source
 MOD_PARAMS[__NUM_COMPUTE_UNITS__]=1
 MOD_PARAMS[__NUM_CEPH_MON_UNITS__]=1
+MOD_PARAMS[__NUM_CEPH_FS_UNITS__]=1
 MOD_PARAMS[__CEPH_INTERFACE__]='ceph-mon'
 MOD_PARAMS[__NUM_NEUTRON_GATEWAY_UNITS__]=1
 MOD_PARAMS[__NUM_VAULT_UNITS__]=1  # there are > 1 vault* overlay so need to use a global with default

@@ -10,4 +10,4 @@ applications:
       loglevel: *loglevel
       source: *source
 relations:
-  - [ ceph-fs, __CEPH_INTERFACE__ ]
+  - [ ceph-fs, ceph-mon ]
