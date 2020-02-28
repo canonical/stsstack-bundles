@@ -66,9 +66,9 @@ if ! has_opt --mysql-innodb-cluster*; then
     MOD_OVERLAYS+=( "mysql.yaml" )
 fi
 
-# Can be optionally used by R and S but that is handled as opt
+# Mandatory from T onwards and can be optionally added in R and S
 if has_min_release train placement; then
-    MOD_OVERLAYS+=( "placement.yaml" )
+    set -- $@ --placement && cache $@
 fi
 
 get_amphora_ssh_pub_key ()
@@ -447,7 +447,7 @@ do
             MOD_OVERLAYS+=( "vault-openstack-secrets.yaml" )
             if ! has_opt --ssl; then
                 MOD_OVERLAYS+=( "vault-openstack-certificates.yaml" )
-                for opt in --heat --octavia --barbican --designate; do
+                for opt in --heat --octavia --barbican --designate --placement; do
                     has_opt $opt && MOD_OVERLAYS+=( "vault-openstack-certificates-${opt##--}.yaml" )
                 done
             fi

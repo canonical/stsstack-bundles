@@ -1,0 +1,2 @@
+relations:
+  - ['placement:certificates', 'vault:certificates']
