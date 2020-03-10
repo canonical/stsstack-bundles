@@ -68,7 +68,7 @@ applications:
     options:
       debug: *debug
       verbose: *verbose
-      overlay-network-type: __OVERLAY_TYPE__
+      overlay-network-type: __OVERLAY_NETWORK_TYPE__
       neutron-security-groups: True
       flat-network-providers: physnet1
       enable-ml2-port-security: True
