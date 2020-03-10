@@ -1,0 +1,11 @@
+applications:
+  barbican:
+    options:
+      vip: 10.5.100.17
+  barbican-hacluster:
+    charm: cs:~openstack-charmers-next/hacluster
+    options:
+      cluster_count: __NUM_BARBICAN_UNITS__
+relations:
+  - [ barbican, barbican-hacluster ]
+

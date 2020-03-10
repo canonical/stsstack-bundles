@@ -5,6 +5,7 @@
 # of yaml bundle and overlay templates.
 MOD_PARAMS[__OS_ORIGIN__]=$os_origin
 MOD_PARAMS[__SOURCE__]=$source
+MOD_PARAMS[__NUM_BARBICAN_UNITS__]=1
 MOD_PARAMS[__NUM_COMPUTE_UNITS__]=1
 MOD_PARAMS[__NUM_CEPH_MON_UNITS__]=1
 MOD_PARAMS[__NUM_CEPH_FS_UNITS__]=1
@@ -95,6 +96,11 @@ do
             # use-case.
             MOD_OVERLAYS+=( "barbican-vault.yaml" )
             set -- $@ --vault && cache $@
+            ;;
+        --barbican-ha*)
+            get_units $1 __NUM_BARBICAN_UNITS__ 3
+            MOD_OVERLAYS+=( "barbican-ha.yaml" )
+            set -- $@ --barbican && cache $@
             ;;
         --bgp)
             assert_min_release queens "dynamic routing"

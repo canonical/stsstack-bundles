@@ -6,7 +6,7 @@ openstack_origin:           &openstack_origin          __OS_ORIGIN__
 applications:
   barbican:
     charm: cs:~openstack-charmers-next/barbican
-    num_units: 1
+    num_units: __NUM_BARBICAN_UNITS__ 
     constraints: mem=1G
     options:
       debug: *debug
