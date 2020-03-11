@@ -2,7 +2,7 @@ applications:
   swift-proxy:
     num_units: __NUM_SWIFT_PROXY_UNITS__
     options:
-      vip: 10.5.100.8
+      vip: __VIP__
   swift-proxy-hacluster:
     charm: cs:~openstack-charmers-next/hacluster
     num_units: 0

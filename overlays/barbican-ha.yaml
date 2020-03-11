@@ -1,7 +1,7 @@
 applications:
   barbican:
     options:
-      vip: 10.5.100.17
+      vip: __VIP__
   barbican-hacluster:
     charm: cs:~openstack-charmers-next/hacluster
     options:

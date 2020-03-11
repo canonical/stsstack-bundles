@@ -2,7 +2,7 @@ applications:
   heat:
     num_units: __NUM_HEAT_UNITS__
     options:
-      vip: 10.5.100.9
+      vip: __VIP__
   heat-hacluster:
     charm: cs:~openstack-charmers-next/hacluster
     options:

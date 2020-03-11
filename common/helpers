@@ -5,6 +5,7 @@ declare -A MASTER_OPTS=(
     [MODEL_CONFIG]=''
     [BUNDLE_NAME]=''
     [TARGET_RELEASE_NAME]=''
+    [VIP_ADDR_START]=10.5.100.0
 )
 DEFAULT_SERIES=bionic
 JUJU_VERSION="`juju --version 2>/dev/null| sed -r 's/^([[:digit:]\.]+).*/\1/g'`"
@@ -80,6 +81,10 @@ OPTIONS:
         By default the development (cs:~openstack-charmers-next) version of
         Openstack charms are used where available. Use this flag if you want to
         use the stable (released) charms i.e. cs:<charm>.
+    --vip-addr-start
+        Address a.b.c.d from which to start allocating virtual ip addresses used
+        for deployed services. There must be enough addresses beyond this one to
+        accomodate for all VIPs needed in the deployment. Default is ${MASTER_OPTS[VIP_ADDR_START]}.
 
 OVERLAYS:
      You can optionally add one or more feature overlay. These are
@@ -164,6 +169,10 @@ filter_master_opts ()
                 ;;
             --pocket|-p)
                 # stub - use get_pocket()
+                shift
+                ;;
+            --vip-addr-start)
+                MASTER_OPTS[VIP_ADDR_START]="$2"
                 shift
                 ;;
             -h|--help)

@@ -1,7 +1,7 @@
 applications:
   vault:
     options:
-      vip: 10.5.100.15 
+      vip: __VIP__
   vault-hacluster:
     charm: cs:~openstack-charmers-next/hacluster
     options:

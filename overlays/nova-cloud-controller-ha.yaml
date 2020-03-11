@@ -2,7 +2,7 @@ applications:
   nova-cloud-controller:
     num_units: __NUM_NOVACC_UNITS__
     options:
-      vip: 10.5.100.2
+      vip: __VIP__
   nova-cloud-controller-hacluster:
     charm: cs:~openstack-charmers-next/hacluster
     options:

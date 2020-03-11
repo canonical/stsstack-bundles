@@ -2,7 +2,7 @@ applications:
   cinder:
     num_units: __NUM_CINDER_UNITS__
     options:
-      vip: 10.5.100.4
+      vip: __VIP__
   cinder-hacluster:
     charm: cs:~openstack-charmers-next/hacluster
     options:

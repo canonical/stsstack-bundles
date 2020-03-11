@@ -9,6 +9,10 @@ declare -a overlay_opts=()
 # Catch any changes/additions to master opts
 update_master_opts ${MOD_PASSTHROUGH_OPTS[@]}
 
+vip_start=${MASTER_OPTS[VIP_ADDR_START]}
+vip_start_prefix=${vip_start%\.*}
+vip_start_suffix=${vip_start##*\.}
+
 if [ -z "$MOD_BASE_TEMPLATE" ]; then
     echo "ERROR: no template provided with --template"
     exit 1
@@ -83,6 +87,11 @@ render () {
     # service-specific replacements
     if [ -n "$INTERNAL_BUNDLE_CONFIG_RENDERER" ]; then
         eval `cat $INTERNAL_BUNDLE_CONFIG_RENDERER` "$1"
+    fi
+
+    if `grep -q __VIP__ $1`; then
+        vip=$vip_start_prefix.$((vip_start_suffix++))
+        sed -i -r "s/__VIP__/$vip/g" $1
     fi
 
     if has_opt --use-stable-charms; then

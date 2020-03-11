@@ -3,7 +3,11 @@ trap_help
 
 # Globals
 export MOD_PATH=`dirname $0`
+export MOD_NAME=swift
 export MOD_BASE_TEMPLATE=swift.yaml.template
+export MOD_SSL_STATE_DIR=${MOD_NAME}
+[ -n "${MASTER_OPTS[BUNDLE_NAME]}" ] && \
+    MOD_SSL_STATE_DIR="${MOD_SSL_STATE_DIR}-${MASTER_OPTS[BUNDLE_NAME]}"
 
 # opts that 02configure does not recognise that get passed to the generator
 export -a MOD_PASSTHROUGH_OPTS=()

@@ -337,8 +337,8 @@ do
             MOD_OVERLAYS+=( "rsyslog.yaml" )
             ;;
         --ssl)
-            (cd ssl; ./create_ca_cert.sh openstack;)
-            ssl_results="ssl/openstack/results"
+            (cd ssl; . ./create_ca_cert.sh $MOD_SSL_STATE_DIR;)
+            ssl_results="ssl/$MOD_SSL_STATE_DIR/results"
             MOD_PARAMS[__SSL_CA__]=`base64 ${ssl_results}/cacert.pem| tr -d '\n'`
             MOD_PARAMS[__SSL_CERT__]=`base64 ${ssl_results}/servercert.pem| tr -d '\n'`
             MOD_PARAMS[__SSL_KEY__]=`base64 ${ssl_results}/serverkey.pem| tr -d '\n'`

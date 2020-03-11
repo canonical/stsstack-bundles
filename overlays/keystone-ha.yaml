@@ -2,7 +2,7 @@ applications:
   keystone:
     num_units: __NUM_KEYSTONE_UNITS__
     options:
-      vip: 10.5.100.1
+      vip: __VIP__
   keystone-hacluster:
     charm: cs:~openstack-charmers-next/hacluster
     options:

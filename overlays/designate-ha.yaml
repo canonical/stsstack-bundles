@@ -2,7 +2,7 @@ applications:
   designate:
     num_units: __NUM_DESIGNATE_UNITS__
     options:
-      vip: 10.5.100.13
+      vip: __VIP__
   designate-bind:
     num_units: 2
   designate-hacluster:

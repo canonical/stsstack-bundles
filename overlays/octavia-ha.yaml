@@ -2,7 +2,7 @@ applications:
   octavia:
     num_units: __NUM_OCTAVIA_UNITS__
     options:
-      vip: 10.5.100.16
+      vip: __VIP__
   octavia-hacluster:
     charm: cs:~openstack-charmers-next/hacluster
     options:

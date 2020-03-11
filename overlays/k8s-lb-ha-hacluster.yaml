@@ -3,7 +3,7 @@
 applications:
   kubeapi-load-balancer:
     options:
-      ha-cluster-vip: 10.5.100.1
+      ha-cluster-vip: __VIP__
   kubeapi-lb-hacluster:
     charm: cs:~openstack-charmers-next/hacluster
     options:

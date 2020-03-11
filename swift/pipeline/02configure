@@ -41,8 +41,8 @@ do
             MOD_MSGS+=( "NOTE: you will need to manually relate grafana (telegraf) to any services you want to monitor" )
             ;;
         --ssl)
-            (cd ssl; ./create_ca_cert.sh swift;)
-            ssl_results="ssl/swift/results"
+            (cd ssl; . ./create_ca_cert.sh $MOD_SSL_STATE_DIR;)
+            ssl_results="ssl/$MOD_SSL_STATE_DIR/results"
             MOD_PARAMS[__SSL_CA__]=`base64 ${ssl_results}/cacert.pem| tr -d '\n'`
             MOD_PARAMS[__SSL_CERT__]=`base64 ${ssl_results}/servercert.pem| tr -d '\n'`
             MOD_PARAMS[__SSL_KEY__]=`base64 ${ssl_results}/serverkey.pem| tr -d '\n'`
