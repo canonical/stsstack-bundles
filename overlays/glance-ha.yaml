@@ -1,6 +1,5 @@
 applications:
   glance:
-    num_units: __NUM_GLANCE_UNITS__
     options:
       vip: __VIP__
   glance-hacluster:

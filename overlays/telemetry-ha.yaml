@@ -1,14 +1,11 @@
 applications:
   ceilometer:
-    num_units: __NUM_TELEMETRY_UNITS__
     options:
       vip: __VIP__
   aodh:
-    num_units: __NUM_TELEMETRY_UNITS__
     options:
       vip: __VIP__
   gnocchi:
-    num_units: __NUM_TELEMETRY_UNITS__
     options:
       vip: __VIP__
   ceilometer-hacluster:

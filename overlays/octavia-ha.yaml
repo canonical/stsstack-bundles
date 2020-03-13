@@ -1,6 +1,5 @@
 applications:
   octavia:
-    num_units: __NUM_OCTAVIA_UNITS__
     options:
       vip: __VIP__
   octavia-hacluster:

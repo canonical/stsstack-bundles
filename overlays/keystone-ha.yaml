@@ -1,6 +1,5 @@
 applications:
   keystone:
-    num_units: __NUM_KEYSTONE_UNITS__
     options:
       vip: __VIP__
   keystone-hacluster:

@@ -3,5 +3,6 @@
 applications:
   octavia-dashboard:
     charm: cs:~openstack-charmers-next/octavia-dashboard
+    num_units: __NUM_HORIZON_UNITS__
 relations:
   - [ octavia-dashboard:dashboard, openstack-dashboard:dashboard-plugin ]

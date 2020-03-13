@@ -1,6 +1,5 @@
 applications:
   openstack-dashboard:
-    num_units: __NUM_HORIZON_UNITS__
     options:
       vip: __VIP__
   openstack-dashboard-hacluster:

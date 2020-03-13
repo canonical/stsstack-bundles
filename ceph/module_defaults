@@ -1,0 +1,16 @@
+# This file must contain defaults for all variables used in bundles/ovelays.
+# They are used to render to final product in the event they are not provided
+# elsewhere. It is inserted into the global context at the start of the
+# pipeline.
+#
+# You can check that none are missing by running lint/check_var_defaults.sh
+#
+MOD_PARAMS[__OS_ORIGIN__]=$os_origin
+MOD_PARAMS[__SOURCE__]=$source
+MOD_PARAMS[__NUM_CEPH_MON_UNITS__]=1
+MOD_PARAMS[__NUM_CEPH_FS_UNITS__]=1
+MOD_PARAMS[__CEPH_INTERFACE__]='ceph-mon'
+MOD_PARAMS[__SSL_CA__]=
+MOD_PARAMS[__SSL_CERT__]=
+MOD_PARAMS[__SSL_KEY__]=
+MOD_PARAMS[__NUM_CEPH_RGW_UNITS__]=1

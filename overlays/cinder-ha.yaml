@@ -1,6 +1,5 @@
 applications:
   cinder:
-    num_units: __NUM_CINDER_UNITS__
     options:
       vip: __VIP__
   cinder-hacluster:

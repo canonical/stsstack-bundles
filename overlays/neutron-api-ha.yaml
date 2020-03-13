@@ -1,6 +1,5 @@
 applications:
   neutron-api:
-    num_units: __NUM_NEUTRON_API_UNITS__
     options:
       vip: __VIP__
   neutron-api-hacluster:

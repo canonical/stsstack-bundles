@@ -10,7 +10,6 @@ debug:                      &debug                     True
 verbose:                    &verbose                   True
 openstack_origin:           &openstack_origin          __OS_ORIGIN__
 source:                     &source                    __SOURCE__
-num_compute_units:          &num_compute_units         __NUM_COMPUTE_UNITS__
 
 ssl_ca:                     &ssl_ca                    __SSL_CA__
 ssl_cert:                   &ssl_cert                  __SSL_CERT__
@@ -19,13 +18,14 @@ ssl_key:                    &ssl_key                   __SSL_KEY__
 series: __SERIES__
 applications:
   rabbitmq-server:
-    num_units: 1
+    num_units: __NUM_RABBIT_UNITS__
     charm: cs:~openstack-charmers-next/rabbitmq-server
     constraints: mem=1G
     options:
       source: *source
+      min-cluster-size: __NUM_RABBIT_UNITS__
   keystone:
-    num_units: 1
+    num_units: __NUM_KEYSTONE_UNITS__
     charm: cs:~openstack-charmers-next/keystone
     constraints: mem=1G
     options:
@@ -39,7 +39,7 @@ applications:
       ssl_key: *ssl_key
   nova-compute:
     charm: cs:~openstack-charmers-next/nova-compute
-    num_units: *num_compute_units
+    num_units: __NUM_COMPUTE_UNITS__
     constraints: mem=4G
     options:
       debug: *debug
@@ -50,7 +50,7 @@ applications:
       openstack-origin: *openstack_origin
       force-raw-images: false  # disable for stsstack since conversion kills the disks and is not needed
   nova-cloud-controller:
-    num_units: 1
+    num_units: __NUM_NOVACC_UNITS__
     charm: cs:~openstack-charmers-next/nova-cloud-controller
     constraints: mem=2G
     options:
@@ -62,7 +62,7 @@ applications:
       ssl_cert: *ssl_cert
       ssl_key: *ssl_key
   neutron-api:
-    num_units: 1
+    num_units: __NUM_NEUTRON_API_UNITS__
     charm: cs:~openstack-charmers-next/neutron-api
     constraints: mem=1G
     options:
@@ -77,7 +77,7 @@ applications:
       ssl_cert: *ssl_cert
       ssl_key: *ssl_key
   cinder:
-    num_units: 1
+    num_units: __NUM_CINDER_UNITS__
     constraints: mem=2G
     charm: cs:~openstack-charmers-next/cinder
     options:
@@ -92,7 +92,7 @@ applications:
       ssl_cert: *ssl_cert
       ssl_key: *ssl_key
   glance:
-    num_units: 1
+    num_units: __NUM_GLANCE_UNITS__
     charm: cs:~openstack-charmers-next/glance
     constraints: mem=1G
     options:

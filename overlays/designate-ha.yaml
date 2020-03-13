@@ -1,6 +1,5 @@
 applications:
   designate:
-    num_units: __NUM_DESIGNATE_UNITS__
     options:
       vip: __VIP__
   designate-bind:

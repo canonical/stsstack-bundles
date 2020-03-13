@@ -1,46 +1,13 @@
-#!/bin/bash
-# NOTE: global variables must be first defined in 01setup
+#!/bin/bash -eu
+# Global variables are first defined in 00setup and module
+# dependencies are defined in 01import-config-defaults
+#
+# All overlay/bundle variables (MOD_PARAMS) defaults must go into
+# the <module>/module_defaults file.
 
-# Bundle template MOD_PARAMS. These should correspond to variables set at the top
-# of yaml bundle and overlay templates.
-MOD_PARAMS[__OS_ORIGIN__]=$os_origin
-MOD_PARAMS[__SOURCE__]=$source
-MOD_PARAMS[__NUM_BARBICAN_UNITS__]=1
-MOD_PARAMS[__NUM_COMPUTE_UNITS__]=1
-MOD_PARAMS[__NUM_CEPH_MON_UNITS__]=1
-MOD_PARAMS[__NUM_CEPH_FS_UNITS__]=1
-MOD_PARAMS[__CEPH_INTERFACE__]='ceph-mon'
-MOD_PARAMS[__NUM_NEUTRON_GATEWAY_UNITS__]=1
-MOD_PARAMS[__NUM_VAULT_UNITS__]=1  # there are > 1 vault* overlay so need to use a global with default
-MOD_PARAMS[__NUM_ETCD_UNITS__]=1
-MOD_PARAMS[__NUM_OCTAVIA_UNITS__]=1
-MOD_PARAMS[__NEUTRON_FW_DRIVER__]=openvswitch  # legacy is iptables_hybrid
-MOD_PARAMS[__SSL_CA__]=
-MOD_PARAMS[__SSL_CERT__]=
-MOD_PARAMS[__SSL_KEY__]=
-MOD_PARAMS[__DVR_DATA_PORT__]=''
-MOD_PARAMS[__OVN_DATA_PORT__]=''
-MOD_PARAMS[__BIND_DNS_FORWARDER__]=`get_local_upstream_dns`
-MOD_PARAMS[__ML2_DNS_FORWARDER__]=`get_local_upstream_dns`
-MOD_PARAMS[__ETCD_SNAP_CHANNEL__]='latest/stable'
-MOD_PARAMS[__GRAYLOG_SNAP_CHANNEL__]='3/stable'
-MOD_PARAMS[__GRAFANA_SNAP_CHANNEL__]='stable'
-MOD_PARAMS[__OCTAVIA_RETROFIT_UCA__]='rocky'  # charm defaults to rocky since it's the first version supported
-MOD_PARAMS[__AMPHORA_SSH_PUB_KEY__]=''
-MOD_PARAMS[__GSSS_SWIFT_ENABLED__]=false  # glance-simplestreams-sync can optionally store index data in swift
-MOD_PARAMS[__LDAP_SERVER__]=''
-MOD_PARAMS[__OVERLAY_NETWORK_TYPE__]='gre'  # this is the charm default
 
-# Try to use current model (or newly requested one) as subdomain name
-model_subdomain=`get_juju_model`
-[ -n "$model_subdomain" ] || model_subdomain="overcloud"
-MOD_PARAMS[__DNS_DOMAIN__]="${model_subdomain}.stsstack.qa.1ss."
-MOD_PARAMS[__DESIGNATE_NAMESERVERS__]="ns1.${MOD_PARAMS[__DNS_DOMAIN__]}"
-
-MOD_PARAMS[__CONSOLE_TYPE__]="novnc"
 # If using any variant of dvr-snat, there is no need for a neutron-gateway.
 # We also don't currently need it when using ovn
-
 is_neutron_gateway_required ()
 {
     if ! has_opt --dvr-snat* && ! has_opt --ovn; then
@@ -331,7 +298,6 @@ do
             ;;
         --rabbitmq-server-ha*)
             get_units $1 __NUM_RABBIT_UNITS__ 3
-            MOD_OVERLAYS+=( "rabbitmq-server-ha.yaml" )
             ;;
         --rsyslog)
             MOD_OVERLAYS+=( "rsyslog.yaml" )

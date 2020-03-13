@@ -1,7 +1,10 @@
-#!/bin/bash
-# NOTE: global variables must be first defined in 01setup
+#!/bin/bash -eu
+# Global variables are first defined in 00setup and module
+# dependencies are defined in 01import-config-defaults
+#
+# All overlay/bundle variables (MOD_PARAMS) defaults must go into
+# the <module>/module_defaults file.
 
-MOD_PARAMS[__LANDSCAPE_VERSION__]="19.01"
 
 # Skip processing input if it includes exclusive passthrough options
 ! has_excl_passthrough_opt && \

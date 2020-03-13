@@ -11,7 +11,7 @@ ssl_key:                    &ssl_key                   __SSL_KEY__
 applications:
   ceph-rgw:
     charm: cs:~openstack-charmers-next/ceph-radosgw
-    num_units: 1
+    num_units: __NUM_CEPH_RGW_UNITS__
     constraints: mem=1G
     options:
       loglevel: *loglevel

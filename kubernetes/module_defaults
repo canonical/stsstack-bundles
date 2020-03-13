@@ -1,0 +1,23 @@
+# This file must contain defaults for all variables used in bundles/ovelays.
+# They are used to render to final product in the event they are not provided
+# elsewhere. It is inserted into the global context at the start of the
+# pipeline.
+#
+# You can check that none are missing by running lint/check_var_defaults.sh
+#
+MOD_PARAMS[__K8S_CHANNEL__]="latest/stable"
+MOD_PARAMS[__NUM_ETCD_UNITS__]=1
+MOD_PARAMS[__NUM_K8S_MASTER_UNITS__]=1
+MOD_PARAMS[__NUM_K8S_WORKER_UNITS__]=2
+MOD_PARAMS[__NUM_K8S_LB_UNITS__]=1
+MOD_PARAMS[__ETCD_SNAP_CHANNEL__]='latest/stable'
+MOD_PARAMS[__CHARM_CHANNEL__]=
+
+# NOTE: the k8s charms publish to stable and edge so its fine to default to
+#       edge but other charms e.g. openstack charms like ceph-mon do not so if
+#       they are used we must override and use stable.
+if ! has_opt --charm-channel && \
+        ! has_opt --use-stable-charms; then
+    MOD_PARAMS[__CHARM_CHANNEL__]=edge
+fi
+

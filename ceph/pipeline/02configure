@@ -1,18 +1,10 @@
-#!/bin/bash
-# Bundle template parameters. These should correspond to variables set at the top
-# of yaml bundle and overlay templates.
-MOD_PARAMS[__OS_ORIGIN__]=$os_origin
-MOD_PARAMS[__SOURCE__]=$source
-MOD_PARAMS[__NUM_CEPH_MON_UNITS__]=1
-MOD_PARAMS[__CEPH_INTERFACE__]='ceph-mon'
-MOD_PARAMS[__NUM_VAULT_UNITS__]=1  # there are > 1 vault* overlay so need to use a global with default
-MOD_PARAMS[__SSL_CA__]=
-MOD_PARAMS[__SSL_CERT__]=
-MOD_PARAMS[__SSL_KEY__]=
-MOD_PARAMS[__NUM_ETCD_UNITS__]=1
-MOD_PARAMS[__ETCD_SNAP_CHANNEL__]='latest/stable'
-MOD_PARAMS[__GRAYLOG_SNAP_CHANNEL__]='3/stable'
-MOD_PARAMS[__GRAFANA_SNAP_CHANNEL__]='stable'
+#!/bin/bash -eu
+# Global variables are first defined in 00setup and module
+# dependencies are defined in 01import-config-defaults
+#
+# All overlay/bundle variables (MOD_PARAMS) defaults must go into
+# the <module>/module_defaults file.
+
 
 # Skip processing input if it includes exclusive passthrough options
 ! has_excl_passthrough_opt && \
