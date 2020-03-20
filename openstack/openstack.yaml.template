@@ -32,7 +32,6 @@ applications:
       debug: *debug
       verbose: *verbose
       admin-password: openstack
-      admin-token: ubuntutesting
       openstack-origin: *openstack_origin
       ssl_ca: *ssl_ca
       ssl_cert: *ssl_cert

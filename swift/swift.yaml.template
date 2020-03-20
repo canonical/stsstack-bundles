@@ -21,7 +21,6 @@ applications:
       debug: *debug
       verbose: *verbose
       admin-password: openstack
-      admin-token: ubuntutesting
       openstack-origin: *openstack_origin
   glance:
     num_units: 1
