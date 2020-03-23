@@ -1,6 +1,4 @@
-#!/bin/bash
-
-set -ex
+#!/bin/bash -ex
 
 . ./profiles/common
 
@@ -10,13 +8,11 @@ install_packages
 [[ -z "$NAMESERVER" ]] && export NAMESERVER="10.230.64.2"
 [[ -z "$SWIFT_IP" ]] && export SWIFT_IP="10.230.19.58"
 
-# Set serverstack defaults, if not already set.
+# Set defaults, if not already set.
 [[ -z "$GATEWAY" ]] && export GATEWAY="10.5.0.1"
 [[ -z "$CIDR_EXT" ]] && export CIDR_EXT="10.5.0.0/16"
 [[ -z "$FIP_RANGE" ]] && export FIP_RANGE="10.5.150.0:10.5.200.254"
-[[ -z "$NAMESERVER" ]] && export NAMESERVER="10.245.168.6"
 [[ -z "$CIDR_PRIV" ]] && export CIDR_PRIV="192.168.21.0/24"
-[[ -z "$SWIFT_IP" ]] && export SWIFT_IP="10.245.161.162"
 
 NS_ARG=""
 [ "`juju config neutron-api enable-ml2-dns`" = "true" ] && unset NAMESERVER || NS_ARG="-N $NAMESERVER"
@@ -51,8 +47,6 @@ fi
 
 # Download images if not already present
 mkdir -vp ~/images
-#upload_image cloudimages trusty trusty-server-cloudimg-amd64-disk1.img &
-#upload_image cloudimages xenial xenial-server-cloudimg-amd64-disk1.img &
 upload_image cloudimages bionic bionic-server-cloudimg-amd64.img &
 upload_image swift cirros cirros-0.4.0-x86_64-disk.img &
 upload_image swift cirros2 cirros-0.3.5-x86_64-disk.img &

@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Upload Image for Single Hypervisor Clouds
 function upload_image {
     src=$1
     image_name=$2
@@ -55,54 +54,8 @@ function convert_image_to_raw {
 
 }
 
-# Upload Image for Multi-Hypervisor Clouds
-function upload_image_mh {
-    src=$1
-    image_name=$2
-    image_file=$3
-    image_format=${4:-"qcow2"}
-    image_hv_type=${5:-"kvm"}
-    image_arch=${6:-"x86_64"}
-
-    case "$src" in
-        swift) http_root="http://$SWIFT_IP:80/swift/v1/images";;
-        cloudimages) http_root="http://cloud-images.ubuntu.com/${image_name}/current";;
-    esac
-
-    mkdir -vp ~/images
-
-    [ -f ~/images/$image_file ] || {
-        wget -O ~/images/$image_file ${http_root}/${image_file}
-    }
-
-    openstack image show $image_name || {
-        openstack image create --public \
-            --container-format=bare --disk-format=$image_format \
-            --file=${HOME}/images/$image_file  $image_name \
-            --property architecture=$image_arch \
-            --property hypervisor_type=$image_hv_type
-    }
-}
-
-function setup_default_images {
-    upload_image cloudimages bionic bionic-server-cloudimg-amd64.img
-    upload_image cloudimages xenial xenial-server-cloudimg-amd64-disk1.img
-    upload_image cloudimages trusty trusty-server-cloudimg-amd64-disk1.img
-    upload_image swift cirros cirros-0.3.4-x86_64-disk.img
-    upload_image swift cirros_alt cirros-0.3.4-x86_64-disk.img
-}
-
 function install_packages {
-    # Install dependencies and CLI tools
-    # See also requirements.txt in tempest (probably need to sudo pip install -r requirements.txt)
-
-    echo "NOTE: The configure script no longer sudo apt installs packages.  If you find a client is missing on your machine, resolve it manually in advance of ./configure."
-
-    #sudo apt-get install git testrepository subunit python-nose python-lxml python-boto \
-    #    python-junitxml python-subunit python-testresources python-oslotest python-stevedore \
-    #    python-cinderclient python-glanceclient python-heatclient python-keystoneclient \
-    #    python-neutronclient python-novaclient python-swiftclient python-ceilometerclient \
-    #    python-openstackclient openvswitch-test openvswitch-common -y
+    echo "NOTE: The configure script no longer sudo apt installs packages. If you find a client is missing on your machine, resolve it manually in advance of ./configure."
 }
 
 function create_roles {
@@ -186,24 +139,6 @@ function create_default_flavors {
     openstack flavor show m1.medium || openstack flavor create --id 3 --ram 4096  --disk 20 --vcpus 2 m1.medium
     openstack flavor show m1.large || openstack flavor create  --id 4 --ram 8192  --disk 20 --vcpus 4 m1.large
     openstack flavor show m1.xlarge || openstack flavor create --id 5 --ram 16384 --disk 20 --vcpus 8 m1.xlarge
-}
-
-function shrink_flavors {
-    openstack flavor delete m1.tiny ||:
-    openstack flavor delete m1.small ||:
-    openstack flavor delete m1.medium ||:
-    openstack flavor delete m1.large ||:
-    openstack flavor delete m1.xlarge ||:
-    openstack flavor create --id 1 --ram 512  --disk 1  --swap 0    --vcpus 1 m1.tiny
-    openstack flavor create --id 2 --ram 768  --disk 10 --swap 2048 --vcpus 1 m1.small
-    openstack flavor create --id 3 --ram 1024 --disk 12 --swap 2048 --vcpus 2 m1.medium
-    openstack flavor create --id 4 --ram 1536 --disk 14 --swap 2048 --vcpus 4 m1.large
-    openstack flavor create --id 5 --ram 2048 --disk 16 --swap 2048 --vcpus 8 m1.xlarge
-}
-
-function juju_config_neutron_mtu {
-    juju set neutron-gateway instance-mtu=1300 &> /dev/null ||
-        juju config neutron-gateway instance-mtu=1300 &> /dev/null
 }
 
 function is_ksv3 () {
