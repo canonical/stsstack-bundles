@@ -16,6 +16,7 @@ declare -A lts=( [trusty]=icehouse
 declare -A nonlts=( [cosmic]=rocky
                     [disco]=stein
                     [eoan]=train
+                    [focal]=ussuri
 )
 
 # Reverse lookups (revision to series)
