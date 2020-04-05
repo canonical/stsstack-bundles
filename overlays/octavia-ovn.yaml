@@ -1,0 +1,3 @@
+relations:
+  - [ octavia:ovsdb-subordinate, ovn-chassis:ovsdb-subordinate ]
+  - [ octavia:ovsdb-cms, ovn-central:ovsdb-cms ]

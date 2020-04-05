@@ -261,9 +261,13 @@ do
             get_param $1 __CONSOLE_TYPE__ "REQUIRES: nova console access protocol:"
             ;;
         --octavia)
-            conflicts_with $1 --ovn
-            # >= Rocky
-            assert_min_release rocky "octavia"
+            if `has_opt --ovn`; then
+                assert_min_release train "octavia+ovn"
+                MOD_OVERLAYS+=( "octavia-ovn.yaml" )
+            else
+                assert_min_release rocky "octavia"
+                MOD_OVERLAYS+=( "octavia-ovs.yaml" )
+            fi
             MOD_OVERLAYS+=( "octavia.yaml" )
             MOD_PARAMS[__AMPHORA_SSH_PUB_KEY__]="`get_amphora_ssh_pub_key`"
             if has_opt --openstack-dashboard*; then
@@ -329,7 +333,6 @@ do
             MOD_OVERLAYS+=( "neutron-sg-logging.yaml" )
             ;;
         --ovn)
-            conflicts_with $1 --octavia
             assert_min_release train "ovn"
             get_param $1 __OVN_DATA_PORT__ 'REQUIRED: ovn-chassis bridge-interface-mappings (leave blank to set later):'
             MOD_OVERLAYS+=( "neutron-ovn.yaml" )

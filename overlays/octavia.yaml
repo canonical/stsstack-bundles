@@ -16,4 +16,3 @@ relations:
   - [ octavia:identity-service, keystone:identity-service ]
   - [ octavia:amqp, rabbitmq-server:amqp ]
   - [ octavia:neutron-api, neutron-api:neutron-load-balancer ]
-  - [ octavia:neutron-openvswitch, neutron-openvswitch:neutron-plugin ]
