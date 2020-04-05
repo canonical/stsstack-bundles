@@ -3,7 +3,7 @@ openstack_origin:           &openstack_origin          __OS_ORIGIN__
 
 applications:
   openstack-dashboard:
-    num_units: 1
+    num_units: __NUM_HORIZON_UNITS__
     charm: cs:~openstack-charmers-next/openstack-dashboard
     constraints: mem=1G
     options:

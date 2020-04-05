@@ -25,7 +25,8 @@ if ! has_opt --ovn*; then
     MOD_OVERLAYS+=( "neutron-openvswitch.yaml" )
 fi
 
-if ! has_opt --no-ml2dns && ! has_opt --designate*; then
+# Enable this by default since it is commonly used.
+if ! has_opt --no-ml2dns; then
     set -- $@ --ml2dns && cache $@
 fi
 
@@ -100,15 +101,14 @@ do
             MOD_OVERLAYS+=( "ceph-fs.yaml" )
             ;;
         --ceph-fs-ha*)
-            assert_min_release ocata "ceph-mds"
             get_units $1 __NUM_CEPH_FS_UNITS__ 3
             MOD_OVERLAYS+=( "ceph-fs.yaml" )
+            set -- $@ --ceph-fs && cache $@
             ;;
         --designate)
             assert_min_release ocata "designate"
             msg="REQUIRED: designate-bind upstream dns server to forward requests to:"
             get_param $1 __BIND_DNS_FORWARDER__ "$msg"
-            MOD_OVERLAYS+=( "neutron-ml2dns.yaml" )
             ns=${MOD_PARAMS[__ML2_DNS_FORWARDER__]}
             MOD_MSGS+=( "NOTE: you will need to set neutron-gateway dns-servers=<designate-bind unit address> post-deploy (current=$ns)" )
             MOD_OVERLAYS+=( "memcached.yaml" )
@@ -224,18 +224,22 @@ do
             set -- $@ --ceph && cache $@
             ;;
         --mysql-ha*)
+            conflicts_with $1 --mysql-innodb-cluster*
             get_units $1 __NUM_MYSQL_UNITS__ 3
             MOD_OVERLAYS+=( "mysql-ha.yaml" )
             ;;
         --mysql-innodb-cluster*)
+            conflicts_with $1 --mysql-ha*
             assert_min_release train mysql-innodb-cluster
             # NOTE: 3 is actually the absolute minimum units required
             get_units $1 __NUM_MYSQL_UNITS__ 3
             MOD_OVERLAYS+=( "mysql-innodb-cluster.yaml")
             ;;
         --no-ml2dns)  #__OPT__
+            conflicts_with $1 --ml2dns
             ;;
         --ml2dns)
+            conflicts_with $1 --no-ml2dns
             # this is internal dns integration, for external use --designate
             msg="REQUIRED: ml2-dns upstream dns server to forward requests to:"
             get_param $1 __ML2_DNS_FORWARDER__ "$msg"
@@ -257,6 +261,7 @@ do
             get_param $1 __CONSOLE_TYPE__ "REQUIRES: nova console access protocol:"
             ;;
         --octavia)
+            conflicts_with $1 --ovn
             # >= Rocky
             assert_min_release rocky "octavia"
             MOD_OVERLAYS+=( "octavia.yaml" )
@@ -277,9 +282,10 @@ do
         --octavia-ha*)
             get_units $1 __NUM_OCTAVIA_UNITS__ 3
             MOD_OVERLAYS+=( "octavia-ha.yaml" )
+            set -- $@ --octavia && cache $@
             ;;
         --octavia-diskimage-retrofit-glance-simplestreams)
-            check_opt_conflict $1 --no-octavia-diskimage-retrofit
+            conflicts_with $1 --no-octavia-diskimage-retrofit
             set -- $@ --glance-simplestreams && cache $@
             MOD_OVERLAYS+=( "octavia-diskimage-retrofit-glance-simplestreams.yaml" )
             ;;
@@ -288,6 +294,7 @@ do
             shift
             ;;
         --no-octavia-diskimage-retrofit)  #__OPT__
+            conflicts_with $1 --octavia-diskimage-retrofit*
             ;;
         --glance-simplestreams-swift)
             MOD_PARAMS[__GSSS_SWIFT_ENABLED__]=true
@@ -314,7 +321,7 @@ do
             fi
             ;;
         --nova-network)
-            # NOTE(hopem) yes this is a hack and we'll get rid of it hwen nova-network is finally no more
+            # NOTE(hopem) yes this is a hack and we'll get rid of it when nova-network is finally no more
             export MOD_BASE_TEMPLATE=openstack-nova-network.yaml.template
             ;;
         --neutron-sg-logging)
@@ -322,6 +329,7 @@ do
             MOD_OVERLAYS+=( "neutron-sg-logging.yaml" )
             ;;
         --ovn)
+            conflicts_with $1 --octavia
             assert_min_release train "ovn"
             get_param $1 __OVN_DATA_PORT__ 'REQUIRED: ovn-chassis bridge-interface-mappings (leave blank to set later):'
             MOD_OVERLAYS+=( "neutron-ovn.yaml" )
@@ -339,8 +347,8 @@ do
             ;;
         --designate-ha*)
             get_units $1 __NUM_DESIGNATE_UNITS__ 3
-            set -- $@ --designate && cache $@
             MOD_OVERLAYS+=( "designate-ha.yaml" )
+            set -- $@ --designate && cache $@
             ;;
         --glance-ha*)
             get_units $1 __NUM_GLANCE_UNITS__ 3
@@ -350,6 +358,7 @@ do
             get_units $1 __NUM_HEAT_UNITS__ 3
             MOD_OVERLAYS+=( "heat.yaml ")
             MOD_OVERLAYS+=( "heat-ha.yaml ")
+            set -- $@ --heat && cache $@
             ;;
         --keystone-ha*)
             get_units $1 __NUM_KEYSTONE_UNITS__ 3
@@ -376,10 +385,8 @@ do
             ;;
         --openstack-dashboard-ha*)
             get_units $1 __NUM_HORIZON_UNITS__ 3
-            if ! has_opt --openstack-dashboard; then
-                set -- $@ --openstack-dashboard && cache $@
-            fi
             MOD_OVERLAYS+=( "openstack-dashboard-ha.yaml" )
+            set -- $@ --openstack-dashboard && cache $@
             ;;
         --swift)
             MOD_OVERLAYS+=( "swift.yaml" )
@@ -387,6 +394,7 @@ do
         --swift-ha*)
             get_units $1 __NUM_SWIFT_PROXY_UNITS__ 3
             MOD_OVERLAYS+=( "swift-ha.yaml" )
+            set -- $@ --swift && cache $@
             ;;
         --telemetry|--telemetry-gnocchi)
             # ceilometer + aodh + gnocchi (>= pike)
@@ -410,10 +418,11 @@ do
             ;;
         --telemetry-ha*)
             get_units $1 __NUM_TELEMETRY_UNITS__ 3
-            MOD_OVERLAYS+=( "telemetry.yaml" )
             MOD_OVERLAYS+=( "telemetry-ha.yaml" )
+            set -- $@ --telemetry && cache $@
             ;;
         --vault)
+            conflicts_with $1 --ssl
             assert_min_release queens "vault"
             MOD_OVERLAYS+=( "vault.yaml" )
             MOD_OVERLAYS+=( "vault-openstack-secrets.yaml" )

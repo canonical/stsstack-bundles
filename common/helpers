@@ -367,13 +367,15 @@ has_opt ()
     return $?
 }
 
-check_opt_conflict ()
+conflicts_with ()
 {
-    local good=$1
-    local bad=$2
-    `has_opt $bad` || return 0
-    echo "ERROR: option $good conflicts with $bad"
-    exit 1
+    local opt="$1"
+    shift
+    for conflict in $@; do
+        `has_opt $conflict` || continue 
+        echo "ERROR: you cannot use $opt with $conflict"
+        exit 1
+    done
 }
 
 assert_min_release ()
