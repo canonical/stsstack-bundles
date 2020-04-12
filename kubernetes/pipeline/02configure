@@ -75,19 +75,19 @@ do
             get_units $1 __NUM_ETCD_UNITS__ 3
             ;;
         --containerd)
-            check_opt_conflict $1 --docker
+            conflicts_with $1 --docker
             MOD_OVERLAYS+=( "k8s-containerd.yaml" )
             ;;
         --docker)
-            check_opt_conflict $1 --containerd
+            conflicts_with $1 --containerd
             MOD_OVERLAYS+=( "k8s-docker.yaml" )
             ;;
         --calico)
-            check_opt_conflict $1 --canal
+            conflicts_with $1 --canal
             MOD_OVERLAYS+=( "k8s-cni-calico.yaml" )
             ;;
         --canal)
-            check_opt_conflict $1 --calico
+            conflicts_with $1 --calico
             MOD_OVERLAYS+=( "k8s-cni-canal.yaml" )
             ;;
         --e2e)
@@ -99,7 +99,7 @@ do
             fi
             ;;
         --lb-ha-hacluster*|--lb-ha-keepalived*)
-            check_opt_conflict $1 --lb-octavia
+            conflicts_with $1 --lb-octavia
             if has_opt --master-ha*; then
                 echo "ERROR: you can't do --master-ha and ${1%%:*} at the same time."
                 exit 1
@@ -113,8 +113,8 @@ do
             fi
             ;;
         --lb-octavia)
-            check_opt_conflict $1 '--lb-ha-hacluster*'
-            check_opt_conflict $1 '--lb-ha-keepalived*'
+            conflicts_with $1 '--lb-ha-hacluster*'
+            conflicts_with $1 '--lb-ha-keepalived*'
             MOD_OVERLAYS+=( "k8s-octavia-lb.yaml" )
             ;;
         --master-ha*)
