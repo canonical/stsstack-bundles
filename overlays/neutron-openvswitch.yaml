@@ -3,6 +3,9 @@ debug:                      &debug                     True
 verbose:                    &verbose                   True
 
 applications:
+  neutron-api:
+    options:
+      manage-neutron-plugin-legacy-mode: true
   neutron-openvswitch:
     charm: cs:~openstack-charmers-next/neutron-openvswitch
     options:
