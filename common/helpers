@@ -321,6 +321,20 @@ get_release ()
     _get ${CACHED_STDIN[@]}
 }
 
+get_pocket ()
+{
+    _get () {
+        while (($#)); do
+            if [ "$1" = "-p" ] || [ "$1" = "--pocket" ]; then
+                 echo $2
+                 return 0
+            fi
+            shift
+        done
+    }
+    _get ${CACHED_STDIN[@]}
+}
+
 get_uca_release ()
 {
     local r=`get_release`
@@ -331,17 +345,6 @@ get_uca_release ()
     ltsmatch "$s" "$r" && return
     # else its uca
     echo $release
-}
-
-get_pocket ()
-{
-    while (($#)); do
-        if [ "$1" = "-p" ] || [ "$1" = "--pocket" ]; then
-             echo $2
-             return 0
-        fi
-        shift
-    done
 }
 
 cache ()
