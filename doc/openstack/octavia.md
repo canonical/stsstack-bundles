@@ -10,10 +10,13 @@ Now you need to add an extra port to your nodes running neutron-openvswitch:
 ./bin/add-data-ports.sh
 ```
 
-The following will download the Amphora image from (stsstack) Swift that corresponds to the deployed release of Openstack and upload it to your Glance.
+The following will download the Amphora image from (stsstack) Swift
+that corresponds to the deployed release of Openstack and upload it to
+your Glance. The optional argument `--image-format` specifies the
+image format and defaults to `qcow2`.
 
 ```
-tools/upload_octavia_amphora_image.sh <openstack-release-name>
+tools/upload_octavia_amphora_image.sh --release <openstack-release-name> [--image-format {raw, qcow2}]
 ```
 
 The following will configure Octavia's tls cert and lb-mgmt network.
