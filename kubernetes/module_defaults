@@ -12,6 +12,7 @@ MOD_PARAMS[__NUM_K8S_WORKER_UNITS__]=2
 MOD_PARAMS[__NUM_K8S_LB_UNITS__]=1
 MOD_PARAMS[__ETCD_SNAP_CHANNEL__]='latest/stable'
 MOD_PARAMS[__CHARM_CHANNEL__]=
+MOD_PARAMS[__CONTAINER_RUNTIME__]='containerd'
 
 # NOTE: the k8s charms publish to stable and edge so its fine to default to
 #       edge but other charms e.g. openstack charms like ceph-mon do not so if

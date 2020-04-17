@@ -1,0 +1,2 @@
+relations:
+ - ['docker-registry', 'easyrsa:client']

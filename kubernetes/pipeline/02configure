@@ -87,10 +87,6 @@ do
             conflicts_with $1 --docker
             MOD_OVERLAYS+=( "k8s-containerd.yaml" )
             ;;
-        --docker)
-            conflicts_with $1 --containerd
-            MOD_OVERLAYS+=( "k8s-docker.yaml" )
-            ;;
         --calico)
             conflicts_with $1 --canal
             MOD_OVERLAYS+=( "k8s-cni-calico.yaml" )
@@ -98,6 +94,19 @@ do
         --canal)
             conflicts_with $1 --calico
             MOD_OVERLAYS+=( "k8s-cni-canal.yaml" )
+            ;;
+        --docker)
+            conflicts_with $1 --containerd
+            MOD_OVERLAYS+=( "k8s-docker.yaml" )
+            ;;
+        --docker-registry)
+            MOD_OVERLAYS+=( "k8s-docker-registry.yaml" )
+            if has_opt --vault*; then
+                MOD_OVERLAYS+=( "k8s-vault-docker-registry.yaml" )
+            else
+                MOD_OVERLAYS+=( "k8s-easyrsa-docker-registry.yaml" )
+            fi
+            MOD_MSGS+=( "Execute tools/configure_docker_registry.sh to upload the images onto the docker registry and setting image registry of the cluster to point to docker registry")
             ;;
         --e2e)
             MOD_OVERLAYS+=( "k8s-e2e.yaml" )

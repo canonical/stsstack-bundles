@@ -1,0 +1,6 @@
+applications:
+  docker-registry:
+    charm: cs:~containers/docker-registry
+    num_units: 1
+relations:
+  - [ 'docker-registry', __CONTAINER_RUNTIME__ ]
