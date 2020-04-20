@@ -34,18 +34,23 @@ done
 openstack loadbalancer healthmonitor create --delay 5 --max-retries 4 --timeout 10 --type HTTP --url-path / pool1
 openstack loadbalancer healthmonitor list
 
-# Add vm to pool
+# Add vm(s) to pool
 if [ -z "$member_vm" ]; then
-    member_vm=`openstack server list -c ID -f value`
-    [ -n "$member_vm" ] || { echo "ERROR: could not find a vm to add to lb pool"; exit 1; }
+    readarray -t member_vm < <(openstack server list -c ID -f value)
+    (( ${#member_vm[@]} )) || { echo "ERROR: could not find a vm to add to lb pool"; exit 1; }
 fi
 
-netaddr=`openstack port list --server $member_vm --network private -c "Fixed IP Addresses" -f value | sed -r "s/ip_address='([[:digit:]\.]+)',\s+.+/\1/g"`
-openstack loadbalancer member create --subnet-id private_subnet --address $netaddr --protocol-port 80 pool1
-while true; do
-[ "`openstack loadbalancer member list pool1 -c provisioning_status -f value`" = "ACTIVE" ] \
-    && break
-echo "waiting for member"
+for member in ${member_vm[@]}; do
+    netaddr=$(openstack port list --server $member --network private \
+        -c "Fixed IP Addresses" -f value | sed -r "s/ip_address='([[:digit:]\.]+)',\s+.+/\1/g")
+    member_id=$(openstack loadbalancer member create --subnet-id private_subnet \
+        --address $netaddr --protocol-port 80 --format value --column id pool1)
+    while true; do
+        [[ $(openstack loadbalancer member show --format value \
+            --column provisioning_status pool1 ${member_id}) = ACTIVE ]] \
+            && break
+        echo "waiting for member ${member} (${member_id})"
+    done
 done
 
 openstack loadbalancer member list pool1
@@ -53,4 +58,3 @@ openstack loadbalancer member list pool1
 floating_ip=$(openstack floating ip create -f value -c floating_ip_address ext_net)
 lb_vip_port_id=$(openstack loadbalancer show -f value -c vip_port_id $lb)
 openstack floating ip set --port $lb_vip_port_id $floating_ip
-
