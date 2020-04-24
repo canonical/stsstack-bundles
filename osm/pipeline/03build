@@ -1,0 +1,31 @@
+#!/bin/bash
+export INTERNAL_BUNDLE_CONFIG_RENDERER=
+export INTERNAL_BUNDLE_CONFIG=
+if ((${#MOD_PARAMS[@]})); then
+    export INTERNAL_BUNDLE_CONFIG_RENDERER=`mktemp`
+    export INTERNAL_BUNDLE_CONFIG=`mktemp`
+    echo -n "sed -i " > $INTERNAL_BUNDLE_CONFIG_RENDERER
+    for p in ${!MOD_PARAMS[@]}; do
+        echo -n "-e 's,$p,${MOD_PARAMS[$p]},g' " >> $INTERNAL_BUNDLE_CONFIG_RENDERER
+        echo "${p}: \"${MOD_PARAMS[$p]}\"" >> $INTERNAL_BUNDLE_CONFIG
+    done
+fi
+
+if [ -n "${MASTER_OPTS[CLOUD_NAME]}" ]; then
+    if `juju list-clouds| egrep -q "^${MASTER_OPTS[CLOUD_NAME]}"`; then
+        echo -e "Juju cloud '${MASTER_OPTS[CLOUD_NAME]}' already exists - skipping create"
+    else
+        cloud_name=${MASTER_OPTS[CLOUD_NAME]}
+        controller=`juju list-controllers --format json | jq -r '.["current-controller"]'`
+        mkdir -p ~/.local/share/osm
+        juju scp -m ${MOD_PARAMS[__K8S_MODEL__]} kubernetes-master/0:config ~/.local/share/osm/${cloud_name}-kubeconfig
+	echo "Creating Juju cloud ${cloud_name} on controller ${controller}"
+	KUBECONFIG=~/.local/share/osm/${cloud_name}-kubeconfig juju add-k8s ${cloud_name} --controller ${controller} --cluster-name=juju-cluster
+    fi
+fi
+
+. $LIB_COMMON/generate_bundle_base
+
+for f in $INTERNAL_BUNDLE_CONFIG_RENDERER $INTERNAL_BUNDLE_CONFIG; do
+    [ -n "$f" ] && [ -r "$f" ] && rm -f $f
+done

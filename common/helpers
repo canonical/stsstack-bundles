@@ -4,6 +4,7 @@ declare -A MASTER_OPTS=(
     [CHARM_CHANNEL]=stable
     [MODEL_CONFIG]=''
     [BUNDLE_NAME]=''
+    [CLOUD_NAME]=''
     [TARGET_RELEASE_NAME]=''
     [VIP_ADDR_START]=10.5.100.0
 )
@@ -60,7 +61,8 @@ OPTIONS:
      -n, --name n
         Name for bundle. If this is not provided then the default bundle
         location is used. This is also used as the name of the model when
-        using --create-model.
+        using --create-model. To specify the cloud name as well, the name
+        should be in format <model-name>:<cloud-name>
      -p, --pocket p
         Archive pocket to install packages from e.g. "proposed". Default is
         main.
@@ -145,7 +147,10 @@ filter_master_opts ()
                 ;;
             --name|-n)
                 # give bundle set a name and store under named dir
-                MASTER_OPTS[BUNDLE_NAME]="$2"
+                MASTER_OPTS[BUNDLE_NAME]="${2%%:*}"
+		if [[ $2 =~ ":" ]]; then
+                    MASTER_OPTS[CLOUD_NAME]="${2##*:}"
+		fi
                 shift
                 ;;
             --list-overlays)

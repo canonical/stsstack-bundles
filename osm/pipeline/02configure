@@ -1,0 +1,29 @@
+#!/bin/bash -eu
+# Global variables are first defined in 00setup and module
+# dependencies are defined in 01import-config-defaults
+#
+# All overlay/bundle variables (MOD_PARAMS) defaults must go into
+# the <module>/module_defaults file.
+
+
+if [ $# -eq 0 ]; then
+    _usage
+    exit 1
+fi
+
+while (($# > 0))
+do
+    case $1 in
+        --k8s-model) #__OPT__type:<str>
+	    MOD_PARAMS[__K8S_MODEL__]=$2
+	    MOD_PARAMS[__JUJU_SSHKEY__]=`juju ssh-keys -m $2 --full | grep ssh-rsa`
+	    shift
+	    ;;
+        *)
+	    echo "ERROR: invalid input '$1'"
+	    _usage
+	    exit 1
+	    ;;
+    esac
+    shift
+done

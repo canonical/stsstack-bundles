@@ -33,7 +33,7 @@ if has_opt --create-model; then
         echo ""
     else
         echo "Creating Juju model ${MASTER_OPTS[BUNDLE_NAME]}"
-        juju add-model ${MASTER_OPTS[BUNDLE_NAME]}
+        juju add-model ${MASTER_OPTS[BUNDLE_NAME]} ${MASTER_OPTS[CLOUD_NAME]}
         echo ""
     fi
 fi

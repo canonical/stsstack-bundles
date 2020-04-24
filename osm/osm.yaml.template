@@ -1,0 +1,208 @@
+# Variables
+juju_pubkey:                &juju_pubkey               __JUJU_SSHKEY__
+juju_cacert:                &juju_cacert               __JUJU_CA_CERT__
+bastion_ip:                 &bastion_ip                __BASTION_IP__
+
+bundle: kubernetes
+applications:
+  grafana-k8s:
+    charm: cs:~charmed-osm/grafana-k8s
+    scale: 1
+    series: kubernetes
+    annotations:
+      gui-x: "500"
+      gui-y: "1100"
+  kafka-k8s:
+    charm: cs:~charmed-osm/kafka-k8s
+    scale: 1
+    series: kubernetes
+    storage:
+      database: 100M
+    options:
+      advertised-hostname: kafka-k8s
+      advertised-port: 9092
+      kafka-units: 1
+      zookeeper-service-name: zookeeper-k8s-endpoints
+      zookeeper-units: 1
+    annotations:
+      gui-x: "0"
+      gui-y: "600"
+  lcm-k8s:
+    charm: cs:~charmed-osm/lcm-k8s
+    scale: 1
+    series: kubernetes
+    storage:
+      packages: 50M
+    options:
+      vca_host: vca
+      vca_port: 17070
+      vca_user: admin
+      vca_password: secret
+      DATABASE_COMMONKEY: osm
+      use_external_vca: false
+      vca_pubkey: *juju_pubkey
+      vca_cacert: *juju_cacert
+      vca_apiproxy: *bastion_ip
+    annotations:
+      gui-x: "-500"
+      gui-y: "100"
+  mariadb-k8s:
+    charm: cs:~charmed-osm/mariadb-k8s
+    scale: 1
+    series: kubernetes
+    storage:
+      database: 50M
+    options:
+      database: database
+      ha-mode: false
+      mysql_port: "3306"
+      password: manopw
+      query-cache-size: 0
+      query-cache-type: "OFF"
+      root_password: osm4u
+      user: mano
+    annotations:
+      gui-x: "-500"
+      gui-y: "-400"
+  mon-k8s:
+    charm: cs:~charmed-osm/mon-k8s
+    scale: 1
+    series: kubernetes
+    storage:
+      database: 100M
+    options:
+      OSMMON_COLLECTOR_INTERVAL: 30
+      OSMMON_DATABASE_COMMONKEY: osm
+      OSMMON_EVALUATOR_INTERVAL: 30
+      OSMMON_GLOBAL_LOGLEVEL: INFO
+      OSMMON_GLOBAL_REQUEST_TIMEOUT: 10
+      OSMMON_OPENSTACK_DEFAULT_GRANULARITY: 300
+      use_external_vca: false
+      vca_host: vca
+      vca_user: admin
+      vca_password: secret
+      vca_cacert: *juju_cacert
+      use_external_vca: false
+    annotations:
+      gui-x: "500"
+      gui-y: "100"
+  mongodb-k8s:
+    charm: cs:~charmed-osm/mongodb-k8s
+    scale: 1
+    series: kubernetes
+    storage:
+      database: 50M
+    options:
+      advertised-port: 27017
+      cluster-domain: cluster.local
+      enable-sidecar: false
+      namespace: osm
+      replica-set: rs0
+      service-name: mongodb-k8s-endpoints
+    annotations:
+      gui-x: "0"
+      gui-y: "100"
+  nbi-k8s:
+    charm: cs:~charmed-osm/nbi-k8s
+    scale: 1
+    series: kubernetes
+    storage:
+      packages: 50M
+    options:
+      DATABASE_COMMONKEY: osm
+      log_level: INFO
+    annotations:
+      gui-x: "0"
+      gui-y: "-400"
+  pol-k8s:
+    charm: cs:~charmed-osm/pol-k8s
+    scale: 1
+    series: kubernetes
+    storage:
+      database: 100M
+    options:
+      log_level: INFO
+    annotations:
+      gui-x: "-500"
+      gui-y: "1100"
+  prometheus-k8s:
+    charm: cs:~charmed-osm/prometheus-k8s
+    scale: 1
+    series: kubernetes
+    storage:
+      database: 50M
+    options:
+      advertised-port: 9090
+      default-target: mon-k8s:8000
+      web-subpath: /
+    annotations:
+      gui-x: "500"
+      gui-y: "600"
+  ro-k8s:
+    charm: cs:~charmed-osm/ro-k8s
+    scale: 1
+    series: kubernetes
+    storage:
+      log: 50M
+    options:
+      OPENMANO_TENANT: osm
+      ro_database: mano_db
+      vim_database: mano_vim_db
+    annotations:
+      gui-x: "-500"
+      gui-y: "600"
+  ui-k8s:
+    charm: cs:~charmed-osm/ui-k8s
+    scale: 1
+    series: kubernetes
+    options:
+      mysql_database: lwui
+    annotations:
+      gui-x: "500"
+      gui-y: "-400"
+  zookeeper-k8s:
+    charm: cs:~charmed-osm/zookeeper-k8s
+    scale: 1
+    series: kubernetes
+    storage:
+      database: 100M
+    options:
+      leader-election-port: 3888
+      server-port: 2888
+      zookeeper-units: 1
+    annotations:
+      gui-x: "0"
+      gui-y: "1100"
+relations:
+- - kafka-k8s:zookeeper
+  - zookeeper-k8s:zookeeper
+- - ro-k8s:mysql
+  - mariadb-k8s:mysql
+- - nbi-k8s:mongo
+  - mongodb-k8s:mongo
+- - nbi-k8s:kafka
+  - kafka-k8s:kafka
+- - lcm-k8s:kafka
+  - kafka-k8s:kafka
+- - lcm-k8s:mongo
+  - mongodb-k8s:mongo
+- - mon-k8s:kafka
+  - kafka-k8s:kafka
+- - mon-k8s:mongo
+  - mongodb-k8s:mongo
+- - pol-k8s:kafka
+  - kafka-k8s:kafka
+- - pol-k8s:mongo
+  - mongodb-k8s:mongo
+- - lcm-k8s:ro
+  - ro-k8s:ro
+- - prometheus-k8s:prometheus
+  - mon-k8s:prometheus
+- - grafana-k8s:prometheus
+  - prometheus-k8s:prometheus
+- - ui-k8s:mysql
+  - mariadb-k8s:mysql
+- - ui-k8s:nbi
+  - nbi-k8s:nbi
+- - prometheus-k8s:prometheus
+  - nbi-k8s:prometheus
