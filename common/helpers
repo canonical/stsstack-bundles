@@ -381,6 +381,17 @@ conflicts_with ()
     done
 }
 
+assert_min_series ()
+{
+    local min="$1"
+    local s=`get_series`
+
+    [ -n "$s" ] || s=`get_series ${CACHED_STDIN[@]}`
+    [[ "$s" < "$min" ]] || return 0
+    echo "Min series '$min' required (currently using '$s')" 1>&2
+    exit 1
+}
+
 assert_min_release ()
 {
     local min="$1"
@@ -395,7 +406,12 @@ assert_min_release ()
 
 has_min_release ()
 {
-    return $(assert_min_release $@ &>/dev/null)
+    return $(assert_min_release $1 "" &>/dev/null)
+}
+
+has_min_series ()
+{
+    return $(assert_min_series $1 "" &>/dev/null)
 }
 
 ltsmatch ()

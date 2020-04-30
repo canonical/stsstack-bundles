@@ -30,13 +30,19 @@ if ! has_opt --no-ml2dns; then
     set -- $@ --ml2dns && cache $@
 fi
 
-# if not using mysql-innodb-cluster, then push the mysql overlay into the stack
-if ! has_opt --mysql-innodb-cluster*; then
+if has_min_series focal; then
+    # There is no Focal support for percona-cluster
+    if ! has_opt --mysql-innodb-cluster*; then
+        set -- $@ --mysql-innodb-cluster && cache $@
+    fi
+elif ! has_opt --mysql-innodb-cluster*; then
+    # If not using mysql-innodb-cluster, then push the mysql overlay into the
+    # stack.
     MOD_OVERLAYS+=( "mysql.yaml" )
 fi
 
 # Mandatory from T onwards and can be optionally added in R and S
-if has_min_release train placement; then
+if has_min_release train; then
     set -- $@ --placement && cache $@
 fi
 
