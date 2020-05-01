@@ -39,7 +39,7 @@ applications:
   nova-compute:
     charm: cs:~openstack-charmers-next/nova-compute
     num_units: __NUM_COMPUTE_UNITS__
-    constraints: mem=4G
+    constraints: __NOVA_COMPUTE_UNIT_CONSTRAINTS__
     options:
       debug: *debug
       verbose: *verbose

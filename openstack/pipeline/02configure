@@ -276,6 +276,10 @@ do
             fi
             MOD_OVERLAYS+=( "octavia.yaml" )
             MOD_PARAMS[__AMPHORA_SSH_PUB_KEY__]="`get_amphora_ssh_pub_key`"
+            # This equates to m1.large (rather than m1.medium) which should
+            # allow creating 1x ubunu vm + 1x amphora vm on the same host thus
+            # avoiding the need for > 1 compute host.
+            MOD_PARAMS[__NOVA_COMPUTE_UNIT_CONSTRAINTS__]="mem=8G"
             if has_opt --openstack-dashboard*; then
                 MOD_OVERLAYS+=( "octavia-dashboard.yaml" )
             fi

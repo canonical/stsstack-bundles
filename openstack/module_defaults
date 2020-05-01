@@ -40,6 +40,10 @@ MOD_PARAMS[__GSSS_SWIFT_ENABLED__]=false  # glance-simplestreams-sync can option
 MOD_PARAMS[__LDAP_SERVER__]=''
 MOD_PARAMS[__OVERLAY_NETWORK_TYPE__]='gre'  # this is the charm default
 
+# This is enough for creating one ubuntu vm or multiple cirros vms but some
+# scenarios may want to allow more per compute (e.g. octavia).
+MOD_PARAMS[__NOVA_COMPUTE_UNIT_CONSTRAINTS__]="mem=4G"
+
 # Try to use current model (or newly requested one) as subdomain name
 model_subdomain=`get_juju_model`
 [ -n "$model_subdomain" ] || model_subdomain="overcloud"
