@@ -522,8 +522,7 @@ get_bundle_state_root ()
 
 get_bundle_state_dir ()
 {
-    local bundle_name="`get_optval --name`"
-    [ -n "$bundle_name" ] || bundle_name="`get_optval -n`"
+    local bundle_name="${MASTER_OPTS[BUNDLE_NAME]}"
     local subdir="/$bundle_name"
     [ -n "$bundle_name" ] || subdir=''
     echo `get_bundle_state_root`$subdir
@@ -541,7 +540,7 @@ get_bundle_existing_config ()
 get_juju_model ()
 {
     if `has_opt --create-model`; then
-        local name="`get_optval --name`"
+        local name="${MASTER_OPTS[BUNDLE_NAME]}"
         if [ -n "$name" ]; then
             echo $name
         fi

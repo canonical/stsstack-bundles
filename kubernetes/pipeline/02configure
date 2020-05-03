@@ -14,10 +14,11 @@ fi
 
 check_hacluster_channel ()
 {
-    charm_channel="`get_optval --charm-channel`"
-    if [ -n "$charm_channel" ] && [ "$charm_channel" != "stable" ]; then
+    local channel=${MOD_PARAMS[__CHARM_CHANNEL__]}
+    [ -n "$channel" ] || channel="${MASTER_OPTS[CHARM_CHANNEL]}"
+    if [ -n "$channel" ] && [ "$channel" != "stable" ]; then
         # NOTE(dosaboy): https://bugs.launchpad.net/juju/+bug/1832873
-        MOD_MSGS+=( "\nIMPORTANT: you are using the $charm_channel charm channel but hacluster is not published to that channel. Either switch to stable channel or post-upgrade hacluster to stable channel.\n" )
+        MOD_MSGS+=( "\nIMPORTANT: you are using the $channel charm channel but hacluster is not published to that channel. Either switch to stable channel or post-upgrade hacluster to stable channel.\n" )
     fi
 }
 
