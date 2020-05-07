@@ -75,6 +75,9 @@ applications:
       ssl_ca: *ssl_ca
       ssl_cert: *ssl_cert
       ssl_key: *ssl_key
+      global-physnet-mtu: 5000
+      path-mtu: 1550
+      physical-network-mtus: physnet1:1500
   cinder:
     num_units: __NUM_CINDER_UNITS__
     constraints: mem=2G
