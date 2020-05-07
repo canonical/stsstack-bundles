@@ -416,7 +416,31 @@ has_min_release ()
 
 has_min_series ()
 {
-    return $(assert_min_series $1 "" &>/dev/null)
+    local min_series="$1"
+    local series="`get_series`"
+    local match=false
+    local s_arr=( ${!lts[@]} )
+
+    if ! `echo ${s_arr[@]}| grep -q $series`; then
+        readarray -t s_arr<<<"`echo -n ${!nonlts[@]}| tr ' ' '\n' | sort`"
+    else
+        s_arr=()
+        readarray -t ordered<<<`echo -n ${!lts_order[@]}| tr ' ' '\n'| sort -n| tr '\n' ' '`
+        for o in ${ordered[@]}; do
+            s_arr+=( ${lts_order[$o]} )
+        done
+    fi
+
+    for s in ${s_arr[@]}; do
+        if [ "$s" == "$series" ]; then
+            [ "$s" == "$min_series" ] && return 0
+            $match && return 
+        elif [ "$s" == "$min_series" ]; then
+            match=true
+        fi
+    done
+
+    return 1
 }
 
 ltsmatch ()

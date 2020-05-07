@@ -9,14 +9,19 @@
 # More info on releases at https://ubuntu.com/about/release-cycle
 
 # TODO: keep these lists up-to-date with supported series
+declare -A lts_order=( [0]=trusty
+                       [1]=xenial
+                       [2]=bionic
+                       [3]=focal
+)
 declare -A lts=( [trusty]=icehouse
                  [xenial]=mitaka
                  [bionic]=queens
+                 [focal]=ussuri
 )
 declare -A nonlts=( [cosmic]=rocky
                     [disco]=stein
                     [eoan]=train
-                    [focal]=ussuri
 )
 
 # Reverse lookups (revision to series)
