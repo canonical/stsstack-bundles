@@ -416,22 +416,52 @@ has_min_release ()
 
 has_min_series ()
 {
+    # Return true if provided series <= --series
+    # 
+    # This is a tricky thing to do since series names do not increase
+    # alphabetically (they wrapped between Zesty and Aardvark), so it takes
+    # a bit more logic to get right.
+
     local min_series="$1"
     local series="`get_series`"
     local match=false
-    local s_arr=( ${!lts[@]} )
+    local lts_arr=()
+    local all_series=()
 
-    if ! `echo ${s_arr[@]}| grep -q $series`; then
-        readarray -t s_arr<<<"`echo -n ${!nonlts[@]}| tr ' ' '\n' | sort`"
-    else
-        s_arr=()
-        readarray -t ordered<<<`echo -n ${!lts_order[@]}| tr ' ' '\n'| sort -n| tr '\n' ' '`
-        for o in ${ordered[@]}; do
-            s_arr+=( ${lts_order[$o]} )
-        done
-    fi
+    # First get ordered lists of each
+    readarray -t ordered<<<`echo -n ${!lts_order[@]}| tr ' ' '\n'| sort -n| tr '\n' ' '`
+    for o in ${ordered[@]}; do
+        lts_arr+=( ${lts_order[$o]} )
+    done    
+    readarray -t nonlts_arr<<<"`echo -n ${!nonlts[@]}| tr ' ' '\n' | sort`"
 
-    for s in ${s_arr[@]}; do
+    # Now create full list
+    i=0
+    j=0
+    for ((n=1;n<${#lts_arr[@]};n+=1)); do
+        curr=${lts_arr[$n]}
+        prev=${lts_arr[$((n-1))]}
+        ((n==1)) && all_series+=( $prev )
+
+        if [[ "$curr" > "${lts_arr[-1]}" ]] || [[ "$curr" < "${nonlts_arr[$j]}" ]]; then
+            all_series+=( $curr )
+        else
+            (($j < ${#nonlts_arr[@]})) || break
+            while [[ "$curr" > "${nonlts_arr[$j]}" ]]; do
+                all_series+=( ${nonlts_arr[$j]} )
+                (($j < ${#nonlts_arr[@]}-1)) || break
+                ((j++))
+            done
+            all_series+=( $curr )
+            while [[ "$curr" < "${nonlts_arr[$j]}" ]]; do
+                all_series+=( ${nonlts_arr[$j]} )
+                (($j < ${#nonlts_arr[@]}-1)) || break
+                ((j++))
+            done
+        fi
+    done
+
+    for s in ${all_series[@]}; do
         if [ "$s" == "$series" ]; then
             [ "$s" == "$min_series" ] && return 0
             $match && return 
