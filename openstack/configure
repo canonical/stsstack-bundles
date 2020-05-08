@@ -1,2 +1,2 @@
 #!/bin/sh
-./profiles/stsstack
+./profiles/stsstack $@

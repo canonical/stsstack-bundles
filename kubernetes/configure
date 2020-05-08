@@ -1,3 +1,4 @@
+#!/bin/bash -x
 sudo snap install kubectl --classic
 mkdir -p ~/.kube
 juju scp kubernetes-master/0:config ~/.kube/config
