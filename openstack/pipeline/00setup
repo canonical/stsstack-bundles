@@ -2,7 +2,7 @@
 trap_help
 
 # Globals
-export MOD_PATH=`dirname $0`
+export MOD_PATH=`readlink --canonicalize $(dirname $0)`
 export MOD_NAME=openstack
 export MOD_BASE_TEMPLATE=openstack.yaml.template
 export MOD_SSL_STATE_DIR=${MOD_NAME}
@@ -19,4 +19,3 @@ export -a MOD_MSGS=()
 export -a MOD_OVERLAYS=()
 
 export -A MOD_PARAMS=()
-

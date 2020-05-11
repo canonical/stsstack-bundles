@@ -20,7 +20,7 @@ elif [ -z "$MOD_PATH" ]; then
     echo "ERROR: no module name provided"
     exit 1
 elif has_opt --create-model && [ -z "${MASTER_OPTS[BUNDLE_NAME]}" ]; then
-    echo "ERROR: no --name provided so cannot create Juju model" 
+    echo "ERROR: no --name provided so cannot create Juju model"
     exit 1
 fi
 
@@ -45,7 +45,7 @@ if has_opt --list; then
     state_root=`get_bundle_state_root`
     if [ -d "$state_root" ]; then
         echo -e "Existing bundles:\n./b (default)"
-        find $state_root/* -maxdepth 0 -type d| egrep -v "/o$|resources" 
+        find $state_root/* -maxdepth 0 -type d| egrep -v "/o$|resources"
         echo ""
     else
         echo "There are currently no bundles."
@@ -81,6 +81,9 @@ has_opt --replay && finish
 # therefore no need to add parameters to this function and they should only
 # be defined in the custom generators.
 render () {
+    local charm_current
+    local charm_new
+
     # generic parameters only
     sed -i "s,__SERIES__,$series,g" $1
 
@@ -93,6 +96,17 @@ render () {
         vip=$vip_start_prefix.$((vip_start_suffix++))
         sed -i -r "s/__VIP__/$vip/g" $1
     fi
+
+    # Process charm revisions from bundle first.
+    for key in ${!MASTER_OPTS[@]}; do
+        prefix="CHARM_REVISIONS\."
+        if ! `echo $key| egrep -q "^$prefix"`; then
+            continue
+        fi
+        charm_current=${key##$prefix}
+        charm_new=${MASTER_OPTS[$key]}
+        sed -i -r "s,charm:.*${charm_current}$,charm: $charm_new," $1
+    done
 
     if has_opt --use-stable-charms; then
         sed -i -r 's,~openstack-charmers-next/,,g' $1
@@ -122,7 +136,7 @@ fi
 dtmp=`mktemp -d`
 template_path=$dtmp/`basename $MOD_BASE_TEMPLATE`
 bundle=${template_path%%.template}
-cp $MOD_BASE_TEMPLATE $bundle
+cp $MOD_DIR/$MOD_BASE_TEMPLATE $bundle
 render $bundle
 mv $bundle $bundles_dir
 [ -r "$INTERNAL_BUNDLE_CONFIG" ] && \
@@ -146,7 +160,7 @@ if ((${#MOD_OVERLAYS[@]})); then
     declare -a msgs=()
     for overlay in ${MOD_OVERLAYS[@]}; do
         [ "${overlays_deduped[$overlay]:-null}" = "null" ] || continue
-        cp overlays/$overlay $bundles_dir/o
+        cp $MOD_DIR/overlays/$overlay $bundles_dir/o
         ((${#overlay_opts[@]}==0)) && overlay_opts+=("")  # left padding
         overlay_opts+=( --overlay $bundles_dir/o/$overlay )
         render $bundles_dir/o/$overlay

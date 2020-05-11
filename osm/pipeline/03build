@@ -24,7 +24,7 @@ if [ -n "${MASTER_OPTS[CLOUD_NAME]}" ]; then
     fi
 fi
 
-. $LIB_COMMON/generate_bundle_base
+. $MOD_DIR/common/generate_bundle_base
 
 for f in $INTERNAL_BUNDLE_CONFIG_RENDERER $INTERNAL_BUNDLE_CONFIG; do
     [ -n "$f" ] && [ -r "$f" ] && rm -f $f

@@ -7,16 +7,17 @@ declare -A MASTER_OPTS=(
     [CLOUD_NAME]=''
     [TARGET_RELEASE_NAME]=''
     [VIP_ADDR_START]=10.5.100.0
+    [CHARM_REVISIONS]=
 )
 DEFAULT_SERIES=bionic
 JUJU_VERSION="`juju --version 2>/dev/null| sed -r 's/^([[:digit:]\.]+).*/\1/g'`"
 JUJU_DEPLOY_OPTS=""
 
-. $LIB_COMMON/openstack_release_info
+. $MOD_DIR/common/openstack_release_info
 
 list_module_opts ()
 {
-    local script=`dirname $0`/pipeline/02configure
+    local script=$MOD_DIR/pipeline/02configure
 
     echo -e "\nMODULE OPTS:"
     grep __OPT__ $script| \
@@ -27,7 +28,7 @@ list_module_opts ()
 list_overlays ()
 {
     echo "Supported overlays:"
-    local script=`dirname $0`/pipeline/02configure
+    local script=$MOD_DIR/pipeline/02configure
     {
     grep -v __OPT__ $script| \
         sed -r 's/.+\s+(--[[:alnum:]\-]+\*?)[\)\|].*/\1/g;t;d'
@@ -37,7 +38,7 @@ list_overlays ()
 }
 
 _usage () {
-cat << EOF
+    cat << EOF
 USAGE: `basename $0` OPTIONS [OVERLAYS] [MODULE_OPTS]
 
 OPTIONS:
@@ -48,6 +49,8 @@ OPTIONS:
      --create-model
         Create Juju model using --name. Switches to model if it already
         exists. If this is not provided then the current Juju model is used.
+     --debug
+        Enable bash debug logging.
      --defaults
         Use module config defaults and don't ask for input.
      -h, --help
@@ -83,6 +86,10 @@ OPTIONS:
         By default the development (cs:~openstack-charmers-next) version of
         Openstack charms are used where available. Use this flag if you want to
         use the stable (released) charms i.e. cs:<charm>.
+    --revision-info
+        Path to a yaml-format bundle file that will be used to pin charms to
+        specific versions. This will automatically switch to using stable
+        charms (since versions are assumed to come from stable charms).
     --vip-addr-start
         Address a.b.c.d from which to start allocating virtual ip addresses used
         for deployed services. There must be enough addresses beyond this one to
@@ -102,7 +109,7 @@ OVERLAYS:
      that provide HA or scale-out services. See --list-overlays for
      available overlays.
 EOF
-list_module_opts
+    list_module_opts
 }
 
 update_master_opts ()
@@ -128,10 +135,9 @@ filter_master_opts ()
     # it may be required to raise an error for such args and for
     # this purpose we use a ERROR_ON_UNKNOWN_OPT global variable.
 
-    declare -a filtered=()
     local ERROR_ON_UNKNOWN_OPT=${ERROR_ON_UNKNOWN_OPT:-false}
 
-    while (($# > 0)); do 
+    while (($# > 0)); do
         case "$1" in
             --charm-channel)
                 MASTER_OPTS[CHARM_CHANNEL]="$2"
@@ -148,9 +154,9 @@ filter_master_opts ()
             --name|-n)
                 # give bundle set a name and store under named dir
                 MASTER_OPTS[BUNDLE_NAME]="${2%%:*}"
-		if [[ $2 =~ ":" ]]; then
+                if [[ $2 =~ ":" ]]; then
                     MASTER_OPTS[CLOUD_NAME]="${2##*:}"
-		fi
+                fi
                 shift
                 ;;
             --list-overlays)
@@ -179,6 +185,23 @@ filter_master_opts ()
             --vip-addr-start)
                 MASTER_OPTS[VIP_ADDR_START]="$2"
                 shift
+                ;;
+            --revision-info)
+                if (( $# < 2 )) || ! [ -r "$2" ]; then
+                    echo "Missing or invalid bundle file path"
+                    exit 1
+                fi
+                readarray -t temp < <("$MOD_DIR/../tools/parse-bundle.py" --get-charms $2)
+                for line in "${temp[@]}"; do
+                    read -a temp -r <<< ${line}
+                    MASTER_OPTS[CHARM_REVISIONS.${temp[0]}]=${temp[1]}
+                done
+                echo "INFO: enabling stable charms since version info provided."
+                CACHED_STDIN=( "${CACHED_STDIN[@]}" --use-stable-charms )
+                shift
+                ;;
+            --debug)
+                # stub
                 ;;
             -h|--help)
                 _usage
@@ -380,7 +403,7 @@ conflicts_with ()
     local opt="$1"
     shift
     for conflict in $@; do
-        `has_opt $conflict` || continue 
+        `has_opt $conflict` || continue
         echo "ERROR: you cannot use $opt with $conflict"
         exit 1
     done
@@ -417,7 +440,7 @@ has_min_release ()
 has_min_series ()
 {
     # Return true if provided series <= --series
-    # 
+    #
     # This is a tricky thing to do since series names do not increase
     # alphabetically (they wrapped between Zesty and Aardvark), so it takes
     # a bit more logic to get right.
@@ -432,7 +455,7 @@ has_min_series ()
     readarray -t ordered<<<`echo -n ${!lts_order[@]}| tr ' ' '\n'| sort -n| tr '\n' ' '`
     for o in ${ordered[@]}; do
         lts_arr+=( ${lts_order[$o]} )
-    done    
+    done
     readarray -t nonlts_arr<<<"`echo -n ${!nonlts[@]}| tr ' ' '\n' | sort`"
 
     # Now create full list
@@ -464,7 +487,7 @@ has_min_series ()
     for s in ${all_series[@]}; do
         if [ "$s" == "$series" ]; then
             [ "$s" == "$min_series" ] && return 0
-            $match && return 
+            $match && return
         elif [ "$s" == "$min_series" ]; then
             match=true
         fi
@@ -607,6 +630,11 @@ get_juju_model ()
         juju list-models 2>/dev/null| sed -r 's/^(.+)\* .+/\1/g;t;d'
     fi
 }
+
+if has_opt --debug; then
+    PS4='+(${BASH_SOURCE##*/}:${LINENO}) ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+    set -x
+fi
 
 pocket=`get_pocket`
 # get cli provided values or fallback to default

@@ -1,2 +1,2 @@
 # Current module imports
-. module_defaults
+. $MOD_DIR/module_defaults
