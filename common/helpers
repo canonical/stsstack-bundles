@@ -264,8 +264,9 @@ get_param()
 {
     # Description: function first checks $opt to see if it has a :<value>
     #              suffix and if it does, sets MOD_PARAMS[key]=value. As
-    #              a fallback user input is requested with message
-    #              displayed. If a default is available, it is used to
+    #              a fallback then checks if key has an existing value based
+    #              on prior input and if not user input is requested with
+    #              message displayed. If a default is available, it is used to
     #              pre-fill the request field.
     #
     # @arg: opt - stdin opt arg
@@ -628,6 +629,37 @@ get_juju_model ()
         fi
     else
         juju list-models 2>/dev/null| sed -r 's/^(.+)\* .+/\1/g;t;d'
+    fi
+}
+
+in_model_context ()
+{
+    [ -n "${MASTER_OPTS[BUNDLE_NAME]}" ] && \
+        juju list-models| egrep -q "^${MASTER_OPTS[BUNDLE_NAME]}\* "
+}
+
+model_exists ()
+{
+    [ -n "${MASTER_OPTS[BUNDLE_NAME]}" ] && \
+        juju list-models| egrep -q "^${MASTER_OPTS[BUNDLE_NAME]} "
+}
+
+ensure_model ()
+{
+    # if requested to create model, ensure this is done and if model exists
+    # ensure we switch context to it.
+    if has_opt --create-model; then
+        if in_model_context; then
+            echo -e "Juju model '${MASTER_OPTS[BUNDLE_NAME]}' already exists and is the current context - skipping create\n"
+        elif model_exists; then
+            echo "Juju model '${MASTER_OPTS[BUNDLE_NAME]}' already exists but is not the current context - switching context"
+            juju switch ${MASTER_OPTS[BUNDLE_NAME]}
+            echo ""
+        else
+            echo "Creating Juju model ${MASTER_OPTS[BUNDLE_NAME]}"
+            juju add-model ${MASTER_OPTS[BUNDLE_NAME]} ${MASTER_OPTS[CLOUD_NAME]}
+            echo ""
+        fi
     fi
 }
 

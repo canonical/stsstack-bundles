@@ -24,19 +24,7 @@ elif has_opt --create-model && [ -z "${MASTER_OPTS[BUNDLE_NAME]}" ]; then
     exit 1
 fi
 
-if has_opt --create-model; then
-    if `juju list-models| egrep -q "^${MASTER_OPTS[BUNDLE_NAME]}\* "`; then
-        echo -e "Juju model '${MASTER_OPTS[BUNDLE_NAME]}' already exists and is the current context - skipping create\n"
-    elif `juju list-models| egrep -q "^${MASTER_OPTS[BUNDLE_NAME]} "`; then
-        echo "Juju model '${MASTER_OPTS[BUNDLE_NAME]}' already exists but is not the current context - switching context"
-        juju switch ${MASTER_OPTS[BUNDLE_NAME]}
-        echo ""
-    else
-        echo "Creating Juju model ${MASTER_OPTS[BUNDLE_NAME]}"
-        juju add-model ${MASTER_OPTS[BUNDLE_NAME]} ${MASTER_OPTS[CLOUD_NAME]}
-        echo ""
-    fi
-fi
+ensure_model
 [ -n "${MASTER_OPTS[MODEL_CONFIG]}" ] && juju model-config ${MASTER_OPTS[MODEL_CONFIG]}
 
 bundles_dir=`get_bundle_state_dir`
