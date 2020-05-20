@@ -16,7 +16,7 @@ vip_start_suffix=${vip_start##*\.}
 if [ -z "$MOD_BASE_TEMPLATE" ]; then
     echo "ERROR: no template provided with --template"
     exit 1
-elif [ -z "$MOD_PATH" ]; then
+elif [ -z "$MOD_DIR" ]; then
     echo "ERROR: no module name provided"
     exit 1
 elif has_opt --create-model && [ -z "${MASTER_OPTS[BUNDLE_NAME]}" ]; then
@@ -144,7 +144,7 @@ mv $bundle $bundles_dir
 rmdir $dtmp
 
 # Copy base bundle resources to bundles dir (if exists)
-resource_path=$MOD_PATH/resources/
+resource_path=$MOD_DIR/resources/
 if [ -d "$resource_path" ]; then
     mkdir -p $bundles_dir/resources
     name=`basename $bundle`
@@ -167,7 +167,7 @@ if ((${#MOD_OVERLAYS[@]})); then
         overlays_deduped[$overlay]=true
         msgs+=( " + $overlay\n" )
         # Copy overla resources to bundles dir (if exists)
-        resource_path=$MOD_PATH/resources/${overlay%%.*}
+        resource_path=$MOD_DIR/resources/${overlay%%.*}
         if [ -d "$resource_path" ]; then
             mkdir -p $bundles_dir/resources
             cp -r $resource_path $bundles_dir/resources

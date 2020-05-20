@@ -2,7 +2,6 @@
 trap_help
 
 # Globals
-export MOD_PATH=`dirname $0`
 export MOD_NAME=landscape
 export MOD_BASE_TEMPLATE=landscape.yaml.template
 export MOD_SSL_STATE_DIR=${MOD_NAME}

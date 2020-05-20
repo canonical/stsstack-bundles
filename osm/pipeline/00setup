@@ -2,7 +2,6 @@
 trap_help
 
 # Globals
-export MOD_PATH=`dirname $0`
 export MOD_NAME=osm
 export MOD_BASE_TEMPLATE=osm.yaml.template
 export MOD_SSL_STATE_DIR=${MOD_NAME}

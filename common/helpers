@@ -599,7 +599,7 @@ trap_help ()
 
 get_bundle_state_root ()
 {
-    echo $MOD_PATH/b
+    echo $MOD_DIR/b
 }
 
 get_bundle_state_dir ()

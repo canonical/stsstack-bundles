@@ -2,7 +2,6 @@
 trap_help
 
 # Globals
-export MOD_PATH=`dirname $0`
 export MOD_NAME=kubernetes
 export MOD_BASE_TEMPLATE=kubernetes.yaml.template
 export MOD_SSL_STATE_DIR=${MOD_NAME}
