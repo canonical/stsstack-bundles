@@ -234,18 +234,6 @@ has_excl_passthrough_opt ()
     return 1
 }
 
-get_optintarg ()
-{
-    # format we are looking for is --opt:intval
-    echo $1| sed -r 's/.+:([[:digit:]]+)/\1/;t;d'
-}
-
-get_optstrarg ()
-{
-    # format we are looking for is --opt:strval
-    echo $1| sed -r 's/.+:([[:alnum:]]+)/\1/;t;d'
-}
-
 get_optval ()
 {
     local opt=$1
@@ -285,8 +273,8 @@ get_param()
     # ensure message has a space at end
     if [ -n "$msg" ] && [ "${msg: -1}" != " " ]; then msg="$msg "; fi
 
-    val=`get_optstrarg $opt`
-    if [ -z "$val" ]; then
+    val=${opt#*:}
+    if [ -z "$val" ] || [[ "$val" == "$opt" ]]; then
         current="`get_bundle_existing_config $key`"
         [ -z "$current" ] && [ -n "$default" ] && current=$default
         read -e -p "$msg" -i "$current" val
@@ -302,8 +290,8 @@ get_units()
     local default=$3
 
     # format we are looking for is --opt:val
-    local val=`get_optintarg $opt`
-    if [ -z "$val" ]; then
+    local val=${opt#*:}
+    if [ -z "$val" ] || [[ "$val" == "$opt" ]]; then
         val="$default"
     fi
     MOD_PARAMS[$key]="$val"
