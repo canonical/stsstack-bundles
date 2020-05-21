@@ -121,12 +121,8 @@ do
             MOD_OVERLAYS+=( "designate.yaml" )
             ;;
         --dvr)
-            opt="$1"
-            if in_model_context; then
-                # if the charm has a config then update cached to match
-                data_port="`juju config neutron-openvswitch data-port 2>/dev/null`" || true
-                [ -n "$data_port" ] && opt="$1:$data_port"
-            fi
+            # since ports typically set post-deployment ensure we don't clobber on re-run
+            opt=`update_from_charm_config $1 neutron-openvswitch data-port`
             get_param "$opt" __DVR_DATA_PORT__ 'REQUIRED: compute host DVR data-port(s) (leave blank to set later):'
             MOD_OVERLAYS+=( "neutron-dvr.yaml" )
             ;;
@@ -350,7 +346,9 @@ do
             ;;
         --ovn)
             assert_min_release train "ovn"
-            get_param $1 __OVN_DATA_PORT__ 'REQUIRED: ovn-chassis bridge-interface-mappings (leave blank to set later):'
+            # since ports typically set post-deployment ensure we don't clobber on re-run
+            opt=`update_from_charm_config $1 ovn-chassis bridge-interface-mappings`
+            get_param $opt __OVN_DATA_PORT__ 'REQUIRED: ovn-chassis bridge-interface-mappings (leave blank to set later):'
             MOD_OVERLAYS+=( "neutron-ovn.yaml" )
             if ! has_opt --vault*; then
                 set -- $@ --vault && cache $@

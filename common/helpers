@@ -651,6 +651,30 @@ ensure_model ()
     fi
 }
 
+update_from_charm_config ()
+{
+    # If no value provided on cli (opt:val) then check if charm already has a
+    # value and inject that into cli opt.
+
+    local opt="$1"
+    local charm="$2"
+    local charm_config_opt="$3"
+    local value=
+
+    # If the opt already contains user-provided value then use that.
+    if ! [ "${opt#*:}" = "$opt" ]; then
+        echo $opt
+        return
+    fi
+
+    if in_model_context; then
+        value="`juju config $charm $charm_config_opt 2>/dev/null`" || true
+        [ -n "$value" ] && opt="$1:$value"
+    fi
+
+    echo $opt
+}
+
 if has_opt --debug; then
     PS4='+(${BASH_SOURCE##*/}:${LINENO}) ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
     set -x
