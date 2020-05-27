@@ -192,12 +192,14 @@ filter_master_opts ()
                     exit 1
                 fi
                 readarray -t temp < <("$MOD_DIR/../tools/parse-bundle.py" --get-charms $2)
-                for line in "${temp[@]}"; do
-                    read -a temp -r <<< ${line}
-                    MASTER_OPTS[CHARM_REVISIONS.${temp[0]}]=${temp[1]}
-                done
-                echo "INFO: enabling stable charms since version info provided."
-                CACHED_STDIN=( "${CACHED_STDIN[@]}" --use-stable-charms )
+                if ((${#temp[@]})); then
+                    for line in "${temp[@]}"; do
+                        read -a temp -r <<< ${line}
+                        MASTER_OPTS[CHARM_REVISIONS.${temp[0]}]=${temp[1]}
+                    done
+                    echo -e "INFO: enabling stable charms since version info provided\n"
+                    CACHED_STDIN=( "${CACHED_STDIN[@]}" --use-stable-charms )
+                fi
                 shift
                 ;;
             --debug)

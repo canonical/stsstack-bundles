@@ -5,7 +5,9 @@ import yaml
 import re
 import sys
 
-charm_match = re.compile("cs:[a-z0-9\-]+-[0-9]+\s*$")
+lpid = r"([~a-z0-9\-]+/)?"
+charm = r"([a-z0-9\-]+)"
+charm_match = re.compile(r".*cs:{}{}-([0-9]+)\s*$".format(lpid, charm))
 
 
 def parse_arguments():
@@ -29,13 +31,27 @@ def get_charms(bundle):
 
 
 def process(bundle_file, options):
+    versions_found = False
+    invalid_charms = []
     bundle = yaml.load(bundle_file, Loader=yaml.SafeLoader)
     if options.get_charms:
         charms = get_charms(bundle)
         for app in charms:
             ret = charm_match.match(charms[app])
             if ret:
-                print(app, charms[app])
+                if ret.group(1):
+                    invalid_charms.append(ret.group(2))
+                else:
+                    versions_found = True
+                    print(ret.group(2), charms[app])
+
+    if not versions_found:
+        sys.stderr.write("WARNING: no valid charm revisions found in {}\n\n".
+                         format(bundle_file.name))
+    elif invalid_charms:
+        sys.stderr.write("WARNING: ignoring version info for non-stable "
+                         "charm(s): ")
+        sys.stderr.write("{}\n\n".format(', '.join(invalid_charms)))
 
 
 def main():
