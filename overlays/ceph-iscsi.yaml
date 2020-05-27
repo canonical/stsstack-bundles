@@ -1,0 +1,14 @@
+# Variables
+source:                     &source                    __SOURCE__
+loglevel:                   &loglevel                  5
+
+applications:
+  ceph-iscsi:
+    charm: cs:~openstack-charmers-next/ceph-iscsi
+    num_units: 2
+    constraints: mem=1G
+    options:
+      loglevel: *loglevel
+      source: *source
+relations:
+  - [ ceph-mon, ceph-iscsi ]

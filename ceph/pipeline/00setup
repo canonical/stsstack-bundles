@@ -23,4 +23,5 @@ export -A APP_RELEASE_NAMES=( [firefly]=icehouse
                               [jewel]=mitaka
                               [luminous]=pike
                               [mimic]=rocky
-                              [nautilus]=train )
+                              [nautilus]=train
+                              [octopus]=ussuri )
