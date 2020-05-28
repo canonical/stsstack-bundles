@@ -32,26 +32,22 @@ def get_charms(bundle):
 
 def process(bundle_file, options):
     versions_found = False
-    invalid_charms = []
     bundle = yaml.load(bundle_file, Loader=yaml.SafeLoader)
     if options.get_charms:
         charms = get_charms(bundle)
         for app in charms:
             ret = charm_match.match(charms[app])
             if ret:
+                versions_found = True
+                _charm = ret.group(2)
                 if ret.group(1):
-                    invalid_charms.append(ret.group(2))
-                else:
-                    versions_found = True
-                    print(ret.group(2), charms[app])
+                    _charm = "{}{}".format(ret.group(1), _charm)
+
+                print(_charm, charms[app])
 
     if not versions_found:
         sys.stderr.write("WARNING: no valid charm revisions found in {}\n\n".
                          format(bundle_file.name))
-    elif invalid_charms:
-        sys.stderr.write("WARNING: ignoring version info for non-stable "
-                         "charm(s): ")
-        sys.stderr.write("{}\n\n".format(', '.join(invalid_charms)))
 
 
 def main():

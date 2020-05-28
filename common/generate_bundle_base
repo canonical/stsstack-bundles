@@ -88,9 +88,7 @@ render () {
     # Process charm revisions from bundle first.
     for key in ${!MASTER_OPTS[@]}; do
         prefix="CHARM_REVISIONS\."
-        if ! `echo $key| egrep -q "^$prefix"`; then
-            continue
-        fi
+        [[ ${key##$prefix} != $key ]] || continue
         charm_current=${key##$prefix}
         charm_new=${MASTER_OPTS[$key]}
         sed -i -r "s,charm:.*${charm_current}$,charm: $charm_new," $1
