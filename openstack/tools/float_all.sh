@@ -6,7 +6,7 @@ echo " + Floating all instances."
 
 function get_ip_f() {
   # Get first unallocated floating IP
-  openstack floating ip list | awk '/None/ { print $4 }' | head -n 1
+  openstack floating ip list | awk '/None/ { print $4; exit }'
 }
 
 fip_count=$(openstack floating ip list | awk '/None/ { print $4 }' | wc -l)
@@ -25,7 +25,7 @@ if (( $fip_count >= $inst_count)); then
 else
   fip_diff=$(( $inst_count - $fip_count ))
   echo " + Creating $fip_diff more floating IPs."
-  for m in $(seq 1 $fip_diff); do
+  for ((m=1; m<=$fip_diff; m++)); do
     openstack floating ip create ext_net
   done
 fi
