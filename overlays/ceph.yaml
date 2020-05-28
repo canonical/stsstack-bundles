@@ -1,6 +1,6 @@
 # Variables
 source:                     &source                    __SOURCE__
-loglevel:                   &loglevel                  10
+loglevel:                   &loglevel                  1
 
 applications:
   ceph-mon:

@@ -3,7 +3,7 @@ debug:                      &debug                     True
 verbose:                    &verbose                   True
 openstack_origin:           &openstack_origin          __OS_ORIGIN__
 source:                     &source                    __SOURCE__
-loglevel:                   &loglevel                  10
+loglevel:                   &loglevel                  1
 ssl_ca:                     &ssl_ca                    __SSL_CA__
 ssl_cert:                   &ssl_cert                  __SSL_CERT__
 ssl_key:                    &ssl_key                   __SSL_KEY__
