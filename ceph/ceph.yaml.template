@@ -50,16 +50,6 @@ applications:
       debug: *debug
       verbose: *verbose
       openstack-origin: *openstack_origin
-  mysql:
-    num_units: 1
-    charm: cs:~openstack-charmers-next/percona-cluster
-    constraints: mem=4G
-    options:
-      dataset-size: 50%
-      max-connections: 20000
-      root-password: ChangeMe123
-      sst-password: ChangeMe123
-      source: *source
 relations:
   - [ keystone, mysql ]
   - [ ceph-mon, ceph-osd ]

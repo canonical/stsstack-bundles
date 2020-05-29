@@ -5,6 +5,13 @@
 # All overlay/bundle variables (MOD_PARAMS) defaults must go into
 # the <module>/module_defaults file.
 
+# NOTE: this is (should be) the same across all modules using mysql
+if has_min_series focal; then
+    # There is no Focal support for percona-cluster
+    MOD_OVERLAYS+=( "mysql-innodb-cluster.yaml")
+else
+    MOD_OVERLAYS+=( "mysql.yaml" )
+fi
 
 # We always add this overlay since it contains core apps for this module.
 MOD_OVERLAYS+=( swift.yaml )
