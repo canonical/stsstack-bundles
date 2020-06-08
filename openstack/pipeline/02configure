@@ -92,6 +92,11 @@ do
             MOD_OVERLAYS+=( "ceph.yaml" )
             MOD_OVERLAYS+=( "ceph-rgw.yaml" )
             ;;
+        --ceph-rgw-ha*)
+            get_units $1 __NUM_CEPH_RGW_UNITS__ 3
+            MOD_OVERLAYS+=( "ceph-rgw-ha.yaml" )
+            set -- $@ --ceph-rgw && cache $@
+            ;;
         --ceph-rgw-multisite)
             MOD_OVERLAYS+=( "ceph.yaml" )
             MOD_OVERLAYS+=( "ceph-rgw-multisite.yaml" )
@@ -334,7 +339,7 @@ do
             MOD_PARAMS[__SSL_CERT__]=`base64 ${ssl_results}/servercert.pem| tr -d '\n'`
             MOD_PARAMS[__SSL_KEY__]=`base64 ${ssl_results}/serverkey.pem| tr -d '\n'`
             # Make everything HA with 1 unit (unless --ha has already been set)
-            if ! has_opt '--ha[:0-9]*$'; then
+            if ! has_opt '--ha*'; then
                 set -- $@ --ha:1 && cache $@
             fi
             ;;
@@ -408,6 +413,7 @@ do
             set -- $@ --openstack-dashboard && cache $@
             ;;
         --swift)
+            conflicts_with $1 --ceph-rgw
             MOD_OVERLAYS+=( "swift.yaml" )
             ;;
         --swift-ha*)
@@ -471,12 +477,20 @@ do
             get_units $1 __NUM_HA_UNITS__ 3
             units=${MOD_PARAMS[__NUM_HA_UNITS__]}
             # This is HA for "core" service apis only.
-            set -- $@ --cinder-ha:$units --glance-ha:$units \
-                      --keystone-ha:$units --neutron-api-ha:$units \
-                      --nova-cloud-controller-ha:$units && cache $@
-            if has_opt --openstack-dashboard; then
-                set -- $@ --openstack-dashboard-ha:$units && cache $@
-            fi
+            for svc in cinder glance keystone neutron-api nova-cloud-controller; do
+                svc_ha=--${svc}-ha
+                # don't override ones that have been explicity provided as HA.
+                has_opt $svc_ha* && continue
+                set -- $@ $svc_ha:$units && cache $@
+            done
+            # now check optional overlays
+            for svc in openstack-dashboard swift ceph-rgw; do
+                svc_ha=--${svc}-ha
+                # don't override ones that have been explicity provided as HA and
+                # ignore ones that are not even requested.
+                ! has_opt --$svc || has_opt $svc_ha* && continue
+                set -- $@ $svc_ha:$units && cache $@
+            done
             ;;
         *)
             echo "ERROR: invalid input '$1'"

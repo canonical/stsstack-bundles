@@ -364,7 +364,7 @@ has_opt ()
     _f () {
         while (($# > 0))
         do
-            [[ "$1" = $opt ]] && return 0
+            [[ $1 = $opt ]] && return 0
             shift
         done
         return 1
