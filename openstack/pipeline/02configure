@@ -249,8 +249,10 @@ do
         --ml2dns)
             conflicts_with $1 --no-ml2dns
             # this is internal dns integration, for external use --designate
-            msg="REQUIRED: ml2-dns upstream dns server to forward requests to:"
-            get_param $1 __ML2_DNS_FORWARDER__ "$msg"
+            if [ -z "${MOD_PARAMS[__ML2_DNS_FORWARDER__]}" ]; then
+                msg="REQUIRED: ml2-dns upstream dns server to forward requests to:"
+                get_param $1 __ML2_DNS_FORWARDER__ "$msg"
+            fi
             MOD_OVERLAYS+=( "neutron-ml2dns.yaml" )
             if ! has_opt --ovn; then
                 if is_neutron_gateway_required; then
