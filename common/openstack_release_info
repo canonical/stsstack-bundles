@@ -8,7 +8,8 @@
 #
 # More info on releases at https://ubuntu.com/about/release-cycle
 
-# TODO: keep these lists up-to-date with supported series
+# TODO: keep this list up-to-date with supported series in order have a way to
+#       know when release names wrap around the alphabet.
 declare -A lts_order=( [0]=trusty
                        [1]=xenial
                        [2]=bionic

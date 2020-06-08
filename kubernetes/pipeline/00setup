@@ -1,5 +1,4 @@
 #!/bin/bash
-trap_help
 
 # Globals
 export MOD_NAME=kubernetes
@@ -19,7 +18,3 @@ export -a MOD_OVERLAYS=()
 
 export -A MOD_PARAMS=()
 
-# Series & Release Info
-export -A lts=( [bionic]=cdk )
-export -A nonlts=( [disco]=cdk
-                   [eoan]=cdk )

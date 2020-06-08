@@ -126,7 +126,7 @@ update_master_opts ()
 declare -a FILTERED=()
 filter_master_opts ()
 {
-    # Parses command line input and filters out "master" opts i.e. not
+    # Parse command line input and filter out "master" opts i.e. not
     # module-specific opts (that get parsed in their respective module)
     #
     # The output/result is a refreshed array of input args/opts which
@@ -168,7 +168,7 @@ filter_master_opts ()
                 MASTER_OPTS[TARGET_RELEASE_NAME]="$2"
                 shift
                 ;;
-            --create-model|--defaults|--list|--replay|--run|--use-stable-charms)
+            --create-model|--defaults|--debug|--list|--replay|--run|--use-stable-charms)
                 # boolean stubs - use has_opt()
                 ;;
             --series|-s)
@@ -203,9 +203,6 @@ filter_master_opts ()
                 fi
                 shift
                 ;;
-            --debug)
-                # stub
-                ;;
             -h|--help)
                 _usage
                 exit 0
@@ -235,20 +232,6 @@ has_excl_passthrough_opt ()
         fi
     done
     return 1
-}
-
-get_optval ()
-{
-    local opt=$1
-    _f () {
-    while (($#)); do
-        if [ "$1" = "$opt" ]; then
-            echo $2
-        fi
-        shift
-    done
-    }
-    _f ${CACHED_STDIN[@]}
 }
 
 get_param()
@@ -574,19 +557,6 @@ get_app_release_name ()
     done
     echo $release_name
     return 0
-}
-
-trap_help ()
-{
-    local i=0
-    while ((i < ${#CACHED_STDIN[@]})); do
-        case "${CACHED_STDIN[$((i++))]}" in
-            -h|--help)
-                _usage
-                exit 0
-                ;;
-        esac
-    done
 }
 
 get_bundle_state_root ()

@@ -1,5 +1,4 @@
 #!/bin/bash
-trap_help
 
 # Globals
 export MOD_NAME=landscape
@@ -19,8 +18,3 @@ export -a MOD_OVERLAYS=()
 
 export -A MOD_PARAMS=()
 
-# Series & Release Info
-declare -A lts=( [xenial]=landscape
-                 [bionic]=landscape )
-declare -A nonlts=( [disco]=landscape
-                    [eoan]=landscape )

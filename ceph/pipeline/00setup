@@ -1,5 +1,4 @@
 #!/bin/bash
-trap_help
 
 # Globals
 export MOD_NAME=ceph
