@@ -299,7 +299,7 @@ do
                 if ! has_opt --octavia-diskimage-retrofit-glance-simplestreams; then
                    MOD_OVERLAYS+=( "octavia-diskimage-retrofit-glance.yaml" )
                 fi
-                MOD_MSGS+=( "NOTE: do 'juju run-action octavia-diskimage-retrofit/0 --wait retrofit-image image-id=<uuid>' with id of glance image to be used for amphorae" )
+                MOD_MSGS+=( "NOTE: do 'juju run-action octavia-diskimage-retrofit/0 --wait retrofit-image source-image=<uuid>' with id of glance image to be used for amphorae" )
             fi
             ;;
         --octavia-ha*)
