@@ -1,3 +1,6 @@
+applications:
+  glance-simplestreams-sync:
+    constraints: mem=4G
 relations:
   - [ octavia-diskimage-retrofit:juju-info, glance-simplestreams-sync:juju-info ]
 
