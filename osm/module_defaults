@@ -6,5 +6,5 @@
 # You can check that none are missing by running lint/check_var_defaults.sh
 #
 MOD_PARAMS[__JUJU_SSHKEY__]=
-MOD_PARAMS[__JUJU_CA_CERT__]=`juju controller-config --format json | jq -r '.["ca-cert"]' | base64 -w 0`
+MOD_PARAMS[__JUJU_CA_CERT__]=
 MOD_PARAMS[__BASTION_IP__]=`hostname -I | cut -d' ' -f1`
