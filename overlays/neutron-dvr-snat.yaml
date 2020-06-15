@@ -5,6 +5,5 @@ applications:
   neutron-openvswitch:
     options:
       use-dvr-snat: True
-      enable-local-dhcp-and-metadata: True
       data-port: '__DVR_DATA_PORT__'
       dns-servers: *dns_servers

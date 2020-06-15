@@ -12,6 +12,7 @@ applications:
       debug: *debug
       verbose: *verbose
       firewall-driver: __NEUTRON_FW_DRIVER__
+      enable-local-dhcp-and-metadata: True
 relations:
   - [ neutron-api, neutron-openvswitch ]
   - [ neutron-openvswitch, nova-compute ]
