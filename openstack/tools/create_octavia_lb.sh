@@ -113,8 +113,9 @@ if [ -z "$member_vm" ]; then
 fi
 
 for member in ${member_vm[@]}; do
-    netaddr=$(openstack port list --server $member --network private \
-        -c "Fixed IP Addresses" -f value | sed -r "s/ip_address='([[:digit:]\.]+)',\s+.+/\1/g")
+    netaddr=$(openstack port list --server $member --network private -c "Fixed IP Addresses" -f value| \
+                sed -rn -e "s/.+ip_address='([[:digit:]\.]+)',\s+.+/\1/" \
+                        -e "s/.+ip_address':\s+'([[:digit:]\.]+)'}.+/\1/p")
     member_id=$(openstack loadbalancer member create --subnet-id private_subnet \
         --address $netaddr --protocol-port ${protocol_port} --format value --column id ${POOL_ID})
     while true; do
