@@ -1,6 +1,6 @@
 #!/bin/bash -x
 sudo snap install kubectl --classic
 mkdir -p ~/.kube
-kubemaster_unit=$(juju status| egrep 'kubernetes-master/[[:digit:]]+'| cut -f 1 -d ' ')
+kubemaster_unit=$(juju status| sed -nr 's,(kubernetes-master/[[:digit:]]+)\*.*,\1,p')
 juju scp ${kubemaster_unit}:config ~/.kube/config
 kubectl --namespace kube-system get pods
