@@ -215,9 +215,15 @@ do
             shift
             ;;
         --l3ha*)
-            get_units $1 __NUM_NEUTRON_GATEWAY_UNITS__ 3
+            conflicts_with $1 --dvr-snat-l3ha*
             get_units $1 __NUM_AGENTS_PER_ROUTER__ 3
-            MOD_OVERLAYS+=( "neutron-l3ha.yaml" )
+            if has_opt --dvr-snat*; then
+                # autmatically convert
+                set -- $@ --dvr-snat-l3ha:${MOD_PARAMS[__NUM_AGENTS_PER_ROUTER__]} && cache $@
+            else
+                get_units $1 __NUM_NEUTRON_GATEWAY_UNITS__ 3
+                MOD_OVERLAYS+=( "neutron-l3ha.yaml" )
+            fi
             ;;
         --keystone-v3)
             # useful for <= pike since queens is v3 only
