@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Only run this after the units have settled.
+
+# Grab the certificate from landscape-haproxy and convert it to base64 in order to configure landscape-client
+cert=$(juju run --unit landscape-haproxy/0 -- "sudo openssl x509 -in /var/lib/haproxy/default.pem | openssl base64 -e | tr -d '[:space:]'")
+# Configure landscape-client to use the certificate
+juju config landscape-client ssl-public-key="base64:$cert"
+
+#Configure correct endpoints for landscape-client
+ipaddr=$(juju status --format=json| jq -r '.applications."landscape-haproxy".units["landscape-haproxy/0"]."public-address"')
+juju config landscape-client url="https://$ipaddr/message-system"
+juju config landscape-client ping-url="https://$ipaddr/ping"
