@@ -347,7 +347,15 @@ get_uca_release ()
     # lts s+r means no uca
     ltsmatch "$s" "$r" && return
     # else its uca
-    echo $release
+    echo $r
+}
+
+get_ost_release ()
+{
+    local r=`get_release`
+    local s=`get_series`
+    [ -n "$r" ] || r=${lts[$s]:-${nonlts[$s]:-""}}
+    echo "$r"
 }
 
 cache ()

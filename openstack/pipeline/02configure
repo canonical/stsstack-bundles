@@ -301,7 +301,7 @@ do
             if ! has_opt --no-octavia-diskimage-retrofit; then
                 # By default we let retrofit use images uploaded by the post-deploy configure script.
                 MOD_OVERLAYS+=( "octavia-diskimage-retrofit.yaml" )
-                MOD_PARAMS[__OCTAVIA_RETROFIT_UCA__]=`get_uca_release`
+                MOD_PARAMS[__OCTAVIA_RETROFIT_UCA__]=`get_ost_release`
                 if ! has_opt --octavia-diskimage-retrofit-glance-simplestreams; then
                    MOD_OVERLAYS+=( "octavia-diskimage-retrofit-glance.yaml" )
                 fi
