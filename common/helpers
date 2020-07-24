@@ -88,9 +88,11 @@ OPTIONS:
         Openstack charms are used where available. Use this flag if you want to
         use the stable (released) charms i.e. cs:<charm>.
     --revision-info
-        Path to a yaml-format bundle file that will be used to pin charms to
-        specific versions. This will automatically switch to using stable
-        charms (since versions are assumed to come from stable charms).
+        Path to a yaml-format bundle file or the output of a "juju
+        status" command that will be used to pin charms to specific
+        versions. This will automatically switch to using stable
+        charms (since versions are assumed to come from stable
+        charms).
     --vip-addr-start
         Address a.b.c.d from which to start allocating virtual ip addresses used
         for deployed services. There must be enough addresses beyond this one to
