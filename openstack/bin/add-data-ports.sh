@@ -5,6 +5,8 @@
 # extra port.
 #
 application=${1:-""}
+(($#>1)) && network="$2" || network=""
+
 declare -A requires=()
 
 # if no app name provided, assume neutron-openvswitch then ovn-chassis
@@ -20,6 +22,8 @@ fi
 echo "Managing ports for $application units"
 
 . ~/novarc
+[ -n "$network" ] || network="${OS_PROJECT_NAME}_admin_net"
+
 readarray -t instances<<<"`juju status $application --format=json| jq -r '.machines[].\"instance-id\"'`"
 
 if [ "$application" = "ovn-chassis" ] && \
@@ -32,7 +36,7 @@ fi
 require_count=0
 echo "Checking $application unit instances: ${instances[@]}"
 for inst in "${instances[@]}"; do
-    num_ports="`openstack port list --server $inst| grep ACTIVE| wc -l`"
+    num_ports="`openstack port list --network $network --server $inst| grep ACTIVE| wc -l`"
     if ((num_ports>1)); then
         requires[$inst]=false
     else
@@ -43,7 +47,7 @@ done
 
 if ((require_count)); then
     # Get extant free ports
-    readarray -t ports<<<"`openstack port list| grep data-port| grep DOWN| awk '{print $2}'`"
+    readarray -t ports<<<"`openstack port list --network $network| grep data-port| grep DOWN| awk '{print $2}'`"
     [ -n "${ports[0]}" ] || ports=()
     num_ports=${#ports[@]}
     if ((num_ports >= require_count)); then
@@ -57,12 +61,12 @@ if ((require_count)); then
     if ((delta)); then
         echo "Creating $delta new ports"
         for ((i=0;i<$delta;i++)); do
-            openstack port create data-port --network ${OS_PROJECT_NAME}_admin_net --no-fixed-ip
+            openstack port create data-port --network $network --no-fixed-ip
         done
     fi
 
     declare -a mac_addrs=()
-    readarray -t ports<<<"`openstack port list| grep data-port| grep DOWN| awk '{print $2}'`"
+    readarray -t ports<<<"`openstack port list --network $network| grep data-port| grep DOWN| awk '{print $2}'`"
     i=0
     for inst in "${instances[@]}"; do
         ${requires[$inst]} || continue
