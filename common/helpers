@@ -70,6 +70,9 @@ OPTIONS:
      -p, --pocket p
         Archive pocket to install packages from e.g. "proposed". Default is
         main.
+     --ppa
+        Specify a ppa for all charms to use (provided using openstack-origin
+        or source config on charms that support it).
      -r, --release r
         Openstack release. This allows UCA to be installed and used otherwise
         you get the release shipped with the version of Ubuntu you are using.
@@ -183,6 +186,10 @@ filter_master_opts ()
                 ;;
             --pocket|-p)
                 # stub - use get_pocket()
+                shift
+                ;;
+            --ppa)
+                # stub - use get_ppa()
                 shift
                 ;;
             --vip-addr-start)
@@ -317,6 +324,20 @@ get_release ()
     _get () {
         while (($#)); do
             if [ "$1" = "-r" ] || [ "$1" = "--release" ]; then
+                 echo $2
+                 return 0
+            fi
+            shift
+        done
+    }
+    _get ${CACHED_STDIN[@]}
+}
+
+get_ppa ()
+{
+    _get () {
+        while (($#)); do
+            if [ "$1" = "--ppa" ]; then
                  echo $2
                  return 0
             fi
@@ -672,7 +693,11 @@ release=`get_release`
 # modules so putting it here.
 series=`ost_series_autocorrect "$series" "$release"`
 release=`ost_release_autocorrect "$series" "$release"`
-if ! ltsmatch "$series" "$release" && ! nonltsmatch "$series" "$release" ; then
+ppa=`get_ppa`
+
+if [ -n "$ppa" ]; then
+    source="ppa:$ppa"
+elif ! ltsmatch "$series" "$release" && ! nonltsmatch "$series" "$release" ; then
     source="cloud:${series}-${release}"
 else
     source=""
