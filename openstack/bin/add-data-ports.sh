@@ -6,6 +6,7 @@
 #
 application=${1:-""}
 (($#>1)) && network="$2" || network=""
+(($#>2)) && bridge="$3" || bridge="br-data"
 
 declare -A requires=()
 
@@ -36,8 +37,8 @@ fi
 require_count=0
 echo "Checking $application unit instances: ${instances[@]}"
 for inst in "${instances[@]}"; do
-    num_ports="`openstack port list --network $network --server $inst| grep ACTIVE| wc -l`"
-    if ((num_ports>1)); then
+    num_ports="`openstack port list --network $network --server $inst| grep data-port| wc -l`"
+    if ((num_ports)); then
         requires[$inst]=false
     else
         requires[$inst]=true
@@ -81,12 +82,12 @@ if ((require_count)); then
     for mac in "${mac_addrs[@]}"; do
         echo "$cfg"| grep -q "$mac" && continue
         ! $first && cfg+=" " || first=false
-        cfg+="br-data:$mac"
+        cfg+="$bridge:$mac"
     done
     echo "Setting $application ${optname}='$cfg'"
     juju config $application ${optname}="$cfg"
 else
-    echo "All instances have > 1 port already - nothing to do"
+    echo "All instances have at least 1 port on network $network (bridge=$bridge) - nothing to do"
 fi
 
 echo "Done."
