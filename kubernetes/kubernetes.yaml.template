@@ -21,6 +21,8 @@ applications:
     charm: cs:~containers/openstack-integrator
     constraints: mem=1G
     num_units: 1
+    options:
+      manage-security-groups: True
 relations:
   - [ 'kubernetes-master:kube-control', 'kubernetes-worker:kube-control' ]
   - [ 'openstack-integrator:clients', 'kubernetes-master:openstack' ]
