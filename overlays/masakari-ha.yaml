@@ -1,0 +1,7 @@
+applications:
+  masakari-hacluster:
+    charm: cs:~openstack-charmers-next/hacluster
+relations:
+  - [ masakari:ha, hacluster:ha ]
+  - [ pacemaker-remote:pacemaker-remote, hacluster:pacemaker-remote ]
+

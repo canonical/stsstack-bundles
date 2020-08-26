@@ -289,6 +289,15 @@ do
             get_units $1 __NUM_MYSQL_UNITS__ 3
             MOD_OVERLAYS+=( "mysql-ha.yaml" )
             ;;
+        --masakari)
+            assert_min_release ussuri masakari
+            # need at least 2 units of compute
+            has_opt --num-compute || MOD_PARAMS[__NUM_COMPUTE_UNITS__]=2
+            MOD_OVERLAYS+=( "masakari.yaml" )
+            # the charm deployment guide suggests 3 units to we do the same by default here
+            get_units $1 __NUM_MASAKARI_UNITS__ 3
+            MOD_OVERLAYS+=( "masakari-ha.yaml" )
+            ;;
         --mysql-innodb-cluster*)
             conflicts_with $1 --mysql-ha*
             assert_min_release train mysql-innodb-cluster

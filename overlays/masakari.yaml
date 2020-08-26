@@ -1,0 +1,30 @@
+# Variables
+debug:                      &debug                     True
+verbose:                    &verbose                   True
+openstack_origin:           &openstack_origin          __OS_ORIGIN__
+
+applications:
+  masakari-monitors:
+    charm: cs:~openstack-charmers-next/masakari-monitors
+    options:
+      debug: *debug
+  pacemaker-remote:
+    charm: cs:~openstack-charmers-next/pacemaker-remote
+    options:
+      enable-stonith: True
+      enable-resources: False
+  masakari:
+    charm: cs:~openstack-charmers-next/masakari
+    series: bionic
+    num_units: __NUM_MASAKARI_UNITS__
+    options:
+      debug: *debug
+      openstack-origin: *openstack_origin
+relations:
+  - [ nova-compute:juju-info, masakari-monitors:container ]
+  - [ keystone:identity-credentials, masakari-monitors:identity-credentials ]
+  - [ nova-compute:juju-info, pacemaker-remote:juju-info ]
+  - [ masakari:identity-service, keystone:identity-service ]
+  - [ masakari:shared-db, mysql:shared-db ]
+  - [ masakari:amqp, rabbitmq-server:amqp ]
+
