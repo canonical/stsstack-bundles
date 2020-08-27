@@ -5,6 +5,9 @@
 # All overlay/bundle variables (MOD_PARAMS) defaults must go into
 # the <module>/module_defaults file.
 
+# Needed in all cases
+MOD_OVERLAYS+=( "keystone.yaml" )
+
 # NOTE: this is (should be) the same across all modules using mysql
 if has_min_series focal; then
     # There is no Focal support for percona-cluster

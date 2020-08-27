@@ -33,15 +33,6 @@ applications:
       osd-devices: ''  # must be empty string when using juju storage
     storage:
       osd-devices: cinder,10G,1
-  keystone:
-    num_units: 1
-    charm: cs:~openstack-charmers-next/keystone
-    constraints: mem=1G
-    options:
-      debug: *debug
-      verbose: *verbose
-      admin-password: openstack
-      openstack-origin: *openstack_origin
   glance:
     num_units: 1
     charm: cs:~openstack-charmers-next/glance

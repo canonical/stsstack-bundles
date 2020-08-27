@@ -24,18 +24,6 @@ applications:
     options:
       source: *source
       min-cluster-size: __NUM_RABBIT_UNITS__
-  keystone:
-    num_units: __NUM_KEYSTONE_UNITS__
-    charm: cs:~openstack-charmers-next/keystone
-    constraints: mem=1G
-    options:
-      debug: *debug
-      verbose: *verbose
-      admin-password: openstack
-      openstack-origin: *openstack_origin
-      ssl_ca: *ssl_ca
-      ssl_cert: *ssl_cert
-      ssl_key: *ssl_key
   nova-compute:
     charm: cs:~openstack-charmers-next/nova-compute
     num_units: __NUM_COMPUTE_UNITS__

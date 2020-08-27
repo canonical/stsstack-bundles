@@ -1,0 +1,23 @@
+# Variables
+debug:                      &debug                     True
+verbose:                    &verbose                   True
+openstack_origin:           &openstack_origin          __OS_ORIGIN__
+
+ssl_ca:                     &ssl_ca                    __SSL_CA__
+ssl_cert:                   &ssl_cert                  __SSL_CERT__
+ssl_key:                    &ssl_key                   __SSL_KEY__
+
+applications:
+  keystone:
+    num_units: __NUM_KEYSTONE_UNITS__
+    charm: cs:~openstack-charmers-next/keystone
+    constraints: mem=1G
+    options:
+      debug: *debug
+      verbose: *verbose
+      admin-password: openstack
+      openstack-origin: *openstack_origin
+      ssl_ca: *ssl_ca
+      ssl_cert: *ssl_cert
+      ssl_key: *ssl_key
+
