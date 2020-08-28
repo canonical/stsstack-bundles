@@ -1,0 +1,3 @@
+relations:
+  - [ 'keystone:shared-db', 'mysql:shared-db' ]
+  - [ 'kubernetes-master:keystone-credentials', 'keystone:identity-credentials' ]

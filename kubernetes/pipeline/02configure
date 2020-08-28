@@ -116,6 +116,17 @@ do
                 MOD_OVERLAYS+=( "k8s-e2e-vault.yaml" )
             fi
             ;;
+        --keystone)
+            MOD_OVERLAYS+=( "keystone.yaml" )
+            MOD_OVERLAYS+=( "k8s-keystone.yaml" )
+            # NOTE: this is (should be) the same across all modules using mysql
+            if has_min_series focal; then
+                # There is no Focal support for percona-cluster
+                MOD_OVERLAYS+=( "mysql-innodb-cluster.yaml")
+            else
+                MOD_OVERLAYS+=( "mysql.yaml" )
+            fi
+            ;;
         --lb-ha-hacluster*|--lb-ha-keepalived*)
             conflicts_with $1 --lb-octavia
             if has_opt --master-ha*; then
