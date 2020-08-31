@@ -46,7 +46,11 @@ if __name__ == '__main__':
             password=os.environ['OS_PASSWORD'],
             tenant_name=os.environ['OS_PROJECT_NAME'],
             auth_url=os.environ['OS_AUTH_URL'])
-    session = keystoneauth1_session.Session(auth=auth)
+    if 'https' == os.environ.get('OS_AUTH_PROTOCOL') and os.environ.get('OS_CACERT'):
+        session = keystoneauth1_session.Session(auth=auth,
+            verify=os.environ['OS_CACERT'])
+    else:
+        session = keystoneauth1_session.Session(auth=auth)
 
     neutron = ne_client.Client(session=session,
                                region_name=os.environ['OS_REGION_NAME'])

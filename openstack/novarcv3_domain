@@ -13,6 +13,7 @@ ssl_cert=`juju config keystone ssl_cert`
 # TODO(hopem): remove fix for bug 1789415 once released
 if [ -n "$ssl_cert" ] && [ "$ssl_cert" != "<nil>" ]; then
   export OS_AUTH_PROTOCOL=https
+  export OS_CACERT=$(dirname "$(realpath -s "${BASH_SOURCE[0]}")")/ssl/openstack-ssl/results/cacert.pem
 fi
 
 unset _OS_PARAMS

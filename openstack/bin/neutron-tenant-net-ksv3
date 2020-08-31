@@ -65,7 +65,10 @@ if __name__ == '__main__':
         project_domain_name=os.environ['OS_PROJECT_DOMAIN_NAME'],
         project_name=os.environ['OS_PROJECT_NAME'],
         auth_url=os.environ['OS_AUTH_URL'])
-    sess = session.Session(auth=auth)
+    if 'https' == os.environ.get('OS_AUTH_PROTOCOL') and os.environ.get('OS_CACERT'):
+        sess = session.Session(auth=auth, verify=os.environ['OS_CACERT'])
+    else:
+        sess = session.Session(auth=auth)
 
     # Clients support sessions
     keystone = v3.Client(session=sess)
