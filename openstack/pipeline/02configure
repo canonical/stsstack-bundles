@@ -284,6 +284,9 @@ do
             MOD_OVERLAYS+=( "nova-console.yaml" )
             get_param $1 __CONSOLE_TYPE__ "REQUIRES: nova console access protocol:"
             ;;
+        --nfs-server)
+            MOD_OVERLAYS+=("nfs-server-test-fixture.yaml")
+	    ;;
         --octavia)
             if `has_opt --ovn`; then
                 assert_min_release train "octavia+ovn"
