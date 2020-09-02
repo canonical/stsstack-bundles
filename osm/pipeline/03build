@@ -19,8 +19,8 @@ if [ -n "${MASTER_OPTS[CLOUD_NAME]}" ]; then
         controller=`juju list-controllers --format json | jq -r '.["current-controller"]'`
         mkdir -p ~/.local/share/osm
         juju scp -m ${MOD_PARAMS[__K8S_MODEL__]} kubernetes-master/0:config ~/.local/share/osm/${cloud_name}-kubeconfig
-	echo "Creating Juju cloud ${cloud_name} on controller ${controller}"
-	KUBECONFIG=~/.local/share/osm/${cloud_name}-kubeconfig juju add-k8s ${cloud_name} --controller ${controller} --cluster-name=juju-cluster
+        echo "Creating Juju cloud ${cloud_name} on controller ${controller}"
+        KUBECONFIG=~/.local/share/osm/${cloud_name}-kubeconfig juju add-k8s ${cloud_name} --controller ${controller} --cluster-name=juju-cluster
     fi
 fi
 
