@@ -45,7 +45,8 @@ Usage:
 
 $(basename $0) [options]
 
---name NAME              The loadbalancer name, default = $lb
+--name NAME              The loadbalancer name base, default = $lb (things
+                         such as listener and pool are named using this base)
 --member-vm NAME         The name of the member VM. If not provided
                          use the first VM running.
 --protocol PROTOCOL      TCP, HTTP, ..., default = $protocol
@@ -66,7 +67,8 @@ if [[ ${protocol} == HTTP ]]; then
     url_path="--url-path /"
 fi
 
-`openstack loadbalancer list -c name -f value| grep -q $lb` && { echo "ERROR: a loadbalancer called $lb already exists"; exit 1; }
+`openstack loadbalancer list --column name --format value | \
+    grep -q $lb` && { echo "ERROR: a loadbalancer called $lb already exists"; exit 1; }
 
 LB_ID=$(openstack loadbalancer create --name $lb \
     --vip-subnet-id private_subnet --format value --column id)
@@ -76,44 +78,44 @@ openstack loadbalancer show ${LB_ID}
 
 # wait for lb to be ACTIVE
 while true; do
-    [[ `openstack loadbalancer show ${LB_ID} -c provisioning_status -f value` = ACTIVE ]] \
+    [[ `openstack loadbalancer show ${LB_ID} --column provisioning_status --format value` = ACTIVE ]] \
         && break
     echo "waiting for $lb"
 done
 
 LISTENER_ID=$(openstack loadbalancer listener create \
-    --name listener1 --protocol ${protocol} --protocol-port ${protocol_port} \
+    --name ${lb}-listener --protocol ${protocol} --protocol-port ${protocol_port} \
     --format value --column id $lb)
 # wait for listener to be ACTIVE
 while true; do
-    [[ `openstack loadbalancer listener show ${LISTENER_ID} -c provisioning_status -f value` = ACTIVE ]] \
+    [[ `openstack loadbalancer listener show ${LISTENER_ID} --column provisioning_status --format value` = ACTIVE ]] \
         && break
-    echo "waiting for listener1"
+    echo "waiting for ${lb}-listener"
 done
 
 POOL_ID=$(openstack loadbalancer pool create \
-    --name pool1 --lb-algorithm ROUND_ROBIN --listener ${LISTENER_ID} --protocol ${protocol} \
+    --name ${lb}-pool --lb-algorithm ROUND_ROBIN --listener ${LISTENER_ID} --protocol ${protocol} \
     --format value --column id)
 # wait for pool to be ACTIVE
 while true; do
-    [[ `openstack loadbalancer pool show ${POOL_ID} -c provisioning_status -f value` = ACTIVE ]] \
+    [[ `openstack loadbalancer pool show ${POOL_ID} --column provisioning_status --format value` = ACTIVE ]] \
         && break
-    echo "waiting for pool1"
+    echo "waiting for ${lb}-pool"
 done
 
 HM_ID=$(openstack loadbalancer healthmonitor create \
-    --name hm1 --delay 5 --max-retries 4 --timeout 10 --type ${protocol} ${url_path} ${POOL_ID} \
+    --name ${lb}-hm --delay 5 --max-retries 4 --timeout 10 --type ${protocol} ${url_path} ${POOL_ID} \
     --format value --column id)
 openstack loadbalancer healthmonitor list
 
 # Add vm(s) to pool
 if [ -z "$member_vm" ]; then
-    readarray -t member_vm < <(openstack server list -c ID -f value)
+    readarray -t member_vm < <(openstack server list --column ID --format value)
     (( ${#member_vm[@]} )) || { echo "ERROR: could not find a vm to add to lb pool"; exit 1; }
 fi
 
 for member in ${member_vm[@]}; do
-    netaddr=$(openstack port list --server $member --network private -c "Fixed IP Addresses" -f value| \
+    netaddr=$(openstack port list --server $member --network private --column "Fixed IP Addresses" --format value | \
                 sed -rn -e "s/.+ip_address='([[:digit:]\.]+)',\s+.+/\1/" \
                         -e "s/.+ip_address':\s+'([[:digit:]\.]+)'}.+/\1/p")
     member_id=$(openstack loadbalancer member create --subnet-id private_subnet \
@@ -128,6 +130,6 @@ done
 
 openstack loadbalancer member list ${POOL_ID}
 
-floating_ip=$(openstack floating ip create -f value -c floating_ip_address ext_net)
-lb_vip_port_id=$(openstack loadbalancer show -f value -c vip_port_id ${LB_ID})
+floating_ip=$(openstack floating ip create --format value --column floating_ip_address ext_net)
+lb_vip_port_id=$(openstack loadbalancer show --format value --column vip_port_id ${LB_ID})
 openstack floating ip set --port $lb_vip_port_id $floating_ip
