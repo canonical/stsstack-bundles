@@ -6,6 +6,8 @@
 declare release=
 declare image_format=
 
+scriptpath=$(readlink --canonicalize $(dirname $0))
+
 while (( $# > 0 )); do
   case $1 in
     --release|-r)
@@ -44,7 +46,8 @@ if [[ -z ${release} ]]; then
   exit 1
 fi
 
-set -x
+set -x -e -u
+
 source ~/novarc
 tmp=`mktemp`
 source ~/novarc
@@ -54,8 +57,8 @@ img="`egrep "${ts}.+$release" $tmp| tail -n 1`"
 rm $tmp
 
 export SWIFT_IP="10.230.19.58"
-. ./profiles/common
-source novarc
+source ${scriptpath}/../profiles/common
+source ${scriptpath}/../novarc
 upload_image swift octavia-amphora $img $image_format
 
 image_name=octavia-amphora
