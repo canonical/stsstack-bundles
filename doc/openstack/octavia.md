@@ -4,12 +4,6 @@ To deploy octavia as part of an Openstack deployment just add the --octavia over
 
 NOTE: if you are using OVN as your neutron networking solution, you will need to perform the steps detailed in the ovn.md documentation before continuing
 
-Now you need to add an extra port to your nodes running neutron-openvswitch:
-
-```
-./bin/add-data-ports.sh
-```
-
 The following will download the Amphora image from (stsstack) Swift
 that corresponds to the deployed release of Openstack and upload it to
 your Glance. The optional argument `--image-format` specifies the

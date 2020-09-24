@@ -17,13 +17,20 @@ install_packages
 NS_ARG=""
 [ "`juju config neutron-api enable-ml2-dns`" = "true" ] && unset NAMESERVER || NS_ARG="-N $NAMESERVER"
 
-if ((`juju status ovn-chassis --format=json 2>/dev/null| jq '.machines| length'`)); then
+ovn_units=`juju status ovn-chassis --format=json 2>/dev/null| jq '.machines| length'`
+((ovn_units)) && ovn_enabled=true || ovn_enabled=false
+if $ovn_enabled; then
     # ovn defaults to geneve
     net_type=${1:-"geneve"}
 else
     net_type=${1:-""}
     [ -n "$net_type" ] || net_type="`juju config neutron-api overlay-network-type`"
     [ -n "$net_type" ] || net_type="gre"
+fi
+
+dvr_enabled=`juju config neutron-api enable-dvr`
+if [ "$dvr_enabled" = "true" ] || $ovn_enabled; then
+    ./bin/add-data-ports.sh
 fi
 
 # add extra port to overcloud neutron-gateway (if exists) and configure charm to use it
