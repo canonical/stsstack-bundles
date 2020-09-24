@@ -54,6 +54,8 @@ export OS_AUTH_URL=${OS_AUTH_PROTOCOL:-http}://${keystone_addr}:5000/v3
 export OS_PROJECT_DOMAIN_NAME=admin_domain
 export OS_USER_DOMAIN_NAME=admin_domain
 export OS_IDENTITY_API_VERSION=3
+# Gnocchi needs this:
+export OS_AUTH_TYPE=password
 else
 export OS_AUTH_URL=${OS_AUTH_PROTOCOL:-http}://${keystone_addr}:5000/v2.0
 fi
