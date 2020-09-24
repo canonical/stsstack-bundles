@@ -5,7 +5,7 @@ applications:
   mysql:  # we call it 'mysql' since that's how other applications address this one.
     charm: cs:~openstack-charmers-next/mysql-innodb-cluster
     constraints: mem=4G
-    num_units: __NUM_MYSQL_UNITS__
+    num_units: __NUM_MYSQL_INNODB_UNITS__
     options:
       source: *source
       innodb-buffer-pool-size: 50%
