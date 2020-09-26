@@ -22,6 +22,6 @@ applications:
       loglevel: *loglevel
       osd-devices: ''  # must be empty string when using juju storage
     storage:
-      osd-devices: cinder,10G,1
+      osd-devices: cinder,10G,__NUM_OSDS_PER_HOST__
 relations:
   - [ ceph-mon, ceph-osd ]

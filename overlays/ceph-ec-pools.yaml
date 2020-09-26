@@ -1,0 +1,19 @@
+applications:
+  cinder-ceph:
+    options:
+      ec-profile-k: 2
+      ec-profile-m: 1
+      ec-profile-name: ec-profile-cinder-ceph
+      ec-profile-plugin: jerasure
+      ec-rbd-metadata-pool: cinder-ceph-ec-metadata
+      rbd-pool-name: cinder-ceph
+      pool-type: erasure-coded
+  nova-compute:
+    options:
+      aa-profile-mode: enforce
+      ec-profile-k: 2
+      ec-profile-m: 1
+      ec-profile-name: ec-profile-nova-compute
+      ec-profile-plugin: jerasure
+      ec-rbd-metadata-pool: nova-ec-metadata
+      pool-type: erasure-coded
