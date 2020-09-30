@@ -40,4 +40,4 @@ juju deploy ./b/mytest/openstack.yaml --overlay ./b/mytest/o/ceph.yaml --overlay
 
 Note that the generated bundles and overlays are stored under a directory with the name you specified. You can now either copy the command and execute it or add --run to automatically execute it.
 
-If you need to manually edit a bundle/overlay prior to deploying you can skip the --run argument and either manually run the deploy command once you have made your changes or alternatively re-run with --run --replay (which will prevent the files from being re-generated).
+If you need to manually edit a bundle/overlay prior to deploying you can skip the --run argument and either manually run the deploy command once you have made your changes or alternatively re-run with --replay (which will prevent the files from being re-generated).

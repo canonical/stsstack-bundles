@@ -175,6 +175,8 @@ filter_master_opts ()
                 ;;
             --create-model|--defaults|--debug|--list|--replay|--run|--use-stable-charms)
                 # boolean stubs - use has_opt()
+                # ensure --run is implied if --replay is provided
+                [ "$1" = "--replay" ] && CACHED_STDIN=( "${CACHED_STDIN[@]}" --run )
                 ;;
             --series|-s)
                 # stub - use get_series()
