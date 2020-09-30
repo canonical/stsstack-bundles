@@ -336,7 +336,7 @@ do
                 MOD_MSGS[octavia.1]="this can be done in one of two ways:"
                 MOD_MSGS[octavia.2]="run ./tools/upload_octavia_amphora_image.sh to use a pre-created image (recommended)"
                 MOD_MSGS[octavia.3]="create a new image with 'juju run-action octavia-diskimage-retrofit/0 --wait retrofit-image source-image=<uuid>' with id of image in Glance to use as base"
-                MOD_MSGS[octavia.4]="then run configure_octavia.sh to finish setting up octavia"
+                MOD_MSGS[octavia.4]="then run tools/configure_octavia.sh to finish setting up octavia"
             fi
             ;;
         --octavia-ha*)
