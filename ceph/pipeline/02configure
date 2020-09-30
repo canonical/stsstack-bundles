@@ -91,10 +91,6 @@ do
             MOD_OVERLAYS+=( "vault-etcd.yaml" )
             set -- $@ --vault && cache $@
             ;;
-        --list-overlays)   #__OPT__
-            list_overlays
-            exit
-            ;;
         --ceph-proxy)
             MOD_PARAMS[__CEPH_INTERFACE__]='ceph-proxy'
             MOD_OVERLAYS+=( "ceph-proxy.yaml" )
