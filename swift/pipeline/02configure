@@ -1,9 +1,10 @@
-#!/bin/bash -eu
+#!/bin/bash
 # Global variables are first defined in 00setup and module
 # dependencies are defined in 01import-config-defaults
 #
 # All overlay/bundle variables (MOD_PARAMS) defaults must go into
 # the <module>/module_defaults file.
+
 
 # Needed in all cases
 MOD_OVERLAYS+=( "keystone.yaml" )
@@ -38,9 +39,9 @@ do
         --lma)
             # Logging Monitoring and Alarming
             MOD_OVERLAYS+=( "graylog.yaml ")
-            MOD_MSGS+=( "NOTE: you will need to manually relate graylog (filebeat) to any services you want to monitor" )
             MOD_OVERLAYS+=( "grafana.yaml ")
-            MOD_MSGS+=( "NOTE: you will need to manually relate grafana (telegraf) to any services you want to monitor" )
+            MOD_MSGS[lma.0]="need to manually relate filebeat (graylog) to any services you want to monitor"
+            MOD_MSGS[lma.1]="need to manually relate telegraf (grafana) to any services you want to monitor"
             ;;
         --ssl)
             (cd ssl; . ./create_ca_cert.sh $MOD_SSL_STATE_DIR;)
@@ -89,4 +90,3 @@ target=${series}-$release
 [ -z "$pocket" ] || target=${target}-$pocket
 MOD_PASSTHROUGH_OPTS+=( --release-name $target )
 
-print_msgs

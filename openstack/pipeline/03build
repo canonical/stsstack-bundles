@@ -13,6 +13,8 @@ fi
 
 . $MOD_DIR/common/generate_bundle_base
 
+print_msgs
+
 for f in $INTERNAL_BUNDLE_CONFIG_RENDERER $INTERNAL_BUNDLE_CONFIG; do
     [ -n "$f" ] && [ -r "$f" ] && rm -f $f
 done

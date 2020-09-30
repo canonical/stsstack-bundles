@@ -1,4 +1,4 @@
-#!/bin/bash -eu
+#!/bin/bash
 # Global variables are first defined in 00setup and module
 # dependencies are defined in 01import-config-defaults
 #
@@ -34,3 +34,4 @@ do
     esac
     shift
 done
+

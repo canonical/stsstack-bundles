@@ -718,12 +718,15 @@ fi
 print_msgs ()
 {
     if ((${#MOD_MSGS[@]})); then
-        echo ""
-        for m in "${MOD_MSGS[@]}"; do
-            echo -e "$m"
+        echo -e "\nPost-Deployment Info/Actions:"
+        prev_key=""
+        for key in `echo ${!MOD_MSGS[@]}| tr -s ' ' '\n'| sort`; do
+            msg=${MOD_MSGS[$key]}
+            key=${key##*_} # strip order
+            key=${key%%.*} # strip index
+            [ "$prev_key" = "$key" ] || echo -e "\n[$key]"; prev_key=$key
+            echo -e "  - $msg"
         done
-        echo ""
-        read -p "Hit [ENTER] to continue"
         echo ""
     fi
 }

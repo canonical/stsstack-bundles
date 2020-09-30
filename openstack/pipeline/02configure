@@ -1,10 +1,9 @@
-#!/bin/bash -eu
+#!/bin/bash
 # Global variables are first defined in 00setup and module
 # dependencies are defined in 01import-config-defaults
 #
 # All overlay/bundle variables (MOD_PARAMS) defaults must go into
 # the <module>/module_defaults file.
-
 
 # If using any variant of dvr-snat, there is no need for a neutron-gateway.
 # We also don't currently need it when using ovn
@@ -113,8 +112,8 @@ do
         --ceph-proxy)
             MOD_PARAMS[__CEPH_INTERFACE__]='ceph-proxy'
             MOD_OVERLAYS+=( "ceph-proxy.yaml" )
-            MOD_MSGS+=("NOTE: once ceph has finished deploying do the following: juju config admin-key=<key> fsid=<fsid> monitor-hosts=<mon-addr-list>'")
-            MOD_MSGS+=( "Example: juju config ceph-proxy admin-key=AQALEzleKLCNDBAAxrOY8WbxF2B7lDx0TaswGA== fsid=e5e6aee2-4719-11ea-8264-fa163e50d5d1 monitor-hosts='10.5.0.11:6789 10.5.0.12:6789 10.5.0.13:6789'" )
+            MOD_MSGS[ceph-proxy.0]="once ceph is ready, do 'juju config admin-key=<key> fsid=<fsid> monitor-hosts=<mon-addr-list>'"
+            MOD_MSGS[ceph-proxy.1]="e.g. juju config ceph-proxy admin-key=AQALEzleKLCNDBAAxrOY8WbxF2B7lDx0TaswGA== fsid=e5e6aee2-4719-11ea-8264-fa163e50d5d1 monitor-hosts='10.5.0.11:6789 10.5.0.12:6789 10.5.0.13:6789'"
             ;;
         --ceph-ec)
             assert_min_release stein "ceph-ec"
@@ -140,14 +139,19 @@ do
             msg="REQUIRED: designate-bind upstream dns server to forward requests to:"
             get_param $1 __BIND_DNS_FORWARDER__ "$msg"
             ns=${MOD_PARAMS[__ML2_DNS_FORWARDER__]}
-            MOD_MSGS+=( "NOTE: you will need to set neutron-gateway dns-servers=<designate-bind unit address> post-deploy (current=$ns)" )
+            MOD_MSGS[designate.0]="Your upstream dns is currently $ns. Since you have designate deployed you can now do:"
+            is_neutron_gateway_required && app=neutron-gateway || app=neutron-openvswitch
+            MOD_MSGS[designate.1]="juju config $app dns-servers=<designate-bind unit address>"
+            if has_opt --dvr; then
+                app=neutron-openvswitch
+                MOD_MSGS[designate.2]="juju config $app dns-servers=<designate-bind unit address>"
+            fi
             MOD_OVERLAYS+=( "memcached.yaml" )
             MOD_OVERLAYS+=( "designate.yaml" )
             ;;
         --dvr)
             # since ports typically set post-deployment ensure we don't clobber on re-run
             opt=`update_from_charm_config $1 neutron-openvswitch data-port`
-            get_param "$opt" __DVR_DATA_PORT__ 'REQUIRED: compute host DVR data-port(s) (leave blank to set later):'
             MOD_OVERLAYS+=( "neutron-dvr.yaml" )
             ;;
         --dvr-l3ha*)
@@ -184,7 +188,7 @@ do
             ;;
         --graylog)
             MOD_OVERLAYS+=( "graylog.yaml ")
-            MOD_MSGS+=( "NOTE: you will need to manually relate graylog (filebeat) to any other services you want to monitor" )
+            MOD_MSGS[graylog.0]="need to manually relate filebeat to any services you want to monitor"
             ;;
         --grafana-channel)  #__OPT__type:<str>
             MOD_PARAMS[__GRAFANA_SNAP_CHANNEL__]="$2"
@@ -199,7 +203,7 @@ do
             if has_opt --ceph; then
                 MOD_OVERLAYS+=( "prometheus-ceph.yaml ")
             fi
-            MOD_MSGS+=( "NOTE: telegraf has been related to core openstack services but you may need to add to others you have in your deployment" )
+            MOD_MSGS[grafana.0]="need to manually relate telegraf to any services you want to monitor"
             ;;
         --nagios)
             MOD_OVERLAYS+=( "nagios.yaml ")
@@ -254,6 +258,7 @@ do
             if ! has_opt --openstack-dashboard*; then
                 set -- $@ --openstack-dashboard && cache $@
             fi
+            MOD_MSGS[keystone-saml.0]="run ./tools/enable_samltestid.sh"
             ;;
         --manila)
             assert_min_release rocky "manila"
@@ -327,7 +332,11 @@ do
                 if ! has_opt --octavia-diskimage-retrofit-glance-simplestreams; then
                    MOD_OVERLAYS+=( "octavia-diskimage-retrofit-glance.yaml" )
                 fi
-                MOD_MSGS+=( "NOTE: do 'juju run-action octavia-diskimage-retrofit/0 --wait retrofit-image source-image=<uuid>' with id of glance image to be used for amphorae" )
+                MOD_MSGS[octavia.0]="you need to to create an amphora image before you can use Octavia"
+                MOD_MSGS[octavia.1]="this can be done in one of two ways:"
+                MOD_MSGS[octavia.2]="run ./tools/upload_octavia_amphora_image.sh to use a pre-created image (recommended)"
+                MOD_MSGS[octavia.3]="create a new image with 'juju run-action octavia-diskimage-retrofit/0 --wait retrofit-image source-image=<uuid>' with id of image in Glance to use as base"
+                MOD_MSGS[octavia.4]="then run configure_octavia.sh to finish setting up octavia"
             fi
             ;;
         --octavia-ha*)
@@ -383,7 +392,6 @@ do
             assert_min_release train "ovn"
             # since ports typically set post-deployment ensure we don't clobber on re-run
             opt=`update_from_charm_config $1 ovn-chassis bridge-interface-mappings`
-            get_param $opt __OVN_DATA_PORT__ 'REQUIRED: ovn-chassis bridge-interface-mappings (leave blank to set later):'
             MOD_OVERLAYS+=( "neutron-ovn.yaml" )
             if ! has_opt --vault*; then
                 set -- $@ --vault && cache $@
@@ -486,6 +494,7 @@ do
                 done
             fi
             has_opt --ceph && MOD_OVERLAYS+=( "vault-ceph.yaml" )
+            MOD_MSGS[vault.0]="run ./tools/vault-unseal-and-authorise.sh"
             ;;
         --etcd-channel)  #__OPT__type:<str>
             MOD_PARAMS[__ETCD_SNAP_CHANNEL__]=$2
@@ -533,4 +542,3 @@ target=${series}-$release
 [ -z "$pocket" ] || target=${target}-$pocket
 MOD_PASSTHROUGH_OPTS+=( --release-name $target )
 
-print_msgs

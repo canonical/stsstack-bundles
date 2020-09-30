@@ -1,4 +1,4 @@
-#!/bin/bash -eu
+#!/bin/bash
 # Global variables are first defined in 00setup and module
 # dependencies are defined in 01import-config-defaults
 #
@@ -18,7 +18,7 @@ check_hacluster_channel ()
     [ -n "$channel" ] || channel="${MASTER_OPTS[CHARM_CHANNEL]}"
     if [ -n "$channel" ] && [ "$channel" != "stable" ]; then
         # NOTE(dosaboy): https://bugs.launchpad.net/juju/+bug/1832873
-        MOD_MSGS+=( "\nIMPORTANT: you are using the $channel charm channel but hacluster is not published to that channel. Either switch to stable channel or post-upgrade hacluster to stable channel.\n" )
+        MOD_MSGS[hacluster.0]="\nIMPORTANT: you are using the $channel charm channel but hacluster is not published to that channel. Either switch to stable channel or post-upgrade hacluster to stable channel.\n"
     fi
 }
 
@@ -69,8 +69,8 @@ do
         --ceph-proxy)
             MOD_PARAMS[__CEPH_INTERFACE__]='ceph-proxy'
             MOD_OVERLAYS+=( "ceph-proxy.yaml" )
-            MOD_MSGS+=("NOTE: once ceph has finished deploying do the following: juju config admin-key=<key> fsid=<fsid> monitor-hosts=<mon-addr-list>'")
-            MOD_MSGS+=( "Example: juju config ceph-proxy admin-key=AQALEzleKLCNDBAAxrOY8WbxF2B7lDx0TaswGA== fsid=e5e6aee2-4719-11ea-8264-fa163e50d5d1 monitor-hosts='10.5.0.11:6789 10.5.0.12:6789 10.5.0.13:6789'" )
+            MOD_MSGS[ceph-proxy.0]="once ceph is ready, do 'juju config admin-key=<key> fsid=<fsid> monitor-hosts=<mon-addr-list>'"
+            MOD_MSGS[ceph-proxy.1]="e.g. juju config ceph-proxy admin-key=AQALEzleKLCNDBAAxrOY8WbxF2B7lDx0TaswGA== fsid=e5e6aee2-4719-11ea-8264-fa163e50d5d1 monitor-hosts='10.5.0.11:6789 10.5.0.12:6789 10.5.0.13:6789'"
             ;;
         --ceph-fs)
             MOD_OVERLAYS+=( "ceph-fs.yaml" )
@@ -106,7 +106,7 @@ do
             else
                 MOD_OVERLAYS+=( "k8s-easyrsa-docker-registry.yaml" )
             fi
-            MOD_MSGS+=( "Execute tools/configure_docker_registry.sh to upload the images onto the docker registry and setting image registry of the cluster to point to docker registry")
+            MOD_MSGS[docker-registry.0]="execute tools/configure_docker_registry.sh to upload the images and set image registry of the cluster to point to docker registry"
             ;;
         --e2e)
             MOD_OVERLAYS+=( "k8s-e2e.yaml" )
@@ -212,4 +212,3 @@ if ! has_opt --*-ha*; then
     fi
 fi
 
-print_msgs
