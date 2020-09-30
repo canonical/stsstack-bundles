@@ -14,6 +14,8 @@ export -a MOD_PASSTHROUGH_OPTS=()
 export -A MOD_MSGS=()
 # Use order 0 to ensure this is first displayed
 MOD_MSGS[0_common.0]="run ./configure to initialise your deployment"
+MOD_MSGS[0_common.1]="source novarc"
+MOD_MSGS[0_common.2]="add rules to default security group: ./tools/sec_groups.sh"
 
 # Array list of overlays to use with this deployment.
 export -a MOD_OVERLAYS=()

@@ -332,16 +332,31 @@ do
                 if ! has_opt --octavia-diskimage-retrofit-glance-simplestreams; then
                    MOD_OVERLAYS+=( "octavia-diskimage-retrofit-glance.yaml" )
                 fi
-                MOD_MSGS[octavia.0]="you need to to create an amphora image before you can use Octavia"
-                MOD_MSGS[octavia.1]="this can be done in one of two ways:"
-                MOD_MSGS[octavia.2]="run ./tools/upload_octavia_amphora_image.sh to use a pre-created image (recommended)"
-                MOD_MSGS[octavia.3]="create a new image with 'juju run-action octavia-diskimage-retrofit/0 --wait retrofit-image source-image=<uuid>' with id of image in Glance to use as base"
-                MOD_MSGS[octavia.4]="then run tools/configure_octavia.sh to finish setting up octavia"
             fi
+            MOD_MSGS[octavia.0]="you need to to create an amphora image before you can use Octavia"
+            MOD_MSGS[octavia.1]="this can be done in one of two ways:"
+            MOD_MSGS[octavia.2]="run ./tools/upload_octavia_amphora_image.sh --release $release to use a pre-created image (recommended)"
+            MOD_MSGS[octavia.3]="create a new image with 'juju run-action octavia-diskimage-retrofit/0 --wait retrofit-image source-image=<uuid>' with id of image in Glance to use as base"
+            if has_opt --octavia-ipv4; then
+                MOD_MSGS[octavia.4]="run tools/create_ipv4_octavia.sh"
+            fi
+            MOD_MSGS[octavia.5]="then run tools/configure_octavia.sh to finish setting up octavia"
+            MOD_MSGS[octavia.6]="create vm for testing"
+            MOD_MSGS[octavia.7]="./tools/instance_launch.sh 1 bionic"
+            MOD_MSGS[octavia.8]="add floating ip to vm with ./tools/float_all.sh "
+            MOD_MSGS[octavia.9]="go and install e.g. apache2 on vm so that port 80 is open"
+            MOD_MSGS[octavia.10]="create loadbalancer from script"
+            MOD_MSGS[octavia.11]="./tools/create_octavia_lb.sh"
+            MOD_MSGS[octavia.12]="alternatively manually create loadbalancer"
+            MOD_MSGS[octavia.13]="openstack loadbalancer create --name lb2 --vip-network-id lb-mgmt"
             ;;
         --octavia-ha*)
             get_units $1 __NUM_OCTAVIA_UNITS__ 3
             MOD_OVERLAYS+=( "octavia-ha.yaml" )
+            set -- $@ --octavia && cache $@
+            ;;
+        --octavia-ipv4)
+            MOD_OVERLAYS+=( "octavia-ipv4.yaml" )
             set -- $@ --octavia && cache $@
             ;;
         --octavia-diskimage-retrofit-glance-simplestreams)
