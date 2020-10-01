@@ -104,7 +104,7 @@ while true; do
 done
 
 HM_ID=$(openstack loadbalancer healthmonitor create \
-    --name ${lb}-hm --delay 5 --max-retries 4 --timeout 10 --type ${protocol} ${url_path} ${POOL_ID} \
+    --name ${lb}-healthmonitor --delay 5 --max-retries 4 --timeout 10 --type ${protocol} ${url_path} ${POOL_ID} \
     --format value --column id)
 openstack loadbalancer healthmonitor list
 
@@ -130,6 +130,50 @@ done
 
 openstack loadbalancer member list ${POOL_ID}
 
+L7_POLICY1_ID=$(openstack loadbalancer l7policy create --action REDIRECT_TO_POOL \
+    --redirect-pool ${POOL_ID} --name ${lb}-l7policy1 --format value --column id ${LISTENER_ID})
+while true; do
+    [[ $(openstack loadbalancer l7policy show ${L7_POLICY1_ID} --format value --column provisioning_status) = ACTIVE ]] \
+        && break
+    echo "waiting for ${lb}-l7policy1"
+done
+
+openstack loadbalancer l7policy show ${L7_POLICY1_ID}
+
+L7_RULE1_ID=$(openstack loadbalancer l7rule create --compare-type STARTS_WITH --type PATH \
+    --value /js --format value --column id ${L7_POLICY1_ID})
+while true; do
+    [[ $(openstack loadbalancer l7rule show --format value --column provisioning_status ${L7_POLICY1_ID} ${L7_RULE1_ID}) = ACTIVE ]] \
+        && break
+    echo "waiting for ${L7_RULE1_ID}"
+done
+
+openstack loadbalancer l7rule show ${L7_POLICY1_ID} ${L7_RULE1_ID}
+
+L7_POLICY2_ID=$(openstack loadbalancer l7policy create --action REDIRECT_TO_POOL \
+    --redirect-pool ${lb}-pool --name ${lb}-l7policy2 --format value --column id ${lb}-listener)
+while true; do
+    [[ $(openstack loadbalancer l7policy show ${L7_POLICY2_ID} --format value --column provisioning_status) = ACTIVE ]] \
+        && break
+    echo "waiting for ${lb}-l7policy2"
+done
+
+openstack loadbalancer l7policy show ${L7_POLICY2_ID}
+
+L7_RULE2_ID=$(openstack loadbalancer l7rule create --compare-type STARTS_WITH --type PATH \
+    --value /images --format value --column id ${L7_POLICY2_ID})
+while true; do
+    [[ $(openstack loadbalancer l7rule show --format value --column provisioning_status ${L7_POLICY2_ID} ${L7_RULE2_ID}) = ACTIVE ]] \
+        && break
+    echo "waiting for ${L7_RULE2_ID}"
+done
+
+openstack loadbalancer l7rule show ${L7_POLICY2_ID} ${L7_RULE2_ID}
+
 floating_ip=$(openstack floating ip create --format value --column floating_ip_address ext_net)
 lb_vip_port_id=$(openstack loadbalancer show --format value --column vip_port_id ${LB_ID})
 openstack floating ip set --port $lb_vip_port_id $floating_ip
+
+# Local Variables:
+# sh-basic-offset: 4
+# End:
