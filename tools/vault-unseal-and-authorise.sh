@@ -8,7 +8,7 @@ unseal_output=~/unseal_output.$model
 
 ftmp=`mktemp`
 juju status --format=json vault > $ftmp
-readarray -t addrs<<<"`jq -r '.applications[].units[]."public-address"' $ftmp 2>/dev/null`"
+readarray -t addrs<<<"`jq -r '.applications[].units[]?."public-address"' $ftmp 2>/dev/null`"
 leader="`jq -r '.applications[].units | to_entries[] | select(.value.leader==true) | .key' $ftmp 2>/dev/null`"
 leader_addr="`jq -r '.applications[].units | to_entries[] | select(.value.leader==true) | .value."public-address"' $ftmp 2>/dev/null`"
 rm $ftmp
