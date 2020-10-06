@@ -55,26 +55,34 @@ else
   create_tempest_users
 fi
 
+set_img_properties ()
+{
+    img_name=$1
+    img_version=$2
+    img_file=$3
+
+    ts=`stat ~/images/$img_file| sed -rn 's/Modify:\s+([[:digit:]-]+)\s+.+/\1/p'| tr -d '-'`
+    declare -A props=( [architecture]=x86_64
+                       [os_distro]='ubuntu'
+                       [os_version]=$img_version
+                       [version_name]="$ts"
+                       [product_name]="com.ubuntu.cloud:server:${img_version}:amd64"
+    )
+    for p in ${!props[@]}; do 
+      openstack image set --property $p=${props[$p]} $img_name &
+    done
+    wait
+}
+
 # Download images if not already present
 mkdir -vp ~/images
 upload_image cloudimages bionic bionic-server-cloudimg-amd64.img &
+upload_image cloudimages focal focal-server-cloudimg-amd64.img &
+# Set properties needed by octavia-disk-image-retrofit (See LP: #1842430)
+set_img_properties bionic 18.04 bionic-server-cloudimg-amd64.img &
+set_img_properties focal 20.04 focal-server-cloudimg-amd64.img &
 upload_image swift cirros cirros-0.4.0-x86_64-disk.img &
 upload_image swift cirros2 cirros-0.3.5-x86_64-disk.img &
-wait
-
-# Set properties needed by octavia-disk-image-retrofit (See LP: #1842430) - we only do Bionic for now since that's the only one supported.
-img_file=bionic-server-cloudimg-amd64.img
-img_name=bionic
-ts=`stat ~/images/$img_file| sed -r 's/Modify:\s+([[:digit:]-]+)\s+.+/\1/g;t;d'| tr -d '-'`
-declare -A props=( [architecture]=x86_64
-                   [os_distro]='ubuntu'
-                   [os_version]='18.04'
-                   [version_name]="$ts"
-                   [product_name]="com.ubuntu.cloud:server:18.04:amd64"
-)
-for p in ${!props[@]}; do 
-  openstack image set --property $p=${props[$p]} $img_name &
-done
 wait
 
 # TODO: remove fallbacks once we move to queens (they are there for clients still on ocata)

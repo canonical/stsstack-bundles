@@ -9,7 +9,7 @@ declare -A MASTER_OPTS=(
     [VIP_ADDR_START]=10.5.100.0
     [CHARM_REVISIONS]=
 )
-DEFAULT_SERIES=bionic
+DEFAULT_SERIES=focal
 JUJU_VERSION="`juju show-controller| sed -r 's/.+controller-model-version:\s+(.+)/\1/g;t;d' 2>/dev/null`" || true
 [ -n "$JUJU_VERSION" ] || JUJU_VERSION="`juju --version 2>/dev/null| sed -r 's/^([[:digit:]\.]+).*/\1/g'`"
 JUJU_DEPLOY_OPTS=""

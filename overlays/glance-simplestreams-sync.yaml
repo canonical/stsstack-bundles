@@ -11,7 +11,7 @@ applications:
          [{url: 'http://cloud-images.ubuntu.com/daily/',
           name_prefix: 'ubuntu:daily',
           path: 'streams/v1/index.sjson', max: 1,
-          item_filters: ['release~(bionic)',
+          item_filters: ['release~(focal)',
                          'arch~(x86_64|amd64)',
                          'ftype~(disk1.img|disk.img)']}]
       use_swift: __GSSS_SWIFT_ENABLED__
