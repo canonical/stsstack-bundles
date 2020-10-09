@@ -5,6 +5,7 @@ verbose:                    &verbose                   True
 applications:
   neutron-api:
     options:
+      overlay-network-type: 'vxlan gre'
       manage-neutron-plugin-legacy-mode: true
   neutron-openvswitch:
     charm: cs:~openstack-charmers-next/neutron-openvswitch

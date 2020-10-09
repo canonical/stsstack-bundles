@@ -55,7 +55,6 @@ applications:
     options:
       debug: *debug
       verbose: *verbose
-      overlay-network-type: 'vxlan gre'
       default-tenant-network-type: __OVERLAY_NETWORK_TYPE__
       neutron-security-groups: True
       flat-network-providers: physnet1
