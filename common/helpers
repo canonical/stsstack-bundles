@@ -738,6 +738,7 @@ print_msgs ()
                 for _msg in "${msg_cache[@]}"; do echo "  - ${_msg}"; done
                 msg_cache=()
                 prev_key=$key
+                ((count==max-1)) && echo "  - ${msg}"
             fi
             msg_cache[$idx]=$msg
             ((count+=1))
