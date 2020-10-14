@@ -722,12 +722,25 @@ print_msgs ()
     if ((${#MOD_MSGS[@]})); then
         echo -e "\nPost-Deployment Info/Actions:"
         prev_key=""
+        declare -a msg_cache=()
+        count=0
+        max=${#MOD_MSGS[@]}
         for key in `echo ${!MOD_MSGS[@]}| tr -s ' ' '\n'| sort`; do
+            idx=${key##*.}
             msg=${MOD_MSGS[$key]}
             key=${key##*_} # strip order
             key=${key%%.*} # strip index
-            [ "$prev_key" = "$key" ] || echo -e "\n[$key]"; prev_key=$key
-            echo -e "  - $msg"
+            if [ -z "$prev_key" ]; then
+                prev_key=$key
+            elif [ "$prev_key" != "$key" ] || ((count==max-1)); then
+                echo -e "\n[$prev_key]"
+                # we need to do this in order to preserve order
+                for _msg in "${msg_cache[@]}"; do echo "  - ${_msg}"; done
+                msg_cache=()
+                prev_key=$key
+            fi
+            msg_cache[$idx]=$msg
+            ((count+=1))
         done
         echo ""
     fi
