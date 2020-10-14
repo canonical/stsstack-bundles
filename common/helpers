@@ -732,6 +732,10 @@ print_msgs ()
             key=${key%%.*} # strip index
             if [ -z "$prev_key" ]; then
                 prev_key=$key
+                if ((count==max-1)); then
+                    echo -e "\n[$prev_key]"
+                    echo "  - ${msg}"
+                fi
             elif [ "$prev_key" != "$key" ] || ((count==max-1)); then
                 echo -e "\n[$prev_key]"
                 # we need to do this in order to preserve order
