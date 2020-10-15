@@ -7,17 +7,17 @@ declare release=
 declare image_format=
 
 while (( $# > 0 )); do
-  case $1 in
-    --release|-r)
-      release=$2
-      shift
-      ;;
-    --image-format|-f)
-      image_format=$2
-      shift
-      ;;
-    --help|-h)
-      cat <<EOF
+    case $1 in
+        --release|-r)
+            release=$2
+            shift
+            ;;
+        --image-format|-f)
+            image_format=$2
+            shift
+            ;;
+        --help|-h)
+            cat <<EOF
 Usage:
 
 ./tools/upload_octavia_amphora_image.sh --release RELEASE [--image-format FORMAT]
@@ -29,19 +29,19 @@ Options:
 --image-format | -f     The image format {'qcow2', 'raw'}. The default
                         is qcow2.
 EOF
-      exit
-      ;;
-    *)
-      echo "Unknown command line option $1"
-      exit 1
-      ;;
-  esac
-  shift
+            exit
+            ;;
+        *)
+            echo "Unknown command line option $1"
+            exit 1
+            ;;
+    esac
+    shift
 done
 
 if [[ -z ${release} ]]; then
-  echo "Missing release. Please specify one with --release command line option"
-  exit 1
+    echo "Missing release. Please specify one with --release command line option"
+    exit 1
 fi
 
 set -x
@@ -60,7 +60,7 @@ upload_image swift octavia-amphora $img $image_format
 
 image_name=octavia-amphora
 if [[ $image_format == raw ]]; then
-  image_name=${image_name}-raw
+    image_name=${image_name}-raw
 fi
 
 openstack image set --tag octavia-amphora ${image_name}

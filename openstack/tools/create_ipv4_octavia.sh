@@ -1,20 +1,22 @@
 #!/bin/bash
 
+set -u -e -x
+
 # wait for services start
 while true; do
     [[ `juju status keystone --format json | jq -r '.applications.keystone.units."keystone/0"."workload-status".current'` = active ]] \
-    && break
+        && break
     if [[ `juju status keystone --format json | jq -r '.applications.keystone.units."keystone/0"."workload-status".current'` = error ]]
     then
-      echo "ERROR: Octavia deployment failed" 
-      break
+        echo "ERROR: Octavia deployment failed"
+        break
     fi
 done
 
 echo INFO: create temp novarc.services and extract octavia password
 touch /tmp/novarc.services
 
-cat << EOF > /tmp/novarc.services 
+cat << EOF > /tmp/novarc.services
 OS_PROJECT_DOMAIN_NAME=service_domain
 OS_USERNAME=octavia
 OS_PROJECT_NAME=services
@@ -30,8 +32,8 @@ openstack router create lb-mgmt --tag charm-octavia
 openstack router add subnet lb-mgmt lb-mgmt-subnet
 
 echo INFO: add security rules
-openstack security group create lb-mgmt-sec-grp --tag charm-octavia 
-openstack security group create lb-health-mgr-sec-grp --tag charm-octavia-health 
-openstack security group rule create lb-mgmt-sec-grp --protocol icmp 
-openstack security group rule create lb-mgmt-sec-grp --protocol tcp --protocol tcp --dst-port 22 
+openstack security group create lb-mgmt-sec-grp --tag charm-octavia
+openstack security group create lb-health-mgr-sec-grp --tag charm-octavia-health
+openstack security group rule create lb-mgmt-sec-grp --protocol icmp
+openstack security group rule create lb-mgmt-sec-grp --protocol tcp --protocol tcp --dst-port 22
 openstack security group rule create lb-mgmt-sec-grp --protocol tcp --dst-port 9443

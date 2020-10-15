@@ -42,5 +42,4 @@ fi
 server_name="${image_name}-$(date +'%H%M%S')"
 openstack server create --wait --image $image_name --flavor $flavor --key-name testkey --nic net-id=${net_id} --min $instance_qty --max $instance_qty $server_name
 
-# Hint:  use ssh -i ~/testkey.pem ubuntu@<ip> to access new instances (may also need a floating IP).
-
+echo 'Hint: use ssh -i ~/testkey.pem ubuntu@<ip> to access new instances (may also need a floating IP, see ./tools/float_all.sh).'

@@ -40,4 +40,3 @@ juju config octavia \
     lb-mgmt-controller-cert="$(base64 $dout/controller_cert_bundle.pem)"
 
 juju run-action octavia/leader configure-resources --wait
-
