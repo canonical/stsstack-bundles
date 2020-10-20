@@ -31,11 +31,15 @@ fi
 
 dvr_enabled=`juju config neutron-api enable-dvr`
 if [ "$dvr_enabled" = "true" ] || $ovn_enabled; then
-    ./bin/add-data-ports.sh
+    if ${BARE_METAL:-false}; then
+        echo "INFO: set 'juju config neutron-openvswitch data-port=...'"
+    else
+        ./bin/add-data-ports.sh
+    fi
 fi
 
 # add extra port to overcloud neutron-gateway (if exists) and configure charm to use it
-if ((`juju status neutron-gateway --format=json 2>/dev/null| jq '.machines| length'`)); then
+if ! ${BARE_METAL:-false} && ((`juju status neutron-gateway --format=json 2>/dev/null| jq '.machines| length'`)); then
     source ~/novarc
     ./bin/post-deploy-config neutron-gateway
 fi
@@ -81,8 +85,8 @@ upload_image cloudimages focal focal-server-cloudimg-amd64.img &
 # Set properties needed by octavia-disk-image-retrofit (See LP: #1842430)
 set_img_properties bionic 18.04 bionic-server-cloudimg-amd64.img &
 set_img_properties focal 20.04 focal-server-cloudimg-amd64.img &
-upload_image swift cirros cirros-0.4.0-x86_64-disk.img &
-upload_image swift cirros2 cirros-0.3.5-x86_64-disk.img &
+${BARE_METAL:-false} || upload_image swift cirros cirros-0.4.0-x86_64-disk.img &
+${BARE_METAL:-false} || upload_image swift cirros2 cirros-0.3.5-x86_64-disk.img &
 wait
 
 # TODO: remove fallbacks once we move to queens (they are there for clients still on ocata)

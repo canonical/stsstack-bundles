@@ -8,7 +8,7 @@ loglevel:                   &loglevel                  1
 applications:
   ceph-proxy:
     charm: cs:~openstack-charmers-next/ceph-proxy
-    num_units: 1
+    num_units: __NUM_CEPH_PROXY_UNITS__
     constraints: mem=1G
     options:
       loglevel: *loglevel

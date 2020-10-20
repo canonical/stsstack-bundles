@@ -20,7 +20,7 @@ applications:
       ssl_cert: *ssl_cert
       ssl_key: *ssl_key
   swift-storage-z1:
-    num_units: 1
+    num_units: __NUM_SWIFT_STORAGE_UNITS__
     charm: cs:~openstack-charmers-next/swift-storage
     constraints: mem=1G
     options:
@@ -30,7 +30,7 @@ applications:
     storage:
       block-devices: cinder,10G,1
   swift-storage-z2:
-    num_units: 1
+    num_units: __NUM_SWIFT_STORAGE_UNITS__
     charm: cs:~openstack-charmers-next/swift-storage
     constraints: mem=1G
     options:
@@ -40,7 +40,7 @@ applications:
     storage:
       block-devices: cinder,10G,1
   swift-storage-z3:
-    num_units: 1
+    num_units: __NUM_SWIFT_STORAGE_UNITS__
     charm: cs:~openstack-charmers-next/swift-storage
     constraints: mem=1G
     options:

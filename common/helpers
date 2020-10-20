@@ -1,6 +1,8 @@
 #!/bin/bash
 declare -a CACHED_STDIN=( $@ )
 declare -A MASTER_OPTS=(
+    [DEFAULT_BINDING]=alpha
+    [HYPERCONVERGED_DEPLOYMENT]=false
     [CHARM_CHANNEL]=stable
     [MODEL_CONFIG]=''
     [BUNDLE_NAME]=''
@@ -54,8 +56,18 @@ OPTIONS:
         Enable bash debug logging.
      --defaults
         Use module config defaults and don't ask for input.
+     --default-binding
+        Default Juju binding to use when using Juju placement with MAAS.
      -h, --help
         Display this help message.
+     --hyperconverged
+        Create a unit placement overlay to deploy applications in
+        containers where possible. Generally this includes all applications
+        other than nova-compute, ceph-osd and neutron-gateway. Containerised
+        units will be randomly distributed across non-containerised units.
+        Placement ids persist across subsequent runs of the same bundle so as
+        not to break machine mappings. Defaults to true if using a MAAS
+        provider.
      --list
         List existing bundles.
      --list-overlays
@@ -148,6 +160,13 @@ filter_master_opts ()
             --charm-channel)
                 MASTER_OPTS[CHARM_CHANNEL]="$2"
                 shift
+                ;;
+            --default-binding)
+                MASTER_OPTS[DEFAULT_BINDING]="$2"
+                shift
+                ;;
+            --hyperconverged)
+                MASTER_OPTS[HYPERCONVERGED_DEPLOYMENT]=true
                 ;;
             --model-config)
                 if [ -z "${MASTER_OPTS[MODEL_CONFIG]}" ]; then
@@ -754,7 +773,7 @@ print_msgs ()
 
 get_local_upstream_dns ()
 {
-    local server="`systemd-resolve --status 2>/dev/null| sed -r 's/\s+DNS Servers:\s+([[:digit:]]+)/\1/g;t;d'`"
+    local server="`systemd-resolve --status 2>/dev/null| sed -r 's/\s+DNS Servers:\s+([[:digit:]]+)/\1/g;t;d'| head -n 1`"
     (($?==0)) && echo $server && return 0
     echo "10.198.200.1"  # stsstack upstream dns
 }

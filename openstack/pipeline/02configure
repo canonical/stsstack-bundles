@@ -21,6 +21,8 @@ MOD_OVERLAYS+=( "keystone.yaml" )
 
 if is_neutron_gateway_required; then
     MOD_OVERLAYS+=( "neutron-gateway.yaml" )
+else
+    MOD_PARAMS[__NUM_NEUTRON_GATEWAY_UNITS__]=0
 fi
 
 if ! has_opt --ovn*; then

@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# Renderers defined here must be applied to any/all templates.
+
+
+# Each custom bundle generator can specify a set of parameters to apply to
+# bundle templates as variables. They are converted into a sed statement that
+# is passed in to here inside a file and run against the template(s). There is
+# therefore no need to add parameters to this function and they should only
+# be defined in the custom generators.
+render () {
+    local charm_current
+    local charm_new
+
+    # generic parameters only
+    sed -i "s,__SERIES__,$series,g" $1
+
+    # service-specific replacements
+    if [ -n "$INTERNAL_BUNDLE_CONFIG_RENDERER" ]; then
+        eval `cat $INTERNAL_BUNDLE_CONFIG_RENDERER` "$1"
+    fi
+
+    if `grep -q __VIP__ $1`; then
+        vip=$VIP_START_PREFIX.$((VIP_START_SUFFIX++))
+        sed -i -r "s/__VIP__/$vip/g" $1
+    fi
+
+    # Process charm revisions from bundle first.
+    for key in ${!MASTER_OPTS[@]}; do
+        prefix="CHARM_REVISIONS\."
+        # skip any key that isnt a charm revision
+        [[ ${key##$prefix} != $key ]] || continue
+        charm_current=${key##$prefix}
+        charm_new=${MASTER_OPTS[$key]}
+        # skip if the charm we are replacing isnt in the template
+        grep -q $charm_current $1 || continue
+        sed -i -r "s,charm:.*${charm_current}\$,charm: $charm_new," $1
+    done
+
+    if has_opt --use-stable-charms; then
+        sed -i -r 's,~openstack-charmers-next/,,g' $1
+    fi
+}
+

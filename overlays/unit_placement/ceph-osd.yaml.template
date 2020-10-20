@@ -1,0 +1,3 @@
+  ceph-osd:
+    to:
+__UNIT_PLACEMENT_METAL__.__UNITS__.__NUM_CEPH_OSD_UNITS__

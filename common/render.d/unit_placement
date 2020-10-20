@@ -1,0 +1,88 @@
+#!/bin/bash
+placement_templates_dir=$MOD_DIR/common/placement_templates
+
+# Renderers defined here must be applied to any/all templates that contain Juju placement stanzas.
+
+
+_render_placement_units ()
+{
+    local template=$1
+    local template_short=`basename $1`
+    local num_machines=$2
+    local placement_type=$3  # LXD/METAL
+    local num_units_key=
+    local machine_offset=0
+    local machine_offset_key=
+
+    # Find out how many units this application has
+    placement_key=__UNIT_PLACEMENT_${placement_type}__
+    num_units_key=`sed -rn "s/$placement_key\.__UNITS__\.(.+)/\1/p" $template`
+    [ -n "$num_units_key" ] || return 0
+    num_units=${MOD_PARAMS[$num_units_key]}
+    if [[ $placement_type == METAL ]]; then
+        machine_offset_key=`sed -rn "s/$placement_key\.__MACHINE_OFFSET__\.(.+)/\1/p" $template`
+        if [ -n "$machine_offset_key" ]; then
+            machine_offset=${MOD_PARAMS[$machine_offset_key]}
+        fi
+    fi
+
+    ((num_units<=num_machines)) || \
+        { echo "ERROR: more units requested ($num_units) that machines available ($num_machines) (template=$template_short)"; exit 1; }
+
+    # remove metadata
+    sed -i "s/\.__UNITS__\.$num_units_key//" $template
+    [ -z "$machine_offset_key" ] || sed -ri "/.+$machine_offset_key.*/d" $template
+
+    # pick $num_units machines at random but preserve existing unit ids
+    local id_cache=$PLACEMENT_OVERLAYS_DIR/$template_short.units.machine.ids
+    local -A id_dict=()
+    # load existing
+    [ -e "$id_cache" ] && while read line; do id_dict[$line]=0; done < $id_cache
+    # fill gaps
+    while ((${#id_dict[@]}<num_units)); do
+        if [[ $placement_type == METAL ]]; then
+            id=$((($RANDOM % num_units) + machine_offset))
+        else
+            id=$(($RANDOM % num_machines))
+        fi
+        id_dict[$id]=0
+        ! [ -e "$id_cache" ] || ((${#id_dict[@]} > `wc -l $id_cache| awk '{print $1}'`)) || continue
+        echo $id >> $id_cache
+    done
+
+    local tmp_out=$PLACEMENT_OVERLAYS_DIR/$template_short.units.${placement_type,,}
+    rm -f $tmp_out
+    for ((i=1;i<=num_units;i++)); do
+        id=`sed "${i}q;d" $id_cache`
+        cat $placement_templates_dir/unit_${placement_type,,}.yaml| \
+            sed -r -e "s/__MACHINE_ID__/$id/g" >> $tmp_out
+    done
+
+    local units="`cat $tmp_out| sed ':a;N;$!ba;s/\n/\\\n/g'`"
+    sed -i "s/$placement_key/$units/" $template
+}
+
+render_placement_units_lxd ()
+{
+    _render_placement_units $1 $2 LXD
+}
+
+render_placement_units_metal ()
+{
+    _render_placement_units $1 $2 METAL
+}
+
+render_placement_machines ()
+{
+    local template=$1
+    local num_machines=$2
+
+    rm -f $PLACEMENT_OVERLAYS_DIR/machines
+    for ((id=0; id<num_machines; id++)) do
+        cat $placement_templates_dir/machine.yaml| sed -r -e "s/__MACHINE_ID__/$id/g" >> $PLACEMENT_OVERLAYS_DIR/machines
+    done
+
+    local machines="`cat $PLACEMENT_OVERLAYS_DIR/machines| sed ':a;N;$!ba;s/\n/\\\n/g'`"
+    sed -i "s/__MACHINE_INFO__/$machines/" $template
+}
+

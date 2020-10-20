@@ -1,0 +1,3 @@
+  nova-cloud-controller:
+    to:
+__UNIT_PLACEMENT_LXD__.__UNITS__.__NUM_NOVACC_UNITS__

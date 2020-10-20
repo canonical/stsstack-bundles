@@ -10,8 +10,8 @@ declare -a overlay_opts=()
 update_master_opts ${MOD_PASSTHROUGH_OPTS[@]}
 
 vip_start=${MASTER_OPTS[VIP_ADDR_START]}
-vip_start_prefix=${vip_start%\.*}
-vip_start_suffix=${vip_start##*\.}
+VIP_START_PREFIX=${vip_start%\.*}
+VIP_START_SUFFIX=${vip_start##*\.}
 
 if [ -z "$MOD_BASE_TEMPLATE" ]; then
     echo "ERROR: no template provided with --template"
@@ -24,10 +24,11 @@ elif has_opt --create-model && [ -z "${MASTER_OPTS[BUNDLE_NAME]}" ]; then
     exit 1
 fi
 
+# If we need a model for this deployment, ensure it exists
 ensure_model
-[ -n "${MASTER_OPTS[MODEL_CONFIG]}" ] && juju model-config ${MASTER_OPTS[MODEL_CONFIG]}
-
-bundles_dir=`get_bundle_state_dir`
+if [ -n "${MASTER_OPTS[MODEL_CONFIG]}" ]; then
+    juju model-config ${MASTER_OPTS[MODEL_CONFIG]}
+fi
 
 if has_opt --list; then
     state_root=`get_bundle_state_root`
@@ -40,6 +41,8 @@ if has_opt --list; then
     fi
     exit
 fi
+
+bundles_dir=`get_bundle_state_dir`
 mkdir -p $bundles_dir
 
 finish ()
@@ -63,52 +66,24 @@ finish ()
 # command.
 has_opt --replay && finish
 
-# Each custom bundle generator can specify a set of parameters to apply to
-# bundle templates as variables. They are converted into a sed statement that
-# is passed in to here inside a file and run against the template(s). There is
-# therefore no need to add parameters to this function and they should only
-# be defined in the custom generators.
-render () {
-    local charm_current
-    local charm_new
+# Flush any existing overlays
+rm -f $bundles_dir/o/*
 
-    # generic parameters only
-    sed -i "s,__SERIES__,$series,g" $1
+# Establish what cloud provider is in use and if it's MAAS, use unit placement.
+cloud=`juju show-model| sed -rn 's/.+cloud:\s*(.+).*/\1/p'| uniq`
+type=`juju show-cloud $cloud| sed -rn 's/^type:\s*(.+).*/\1/p'| uniq`
+if [[ $type = maas ]]; then
+    echo "INFO: maas provider detected - enabling hyperconverged deployment"
+    MASTER_OPTS[HYPERCONVERGED_DEPLOYMENT]=true
+fi
 
-    # service-specific replacements
-    if [ -n "$INTERNAL_BUNDLE_CONFIG_RENDERER" ]; then
-        eval `cat $INTERNAL_BUNDLE_CONFIG_RENDERER` "$1"
-    fi
-
-    if `grep -q __VIP__ $1`; then
-        vip=$vip_start_prefix.$((vip_start_suffix++))
-        sed -i -r "s/__VIP__/$vip/g" $1
-    fi
-
-    # Process charm revisions from bundle first.
-    for key in ${!MASTER_OPTS[@]}; do
-        prefix="CHARM_REVISIONS\."
-        # skip any key that isnt a charm revision
-        [[ ${key##$prefix} != $key ]] || continue
-        charm_current=${key##$prefix}
-        charm_new=${MASTER_OPTS[$key]}
-        # skip if the charm we are replacing isnt in the template
-        grep -q $charm_current $1 || continue
-        sed -i -r "s,charm:.*${charm_current}\$,charm: $charm_new," $1
-    done
-
-    if has_opt --use-stable-charms; then
-        sed -i -r 's,~openstack-charmers-next/,,g' $1
-    fi
-}
-
-render_resources_path () {
-    local file="$1"
-    local name=`basename $file`
-    local path=resources/${name%%.*}/
-
-    sed -i -r "s,__RESOURCES_PATH__,$path,g" $file
-}
+. $MOD_DIR/common/render.d/all
+if ${MASTER_OPTS[HYPERCONVERGED_DEPLOYMENT]}; then
+    PLACEMENT_OVERLAYS_DIR=$bundles_dir/p
+    mkdir -p $PLACEMENT_OVERLAYS_DIR
+    . $MOD_DIR/common/render.d/resources
+    . $MOD_DIR/common/render.d/unit_placement
+fi
 
 if has_opt --use-stable-charms; then
     msg="using stable charms"
@@ -128,8 +103,9 @@ bundle=${template_path%%.template}
 cp $MOD_DIR/$MOD_BASE_TEMPLATE $bundle
 render $bundle
 mv $bundle $bundles_dir
-[ -r "$INTERNAL_BUNDLE_CONFIG" ] && \
+if [ -r "$INTERNAL_BUNDLE_CONFIG" ]; then
     cp $INTERNAL_BUNDLE_CONFIG $bundles_dir/config
+fi
 rmdir $dtmp
 
 # Copy base bundle resources to bundles dir (if exists)
@@ -143,6 +119,7 @@ if [ -d "$resource_path" ]; then
         render_resources_path $bundles_dir/$name
     fi
 fi
+
 # De-duplicate overlay list and create bundle structure.
 if ((${#MOD_OVERLAYS[@]})); then
     mkdir -p $bundles_dir/o
@@ -164,13 +141,46 @@ if ((${#MOD_OVERLAYS[@]})); then
             render_resources_path $bundles_dir/o/$overlay
         fi
     done
-    ((${#overlay_opts[@]})) && overlay_opts+=("")  # right padding
 
     echo "Created ${MASTER_OPTS[TARGET_RELEASE_NAME]} bundle and overlays ($msg):"
     echo -e " ${msgs[@]}"
 else
     echo -e "Created ${MASTER_OPTS[TARGET_RELEASE_NAME]} bundle ($msg)\n"
 fi
+
+# Generate placement overlay for use with MAAS provider
+if ${MASTER_OPTS[HYPERCONVERGED_DEPLOYMENT]}; then
+    cp  $MOD_DIR/overlays/unit_placement/header.yaml.template $bundles_dir/unit-placement.yaml
+    # these two represent total machines since e.g. ceph is deployed on compute but compute and gateway are never colocated
+    num_placement_machines=$((${MOD_PARAMS[__NUM_NEUTRON_GATEWAY_UNITS__]}+${MOD_PARAMS[__NUM_COMPUTE_UNITS__]}))
+    # detect all apps used and generate placement info
+    for app in `egrep -hr "^\s+[0-9a-z\-]+:$" $bundles_dir --exclude-dir=p| sed -rn 's/\s+([[:alnum:]\-]+):.*/\1/p'| sort -u`; do
+        # filter juju keywords
+        [[ $app == "options" ]] || [[ $app == "to" ]] || [[ $app == "storage" ]] && continue
+        app_placement=${app}.yaml
+        t=$MOD_DIR/overlays/unit_placement/${app_placement}.template
+        [ -r "$t" ] || continue
+        # load template
+        cp $t $PLACEMENT_OVERLAYS_DIR/$app_placement
+        # apply all renderers
+        render_placement_units_lxd $PLACEMENT_OVERLAYS_DIR/$app_placement $num_placement_machines
+        render_placement_units_metal $PLACEMENT_OVERLAYS_DIR/$app_placement $num_placement_machines
+        render $PLACEMENT_OVERLAYS_DIR/$app_placement
+        # add to master placement overlay
+        cat $PLACEMENT_OVERLAYS_DIR/$app_placement >> $bundles_dir/unit-placement.yaml
+    done
+    # finally render master machine list
+    render_placement_machines $bundles_dir/unit-placement.yaml $num_placement_machines
+    render $bundles_dir/unit-placement.yaml
+    # and add to list of overlays
+    overlay_opts+=( --overlay $bundles_dir/unit-placement.yaml )
+
+    # add default binding to all applications
+    bindings="\    bindings:\n      '': ${MASTER_OPTS[DEFAULT_BINDING]}"
+    find $bundles_dir -name \*.yaml| xargs -l sed -i -r "/^\s+charm:.+/a$bindings"
+fi
+
+((${#overlay_opts[@]})) && overlay_opts+=("")  # right padding
 
 base_bundle=$bundles_dir/`basename $bundle`
 echo -e "juju deploy${JUJU_DEPLOY_OPTS} ${base_bundle}${overlay_opts[@]:- }${channel_param}\n " > ${bundles_dir}/command

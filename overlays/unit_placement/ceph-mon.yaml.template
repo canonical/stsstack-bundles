@@ -1,0 +1,3 @@
+  ceph-mon:
+    to:
+__UNIT_PLACEMENT_LXD__.__UNITS__.__NUM_CEPH_MON_UNITS__
