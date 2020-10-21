@@ -483,16 +483,25 @@ do
             MOD_OVERLAYS+=( "telemetry.yaml" )
 
             if has_opt --vault; then
-                MOD_OVERLAYS+=( "gnocchi-vault.yaml" )
+                MOD_OVERLAYS+=( "vault-openstack-certificates-gnocchi.yaml" )
+                MOD_OVERLAYS+=( "vault-openstack-certificates-ceilometer.yaml" )
+                MOD_OVERLAYS+=( "vault-openstack-certificates-aodh.yaml" )
             fi
             ;;
         --telemetry-legacy-aodh)
             # ceilometer + aodh + mongodb (<= pike)
             MOD_OVERLAYS+=( "telemetry-legacy-aodh.yaml" )
+            if has_opt --vault; then
+                MOD_OVERLAYS+=( "vault-openstack-certificates-ceilometer.yaml" )
+                MOD_OVERLAYS+=( "vault-openstack-certificates-aodh.yaml" )
+            fi
             ;;
         --telemetry-legacy)
             # ceilometer + mongodb (<= pike)
             MOD_OVERLAYS+=( "telemetry-legacy.yaml" )
+            if has_opt --vault; then
+                MOD_OVERLAYS+=( "vault-openstack-certificates-ceilometer.yaml" )
+            fi
             ;;
         --telemetry-ha*)
             get_units $1 __NUM_TELEMETRY_UNITS__ 3
