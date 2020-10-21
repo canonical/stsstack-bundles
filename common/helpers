@@ -455,6 +455,7 @@ has_min_series ()
 
     local min_series="$1"
     local series="`get_series`"
+    series=$(ost_series_autocorrect "$series" "`get_release`" 2>/dev/null)
     local match=false
     local lts_arr=()
     local all_series=()
