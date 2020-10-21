@@ -165,7 +165,7 @@ do
             ;;
         --dvr-snat-l3ha*)
             assert_min_release queens "dvr-snat-l3ha"
-            get_units $1 __NUM_COMPUTE_UNITS__ 3
+            has_opt --num-compute || get_units $1 __NUM_COMPUTE_UNITS__ 3
             get_units $1 __NUM_AGENTS_PER_ROUTER__ 3
             MOD_OVERLAYS+=( "neutron-dvr-snat.yaml" )
             has_opt --dvr-snat* || \
@@ -174,7 +174,7 @@ do
             ;;
         --dvr-snat*)
             assert_min_release queens "dvr-snat"
-            get_units $1 __NUM_COMPUTE_UNITS__ 1
+            has_opt --num-compute || get_units $1 __NUM_COMPUTE_UNITS__ 1
             has_opt --dvr || { set -- $@ --dvr && cache $@; }
             MOD_OVERLAYS+=( "neutron-dvr-snat.yaml" )
             ;;
