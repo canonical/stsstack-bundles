@@ -279,6 +279,9 @@ do
             # NOTE: 3 is actually the absolute minimum units required
             get_units $1 __NUM_MYSQL_UNITS__ 3
             MOD_OVERLAYS+=( "mysql-innodb-cluster.yaml")
+            if has_opt --vault; then
+                MOD_OVERLAYS+=( "vault-certificates-mysql-innodb-cluster.yaml" )
+            fi
             ;;
         --no-ml2dns)  #__OPT__
             conflicts_with $1 --ml2dns
