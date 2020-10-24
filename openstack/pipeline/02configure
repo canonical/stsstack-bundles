@@ -277,7 +277,7 @@ do
             conflicts_with $1 --mysql-ha*
             assert_min_release train mysql-innodb-cluster
             # NOTE: 3 is actually the absolute minimum units required
-            get_units $1 __NUM_MYSQL_INNODB_UNITS__ 3
+            get_units $1 __NUM_MYSQL_UNITS__ 3
             MOD_OVERLAYS+=( "mysql-innodb-cluster.yaml")
             ;;
         --no-ml2dns)  #__OPT__

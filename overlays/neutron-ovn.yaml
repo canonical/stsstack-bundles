@@ -15,7 +15,7 @@ applications:
   ovn-central:
     charm: cs:~openstack-charmers-next/ovn-central
     constraints: mem=2G
-    num_units: 3
+    num_units: __NUM_OVN_CENTRAL_UNITS__
     options:
       source: *openstack_origin
   ovn-chassis:

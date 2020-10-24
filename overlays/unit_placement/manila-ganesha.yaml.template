@@ -1,0 +1,3 @@
+  manila-ganesha:
+    to:
+__UNIT_PLACEMENT_LXD__.__UNITS__.__NUM_MANILA_GANESHA_UNITS__

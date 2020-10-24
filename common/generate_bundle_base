@@ -153,8 +153,10 @@ if ${MASTER_OPTS[HYPERCONVERGED_DEPLOYMENT]}; then
     cp  $MOD_DIR/overlays/unit_placement/header.yaml.template $bundles_dir/unit-placement.yaml
     # these two represent total machines since e.g. ceph is deployed on compute but compute and gateway are never colocated
     num_placement_machines=$((${MOD_PARAMS[__NUM_NEUTRON_GATEWAY_UNITS__]}+${MOD_PARAMS[__NUM_COMPUTE_UNITS__]}))
-    # detect all apps used and generate placement info
-    for app in `egrep -hr "^\s+[0-9a-z\-]+:$" $bundles_dir --exclude-dir=p| sed -rn 's/\s+([[:alnum:]\-]+):.*/\1/p'| sort -u`; do
+    # detect all apps used and generate placement info by doing:
+    #  * search for all app names in generated bundles/overlays
+    #  * search unit_placement template with same name
+    for app in `egrep -hr "^\s+[0-9a-z\-]+:(\s*#*.*)$" $bundles_dir --exclude-dir=p| sed -rn 's/\s+([[:alnum:]\-]+):.*/\1/p'| sort -u`; do
         # filter juju keywords
         [[ $app == "options" ]] || [[ $app == "to" ]] || [[ $app == "storage" ]] && continue
         app_placement=${app}.yaml
