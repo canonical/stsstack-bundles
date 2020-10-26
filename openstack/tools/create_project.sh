@@ -4,6 +4,9 @@ project_name=${1:-project-$id}
 domain=${2:-user_domain}
 network=${3:-172.16.0.0/24}
 
+# ensure deps
+dpkg -s ipcalc &>/dev/null|| sudo apt install ipcalc -y
+
 echo "Creating project $project_name"
 
 openstack domain show $domain 2>/dev/null || openstack domain create $domain
