@@ -4,6 +4,7 @@ lb=lb1
 member_vm=
 protocol=HTTP
 protocol_port=80
+hm_protocol=
 
 while (( $# > 0 )); do
     case $1 in
@@ -39,6 +40,14 @@ while (( $# > 0 )); do
             protocol_port=$2
             shift
             ;;
+	--healthmonitor-protocol)
+            if (( $# < 2 )); then
+                echo "missing protocol for healthmonitor"
+                exit 1
+            fi
+	    hm_protocol=$2
+	    shift
+	    ;;
         -h|--help)
             cat <<EOF
 Usage:
@@ -61,9 +70,11 @@ EOF
     esac
     shift
 done
-
+if [ -z "$hm_protocol" ]; then
+    hm_protocol=$protocol
+fi
 url_path=
-if [[ ${protocol} == HTTP ]]; then
+if [[ ${hm_protocol} == HTTP ]]; then
     url_path="--url-path /"
 fi
 
@@ -104,7 +115,7 @@ while true; do
 done
 
 HM_ID=$(openstack loadbalancer healthmonitor create \
-    --name ${lb}-healthmonitor --delay 5 --max-retries 4 --timeout 10 --type ${protocol} ${url_path} ${POOL_ID} \
+    --name ${lb}-healthmonitor --delay 5 --max-retries 4 --timeout 10 --type ${hm_protocol} ${url_path} ${POOL_ID} \
     --format value --column id)
 openstack loadbalancer healthmonitor list
 
