@@ -413,6 +413,8 @@ do
             # since ports typically set post-deployment ensure we don't clobber on re-run
             opt=`update_from_charm_config $1 ovn-chassis bridge-interface-mappings`
             MOD_OVERLAYS+=( "neutron-ovn.yaml" )
+            # needs to be left blank since it is configured by the neutron-api-plugin-ovn charm
+            MOD_PARAMS[__OVERLAY_NETWORK_TYPE__]=""
             if ! has_opt --vault*; then
                 set -- $@ --vault && cache $@
             fi
