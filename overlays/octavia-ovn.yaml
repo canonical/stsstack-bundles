@@ -1,3 +1,6 @@
+applications:
+  octavia-ovn-chassis:
+    charm: cs:~openstack-charmers-next/ovn-chassis
 relations:
-  - [ octavia:ovsdb-subordinate, ovn-chassis:ovsdb-subordinate ]
+  - [ octavia:ovsdb-subordinate, octavia-ovn-chassis:ovsdb-subordinate ]
   - [ octavia:ovsdb-cms, ovn-central:ovsdb-cms ]
