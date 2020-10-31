@@ -1,2 +1,2 @@
 relations:
-  - ['mysql-innodb-cluster:certificates', 'vault:certificates']
+  - ['mysql:certificates', 'vault:certificates']
