@@ -459,6 +459,18 @@ assert_min_release ()
     exit 1
 }
 
+assert_max_release ()
+{
+    local max="$1"
+    local feature_name="$2"
+    local r=`get_release`
+
+    [ -n "$r" ] || r=${lts[`get_series ${CACHED_STDIN[@]}`]:-${nonlts[`get_series ${CACHED_STDIN[@]}`]:-""}}
+    [[ "$r" > "$max" ]] || return 0
+    echo "Max release '$max' required to be able to use $feature_name (currently using '$r')" 1>&2
+    exit 1
+}
+
 has_min_release ()
 {
     return $(assert_min_release $1 "" &>/dev/null)
