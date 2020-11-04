@@ -27,7 +27,7 @@ source /tmp/novarc.services
 
 echo INFO: create octavia network, subnet, router, add subnet to router
 openstack network create lb-mgmt-net --tag charm-octavia
-openstack subnet create --tag charm-octavia --subnet-range 21.0.0.0/29 --dhcp  --ip-version 4 --network lb-mgmt-net lb-mgmt-subnet
+openstack subnet create --tag charm-octavia --subnet-range 10.100.0.0/24 --dhcp  --ip-version 4 --network lb-mgmt-net lb-mgmt-subnet
 openstack router create lb-mgmt --tag charm-octavia
 openstack router add subnet lb-mgmt lb-mgmt-subnet
 
