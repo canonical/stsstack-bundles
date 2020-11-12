@@ -22,7 +22,7 @@ if [ -n "`juju config keystone ssl_cert`" ]; then
     export OS_AUTH_PROTOCOL=https
 elif ((`jq -r '.applications[]| select(."charm-name"=="vault")' $juju_status_json_cache| wc -l`)); then
     # Vault-based ssl
-    if `jq -r .applications.vault.relations.certificates[] $juju_status_json_cache| grep -q keystone`; then
+    if `jq -r '.applications.vault.relations.certificates[]' $juju_status_json_cache| grep -q keystone`; then
         export OS_AUTH_PROTOCOL=https
     fi
 else
