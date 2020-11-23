@@ -32,5 +32,4 @@ if [[ `juju status keystone --format=json 2>/dev/null| jq '.machines| length'` -
     source kube-keystone.sh
 fi
 
-
 kubectl --namespace kube-system get pods
