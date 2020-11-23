@@ -74,6 +74,7 @@ do
             ;;
         --ceph-fs)
             MOD_OVERLAYS+=( "ceph-fs.yaml" )
+            MOD_OVERLAYS+=( "ceph-fs-k8s.yaml" )
             ;;
         --ceph-fs-ha*)
             get_units $1 __NUM_CEPH_FS_UNITS__ 3
