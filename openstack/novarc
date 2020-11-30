@@ -7,8 +7,8 @@ trap cleanup EXIT KILL
 # cache juju status
 juju status --format=json > $juju_status_json_cache
 
-_OS_PARAMS=$(env | awk 'BEGIN {FS="="} /^OS_/ {print $1;}' | paste -sd ' ')
-for param in $_OS_PARAMS; do
+_OS_PARAMS=($(env | awk 'BEGIN {FS="="} /^OS_/ {print $1;}'))
+for param in ${_OS_PARAMS[@]}; do
     unset $param
 done
 
