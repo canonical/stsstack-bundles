@@ -29,7 +29,24 @@ MOD_OVERLAYS+=(
     "easyrsa.yaml"
     "k8s-etcd.yaml"
 )
-if ! has_opt --master-ha* && ! has_opt --lb-octavia; then
+
+add_mysql_overlay ()
+{
+    # NOTE: this is (should be) the same across all modules using mysql
+    if has_min_series focal; then
+        # There is no Focal support for percona-cluster
+        MOD_OVERLAYS+=( "mysql-innodb-cluster.yaml")
+    else
+        MOD_OVERLAYS+=( "mysql.yaml" )
+    fi
+}
+
+using_kubeapi_lb ()
+{
+    ! has_opt --master-ha* && ! has_opt --lb-octavia
+}
+
+if using_kubeapi_lb; then
     MOD_OVERLAYS+=( "k8s-lb.yaml"  )
 fi
 # default to flannel cni
@@ -122,13 +139,7 @@ do
         --keystone)
             MOD_OVERLAYS+=( "keystone.yaml" )
             MOD_OVERLAYS+=( "k8s-keystone.yaml" )
-            # NOTE: this is (should be) the same across all modules using mysql
-            if has_min_series focal; then
-                # There is no Focal support for percona-cluster
-                MOD_OVERLAYS+=( "mysql-innodb-cluster.yaml")
-            else
-                MOD_OVERLAYS+=( "mysql.yaml" )
-            fi
+            add_mysql_overlay
             ;;
         --lb-ha-hacluster*|--lb-ha-keepalived*)
             conflicts_with $1 --lb-octavia
@@ -160,8 +171,9 @@ do
             ;;
         --vault)
             MOD_OVERLAYS+=( "vault.yaml" )
-            MOD_OVERLAYS+=( "mysql.yaml" )
+            add_mysql_overlay
             MOD_OVERLAYS+=( "k8s-vault.yaml" )
+            using_kubeapi_lb && MOD_OVERLAYS+=( "k8s-vault-lb.yaml" )
             has_opt --ceph && MOD_OVERLAYS+=( "vault-ceph.yaml" )
             # NOTE: force stable since these charms are not published to edge
             MOD_PARAMS[__CHARM_CHANNEL__]=stable

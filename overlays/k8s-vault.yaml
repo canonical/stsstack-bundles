@@ -2,4 +2,3 @@ relations:
  - ['etcd:certificates', 'vault:certificates']
  - ['kubernetes-master:certificates', 'vault:certificates']
  - ['kubernetes-worker:certificates', 'vault:certificates']
- - ['kubeapi-load-balancer:certificates', 'vault:certificates']
