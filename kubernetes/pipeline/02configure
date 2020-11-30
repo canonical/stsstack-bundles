@@ -35,6 +35,7 @@ add_mysql_overlay ()
     # NOTE: this is (should be) the same across all modules using mysql
     if has_min_series focal; then
         # There is no Focal support for percona-cluster
+        MOD_PARAMS[__NUM_MYSQL_UNITS__]=3
         MOD_OVERLAYS+=( "mysql-innodb-cluster.yaml")
     else
         MOD_OVERLAYS+=( "mysql.yaml" )
