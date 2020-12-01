@@ -202,6 +202,14 @@ do
             MOD_PARAMS[__NUM_K8S_MASTER_UNITS__]=$2
             shift
             ;;
+        --lma)
+            MOD_OVERLAYS+=( "grafana.yaml ")
+            MOD_OVERLAYS+=( "prometheus-k8s.yaml ")
+            if has_opt --ceph; then
+                MOD_OVERLAYS+=( "prometheus-ceph.yaml ")
+            fi
+            MOD_MSGS[grafana.0]="need to manually relate telegraf to any services you want to monitor"
+            ;;
         *)
             echo "ERROR: invalid input '$1'"
             _usage
