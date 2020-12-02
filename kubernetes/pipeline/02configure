@@ -56,7 +56,7 @@ if ! has_opt --calico && ! has_opt --canal; then
 fi
 if ! has_opt --vault*; then
     MOD_OVERLAYS+=( "k8s-easyrsa.yaml" )
-    if ! `has_opt '--lb-octavia'`; then
+    if using_kubeapi_lb; then
         MOD_OVERLAYS+=( "k8s-lb-easyrsa.yaml" )
     fi
 fi
@@ -160,6 +160,7 @@ do
         --lb-octavia)
             conflicts_with $1 '--lb-ha-hacluster*'
             conflicts_with $1 '--lb-ha-keepalived*'
+            conflicts_with $1 '--master-ha*'
             MOD_OVERLAYS+=( "k8s-octavia-lb.yaml" )
             ;;
         --master-ha*)
