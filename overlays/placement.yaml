@@ -11,6 +11,6 @@ applications:
       debug: *debug
       openstack-origin: *openstack_origin
 relations:
-  - [ placement, mysql ]
+  - [ placement:shared-db, __MYSQL_INTERFACE__ ]
   - [ placement, keystone ]
   - [ placement, nova-cloud-controller ]

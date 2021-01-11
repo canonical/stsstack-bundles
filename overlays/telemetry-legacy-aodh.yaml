@@ -34,5 +34,5 @@ relations:
   - [ ceilometer-agent, ceilometer ]
   - [ ceilometer-agent, rabbitmq-server ]
   - [ aodh, rabbitmq-server ]
-  - [ aodh, mysql ]
+  - [ aodh:shared-db, __MYSQL_INTERFACE__ ]
   - [ aodh, keystone ]

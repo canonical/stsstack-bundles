@@ -66,8 +66,9 @@ finish ()
 # command.
 has_opt --replay && finish
 
-# Flush any existing overlays
+# Purge any existing overlays and parts
 rm -f $bundles_dir/o/*
+rm -rf $bundles_dir/parts
 
 # Establish what cloud provider is in use and if it's MAAS, use unit placement.
 cloud=`juju show-model| sed -rn 's/.+cloud:\s*(.+).*/\1/p'| uniq`
@@ -77,6 +78,9 @@ if [[ $type = maas ]]; then
     MASTER_OPTS[HYPERCONVERGED_DEPLOYMENT]=true
 fi
 
+# load renderers
+RENDER_PARTS_DIR=$bundles_dir/parts
+mkdir -p $RENDER_PARTS_DIR
 . $MOD_DIR/common/render.d/all
 if ${MASTER_OPTS[HYPERCONVERGED_DEPLOYMENT]}; then
     PLACEMENT_OVERLAYS_DIR=$bundles_dir/p
@@ -181,6 +185,10 @@ if ${MASTER_OPTS[HYPERCONVERGED_DEPLOYMENT]}; then
     bindings="\    bindings:\n      '': ${MASTER_OPTS[DEFAULT_BINDING]}"
     find $bundles_dir -name \*.yaml| xargs -l sed -i -r "/^\s+charm:.+/a$bindings"
 fi
+
+# put together any mysql interface parts that may have been generated as part
+# of render()
+aggregate_mysql_interface_parts $bundles_dir/o
 
 ((${#overlay_opts[@]})) && overlay_opts+=("")  # right padding
 

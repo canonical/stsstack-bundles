@@ -42,8 +42,8 @@ applications:
       verbose: *verbose
       openstack-origin: *openstack_origin
 relations:
-  - [ keystone, mysql ]
+  - [ keystone:shared-db, __MYSQL_INTERFACE__ ]
   - [ ceph-mon, ceph-osd ]
-  - [ glance, mysql ]
+  - [ glance:shared-db, __MYSQL_INTERFACE__ ]
   - [ glance, keystone ]
   - [ glance, __CEPH_INTERFACE__]

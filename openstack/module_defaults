@@ -44,6 +44,7 @@ MOD_PARAMS[__AMPHORA_SSH_PUB_KEY__]=''
 MOD_PARAMS[__GSSS_SWIFT_ENABLED__]=false  # glance-simplestreams-sync can optionally store index data in swift
 MOD_PARAMS[__LDAP_SERVER__]=''
 MOD_PARAMS[__OVERLAY_NETWORK_TYPE__]='vxlan'
+MOD_PARAMS[__MYSQL_INTERFACE__]='mysql:shared-db'
 
 # This is enough for creating one ubuntu vm or multiple cirros vms but some
 # scenarios may want to allow more per compute (e.g. octavia).

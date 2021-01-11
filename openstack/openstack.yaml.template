@@ -93,8 +93,8 @@ applications:
       ssl_cert: *ssl_cert
       ssl_key: *ssl_key
 relations:
-  - [ keystone, mysql ]
-  - [ "nova-cloud-controller:shared-db", mysql ]
+  - [ keystone:shared-db, __MYSQL_INTERFACE__ ]
+  - [ nova-cloud-controller:shared-db, __MYSQL_INTERFACE__ ]
   - [ "nova-cloud-controller:amqp", rabbitmq-server ]
   - [ nova-cloud-controller, glance ]
   - [ nova-cloud-controller, keystone ]
@@ -102,15 +102,15 @@ relations:
   - - nova-compute
     - rabbitmq-server:amqp
   - [ nova-compute, glance ]
-  - [ glance, mysql ]
+  - [ glance:shared-db, __MYSQL_INTERFACE__ ]
   - [ glance, keystone ]
   - [ glance, "cinder:image-service" ]
   - [ glance, rabbitmq-server ]
-  - [ cinder, mysql ]
+  - [ cinder:shared-db, __MYSQL_INTERFACE__ ]
   - [ cinder, rabbitmq-server ]
   - [ cinder, nova-cloud-controller ]
   - [ cinder, keystone ]
-  - [ neutron-api, mysql ]
+  - [ neutron-api:shared-db, __MYSQL_INTERFACE__ ]
   - [ neutron-api, rabbitmq-server ]
   - [ neutron-api, nova-cloud-controller ]
   - [ neutron-api, keystone ]

@@ -23,7 +23,7 @@ applications:
       reverse-dns-lookup: True
 relations:
   - [ designate, keystone ]
-  - [ designate, mysql ]
+  - [ designate:shared-db, __MYSQL_INTERFACE__ ]
   - [ designate, rabbitmq-server ]
   - [ designate, designate-bind ]
   - [ designate, memcached ]

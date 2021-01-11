@@ -13,6 +13,6 @@ applications:
       verbose: *verbose
       openstack-origin: *openstack_origin
 relations:
-  - [ heat, mysql ]
+  - [ heat:shared-db, __MYSQL_INTERFACE__ ]
   - [ heat, keystone ]
   - [ heat, rabbitmq-server ]

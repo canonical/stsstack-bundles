@@ -23,10 +23,10 @@ applications:
       share-protocols: NFS
 relations:
   - [ manila-ganesha, __CEPH_INTERFACE__ ]
-  - [ manila-ganesha, mysql ]
+  - [ manila-ganesha:shared-db, __MYSQL_INTERFACE__ ]
   - [ manila-ganesha, rabbitmq-server ]
   - [ manila-ganesha, keystone ]
   - [ manila, manila-ganesha ]
   - [ manila, rabbitmq-server ]
   - [ manila, keystone ]
-  - [ manila, mysql ] 
+  - [ manila:shared-db, __MYSQL_INTERFACE__ ]

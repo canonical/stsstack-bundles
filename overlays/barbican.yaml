@@ -13,6 +13,6 @@ applications:
       openstack-origin: *openstack_origin
 relations:
   - [ barbican:amqp, rabbitmq-server:amqp ]
-  - [ barbican:shared-db, mysql:shared-db ]
+  - [ barbican:shared-db, __MYSQL_INTERFACE__ ]
   - [ barbican:identity-service, keystone:identity-service ]
 

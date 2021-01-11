@@ -13,7 +13,7 @@ applications:
       openstack-origin: *openstack_origin
 relations:
   - [ gnocchi, __CEPH_INTERFACE__ ]
-  - [ gnocchi, mysql ]
+  - [ gnocchi:shared-db, __MYSQL_INTERFACE__ ]
   - [ gnocchi, rabbitmq-server ]
   - [ gnocchi, memcached ]
   - [ gnocchi, ceilometer ]

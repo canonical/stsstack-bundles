@@ -282,6 +282,9 @@ do
             if has_opt --vault; then
                 MOD_OVERLAYS+=( "vault-certificates-mysql-innodb-cluster.yaml" )
             fi
+            # this will be auto-generated for each app (see common/render.d/all)
+            MOD_OVERLAYS+=( "mysql-innodb-cluster-router.yaml" )
+            MOD_PARAMS[__MYSQL_INTERFACE__]='__APPLICATION_MYSQL_INNODB_ROUTER__'
             ;;
         --no-ml2dns)  #__OPT__
             conflicts_with $1 --ml2dns

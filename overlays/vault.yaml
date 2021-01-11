@@ -5,4 +5,4 @@ applications:
     options:
       auto-generate-root-ca-cert: true
 relations:
-  - [ 'mysql:shared-db', 'vault:shared-db' ]
+  - [ vault:shared-db, __MYSQL_INTERFACE__ ]
