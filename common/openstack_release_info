@@ -22,6 +22,7 @@ declare -A lts=( [trusty]=icehouse
 )
 declare -A nonlts=( [eoan]=train
                     [groovy]=victoria
+                    [hirsute]=wallaby
 )
 
 # Reverse lookups (revision to series)
