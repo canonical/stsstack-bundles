@@ -52,6 +52,8 @@ aggregate_mysql_interface_parts()
     local rendered_path=$1
     local dir
 
+    [ -d "$RENDER_PARTS_DIR/mysql" ] || return 0
+
     ((`find $RENDER_PARTS_DIR/mysql -type f| wc -l`)) || return 0
 
     # this function is only expected to be called once so ensure clean file.
