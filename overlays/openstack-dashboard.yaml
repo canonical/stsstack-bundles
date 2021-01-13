@@ -1,6 +1,10 @@
 # Variables
 openstack_origin:           &openstack_origin          __OS_ORIGIN__
 
+ssl_ca:                     &ssl_ca                    __SSL_CA__
+ssl_cert:                   &ssl_cert                  __SSL_CERT__
+ssl_key:                    &ssl_key                   __SSL_KEY__
+
 applications:
   openstack-dashboard:
     num_units: __NUM_HORIZON_UNITS__
@@ -9,5 +13,8 @@ applications:
     options:
       openstack-origin: *openstack_origin
       webroot: '/'
+      ssl_ca: *ssl_ca
+      ssl_key: *ssl_key
+      ssl_cert: *ssl_cert
 relations:
   - [ "openstack-dashboard:identity-service", "keystone:identity-service" ]
