@@ -1,6 +1,9 @@
-set -x -e
-source ./profiles/common
-source novarc
+set -x -u -e
+
+scriptpath=$(readlink --canonicalize $(dirname $0))
+
+source ${scriptpath}/../profiles/common
+source ${scriptpath}/../novarc
 
 # Gather vars for tempest template
 # TODO: remove fallbacks once we move to queens (they are there for clients still on ocata)
