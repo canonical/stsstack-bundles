@@ -18,6 +18,6 @@ applications:
 relations:
   - [ glance, __CEPH_INTERFACE__ ]
   - [ cinder, cinder-ceph ]
-  - [ cinder-ceph, __CEPH_INTERFACE__ ]
+  - [ cinder-ceph:ceph, __CEPH_INTERFACE__ ]
   - [ nova-compute, cinder-ceph ]
   - [ nova-compute, __CEPH_INTERFACE__ ]
