@@ -18,3 +18,4 @@ applications:
       ssl_cert: *ssl_cert
 relations:
   - [ "openstack-dashboard:identity-service", "keystone:identity-service" ]
+  - [ openstack-dashboard:shared-db, __MYSQL_INTERFACE__ ]
