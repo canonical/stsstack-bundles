@@ -81,6 +81,7 @@ do
             set -- $@ --barbican && cache $@
             ;;
         --bgp)
+            conflicts_with $1 --ovn
             assert_min_release queens "dynamic routing"
             MOD_OVERLAYS+=( "neutron-bgp.yaml" )
             ;;
@@ -152,11 +153,13 @@ do
             MOD_OVERLAYS+=( "designate.yaml" )
             ;;
         --dvr)
+            conflicts_with $1 --ovn
             # since ports typically set post-deployment ensure we don't clobber on re-run
             opt=`update_from_charm_config $1 neutron-openvswitch data-port`
             MOD_OVERLAYS+=( "neutron-dvr.yaml" )
             ;;
         --dvr-l3ha*)
+            conflicts_with $1 --ovn
             get_units $1 __NUM_AGENTS_PER_ROUTER__ 3
             # if we are a dep then don't get gateway units
             if ! has_opt --dvr-snat-l3ha*; then
@@ -166,6 +169,7 @@ do
             MOD_OVERLAYS+=( "neutron-l3ha.yaml" )
             ;;
         --dvr-snat-l3ha*)
+            conflicts_with $1 --ovn
             assert_min_release queens "dvr-snat-l3ha"
             has_opt --num-compute || get_units $1 __NUM_COMPUTE_UNITS__ 3
             get_units $1 __NUM_AGENTS_PER_ROUTER__ 3
@@ -175,6 +179,7 @@ do
             set -- $@ --dvr-l3ha:${MOD_PARAMS[__NUM_AGENTS_PER_ROUTER__]} && cache $@
             ;;
         --dvr-snat*)
+            conflicts_with $1 --ovn
             assert_min_release queens "dvr-snat"
             has_opt --num-compute || get_units $1 __NUM_COMPUTE_UNITS__ 1
             has_opt --dvr || { set -- $@ --dvr && cache $@; }
@@ -240,6 +245,7 @@ do
             shift
             ;;
         --l3ha*)
+            conflicts_with $1 --ovn
             conflicts_with $1 --dvr-snat-l3ha*
             get_units $1 __NUM_AGENTS_PER_ROUTER__ 3
             if has_opt --dvr-snat*; then
@@ -408,6 +414,7 @@ do
             export MOD_BASE_TEMPLATE=openstack-nova-network.yaml.template
             ;;
         --neutron-sg-logging)
+            conflicts_with $1 --ovn
             assert_min_release queens "neutron-sg-logging"
             MOD_OVERLAYS+=( "neutron-sg-logging.yaml" )
             ;;
