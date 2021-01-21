@@ -16,6 +16,8 @@ if has_min_series focal; then
     # this will be auto-generated for each app (see common/render.d/all)
     MOD_OVERLAYS+=( "mysql-innodb-cluster-router.yaml" )
     MOD_PARAMS[__MYSQL_INTERFACE__]='__APPLICATION_MYSQL_INNODB_ROUTER__'
+    # NOTE: 3 is the absolute minimum units required
+    MOD_PARAMS[__NUM_MYSQL_UNITS__]=3
 else
     MOD_OVERLAYS+=( "mysql.yaml" )
 fi
