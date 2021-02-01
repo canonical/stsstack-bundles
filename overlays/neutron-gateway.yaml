@@ -13,6 +13,7 @@ applications:
       verbose: *verbose
       bridge-mappings: physnet1:br-data
       openstack-origin: *openstack_origin
+      enable-isolated-metadata: true
 relations:
   - [ neutron-gateway, nova-cloud-controller ]
   - [ 'neutron-gateway:amqp', rabbitmq-server ]
