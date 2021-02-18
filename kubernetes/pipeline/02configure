@@ -148,6 +148,11 @@ do
             MOD_OVERLAYS+=( "k8s-keystone.yaml" )
             add_mysql_overlay
             ;;
+        --keystone-ha*)
+            get_units $1 __NUM_KEYSTONE_UNITS__ 3
+            MOD_OVERLAYS+=( "keystone-ha.yaml" )
+            set -- $@ --keystone && cache $@
+            ;;
         --lb-ha-hacluster*|--lb-ha-keepalived*)
             conflicts_with $1 --lb-octavia
             if has_opt --master-ha*; then
