@@ -46,11 +46,18 @@ for inst in "${instances[@]}"; do
     fi
 done
 
+declare -a ports_filtered=()
 if ((require_count)); then
     # Get extant free ports
-    readarray -t ports<<<"`openstack port list --network $network| grep data-port| grep DOWN| awk '{print $2}'`"
+    readarray -t ports<<<"`openstack port list --network $network| grep " data-port "| grep DOWN| awk '{print $2}'`"
     [ -n "${ports[0]}" ] || ports=()
-    num_ports=${#ports[@]}
+    for port in ${ports[@]}; do
+        device=`openstack port show $port  -c device_id -f value`
+        [[ -z $device ]] || continue
+        ports_filtered+=( $port )
+    done
+
+    num_ports=${#ports_filtered[@]}
     if ((num_ports >= require_count)); then
         delta=0
     elif ((num_ports > 0)); then
@@ -62,16 +69,16 @@ if ((require_count)); then
     if ((delta)); then
         echo "Creating $delta new ports"
         for ((i=0;i<$delta;i++)); do
-            openstack port create data-port --network $network --no-fixed-ip
+            id=`openstack port create data-port --network $network --no-fixed-ip -c id -f value`
+            ports_filtered+=( $id )
         done
     fi
 
     declare -a mac_addrs=()
-    readarray -t ports<<<"`openstack port list --network $network| grep data-port| grep DOWN| awk '{print $2}'`"
     i=0
     for inst in "${instances[@]}"; do
         ${requires[$inst]} || continue
-        port=${ports[$((i++))]}
+        port=${ports_filtered[$((i++))]}
         echo "Adding port $port to server $inst"
         openstack server add port $inst $port
         mac_addrs+=( "`openstack port show -c mac_address -f value $port`" )
