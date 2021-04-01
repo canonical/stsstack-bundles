@@ -21,6 +21,7 @@ applications:
       source: *source
       loglevel: *loglevel
       osd-devices: ''  # must be empty string when using juju storage
+      config-flags: '{"osd": {"osd memory target": 1073741824}}' # matching 2G constraint
     storage:
       osd-devices: cinder,10G,__NUM_OSDS_PER_HOST__
 relations:
