@@ -4,6 +4,8 @@ juju_status_json_cache=`mktemp`
 cleanup () { rm -rf $juju_status_json_cache; }
 trap cleanup EXIT KILL
 
+scriptdir=$(readlink --canonicalize $(dirname ${BASH_SOURCE}))
+
 # cache juju status
 juju status --format=json > $juju_status_json_cache
 
@@ -31,7 +33,7 @@ fi
 
 if [ "${OS_AUTH_PROTOCOL:-}" = "https" ]; then
     echo -n "INFO: installing certificate authority for this deployment..."
-    ./tools/install_local_ca.sh 1>/dev/null
+    ${scriptdir}/tools/install_local_ca.sh 1>/dev/null
     echo done.
 fi
 
