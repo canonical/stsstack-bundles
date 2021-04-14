@@ -6,7 +6,7 @@ Deployed kubernetes cluster
 1. Generate OSM bundle
 
 ```
-generate-bundle.sh -n <model_name>:<cloud_name> --create-model --k8s-model <k8s_model_name>
+generate-bundle.sh -n <model_name>:<cloud_name> --k8s-model <k8s_model_name>
 ```
 
 2. Install OSMClient

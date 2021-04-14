@@ -50,8 +50,13 @@ OPTIONS:
         applies to all charms being deployed which means they must all
         have a release available in the channel specified.
      --create-model
+        NOTE: this option is deprecated and is now implicit in providing a
+              --name.
         Create Juju model using --name. Switches to model if it already
         exists. If this is not provided then the current Juju model is used.
+     --no-create-model
+       This will prevent creating/switching to a Juju model when --name is
+       provided.
      --debug
         Enable bash debug logging.
      --defaults
@@ -75,10 +80,12 @@ OPTIONS:
      --model-config
         Juju model config <key>=<value> (can be provided multiple times).
      -n, --name n
-        Name for bundle. If this is not provided then the default bundle
-        location is used. This is also used as the name of the model when
-        using --create-model. To specify the cloud name as well, the name
-        should be in format <model-name>:<cloud-name>
+        Name for bundle and Juju model. If this is not provided then the
+        default bundle location is used. Unless --no-create-model is set,
+        a Juju model will be created with this name. If the model already
+        exists, the context will be be switched to that model. You can
+        optionally specify a Juju cloud name as well, the name should be
+        of the format <model>:<cloud>.
      -p, --pocket p
         Archive pocket to install packages from e.g. "proposed". Default is
         main.
@@ -192,7 +199,10 @@ filter_master_opts ()
                 MASTER_OPTS[TARGET_RELEASE_NAME]="$2"
                 shift
                 ;;
-            --create-model|--defaults|--debug|--list|--replay|--run|--use-stable-charms)
+            --create-model)
+                echo "INFO: $1 is deprecated and will be ignored. It's function is now implicit when providing --name."
+                ;;
+            --no-create-model|--defaults|--debug|--list|--replay|--run|--use-stable-charms)
                 # boolean stubs - use has_opt()
                 # ensure --run is implied if --replay is provided
                 [ "$1" = "--replay" ] && CACHED_STDIN=( "${CACHED_STDIN[@]}" --run )
@@ -648,7 +658,7 @@ get_bundle_existing_config ()
 # get cli model name if available since it might not have been created yet.
 get_juju_model ()
 {
-    if `has_opt --create-model`; then
+    if has_opt -n || has_opt --name; then
         local name="${MASTER_OPTS[BUNDLE_NAME]}"
         if [ -n "$name" ]; then
             echo $name
@@ -674,7 +684,9 @@ ensure_model ()
 {
     # if requested to create model, ensure this is done and if model exists
     # ensure we switch context to it.
-    if has_opt --create-model; then
+    if has_opt --no-create-model; then
+        return 0
+    elif has_opt -n || has_opt --name; then
         if in_model_context; then
             echo -e "Juju model '${MASTER_OPTS[BUNDLE_NAME]}' already exists and is the current context - skipping create\n"
         elif model_exists; then

@@ -19,9 +19,6 @@ if [ -z "$MOD_BASE_TEMPLATE" ]; then
 elif [ -z "$MOD_DIR" ]; then
     echo "ERROR: no module name provided"
     exit 1
-elif has_opt --create-model && [ -z "${MASTER_OPTS[BUNDLE_NAME]}" ]; then
-    echo "ERROR: no --name provided so cannot create Juju model"
-    exit 1
 fi
 
 # If we need a model for this deployment, ensure it exists

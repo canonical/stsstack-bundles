@@ -9,7 +9,7 @@ NOTE: see generate-bundle.sh --help for option info about using that particular 
 The basic usage is as follows:
 
    * give your deployment a name with (--name)
-   * create a Juju model using the given name (--create-model) or use existing one or default
+   * create a Juju model using the given name or use existing one or default
    * add a bunch of feature overlays depending on what you need (see --list-overlays)
    * resources are stored under a named directory so as to be able to avoid collisions and replay later (--replay)
    * immediate deploy (--run) or save for later
@@ -19,7 +19,7 @@ Example:
 Say you want to deploy Openstack using the Stein release on Bionic and you want to enable ceph and heat with keystone in HA:
 
 ```
-cd openstack; $ ./generate-bundle.sh --name mytest --create-model -r stein --ceph --heat --keystone-ha
+cd openstack; $ ./generate-bundle.sh --name mytest -r stein --ceph --heat --keystone-ha
 ```
 
 This will give you output like:
