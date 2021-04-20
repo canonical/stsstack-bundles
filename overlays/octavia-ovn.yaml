@@ -4,3 +4,5 @@ applications:
 relations:
   - [ octavia:ovsdb-subordinate, octavia-ovn-chassis:ovsdb-subordinate ]
   - [ octavia:ovsdb-cms, ovn-central:ovsdb-cms ]
+  - [ octavia-ovn-chassis:ovsdb, ovn-central:ovsdb ]
+  - [ octavia-ovn-chassis:certificates, vault:certificates ]
