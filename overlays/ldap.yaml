@@ -7,6 +7,13 @@ applications:
       ldap-password: crapper
       ldap-suffix: dc=test,dc=com
       domain-name: userdomain
+      ldap-group-name-attribute: cn
+      ldap-group-objectclass: posixGroup
+      ldap-group-tree-dn: ou=groups,dc=test,dc=com
+      ldap-user-id-attribute: uid
+      ldap-user-name-attribute: uid
+      ldap-user-objectclass: posixAccount
+      ldap-user-tree-dn: ou=users,dc=test,dc=com
 relations:
   - [ keystone, keystone-ldap ]
 
