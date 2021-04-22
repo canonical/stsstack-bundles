@@ -7,6 +7,9 @@ applications:
       ldap-password: crapper
       ldap-suffix: dc=test,dc=com
       domain-name: userdomain
+      ldap-config-flags: 'group_desc_attribute: ''cn'''
+      ldap-group-member-attribute: memberUid
+      ldap-group-members-are-ids: true
       ldap-group-name-attribute: cn
       ldap-group-objectclass: posixGroup
       ldap-group-tree-dn: ou=groups,dc=test,dc=com
