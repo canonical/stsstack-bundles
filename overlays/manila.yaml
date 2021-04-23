@@ -11,7 +11,6 @@ applications:
     options:
       openstack-origin: *openstack_origin
       debug: *debug
-      verbose: *verbose
   manila:
     charm: cs:~openstack-charmers-next/manila
     num_units: __NUM_MANILA_UNITS__
