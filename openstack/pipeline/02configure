@@ -273,6 +273,11 @@ do
             MOD_OVERLAYS+=( "manila.yaml" )
             MOD_OVERLAYS+=( "ceph-fs.yaml" )
             set -- $@ --ceph && cache $@
+            # need to list both here in case --ovn comes after --manila on cli
+            # since --ovn adds --vault as a dep.
+            if has_opt --vault || has_opt --ovn; then
+                MOD_OVERLAYS+=( "vault-manila.yaml" )
+            fi
             ;;
         --mysql-ha*)
             conflicts_with $1 --mysql-innodb-cluster*
