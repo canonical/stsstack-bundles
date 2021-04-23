@@ -20,6 +20,11 @@ applications:
       openstack-origin: *openstack_origin
       default-share-backend: cephfsnfs1
       share-protocols: NFS
+      vip: __VIP__
+  manila-hacluster:
+    charm: cs:~openstack-charmers-next/hacluster
+    options:
+        cluster_count: 3
 relations:
   - [ manila-ganesha, __CEPH_INTERFACE__ ]
   - [ manila-ganesha:shared-db, __MYSQL_INTERFACE__ ]
@@ -29,3 +34,5 @@ relations:
   - [ manila, rabbitmq-server ]
   - [ manila, keystone ]
   - [ manila:shared-db, __MYSQL_INTERFACE__ ]
+  - [ manila, manila-hacluster ]
+
