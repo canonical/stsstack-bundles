@@ -24,7 +24,7 @@ applications:
   manila-hacluster:
     charm: cs:~openstack-charmers-next/hacluster
     options:
-        cluster_count: 3
+        cluster_count: __NUM_MANILA_UNITS__
 relations:
   - [ manila-ganesha, __CEPH_INTERFACE__ ]
   - [ manila-ganesha:shared-db, __MYSQL_INTERFACE__ ]
