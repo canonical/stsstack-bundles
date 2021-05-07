@@ -341,38 +341,45 @@ do
                 MOD_OVERLAYS+=( "octavia-ovs.yaml" )
             fi
             MOD_OVERLAYS+=( "octavia.yaml" )
-            MOD_PARAMS[__AMPHORA_SSH_PUB_KEY__]="`get_amphora_ssh_pub_key`"
-            # This equates to m1.large (rather than m1.medium) which should
-            # allow creating 1x ubunu vm + 1x amphora vm on the same host thus
-            # avoiding the need for > 1 compute host.
-            MOD_PARAMS[__NOVA_COMPUTE_UNIT_CONSTRAINTS__]="mem=8G"
             if has_opt --openstack-dashboard*; then
                 MOD_OVERLAYS+=( "octavia-dashboard.yaml" )
             fi
-            if ! has_opt --no-octavia-diskimage-retrofit; then
-                # By default we let retrofit use images uploaded by the post-deploy configure script.
-                MOD_OVERLAYS+=( "octavia-diskimage-retrofit.yaml" )
-                MOD_PARAMS[__OCTAVIA_RETROFIT_UCA__]=`get_ost_release`
-                if ! has_opt --octavia-diskimage-retrofit-glance-simplestreams; then
-                   MOD_OVERLAYS+=( "octavia-diskimage-retrofit-glance.yaml" )
+            # no amphora if using ovn provider
+            if ! has_opt --octavia-ovn-provider; then
+                MOD_PARAMS[__AMPHORA_SSH_PUB_KEY__]="`get_amphora_ssh_pub_key`"
+                # This equates to m1.large (rather than m1.medium) which should
+                # allow creating 1x ubunu vm + 1x amphora vm on the same host thus
+                # avoiding the need for > 1 compute host.
+                MOD_PARAMS[__NOVA_COMPUTE_UNIT_CONSTRAINTS__]="mem=8G"
+                if ! has_opt --no-octavia-diskimage-retrofit; then
+                    # By default we let retrofit use images uploaded by the post-deploy configure script.
+                    MOD_OVERLAYS+=( "octavia-diskimage-retrofit.yaml" )
+                    MOD_PARAMS[__OCTAVIA_RETROFIT_UCA__]=`get_ost_release`
+                    if ! has_opt --octavia-diskimage-retrofit-glance-simplestreams; then
+                       MOD_OVERLAYS+=( "octavia-diskimage-retrofit-glance.yaml" )
+                    fi
                 fi
+                MOD_MSGS[octavia.0]="you need to to create an amphora image before you can use Octavia"
+                MOD_MSGS[octavia.1]="this can be done in one of two ways:"
+                MOD_MSGS[octavia.2]="run ./tools/upload_octavia_amphora_image.sh --release $release to use a pre-created image (recommended)"
+                MOD_MSGS[octavia.3]="create a new image with 'juju run-action octavia-diskimage-retrofit/0 --wait retrofit-image source-image=<uuid>' with id of image in Glance to use as base"
             fi
-            MOD_MSGS[octavia.0]="you need to to create an amphora image before you can use Octavia"
-            MOD_MSGS[octavia.1]="this can be done in one of two ways:"
-            MOD_MSGS[octavia.2]="run ./tools/upload_octavia_amphora_image.sh --release $release to use a pre-created image (recommended)"
-            MOD_MSGS[octavia.3]="create a new image with 'juju run-action octavia-diskimage-retrofit/0 --wait retrofit-image source-image=<uuid>' with id of image in Glance to use as base"
             if has_opt --octavia-ipv4; then
                 MOD_MSGS[octavia.4]="run tools/create_ipv4_octavia.sh"
             fi
-            MOD_MSGS[octavia.5]="then run tools/configure_octavia.sh to finish setting up octavia"
-            MOD_MSGS[octavia.6]="create vm for testing"
-            MOD_MSGS[octavia.7]="./tools/instance_launch.sh 1 bionic"
-            MOD_MSGS[octavia.8]="add floating ip to vm with ./tools/float_all.sh "
-            MOD_MSGS[octavia.9]="go and install e.g. apache2 on vm so that port 80 is open"
-            MOD_MSGS[octavia.10]="create loadbalancer from script"
-            MOD_MSGS[octavia.11]="./tools/create_octavia_lb.sh"
-            MOD_MSGS[octavia.12]="alternatively manually create loadbalancer"
-            MOD_MSGS[octavia.13]="openstack loadbalancer create --name lb2 --vip-network-id lb-mgmt"
+            MOD_MSGS[octavia.5]="run tools/configure_octavia.sh to finish setting up octavia"
+            MOD_MSGS[octavia.6]="create vm for testing e.g. ./tools/instance_launch.sh 1 focal"
+            MOD_MSGS[octavia.7]="add floating ip to vm with ./tools/float_all.sh "
+            MOD_MSGS[octavia.8]="install e.g. apache2 on the vm so it listens on port 80"
+            MOD_MSGS[octavia.9]="create loadbalancer i.e. ./tools/create_octavia_lb.sh --member-vm <uuid from prev step>"
+            MOD_MSGS[octavia.10]="alternatively manually create loadbalancer"
+            MOD_MSGS[octavia.11]="openstack loadbalancer create --name lb2 --vip-network-id lb-mgmt"
+            ;;
+        --octavia-ovn-provider)
+            MOD_OVERLAYS+=( "octavia-ovn-provider.yaml" )
+            # ensure octavia and ovn
+            set -- $@ --octavia && cache $@
+            set -- $@ --ovn && cache $@
             ;;
         --octavia-ha*)
             get_units $1 __NUM_OCTAVIA_UNITS__ 3
