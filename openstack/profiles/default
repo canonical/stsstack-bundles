@@ -44,6 +44,10 @@ if ! ${BARE_METAL:-false} && ((`juju status neutron-gateway --format=json 2>/dev
     ./bin/post-deploy-config neutron-gateway
 fi
 
+if ((`juju status ceilometer --format=json 2>/dev/null| jq '.machines| length'`)); then
+    juju run-action --wait ceilometer/leader ceilometer-upgrade
+fi
+
 # Configure neutron networking on overcloud
 source novarc
 
