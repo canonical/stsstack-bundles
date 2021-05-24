@@ -73,6 +73,7 @@ aggregate_mysql_interface_parts()
 render () {
     local charm_current
     local charm_new
+    local num_vips
 
     # generic parameters only
     sed -i "s,__SERIES__,$series,g" $1
@@ -82,9 +83,12 @@ render () {
         eval `cat $INTERNAL_BUNDLE_CONFIG_RENDERER` "$1"
     fi
 
-    if `grep -q __VIP__ $1`; then
-        vip=$VIP_START_PREFIX.$((VIP_START_SUFFIX++))
-        sed -i -r "s/__VIP__/$vip/g" $1
+    num_vips=`grep __VIP__ $1| wc -l`
+    if ((num_vips)); then
+        for ((i=0;i<num_vips;i++)); do
+            vip=$VIP_START_PREFIX.$((VIP_START_SUFFIX++))
+            sed -i "0,/__VIP__/s//$vip/" $1
+        done
     fi
 
     # Process charm revisions from bundle first.
