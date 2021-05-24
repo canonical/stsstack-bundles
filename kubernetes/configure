@@ -1,5 +1,5 @@
 #!/bin/bash -x
-sudo snap install kubectl --classic
+which kubectl || sudo snap install kubectl --classic
 mkdir -p ~/.kube
 kubemaster_unit=$(juju status| sed -nr 's,(kubernetes-master/[[:digit:]]+)\*.*,\1,p')
 juju scp ${kubemaster_unit}:config ~/.kube/config
@@ -21,7 +21,7 @@ if [[ `juju status keystone --format=json 2>/dev/null| jq '.machines| length'` -
     openstack role add --user k8s-admin --user-domain k8s --project k8s --project-domain k8s k8s-admins
     source novarc_unset_all
 
-    sudo snap install --edge client-keystone-auth
+    which client-keystone-auth || sudo snap install --edge client-keystone-auth
 
     juju scp ${kubemaster_unit}:kube-keystone.sh .
     chmod a+w kube-keystone.sh
