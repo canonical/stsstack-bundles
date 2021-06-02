@@ -29,8 +29,10 @@ elif [ -n "`juju config keystone ssl_cert`" ]; then
 fi
 
 if [ -n "$model_ca_cert_path" ]; then
-    echo "INFO: installing stsstack-bundles openstack CA from /usr/local/share/ca-certificates/cacert.crt"
-    sudo cp ${model_ca_cert_path} /usr/local/share/ca-certificates/cacert.crt
-    sudo chmod 644 /usr/local/share/ca-certificates/cacert.crt
-    sudo update-ca-certificates --fresh 1>/dev/null
+    if [ ! -f /usr/local/share/ca-certificates/cacert.crt ] || [ $(md5sum $model_ca_cert_path | awk '{print $1}') != $(md5sum /usr/local/share/ca-certificates/cacert.crt | awk '{print $1}') ]; then
+        echo "INFO: installing stsstack-bundles openstack CA from /usr/local/share/ca-certificates/cacert.crt"
+        sudo cp ${model_ca_cert_path} /usr/local/share/ca-certificates/cacert.crt
+        sudo chmod 644 /usr/local/share/ca-certificates/cacert.crt
+        sudo update-ca-certificates --fresh 1>/dev/null
+    fi
 fi
