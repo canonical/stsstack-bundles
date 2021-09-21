@@ -1,4 +1,4 @@
-# This file must contain defaults for all variables used in bundles/ovelays.
+# This file must contain defaults for all variables used in bundles/overlays.
 # They are used to render to final product in the event they are not provided
 # elsewhere. It is inserted into the global context at the start of the
 # pipeline.
