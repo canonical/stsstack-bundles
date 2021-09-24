@@ -84,6 +84,7 @@ do
             shift
             ;;
         --ceph)
+            conflicts_with $1 --rook-ceph
             MOD_OVERLAYS+=( "ceph.yaml" )
             MOD_OVERLAYS+=( "k8s-ceph.yaml" )
             # NOTE: force stable since these charms are not published to edge
@@ -209,6 +210,10 @@ do
             MOD_PARAMS[__NUM_K8S_MASTER_UNITS__]=$2
             shift
             ;;
+       --rook-ceph)
+            conflicts_with $1 --ceph
+            MOD_MSGS[rook.0]="once kubernetes cluster is ready, run tools/rook-ceph.sh to deploy Ceph via Rook"
+            ;;
         --lma)
             MOD_OVERLAYS+=( "grafana.yaml ")
             MOD_OVERLAYS+=( "prometheus-k8s.yaml ")
@@ -237,6 +242,13 @@ target=$series
 [ -z "$pocket" ] || target=${target}-$pocket
 target=${target}:${MOD_PARAMS[__K8S_CHANNEL__]}
 MOD_PASSTHROUGH_OPTS+=( --release-name $target )
+
+if has_opt --rook-ceph; then
+    if [[ ${MOD_PARAMS[__NUM_K8S_WORKER_UNITS__]} -lt 3 ]]; then
+        echo "INFO: auto-correcting kube-worker to 3 as --rook-ceph is being deployed."
+        MOD_PARAMS[__NUM_K8S_WORKER_UNITS__]=3
+    fi
+fi
 
 if ! has_opt --*-ha*; then
     if [ -r ~/novarc ]; then
