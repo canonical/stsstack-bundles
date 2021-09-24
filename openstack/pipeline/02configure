@@ -30,7 +30,7 @@ if ! has_opt --ovn*; then
 fi
 
 # Enable this by default since it is commonly used.
-if ! has_opt --no-ml2dns; then
+if ! ( has_opt --ironic || has_opt --no-ml2dns ); then
     set -- $@ --ml2dns && cache $@
 fi
 
@@ -548,7 +548,7 @@ do
             MOD_OVERLAYS+=( "vault-openstack-secrets.yaml" )
             if ! has_opt --ssl; then
                 MOD_OVERLAYS+=( "vault-openstack-certificates.yaml" )
-                for opt in --heat --octavia --barbican --designate --placement --openstack-dashboard; do
+                for opt in --heat --octavia --barbican --designate --placement --openstack-dashboard --ironic; do
                     has_opt $opt* && MOD_OVERLAYS+=( "vault-openstack-certificates-${opt##--}.yaml" )
                 done
             fi
@@ -558,6 +558,13 @@ do
         --etcd-channel)  #__OPT__type:<str>
             MOD_PARAMS[__ETCD_SNAP_CHANNEL__]=$2
             shift
+            ;;
+        --ironic)
+            MOD_OVERLAYS+=( "ironic.yaml" )
+            MOD_OVERLAYS+=( "neutron-gateway.yaml" )
+            MOD_OVERLAYS=( ${MOD_OVERLAYS[@]/"neutron-openvswitch.yaml"} )
+            set -- $@ --no-ml2dns --ceph --ceph-rgw && cache $@
+            MOD_MSGS[ironic-conductor.0]="juju run-action ironic-conductor/leader set-temp-url-secret"
             ;;
         --vault-ha*)
             get_units $1 __NUM_VAULT_UNITS__ 3
