@@ -696,7 +696,7 @@ ensure_model ()
         else
             echo "Creating Juju model ${MASTER_OPTS[BUNDLE_NAME]}"
             juju add-model ${MASTER_OPTS[BUNDLE_NAME]} ${MASTER_OPTS[CLOUD_NAME]}
-            juju model-config ${MASTER_OPTS[BUNDLE_NAME]} default-series=$(get_series)
+            juju model-config -m ${MASTER_OPTS[BUNDLE_NAME]} default-series=$(get_series)
             echo ""
         fi
     fi
