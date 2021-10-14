@@ -20,9 +20,8 @@ declare -A lts=( [trusty]=icehouse
                  [bionic]=queens
                  [focal]=ussuri
 )
-declare -A nonlts=( [eoan]=train
-                    [groovy]=victoria
-                    [hirsute]=wallaby
+declare -A nonlts=( [hirsute]=wallaby
+                    [impish]=xena
 )
 
 # Reverse lookups (revision to series)
