@@ -126,6 +126,7 @@ do
         --docker)
             conflicts_with $1 --containerd
             MOD_OVERLAYS+=( "k8s-docker.yaml" )
+            MOD_PARAMS[__CONTAINER_RUNTIME__]='docker'
             ;;
         --docker-registry)
             MOD_OVERLAYS+=( "k8s-docker-registry.yaml" )
