@@ -548,8 +548,8 @@ do
             MOD_OVERLAYS+=( "vault-openstack-secrets.yaml" )
             if ! has_opt --ssl; then
                 MOD_OVERLAYS+=( "vault-openstack-certificates.yaml" )
-                for opt in --heat --octavia --barbican --designate --placement; do
-                    has_opt $opt && MOD_OVERLAYS+=( "vault-openstack-certificates-${opt##--}.yaml" )
+                for opt in --heat --octavia --barbican --designate --placement --openstack-dashboard; do
+                    has_opt $opt* && MOD_OVERLAYS+=( "vault-openstack-certificates-${opt##--}.yaml" )
                 done
             fi
             has_opt --ceph && MOD_OVERLAYS+=( "vault-ceph.yaml" )
