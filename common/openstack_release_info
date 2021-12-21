@@ -14,11 +14,13 @@ declare -A lts_order=( [0]=trusty
                        [1]=xenial
                        [2]=bionic
                        [3]=focal
+                       [4]=jammy
 )
 declare -A lts=( [trusty]=icehouse
                  [xenial]=mitaka
                  [bionic]=queens
                  [focal]=ussuri
+                 [jammy]=yoga
 )
 declare -A nonlts=( [hirsute]=wallaby
                     [impish]=xena
