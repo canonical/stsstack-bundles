@@ -1,0 +1,3 @@
+relations:
+  - [ vault:certificates, ironic-api:certificates ]
+  - [ vault:certificates, ironic-conductor:certificates ]
