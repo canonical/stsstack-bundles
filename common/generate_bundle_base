@@ -79,10 +79,10 @@ fi
 RENDER_PARTS_DIR=$bundles_dir/parts
 mkdir -p $RENDER_PARTS_DIR
 . $MOD_DIR/common/render.d/all
+. $MOD_DIR/common/render.d/resources
 if ${MASTER_OPTS[HYPERCONVERGED_DEPLOYMENT]}; then
     PLACEMENT_OVERLAYS_DIR=$bundles_dir/p
     mkdir -p $PLACEMENT_OVERLAYS_DIR
-    . $MOD_DIR/common/render.d/resources
     . $MOD_DIR/common/render.d/unit_placement
 fi
 
