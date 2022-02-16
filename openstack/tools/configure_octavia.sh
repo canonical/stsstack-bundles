@@ -40,3 +40,8 @@ juju config octavia \
     lb-mgmt-controller-cert="$(base64 $dout/controller_cert_bundle.pem)"
 
 juju run-action octavia/leader configure-resources --wait
+
+# Add load-balancer_admin role for admin user
+source $(readlink --canonicalize $(dirname $0))/../novarc
+PROJECT_ID=$(openstack project show --domain admin_domain --format value --column id admin)
+openstack role add --project ${PROJECT_ID} --user admin load-balancer_admin
