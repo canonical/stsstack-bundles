@@ -92,7 +92,7 @@ if __name__ == '__main__':
     juju_version = int(subprocess.check_output(
         ['juju', 'version']).decode('UTF-8').strip()[0])
 
-    service_config = yaml.load(
+    service_config = yaml.safe_load(
         subprocess.check_output(['juju', 'status', '--format=yaml',
                                  service]).decode('UTF-8')
     )
