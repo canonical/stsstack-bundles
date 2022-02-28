@@ -9,17 +9,20 @@ applications:
     options:
       manage-neutron-plugin-legacy-mode: false
   neutron-api-plugin-ovn:
-    charm: cs:~openstack-charmers-next/neutron-api-plugin-ovn
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__neutron-api-plugin-ovn
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     options:
       dns-servers: *dns_servers
   ovn-central:
-    charm: cs:~openstack-charmers-next/ovn-central
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__ovn-central
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     constraints: mem=2G
     num_units: __NUM_OVN_CENTRAL_UNITS__
     options:
       source: *openstack_origin
   ovn-chassis:
-    charm: cs:~openstack-charmers-next/ovn-chassis
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__ovn-chassis
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     options:
       ovn-bridge-mappings: physnet1:br-data
       bridge-interface-mappings: __OVN_DATA_PORT__

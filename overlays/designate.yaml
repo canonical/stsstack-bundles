@@ -5,7 +5,8 @@ openstack_origin:           &openstack_origin          __OS_ORIGIN__
 
 applications:
   designate:
-    charm: cs:~openstack-charmers-next/designate
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__designate
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     num_units: __NUM_DESIGNATE_UNITS__
     constraints: mem=2G
     options:
@@ -13,7 +14,8 @@ applications:
       openstack-origin: *openstack_origin
       nameservers: '__DESIGNATE_NAMESERVERS__'
   designate-bind:
-    charm: cs:~openstack-charmers-next/designate-bind
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__designate-bind
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     num_units: 1
     constraints: mem=1G
     options:

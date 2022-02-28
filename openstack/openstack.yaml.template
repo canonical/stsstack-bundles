@@ -19,13 +19,15 @@ series: __SERIES__
 applications:
   rabbitmq-server:
     num_units: __NUM_RABBIT_UNITS__
-    charm: cs:~openstack-charmers-next/rabbitmq-server
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__rabbitmq-server
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     constraints: mem=1G
     options:
       source: *source
       min-cluster-size: __NUM_RABBIT_UNITS__
   nova-compute:
-    charm: cs:~openstack-charmers-next/nova-compute
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__nova-compute
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     num_units: __NUM_COMPUTE_UNITS__
     constraints: __NOVA_COMPUTE_UNIT_CONSTRAINTS__
     options:
@@ -38,7 +40,8 @@ applications:
       force-raw-images: false  # disable for stsstack since conversion kills the disks and is not needed
   nova-cloud-controller:
     num_units: __NUM_NOVACC_UNITS__
-    charm: cs:~openstack-charmers-next/nova-cloud-controller
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__nova-cloud-controller
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     constraints: mem=2G
     options:
       debug: *debug
@@ -50,7 +53,8 @@ applications:
       ssl_key: *ssl_key
   neutron-api:
     num_units: __NUM_NEUTRON_API_UNITS__
-    charm: cs:~openstack-charmers-next/neutron-api
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__neutron-api
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     constraints: mem=2G
     options:
       debug: *debug
@@ -69,7 +73,8 @@ applications:
   cinder:
     num_units: __NUM_CINDER_UNITS__
     constraints: mem=2G
-    charm: cs:~openstack-charmers-next/cinder
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__cinder
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     options:
       debug: *debug
       verbose: *verbose
@@ -83,7 +88,8 @@ applications:
       ssl_key: *ssl_key
   glance:
     num_units: __NUM_GLANCE_UNITS__
-    charm: cs:~openstack-charmers-next/glance
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__glance
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     constraints: mem=1G
     options:
       debug: *debug

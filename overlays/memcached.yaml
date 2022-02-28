@@ -1,5 +1,6 @@
 applications:
   memcached:
-    charm: cs:memcached
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__memcached
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     num_units: __NUM_MEMCACHED_UNITS__
     constraints: mem=2G

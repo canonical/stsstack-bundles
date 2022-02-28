@@ -19,6 +19,8 @@ MOD_MSGS[0_common.0]="run ./configure to initialise your deployment"
 export -a MOD_OVERLAYS=()
 
 export -A MOD_PARAMS=()
+# override this for openstack
+MASTER_OPTS[CHARM_TRACK]=/$release
 
 # Series & Release Info (see http://docs.ceph.com/docs/master/releases/)
 export -A APP_RELEASE_NAMES=( [firefly]=icehouse
@@ -26,5 +28,6 @@ export -A APP_RELEASE_NAMES=( [firefly]=icehouse
                               [luminous]=pike
                               [mimic]=rocky
                               [nautilus]=train
-                              [octopus]=ussuri )
+                              [octopus]=ussuri
+                              [pacific]=wallaby )
 

@@ -5,15 +5,21 @@
 #
 # You can check that none are missing by running lint/check_var_defaults.sh
 #
-MOD_PARAMS[__K8S_CHANNEL__]="latest/stable"
-MOD_PARAMS[__NUM_ETCD_UNITS__]=1
-MOD_PARAMS[__NUM_EASYRSA_UNITS__]=1
-MOD_PARAMS[__NUM_K8S_MASTER_UNITS__]=1
-MOD_PARAMS[__NUM_K8S_WORKER_UNITS__]=2
-MOD_PARAMS[__NUM_K8S_LB_UNITS__]=1
-MOD_PARAMS[__ETCD_SNAP_CHANNEL__]='latest/stable'
-MOD_PARAMS[__CHARM_CHANNEL__]=
-MOD_PARAMS[__CONTAINER_RUNTIME__]='containerd'
+
+MOD_PARAMS[__CHARM_STORE__]=${MASTER_OPTS[CHARM_STORE]}
+if [[ ${MOD_PARAMS[__CHARM_STORE__]} == cs: ]]; then
+    # ns only applies to cs:
+    MOD_PARAMS[__CHARM_NS__]=~containers/
+    MOD_PARAMS[__CHARM_PREFIX__]=
+    MOD_PARAMS[__CHARM_TRACK__]=
+    MOD_PARAMS[__CHARM_CHANNEL__]=stable
+else
+    # charmhub versions have ns appended as prefix
+    MOD_PARAMS[__CHARM_NS__]=
+    MOD_PARAMS[__CHARM_PREFIX__]=containers-
+    MOD_PARAMS[__CHARM_TRACK__]=${MASTER_OPTS[CHARM_TRACK]}
+    MOD_PARAMS[__CHARM_CHANNEL__]=${MASTER_OPTS[CHARM_CHANNEL]}
+fi
 
 # NOTE: the k8s charms publish to stable and edge so its fine to default to
 #       edge but other charms e.g. openstack charms like ceph-mon do not so if
@@ -22,4 +28,13 @@ if ! has_opt --charm-channel && \
         ! has_opt --use-stable-charms; then
     MOD_PARAMS[__CHARM_CHANNEL__]=edge
 fi
+
+MOD_PARAMS[__K8S_CHANNEL__]="latest/stable"
+MOD_PARAMS[__NUM_ETCD_UNITS__]=1
+MOD_PARAMS[__NUM_EASYRSA_UNITS__]=1
+MOD_PARAMS[__NUM_K8S_MASTER_UNITS__]=1
+MOD_PARAMS[__NUM_K8S_WORKER_UNITS__]=2
+MOD_PARAMS[__NUM_K8S_LB_UNITS__]=1
+MOD_PARAMS[__ETCD_SNAP_CHANNEL__]='latest/stable'
+MOD_PARAMS[__CONTAINER_RUNTIME__]='containerd'
 

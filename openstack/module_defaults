@@ -5,6 +5,20 @@
 #
 # You can check that none are missing by running lint/check_var_defaults.sh
 #
+MOD_PARAMS[__CHARM_STORE__]=${MASTER_OPTS[CHARM_STORE]}
+if [[ ${MOD_PARAMS[__CHARM_STORE__]} == cs: ]]; then
+    # ns only applies to cs:
+    MOD_PARAMS[__CHARM_NS__]=~openstack-charmers-next/
+    MOD_PARAMS[__CHARM_PREFIX__]=
+    MOD_PARAMS[__CHARM_TRACK__]=
+    MOD_PARAMS[__CHARM_CHANNEL__]=stable
+else
+    MOD_PARAMS[__CHARM_NS__]=
+    MOD_PARAMS[__CHARM_PREFIX__]=
+    MOD_PARAMS[__CHARM_TRACK__]=${MASTER_OPTS[CHARM_TRACK]}
+    MOD_PARAMS[__CHARM_CHANNEL__]=${MASTER_OPTS[CHARM_CHANNEL]}
+fi
+
 MOD_PARAMS[__OS_ORIGIN__]=$os_origin
 MOD_PARAMS[__SOURCE__]=$source
 MOD_PARAMS[__NUM_BARBICAN_UNITS__]=1

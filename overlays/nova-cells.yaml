@@ -8,7 +8,8 @@ source:                     &source                    __OS_ORIGIN__
 
 applications:
   nova-cell-controller-cell2:
-    charm: cs:~openstack-charmers-next/nova-cell-controller
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__nova-cell-controller
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     num_units: 1
     constraints: mem=1G
     options:
@@ -18,13 +19,15 @@ applications:
       cell-name: 'cell2'
   rabbitmq-server-cell2:
     num_units: 1
-    charm: cs:~openstack-charmers-next/rabbitmq-server
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__rabbitmq-server
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     constraints: mem=1G
     options:
       source: *source
   mysql-cell2:
     num_units: 1
-    charm: cs:~openstack-charmers-next/percona-cluster
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__percona-cluster
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     constraints: mem=4G
     options:
       dataset-size: 50%
@@ -33,7 +36,8 @@ applications:
       sst-password: ChangeMe123
       source: *source
   nova-compute-cell2:
-    charm: cs:~openstack-charmers-next/nova-compute
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__nova-compute
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     num_units: 1 
     constraints: mem=4G
     options:

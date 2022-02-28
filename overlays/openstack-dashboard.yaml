@@ -8,7 +8,8 @@ ssl_key:                    &ssl_key                   __SSL_KEY__
 applications:
   openstack-dashboard:
     num_units: __NUM_HORIZON_UNITS__
-    charm: cs:~openstack-charmers-next/openstack-dashboard
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__openstack-dashboard
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     constraints: mem=1G
     options:
       openstack-origin: *openstack_origin

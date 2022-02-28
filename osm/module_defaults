@@ -5,6 +5,24 @@
 #
 # You can check that none are missing by running lint/check_var_defaults.sh
 #
+
+# force charmstore for now until we have a good way to map the new charm names
+# for charmhub.
+MOD_PARAMS[__CHARM_STORE__]=cs:
+if [[ ${MOD_PARAMS[__CHARM_STORE__]} == cs: ]]; then
+    # ns only applies to cs:
+    MOD_PARAMS[__CHARM_NS__]=~charmed-osm/
+    MOD_PARAMS[__CHARM_PREFIX__]=
+    MOD_PARAMS[__CHARM_TRACK__]=
+    MOD_PARAMS[__CHARM_CHANNEL__]=stable
+else
+    MOD_PARAMS[__CHARM_NS__]=
+    MOD_PARAMS[__CHARM_PREFIX__]=
+    MOD_PARAMS[__CHARM_TRACK__]=${MASTER_OPTS[CHARM_TRACK]}
+    MOD_PARAMS[__CHARM_CHANNEL__]=${MASTER_OPTS[CHARM_CHANNEL]}
+fi
+
+
 MOD_PARAMS[__JUJU_SSHKEY__]=
 MOD_PARAMS[__JUJU_CA_CERT__]=
 MOD_PARAMS[__BASTION_IP__]=`hostname -I | cut -d' ' -f1`

@@ -1,6 +1,7 @@
 applications:
   vault:
-    charm: cs:~openstack-charmers-next/vault
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__vault
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     num_units: __NUM_VAULT_UNITS__
     options:
       auto-generate-root-ca-cert: true

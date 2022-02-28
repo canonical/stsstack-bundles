@@ -4,7 +4,8 @@ loglevel:                   &loglevel                  1
 
 applications:
   ceph-fs:
-    charm: cs:~openstack-charmers-next/ceph-fs
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__ceph-fs
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     num_units: __NUM_CEPH_FS_UNITS__
     options:
       loglevel: *loglevel

@@ -6,7 +6,8 @@ openstack_origin:           &openstack_origin          __OS_ORIGIN__
 applications:
   neutron-gateway:
     num_units: __NUM_NEUTRON_GATEWAY_UNITS__
-    charm: cs:~openstack-charmers-next/neutron-gateway
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__neutron-gateway
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     constraints: mem=4G
     options:
       debug: *debug

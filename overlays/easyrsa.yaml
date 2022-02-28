@@ -1,4 +1,5 @@
 applications:
   easyrsa:
-    charm: cs:~containers/easyrsa
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__easyrsa
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     num_units: __NUM_EASYRSA_UNITS__

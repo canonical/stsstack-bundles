@@ -1,6 +1,7 @@
 applications:
   docker:
-    charm: cs:~containers/docker
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__docker
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
 relations:
   - [ 'docker:docker', 'kubernetes-worker:container-runtime' ]
   - [ 'docker:docker', 'kubernetes-master:container-runtime' ]

@@ -3,13 +3,15 @@ declare -a CACHED_STDIN=( $@ )
 declare -A MASTER_OPTS=(
     [DEFAULT_BINDING]=alpha
     [HYPERCONVERGED_DEPLOYMENT]=false
-    [CHARM_CHANNEL]=stable
     [MODEL_CONFIG]=''
     [BUNDLE_NAME]=''
     [CLOUD_NAME]=''
     [TARGET_RELEASE_NAME]=''
     [VIP_ADDR_START]=10.5.100.0
     [CHARM_REVISIONS]=
+    [CHARM_STORE]=ch:
+    [CHARM_CHANNEL]=edge
+    [CHARM_TRACK]=/latest
 )
 DEFAULT_SERIES=focal
 JUJU_VERSION="`juju show-controller| sed -r 's/.+controller-model-version:\s+(.+)/\1/g;t;d' 2>/dev/null`" || true
@@ -49,6 +51,9 @@ OPTIONS:
         Charm channel to deploy from (if supported). Be aware that this
         applies to all charms being deployed which means they must all
         have a release available in the channel specified.
+     --charmstore
+        By default we use charmhub (ch:) with channels/tracks but for older
+        versions of charms or juju it may be necessary to use charmstore (cs:).
      --create-model
         NOTE: this option is deprecated and is now implicit in providing a
               --name.
@@ -167,6 +172,9 @@ filter_master_opts ()
             --charm-channel)
                 MASTER_OPTS[CHARM_CHANNEL]="$2"
                 shift
+                ;;
+            --charmstore)
+                MASTER_OPTS[CHARM_STORE]="cs:"
                 ;;
             --default-binding)
                 MASTER_OPTS[DEFAULT_BINDING]="$2"

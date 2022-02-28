@@ -1,6 +1,7 @@
 applications:
   calico:
-    charm: cs:~containers/calico
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__calico
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
 relations:
   - [ 'calico:cni', 'kubernetes-master:cni' ]
   - [ 'calico:cni', 'kubernetes-worker:cni' ]

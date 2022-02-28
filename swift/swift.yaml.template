@@ -15,7 +15,8 @@ series: __SERIES__
 applications:
   glance:
     num_units: 1
-    charm: cs:~openstack-charmers-next/glance
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__glance
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     options:
       debug: *debug
       verbose: *verbose

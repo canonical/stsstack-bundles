@@ -6,13 +6,15 @@ loglevel:                   &loglevel                  1
 
 applications:
   manila-ganesha:
-    charm: cs:~openstack-charmers-next/manila-ganesha
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__manila-ganesha
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     num_units: __NUM_MANILA_GANESHA_UNITS__
     options:
       openstack-origin: *openstack_origin
       debug: *debug
   manila:
-    charm: cs:~openstack-charmers-next/manila
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__manila
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     num_units: __NUM_MANILA_UNITS__
     options:
       debug: *debug
@@ -22,7 +24,8 @@ applications:
       share-protocols: NFS
       vip: __VIP__
   manila-hacluster:
-    charm: cs:~openstack-charmers-next/hacluster
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__hacluster
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     options:
         cluster_count: __NUM_MANILA_UNITS__
 relations:

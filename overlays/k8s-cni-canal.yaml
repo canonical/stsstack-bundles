@@ -1,6 +1,7 @@
 applications:
   canal:
-    charm: cs:~containers/canal
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__canal
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
 relations:
   - [ 'canal:cni', 'kubernetes-master:cni' ]
   - [ 'canal:cni', 'kubernetes-worker:cni' ]

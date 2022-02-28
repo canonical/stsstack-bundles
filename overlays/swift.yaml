@@ -8,7 +8,8 @@ ssl_key:                    &ssl_key                   __SSL_KEY__
 applications:
   swift-proxy:
     num_units: __NUM_SWIFT_PROXY_UNITS__
-    charm: cs:~openstack-charmers-next/swift-proxy
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__swift-proxy
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     constraints: mem=1G
     options:
       debug: *debug
@@ -21,7 +22,8 @@ applications:
       ssl_key: *ssl_key
   swift-storage-z1:
     num_units: __NUM_SWIFT_STORAGE_UNITS__
-    charm: cs:~openstack-charmers-next/swift-storage
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__swift-storage
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     constraints: mem=1G
     options:
       zone: 1
@@ -31,7 +33,8 @@ applications:
       block-devices: cinder,10G,1
   swift-storage-z2:
     num_units: __NUM_SWIFT_STORAGE_UNITS__
-    charm: cs:~openstack-charmers-next/swift-storage
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__swift-storage
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     constraints: mem=1G
     options:
       zone: 2
@@ -41,7 +44,8 @@ applications:
       block-devices: cinder,10G,1
   swift-storage-z3:
     num_units: __NUM_SWIFT_STORAGE_UNITS__
-    charm: cs:~openstack-charmers-next/swift-storage
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__swift-storage
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     constraints: mem=1G
     options:
       zone: 3

@@ -1,6 +1,7 @@
 applications:
   prometheus-ceph-exporter:
-    charm: cs:prometheus-ceph-exporter
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__prometheus-ceph-exporter
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     num_units: 1
 relations:
   - [ 'prometheus-ceph-exporter:ceph-exporter', 'prometheus:target' ]

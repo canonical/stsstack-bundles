@@ -8,9 +8,19 @@ __generate_app_mysql_inndodb_router ()
 
     mkdir -p $RENDER_PARTS_DIR/mysql/{applications,relations}
 
+
+    channel=${MOD_PARAMS[__CHARM_CHANNEL__]}
+    ns=${MOD_PARAMS[__CHARM_NS__]:-}
+    track=${MOD_PARAMS[__CHARM_TRACK__]}
+    if has_opt --use-stable-charms; then
+        channel=stable
+        ns=
+    fi
+
 cat << EOF > $RENDER_PARTS_DIR/mysql/applications/$app-mysql-innodb-cluster-router.part
   $app-mysql-router:
-    charm: cs:~openstack-charmers-next/mysql-router
+    charm: ${MOD_PARAMS[__CHARM_STORE__]}${ns}mysql-router
+    channel: $channel$track
 EOF
 cat << EOF > $RENDER_PARTS_DIR/mysql/relations/$app-mysql-innodb-cluster-router.part
   - [ mysql:db-router, $app-mysql-router:db-router ]
@@ -104,7 +114,10 @@ render () {
     done
 
     if has_opt --use-stable-charms; then
-        sed -i -r 's,~openstack-charmers-next/,,g' $1
+        if [[ ${MASTER_OPTS[CHARM_STORE]} == cs: ]]; then
+            sed -i -r 's,~openstack-charmers-next/,,g' $1
+        fi
+        sed -i -r 's,channel:\s*[a-z]+,channel: stable,g' $1
     fi
 
     # render mysql interface if exists

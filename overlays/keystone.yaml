@@ -10,7 +10,8 @@ ssl_key:                    &ssl_key                   __SSL_KEY__
 applications:
   keystone:
     num_units: __NUM_KEYSTONE_UNITS__
-    charm: cs:~openstack-charmers-next/keystone
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__keystone
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     constraints: mem=1G
     options:
       debug: *debug

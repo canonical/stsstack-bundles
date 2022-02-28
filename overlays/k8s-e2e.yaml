@@ -1,6 +1,7 @@
 applications:
   e2e:
-    charm: cs:~containers/kubernetes-e2e
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__kubernetes-e2e
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     num_units: 1
 relations:
   - [ 'e2e:kube-control', 'kubernetes-master:kube-control' ]

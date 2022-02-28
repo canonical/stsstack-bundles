@@ -16,13 +16,15 @@ series: __SERIES__
 applications:
   rabbitmq-server:
     num_units: 1
-    charm: cs:~openstack-charmers-next/rabbitmq-server
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__rabbitmq-server
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     constraints: mem=1G
     options:
       source: *source
   keystone:
     num_units: 1
-    charm: cs:~openstack-charmers-next/keystone
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__keystone
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     constraints: mem=1G
     options:
       debug: *debug
@@ -31,12 +33,14 @@ applications:
       openstack-origin: *openstack_origin
   openstack-dashboard:
     num_units: 1
-    charm: cs:~openstack-charmers-next/openstack-dashboard
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__openstack-dashboard
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     constraints: mem=1G
     options:
       openstack-origin: *openstack_origin
   nova-compute:
-    charm: cs:~hopem/nova-compute-nova-network
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__~hopem/nova-compute-nova-network
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     num_units: *num_compute_units
     constraints: mem=4G
     options:
@@ -49,7 +53,8 @@ applications:
       config-flags: 'flat_network_bridge=br100,multi_host=True,share_dhcp_address=True'
   nova-cloud-controller:
     num_units: 1
-    charm: cs:~openstack-charmers-next/nova-cloud-controller
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__nova-cloud-controller
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     constraints: mem=1G
     options:
       debug: *debug
@@ -59,7 +64,8 @@ applications:
   cinder:
     num_units: 1
     constraints: mem=1G
-    charm: cs:~openstack-charmers-next/cinder
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__cinder
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     options:
       debug: *debug
       verbose: *verbose
@@ -70,7 +76,8 @@ applications:
       openstack-origin: *openstack_origin
   glance:
     num_units: 1
-    charm: cs:~openstack-charmers-next/glance
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__glance
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     constraints: mem=1G
     options:
       debug: *debug
@@ -78,7 +85,8 @@ applications:
       openstack-origin: *openstack_origin
   mysql:
     num_units: 1
-    charm: cs:~openstack-charmers-next/percona-cluster
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__percona-cluster
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     constraints: mem=4G
     options:
       dataset-size: 50%

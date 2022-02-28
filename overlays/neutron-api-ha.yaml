@@ -3,7 +3,8 @@ applications:
     options:
       vip: __VIP__
   neutron-api-hacluster:
-    charm: cs:~openstack-charmers-next/hacluster
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__hacluster
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     options:
         cluster_count: __NUM_NEUTRON_API_UNITS__
 relations:

@@ -21,3 +21,5 @@ MOD_MSGS[0_common.2]="add rules to default security group: ./tools/sec_groups.sh
 export -a MOD_OVERLAYS=()
 
 export -A MOD_PARAMS=()
+# override this for openstack
+MASTER_OPTS[CHARM_TRACK]=/$release

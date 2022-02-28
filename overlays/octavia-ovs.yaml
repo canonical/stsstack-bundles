@@ -4,7 +4,8 @@ verbose:                    &verbose                   True
 
 applications:
   neutron-openvswitch-octavia:
-    charm: cs:~openstack-charmers-next/neutron-openvswitch
+    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__neutron-openvswitch
+    channel: __CHARM_CHANNEL____CHARM_TRACK__
     options:
       debug: *debug
       verbose: *verbose
