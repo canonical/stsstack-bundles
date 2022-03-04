@@ -5,7 +5,7 @@ loglevel:                   &loglevel                  5
 applications:
   ceph-iscsi:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__ceph-iscsi
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_CHANNEL____CHARM_CEPH_TRACK__
     num_units: 2
     constraints: mem=1G
     options:

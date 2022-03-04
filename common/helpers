@@ -12,6 +12,8 @@ declare -A MASTER_OPTS=(
     [CHARM_STORE]=ch:
     [CHARM_CHANNEL]=edge
     [CHARM_TRACK]=/latest
+    [CHARM_CEPH_TRACK]=
+    [CHARM_RABBIT_TRACK]=
 )
 DEFAULT_SERIES=focal
 JUJU_VERSION="`juju show-controller| sed -r 's/.+controller-model-version:\s+(.+)/\1/g;t;d' 2>/dev/null`" || true
@@ -19,6 +21,7 @@ JUJU_VERSION="`juju show-controller| sed -r 's/.+controller-model-version:\s+(.+
 JUJU_DEPLOY_OPTS=""
 
 . $MOD_DIR/common/openstack_release_info
+. $MOD_DIR/common/ceph_release_info
 
 list_module_opts ()
 {

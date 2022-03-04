@@ -21,13 +21,4 @@ export -a MOD_OVERLAYS=()
 export -A MOD_PARAMS=()
 # override this for openstack
 MASTER_OPTS[CHARM_TRACK]=/$release
-
-# Series & Release Info (see http://docs.ceph.com/docs/master/releases/)
-export -A APP_RELEASE_NAMES=( [firefly]=icehouse
-                              [jewel]=mitaka
-                              [luminous]=pike
-                              [mimic]=rocky
-                              [nautilus]=train
-                              [octopus]=ussuri
-                              [pacific]=wallaby )
-
+MASTER_OPTS[CHARM_CEPH_TRACK]=/`get_app_release_name $release`
