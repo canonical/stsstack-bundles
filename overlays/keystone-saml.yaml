@@ -1,7 +1,6 @@
 applications:
   keystone-saml-mellon:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__keystone-saml-mellon
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__keystone-saml-mellon
     options:
       idp-name: 'samltest'
       protocol-name: 'mapped'

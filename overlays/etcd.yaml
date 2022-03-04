@@ -1,7 +1,6 @@
 applications:
   etcd:
-    charm: __CHARM_STORE____CHARM_NS__etcd
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__etcd
     num_units: __NUM_ETCD_UNITS__
     options:
       channel: __ETCD_SNAP_CHANNEL__

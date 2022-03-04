@@ -3,31 +3,26 @@ series: __SERIES__
 
 applications:
   ubuntu:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__ubuntu
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__ubuntu
     num_units: 1
   landscape-server:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__landscape-server
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__landscape-server
     options:
       install_sources: "['ppa:landscape/__LANDSCAPE_VERSION__']"
     num_units: 1
     constraints: mem=4G
   landscape-rabbitmq-server:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__rabbitmq-server
-    channel: __CHARM_RABBIT_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__rabbitmq-server
     num_units: 1
   landscape-postgresql:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__postgresql
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__postgresql
     options:
       extra_packages: python-apt postgresql-contrib postgresql-.*-debversion postgresql-plpython-.*
       max_connections: 500
       max_prepared_transactions: 500
     num_units: 1
   landscape-haproxy:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__haproxy
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__haproxy
     options:
       default_timeouts: "queue 60000, connect 5000, client 120000, server 120000"
       services: ""
@@ -36,8 +31,7 @@ applications:
       global_default_bind_options: "no-tlsv10"
     num_units: 1
   landscape-client:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__landscape-client
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__landscape-client
     options:
       account-name: "standalone"
       origin: ppa:landscape/__LANDSCAPE_VERSION__

@@ -19,6 +19,4 @@ MOD_MSGS[0_common.0]="run ./configure to initialise your deployment"
 export -a MOD_OVERLAYS=()
 
 export -A MOD_PARAMS=()
-# override this for openstack
-MASTER_OPTS[CHARM_TRACK]=$release/
-MASTER_OPTS[CHARM_CEPH_TRACK]=`get_app_release_name $release`/
+

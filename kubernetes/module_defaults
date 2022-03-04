@@ -6,29 +6,9 @@
 # You can check that none are missing by running lint/check_var_defaults.sh
 #
 
-MOD_PARAMS[__CHARM_STORE__]=${MASTER_OPTS[CHARM_STORE]}
-if [[ ${MOD_PARAMS[__CHARM_STORE__]} == cs: ]]; then
-    # ns only applies to cs:
-    MOD_PARAMS[__CHARM_NS__]=~containers/
-    MOD_PARAMS[__CHARM_PREFIX__]=
-    MOD_PARAMS[__CHARM_TRACK__]=
-    MOD_PARAMS[__CHARM_CHANNEL__]=stable
-else
-    # charmhub versions have ns appended as prefix
-    MOD_PARAMS[__CHARM_NS__]=
-    MOD_PARAMS[__CHARM_PREFIX__]=containers-
-    MOD_PARAMS[__CHARM_TRACK__]=${MASTER_OPTS[CHARM_TRACK]}
-    MOD_PARAMS[__CHARM_CHANNEL__]=${MASTER_OPTS[CHARM_CHANNEL]}
-fi
-
 # NOTE: the k8s charms publish to stable and edge so its fine to default to
 #       edge but other charms e.g. openstack charms like ceph-mon do not so if
 #       they are used we must override and use stable.
-if ! has_opt --charm-channel && \
-        ! has_opt --use-stable-charms; then
-    MOD_PARAMS[__CHARM_CHANNEL__]=edge
-fi
-
 MOD_PARAMS[__K8S_CHANNEL__]="latest/stable"
 MOD_PARAMS[__NUM_ETCD_UNITS__]=1
 MOD_PARAMS[__NUM_EASYRSA_UNITS__]=1

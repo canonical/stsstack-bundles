@@ -1,0 +1,4 @@
+# osm charms that have containers- prefix in ch:
+for c in ${OSM_CHARMS[@]}; do
+    CH_PREFIXED_CHARMS[$c]=charmed-osm-
+done

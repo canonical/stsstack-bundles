@@ -1,14 +1,12 @@
 applications:
   nagios:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__nagios
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__nagios
     num_units: 1
     series: bionic
     options:
       password: ubuntu
   nrpe:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__nrpe
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__nrpe
     options:
       nagios_hostname_type: "host"
 relations:

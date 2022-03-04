@@ -9,11 +9,7 @@ declare -A MASTER_OPTS=(
     [TARGET_RELEASE_NAME]=''
     [VIP_ADDR_START]=10.5.100.0
     [CHARM_REVISIONS]=
-    [CHARM_STORE]=cs:
-    [CHARM_CHANNEL]=edge
-    [CHARM_TRACK]=latest/
-    [CHARM_CEPH_TRACK]=
-    [CHARM_RABBIT_TRACK]=
+    [CHARM_STORE]=ch:
 )
 DEFAULT_SERIES=focal
 JUJU_VERSION="`juju show-controller| sed -r 's/.+controller-model-version:\s+(.+)/\1/g;t;d' 2>/dev/null`" || true
@@ -50,10 +46,6 @@ _usage () {
 USAGE: `basename $0` OPTIONS [OVERLAYS] [MODULE_OPTS]
 
 OPTIONS:
-     --charm-channel
-        Charm channel to deploy from (if supported). Be aware that this
-        applies to all charms being deployed which means they must all
-        have a release available in the channel specified.
      --charmstore
         By default we use charmhub (ch:) with channels/tracks but for older
         versions of charms or juju it may be necessary to use charmstore (cs:).
@@ -114,8 +106,9 @@ OPTIONS:
      -s, --series s
         Ubuntu series.
     --use-stable-charms
-        By default the development (cs:~openstack-charmers-next) version of
-        Openstack charms are used where available. Use this flag if you want to
+	If using charmstore (cs:), by default the development
+        (cs:~openstack-charmers-next) version of Openstack charms
+        are used where available. Use this flag if you want to
         use the stable (released) charms i.e. cs:<charm>.
     --revision-info
         Path to a yaml-format bundle file or the output of a "juju
@@ -172,10 +165,6 @@ filter_master_opts ()
 
     while (($# > 0)); do
         case "$1" in
-            --charm-channel)
-                MASTER_OPTS[CHARM_CHANNEL]="$2"
-                shift
-                ;;
             --charmstore)
                 MASTER_OPTS[CHARM_STORE]="cs:"
                 ;;
@@ -752,6 +741,23 @@ release=`get_release`
 series=`ost_series_autocorrect "$series" "$release"`
 release=`ost_release_autocorrect "$series" "$release"`
 ppa=`get_ppa`
+
+ceph_release=`get_app_release_name $release`
+
+# get charm channels
+. $MOD_DIR/common/charm_lists
+declare -A CHARM_CHANNEL=()
+. $MOD_DIR/common/ch_channel_map/$series
+. $MOD_DIR/common/ch_channel_map/any_series
+declare -A CH_PREFIXED_CHARMS=()
+. $MOD_DIR/common/ch_prefix_map/charmed-osm
+. $MOD_DIR/common/ch_prefix_map/containers
+declare -A CS_NS_CHARMS=()
+if ! has_opt --use-stable-charms; then
+    . $MOD_DIR/common/cs_ns_map/charmed-osm
+    . $MOD_DIR/common/cs_ns_map/containers
+    . $MOD_DIR/common/cs_ns_map/openstack-charmers-next
+fi
 
 if [ -n "$ppa" ]; then
     source="ppa:$ppa"

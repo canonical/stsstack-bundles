@@ -2,26 +2,67 @@
 
 # Renderers defined here must be applied to any/all templates.
 
+render_mod_params ()
+{
+    local template=$1
+    local config_renderer=
+    export INTERNAL_BUNDLE_CONFIG=
+
+    declare -A CHANNEL_DEFAULT=( [cs:]=stable [ch:]=latest/stable )
+    local store=${MASTER_OPTS[CHARM_STORE]}
+    local store_default_channel=${CHANNEL_DEFAULT[$store]}
+    local service_default_channel=${MASTER_OPTS[DEFAULT_CHANNEL]:-$store_default_channel}
+    local channel
+
+    local charms
+    # get list of charms in this template
+    readarray -t charms<<<`sed -rn 's,.+ charm:\s+.+__CHARM_CH_PREFIX__(.+)\s*$,\1,p' $1`
+
+    config_renderer=`mktemp`
+    export INTERNAL_BUNDLE_CONFIG=`mktemp`
+    echo -n "sed -i " > $config_renderer
+
+    for c in ${charms[@]}; do
+        if [[ $store == "ch:" ]]; then
+            # apply channel and prefix, if required, for each charm
+            channel=${CHARM_CHANNEL[$c]:-$service_default_channel}
+            echo "-e '/__CHARM_CS_NS____CHARM_CH_PREFIX__${c}\s*$/a\ \ \ \ channel: $channel'" >> $config_renderer
+
+            prefix=${CH_PREFIXED_CHARMS[$c]:-""}
+            echo "-e 's,__CHARM_CS_NS____CHARM_CH_PREFIX__${c}\s*$,$prefix${c},'" >> $config_renderer
+        else
+            # apply ns, if required, for each charm
+            ns=${CS_NS_CHARMS[$c]:-""}
+            echo "-e 's,__CHARM_CS_NS____CHARM_CH_PREFIX__${c}\s*$,$ns${c},'" >> $config_renderer
+        fi
+    done
+
+    echo "-e 's,__CHARM_STORE__,$store,'" >> $config_renderer
+
+    if ((${#MOD_PARAMS[@]})); then
+        for p in ${!MOD_PARAMS[@]}; do
+            echo -n "-e 's,$p,${MOD_PARAMS[$p]},g' " >> $config_renderer
+            echo "${p}: \"${MOD_PARAMS[$p]}\"" >> $INTERNAL_BUNDLE_CONFIG
+        done
+    fi
+
+    # apply it
+    eval `cat $config_renderer` "$template"
+    rm -rf $config_renderer
+}
+
 __generate_app_mysql_inndodb_router ()
 {
     local app="$1"
+    local app_part=$RENDER_PARTS_DIR/mysql/applications/${app}-mysql-innodb-cluster-router.part
 
     mkdir -p $RENDER_PARTS_DIR/mysql/{applications,relations}
-
-
-    channel=${MOD_PARAMS[__CHARM_CHANNEL__]}
-    ns=${MOD_PARAMS[__CHARM_NS__]:-}
-    track=${MOD_PARAMS[__CHARM_TRACK__]}
-    if has_opt --use-stable-charms; then
-        channel=stable
-        ns=
-    fi
-
-cat << EOF > $RENDER_PARTS_DIR/mysql/applications/$app-mysql-innodb-cluster-router.part
+cat << EOF > $app_part
   $app-mysql-router:
-    charm: ${MOD_PARAMS[__CHARM_STORE__]}${ns}mysql-router
-    channel: $track$channel
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__mysql-router
 EOF
+    render_mod_params $app_part
+
 cat << EOF > $RENDER_PARTS_DIR/mysql/relations/$app-mysql-innodb-cluster-router.part
   - [ mysql:db-router, $app-mysql-router:db-router ]
 EOF
@@ -89,9 +130,7 @@ render () {
     sed -i "s,__SERIES__,$series,g" $1
 
     # service-specific replacements
-    if [ -n "$INTERNAL_BUNDLE_CONFIG_RENDERER" ]; then
-        eval `cat $INTERNAL_BUNDLE_CONFIG_RENDERER` "$1"
-    fi
+    render_mod_params $1
 
     num_vips=`grep __VIP__ $1| wc -l`
     if ((num_vips)); then
@@ -112,13 +151,6 @@ render () {
         grep -q $charm_current $1 || continue
         sed -i -r "s,charm:.*${charm_current}\$,charm: $charm_new," $1
     done
-
-    if has_opt --use-stable-charms; then
-        if [[ ${MASTER_OPTS[CHARM_STORE]} == cs: ]]; then
-            sed -i -r 's,~openstack-charmers-next/,,g' $1
-        fi
-        sed -i -r 's,channel:\s*[a-z]+,channel: stable,g' $1
-    fi
 
     # render mysql interface if exists
     # note: no changes applied until aggregate_mysql_interface_parts()

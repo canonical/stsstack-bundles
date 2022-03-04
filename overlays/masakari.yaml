@@ -5,19 +5,16 @@ openstack_origin:           &openstack_origin          __OS_ORIGIN__
 
 applications:
   masakari-monitors:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__masakari-monitors
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__masakari-monitors
     options:
       debug: *debug
   pacemaker-remote:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__pacemaker-remote
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__pacemaker-remote
     options:
       enable-stonith: True
       enable-resources: False
   masakari:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__masakari
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__masakari
     num_units: __NUM_MASAKARI_UNITS__
     options:
       debug: *debug

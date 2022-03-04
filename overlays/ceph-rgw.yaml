@@ -10,8 +10,7 @@ ssl_key:                    &ssl_key                   __SSL_KEY__
 
 applications:
   ceph-rgw:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__ceph-radosgw
-    channel: __CHARM_CEPH_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__ceph-radosgw
     num_units: __NUM_CEPH_RGW_UNITS__
     constraints: mem=1G
     options:

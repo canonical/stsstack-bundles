@@ -14,8 +14,7 @@ applications:
       overwrite: 'false'
       glance-api-version: 2
   cinder-ceph:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__cinder-ceph
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__cinder-ceph
 relations:
   - [ glance, __CEPH_INTERFACE__ ]
   - [ cinder, cinder-ceph ]

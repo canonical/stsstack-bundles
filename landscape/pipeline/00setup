@@ -19,12 +19,4 @@ MOD_MSGS[0_common.0]="run ./configure to initialise your deployment"
 export -a MOD_OVERLAYS=()
 
 export -A MOD_PARAMS=()
-# override this for openstack
-MASTER_OPTS[CHARM_TRACK]=$release/
-if [[ $series = bionic ]]; then
-    MASTER_OPTS[CHARM_RABBIT_TRACK]=3.6/
-elif [[ $series = focal ]]; then
-    MASTER_OPTS[CHARM_RABBIT_TRACK]=3.8/
-else
-    MASTER_OPTS[CHARM_RABBIT_TRACK]=latest/
-fi
+

@@ -5,8 +5,7 @@ openstack_origin:           &openstack_origin          __OS_ORIGIN__
 
 applications:
   heat:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__heat
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__heat
     num_units: __NUM_HEAT_UNITS__
     constraints: mem=1G
     options:

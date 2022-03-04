@@ -1,0 +1,4 @@
+for c in ${OSM_CHARMS[@]}; do
+    CS_NS_CHARMS[$c]=~charmed-osm/
+done
+

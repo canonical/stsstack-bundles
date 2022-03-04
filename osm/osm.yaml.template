@@ -6,17 +6,15 @@ bastion_ip:                 &bastion_ip                __BASTION_IP__
 bundle: kubernetes
 applications:
   grafana-k8s:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__grafana-10
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__grafana
     scale: 1
     series: kubernetes
     annotations:
       gui-x: "500"
       gui-y: "1100"
   kafka-k8s:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__kafka-0
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
-    scale: 1
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__kafka
+    scale: 
     series: kubernetes
     storage:
       database: 100M
@@ -24,8 +22,7 @@ applications:
       gui-x: "0"
       gui-y: "600"
   lcm-k8s:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__lcm-15
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__lcm
     scale: 1
     series: kubernetes
     options:
@@ -40,8 +37,7 @@ applications:
       gui-x: "-500"
       gui-y: "100"
   mariadb-k8s:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__mariadb-k8s
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__mariadb-k8s
     scale: 1
     series: kubernetes
     storage:
@@ -59,8 +55,7 @@ applications:
       gui-x: "-500"
       gui-y: "-400"
   mon-k8s:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__mon-12
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__mon
     scale: 1
     series: kubernetes
     options:
@@ -72,8 +67,7 @@ applications:
       gui-x: "500"
       gui-y: "100"
   mongodb-k8s:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__mongodb-k8s
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__mongodb-k8s
     scale: 1
     series: kubernetes
     storage:
@@ -89,8 +83,7 @@ applications:
       gui-x: "0"
       gui-y: "100"
   nbi-k8s:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__nbi-18
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__nbi
     scale: 1
     series: kubernetes
     options:
@@ -100,8 +93,7 @@ applications:
       gui-x: "0"
       gui-y: "-400"
   pol-k8s:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__pol-10
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__pol
     scale: 1
     series: kubernetes
     options:
@@ -110,8 +102,7 @@ applications:
       gui-x: "-500"
       gui-y: "1100"
   prometheus-k8s:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__prometheus-9
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__prometheus
     scale: 1
     series: kubernetes
     storage:
@@ -123,8 +114,7 @@ applications:
       gui-x: "500"
       gui-y: "600"
   ro-k8s:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__ro-10
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__ro
     scale: 1
     series: kubernetes
     options:
@@ -134,16 +124,14 @@ applications:
       gui-x: "-500"
       gui-y: "600"
   ui-k8s:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__ng-ui-25
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__ng-ui
     scale: 1
     series: kubernetes
     annotations:
       gui-x: "500"
       gui-y: "-400"
   zookeeper-k8s:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__zookeeper-0
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__zookeeper
     scale: 1
     series: kubernetes
     storage:

@@ -4,8 +4,7 @@ openstack_origin:           &openstack_origin          __OS_ORIGIN__
 
 applications:
   barbican-vault:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__barbican-vault
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__barbican-vault
 relations:
   - [ barbican-vault:secrets, barbican:secrets ]
   - [ barbican-vault:secrets-storage, vault:secrets ]

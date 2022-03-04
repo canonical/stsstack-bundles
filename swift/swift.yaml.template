@@ -15,8 +15,7 @@ series: __SERIES__
 applications:
   glance:
     num_units: 1
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__glance
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__glance
     options:
       debug: *debug
       verbose: *verbose

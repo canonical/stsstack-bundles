@@ -5,8 +5,7 @@ When you deploy Ceph with stsstack-bundles it is using Juju storage [1] to creat
 ```
 applications:
   ceph-osd:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__ceph-osd
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__ceph-osd
     num_units: 3
     constraints: mem=1G
     options:

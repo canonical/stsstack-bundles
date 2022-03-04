@@ -4,8 +4,7 @@ source:                     &source          __OS_ORIGIN__
 applications:
   mysql:
     num_units: __NUM_MYSQL_UNITS__
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__percona-cluster
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__percona-cluster
     constraints: mem=4G
     options:
       source: *source

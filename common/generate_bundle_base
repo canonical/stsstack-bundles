@@ -92,11 +92,6 @@ else
     msg="using dev/next charms"
 fi
 
-channel_param=
-if [ -n "${MASTER_OPTS[CHARM_CHANNEL]}" ]; then
-    channel_param="--channel=${MASTER_OPTS[CHARM_CHANNEL]}"
-fi
-
 # Make copy of base template, render, and store in named dir.
 dtmp=`mktemp -d`
 template_path=$dtmp/`basename $MOD_BASE_TEMPLATE`
@@ -190,5 +185,9 @@ aggregate_mysql_interface_parts $bundles_dir/o
 ((${#overlay_opts[@]})) && overlay_opts+=("")  # right padding
 
 base_bundle=$bundles_dir/`basename $bundle`
-echo -e "juju deploy${JUJU_DEPLOY_OPTS} ${base_bundle}${overlay_opts[@]:- }${channel_param}\n " > ${bundles_dir}/command
+echo -e "juju deploy${JUJU_DEPLOY_OPTS} ${base_bundle}${overlay_opts[@]:- }\n " > ${bundles_dir}/command
 finish
+
+for f in $INTERNAL_BUNDLE_CONFIG; do
+    [ -n "$f" ] && [ -r "$f" ] && rm -f $f
+done

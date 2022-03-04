@@ -1,5 +1,4 @@
 applications:
   easyrsa:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__easyrsa
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__easyrsa
     num_units: __NUM_EASYRSA_UNITS__

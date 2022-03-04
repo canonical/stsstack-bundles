@@ -12,16 +12,6 @@ if ! has_opt --docker; then
     set -- $@ --containerd && cache $@
 fi
 
-check_hacluster_channel ()
-{
-    local channel=${MOD_PARAMS[__CHARM_CHANNEL__]}
-    [ -n "$channel" ] || channel="${MASTER_OPTS[CHARM_CHANNEL]}"
-    if [ -n "$channel" ] && [ "$channel" != "stable" ]; then
-        # NOTE(dosaboy): https://bugs.launchpad.net/juju/+bug/1832873
-        MOD_MSGS[hacluster.0]="\nIMPORTANT: you are using the $channel charm channel but hacluster is not published to that channel. Either switch to stable channel or post-upgrade hacluster to stable channel.\n"
-    fi
-}
-
 # default overlay setup
 MOD_OVERLAYS+=(
     "etcd.yaml"
@@ -87,8 +77,6 @@ do
             conflicts_with $1 --rook-ceph
             MOD_OVERLAYS+=( "ceph.yaml" )
             MOD_OVERLAYS+=( "k8s-ceph.yaml" )
-            # NOTE: force stable since these charms are not published to edge
-            MOD_PARAMS[__CHARM_CHANNEL__]=stable
             ;;
         --ceph-proxy)
             MOD_PARAMS[__CEPH_INTERFACE__]='ceph-proxy'
@@ -166,7 +154,6 @@ do
                 MOD_OVERLAYS+=( "k8s-lb-ha-keepalived.yaml" )
             else
                 MOD_OVERLAYS+=( "k8s-lb-ha-hacluster.yaml" )
-                check_hacluster_channel
             fi
             ;;
         --lb-octavia)
@@ -190,8 +177,6 @@ do
             MOD_OVERLAYS+=( "k8s-vault.yaml" )
             using_kubeapi_lb && MOD_OVERLAYS+=( "k8s-vault-lb.yaml" )
             has_opt --ceph && MOD_OVERLAYS+=( "vault-ceph.yaml" )
-            # NOTE: force stable since these charms are not published to edge
-            MOD_PARAMS[__CHARM_CHANNEL__]=stable
             ;;
         --etcd-channel)  #__OPT__type:<str>
             MOD_PARAMS[__ETCD_SNAP_CHANNEL__]=$2
@@ -251,13 +236,6 @@ do
     esac
     shift
 done
-
-# We do this here in case there was a need to override.
-charm_channel="${MOD_PARAMS[__CHARM_CHANNEL__]}"
-if [ -n "$charm_channel" ]; then
-    set -- $@ --charm-channel $charm_channel && cache $@
-    MOD_PASSTHROUGH_OPTS+=( --charm-channel $charm_channel )
-fi
 
 target=$series
 [ -z "$pocket" ] || target=${target}-$pocket

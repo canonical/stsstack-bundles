@@ -1,7 +1,6 @@
 applications:
   nfs-server-test-fixture:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__nfs-server-test-fixture
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__nfs-server-test-fixture
     num_units: 1
     storage:
       share: cinder,40G

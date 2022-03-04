@@ -3,8 +3,7 @@ source:                     &source          __OS_ORIGIN__
 
 applications:
   mysql:  # we call it 'mysql' since that's how other applications address this one.
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__mysql-innodb-cluster
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__mysql-innodb-cluster
     constraints: mem=4G
     num_units: __NUM_MYSQL_UNITS__  # min 3
     options:

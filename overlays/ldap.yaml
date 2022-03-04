@@ -1,7 +1,6 @@
 applications:
   keystone-ldap:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__keystone-ldap
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__keystone-ldap
     options:
       ldap-server: 'ldap://__LDAP_SERVER__'
       ldap-user: cn=admin,dc=test,dc=com

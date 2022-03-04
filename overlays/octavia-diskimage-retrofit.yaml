@@ -3,8 +3,7 @@ debug:                      &debug                     True
 
 applications:
   octavia-diskimage-retrofit:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__octavia-diskimage-retrofit
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__octavia-diskimage-retrofit
     options:
       debug: *debug
       amp-image-tag: octavia-amphora 

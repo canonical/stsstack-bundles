@@ -2,8 +2,7 @@
 
 applications:
   kubeapi-lb-keepalived:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__keepalived
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__keepalived
     options:
       virtual_ip: __VIP__
       vip_hostname: __VIP__

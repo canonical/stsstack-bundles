@@ -8,8 +8,7 @@ applications:
       overlay-network-type: 'vxlan gre'
       manage-neutron-plugin-legacy-mode: true
   neutron-openvswitch:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__neutron-openvswitch
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__neutron-openvswitch
     options:
       debug: *debug
       verbose: *verbose

@@ -1,23 +1,20 @@
 applications:
   elasticsearch:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__elasticsearch
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__elasticsearch
     num_units: 1
     constraints: mem=8G
     options:
       firewall_enabled: false
       es-heap-size: 4
   filebeat:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__filebeat
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__filebeat
     options:
       logpath: >
               /var/log/syslog
               /var/log/*.log
               /var/log/*/*.log
   graylog:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__graylog
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__graylog
     num_units: 1
     constraints: mem=2G
     options:
@@ -28,8 +25,7 @@ applications:
       index_rotation_size: 10737418240
       index_retention_count: 7
   mongodb:
-    charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__mongodb
-    channel: __CHARM_TRACK____CHARM_CHANNEL__
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__mongodb
     num_units: 1
     constraints: mem=1G
     options:
