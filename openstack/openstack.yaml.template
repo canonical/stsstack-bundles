@@ -20,7 +20,7 @@ applications:
   rabbitmq-server:
     num_units: __NUM_RABBIT_UNITS__
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__rabbitmq-server
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_CHANNEL____CHARM_RABBIT_TRACK__
     constraints: mem=1G
     options:
       source: *source

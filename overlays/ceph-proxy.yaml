@@ -8,7 +8,7 @@ loglevel:                   &loglevel                  1
 applications:
   ceph-proxy:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__ceph-proxy
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_CHANNEL____CHARM_CEPH_TRACK__
     num_units: __NUM_CEPH_PROXY_UNITS__
     constraints: mem=1G
     options:
