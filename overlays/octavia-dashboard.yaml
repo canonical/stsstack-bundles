@@ -3,6 +3,6 @@
 applications:
   octavia-dashboard:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__octavia-dashboard
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
 relations:
   - [ octavia-dashboard:dashboard, openstack-dashboard:dashboard-plugin ]

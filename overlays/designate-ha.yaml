@@ -6,7 +6,7 @@ applications:
     num_units: 2
   designate-hacluster:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__hacluster
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     options:
         cluster_count: __NUM_DESIGNATE_UNITS__
 relations:

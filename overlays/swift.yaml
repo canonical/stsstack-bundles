@@ -9,7 +9,7 @@ applications:
   swift-proxy:
     num_units: __NUM_SWIFT_PROXY_UNITS__
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__swift-proxy
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     constraints: mem=1G
     options:
       debug: *debug
@@ -23,7 +23,7 @@ applications:
   swift-storage-z1:
     num_units: __NUM_SWIFT_STORAGE_UNITS__
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__swift-storage
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     constraints: mem=1G
     options:
       zone: 1
@@ -34,7 +34,7 @@ applications:
   swift-storage-z2:
     num_units: __NUM_SWIFT_STORAGE_UNITS__
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__swift-storage
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     constraints: mem=1G
     options:
       zone: 2
@@ -45,7 +45,7 @@ applications:
   swift-storage-z3:
     num_units: __NUM_SWIFT_STORAGE_UNITS__
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__swift-storage
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     constraints: mem=1G
     options:
       zone: 3

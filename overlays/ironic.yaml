@@ -7,14 +7,14 @@ applications:
   ironic-api:
     num_units: 1
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__ironic-api
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     constraints: mem=2G
     options:
       debug: *debug
       openstack-origin: *openstack_origin
   ironic-conductor:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__ironic-conductor
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     num_units: 1
     constraints: mem=2G
     options:
@@ -26,7 +26,7 @@ applications:
       use-ipxe: true
   neutron-ironic-agent:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__neutron-api-plugin-ironic
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     options:
       debug: *debug
       openstack-origin: *openstack_origin

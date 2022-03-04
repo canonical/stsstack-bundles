@@ -7,14 +7,14 @@ loglevel:                   &loglevel                  1
 applications:
   manila-ganesha:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__manila-ganesha
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     num_units: __NUM_MANILA_GANESHA_UNITS__
     options:
       openstack-origin: *openstack_origin
       debug: *debug
   manila:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__manila
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     num_units: __NUM_MANILA_UNITS__
     options:
       debug: *debug
@@ -25,7 +25,7 @@ applications:
       vip: __VIP__
   manila-hacluster:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__hacluster
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     options:
         cluster_count: __NUM_MANILA_UNITS__
 relations:

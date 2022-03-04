@@ -11,7 +11,7 @@ declare -A MASTER_OPTS=(
     [CHARM_REVISIONS]=
     [CHARM_STORE]=ch:
     [CHARM_CHANNEL]=edge
-    [CHARM_TRACK]=/latest
+    [CHARM_TRACK]=latest/
     [CHARM_CEPH_TRACK]=
     [CHARM_RABBIT_TRACK]=
 )

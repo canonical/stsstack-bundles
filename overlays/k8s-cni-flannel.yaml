@@ -1,7 +1,7 @@
 applications:
   flannel:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__flannel
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
 relations:
   - [ 'flannel:cni', 'kubernetes-master:cni' ]
   - [ 'flannel:cni', 'kubernetes-worker:cni' ]

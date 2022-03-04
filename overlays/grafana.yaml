@@ -1,7 +1,7 @@
 applications:
   grafana:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__grafana
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     num_units: 1
     constraints: mem=1G
     options:
@@ -11,12 +11,12 @@ applications:
       admin_password: admin
   prometheus:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__prometheus2
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     num_units: 1
     constraints: mem=1G
   telegraf:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__telegraf
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     expose: True
     options:
       prometheus_output_port: default

@@ -7,7 +7,7 @@ bundle: kubernetes
 applications:
   grafana-k8s:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__grafana-10
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     scale: 1
     series: kubernetes
     annotations:
@@ -15,7 +15,7 @@ applications:
       gui-y: "1100"
   kafka-k8s:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__kafka-0
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     scale: 1
     series: kubernetes
     storage:
@@ -25,7 +25,7 @@ applications:
       gui-y: "600"
   lcm-k8s:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__lcm-15
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     scale: 1
     series: kubernetes
     options:
@@ -41,7 +41,7 @@ applications:
       gui-y: "100"
   mariadb-k8s:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__mariadb-k8s
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     scale: 1
     series: kubernetes
     storage:
@@ -60,7 +60,7 @@ applications:
       gui-y: "-400"
   mon-k8s:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__mon-12
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     scale: 1
     series: kubernetes
     options:
@@ -73,7 +73,7 @@ applications:
       gui-y: "100"
   mongodb-k8s:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__mongodb-k8s
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     scale: 1
     series: kubernetes
     storage:
@@ -90,7 +90,7 @@ applications:
       gui-y: "100"
   nbi-k8s:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__nbi-18
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     scale: 1
     series: kubernetes
     options:
@@ -101,7 +101,7 @@ applications:
       gui-y: "-400"
   pol-k8s:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__pol-10
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     scale: 1
     series: kubernetes
     options:
@@ -111,7 +111,7 @@ applications:
       gui-y: "1100"
   prometheus-k8s:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__prometheus-9
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     scale: 1
     series: kubernetes
     storage:
@@ -124,7 +124,7 @@ applications:
       gui-y: "600"
   ro-k8s:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__ro-10
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     scale: 1
     series: kubernetes
     options:
@@ -135,7 +135,7 @@ applications:
       gui-y: "600"
   ui-k8s:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__ng-ui-25
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     scale: 1
     series: kubernetes
     annotations:
@@ -143,7 +143,7 @@ applications:
       gui-y: "-400"
   zookeeper-k8s:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__zookeeper-0
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     scale: 1
     series: kubernetes
     storage:

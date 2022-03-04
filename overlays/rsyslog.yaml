@@ -1,13 +1,13 @@
 applications:
   rsyslog:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__rsyslog
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     num_units: 1
     options:
       nova_logs: True
       protocol: udp
   rsyslog-forwarder-ha:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__rsyslog-forwarder-ha
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
 relations:
  - [ rsyslog, rsyslog-forwarder-ha ]

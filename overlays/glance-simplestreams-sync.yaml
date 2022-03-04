@@ -4,7 +4,7 @@ ssl_ca:                     &ssl_ca                    __SSL_CA__
 applications:
   glance-simplestreams-sync:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__glance-simplestreams-sync
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     num_units: 1
     options:
       source: ppa:simplestreams-dev/trunk

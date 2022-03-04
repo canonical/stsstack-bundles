@@ -11,7 +11,7 @@ applications:
   keystone:
     num_units: __NUM_KEYSTONE_UNITS__
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__keystone
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     constraints: mem=1G
     options:
       debug: *debug

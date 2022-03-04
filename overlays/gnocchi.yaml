@@ -6,7 +6,7 @@ openstack_origin:           &openstack_origin          __OS_ORIGIN__
 applications:
   gnocchi:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__gnocchi
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     num_units: __NUM_TELEMETRY_UNITS__
     constraints: mem=1G
     options:

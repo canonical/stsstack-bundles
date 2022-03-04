@@ -20,7 +20,7 @@ __generate_app_mysql_inndodb_router ()
 cat << EOF > $RENDER_PARTS_DIR/mysql/applications/$app-mysql-innodb-cluster-router.part
   $app-mysql-router:
     charm: ${MOD_PARAMS[__CHARM_STORE__]}${ns}mysql-router
-    channel: $channel$track
+    channel: $track$channel
 EOF
 cat << EOF > $RENDER_PARTS_DIR/mysql/relations/$app-mysql-innodb-cluster-router.part
   - [ mysql:db-router, $app-mysql-router:db-router ]

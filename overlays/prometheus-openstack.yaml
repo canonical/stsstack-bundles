@@ -1,7 +1,7 @@
 applications:
   prometheus-openstack-exporter:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__prometheus-openstack-exporter
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     num_units: 1
 relations:
   - [ 'prometheus-openstack-exporter:identity-credentials', 'keystone:identity-credentials' ]

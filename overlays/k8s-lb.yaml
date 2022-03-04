@@ -1,7 +1,7 @@
 applications:
   kubeapi-load-balancer:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__kubeapi-load-balancer
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     constraints: mem=1G
     expose: true
     num_units: __NUM_K8S_LB_UNITS__

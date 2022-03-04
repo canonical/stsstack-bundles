@@ -20,4 +20,4 @@ export -a MOD_OVERLAYS=()
 
 export -A MOD_PARAMS=()
 # override this for openstack
-MASTER_OPTS[CHARM_TRACK]=/$release
+MASTER_OPTS[CHARM_TRACK]=$release/

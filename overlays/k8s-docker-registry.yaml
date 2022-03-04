@@ -1,7 +1,7 @@
 applications:
   docker-registry:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__docker-registry
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     num_units: 1
 relations:
   - [ 'docker-registry', __CONTAINER_RUNTIME__ ]

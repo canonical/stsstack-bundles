@@ -20,4 +20,4 @@ export -a MOD_OVERLAYS=()
 
 export -A MOD_PARAMS=()
 # needed for ceph
-MASTER_OPTS[CHARM_CEPH_TRACK]=/`get_app_release_name $release`
+MASTER_OPTS[CHARM_CEPH_TRACK]=`get_app_release_name $release`/

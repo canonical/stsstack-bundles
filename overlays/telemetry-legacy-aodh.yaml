@@ -6,7 +6,7 @@ openstack_origin:           &openstack_origin          __OS_ORIGIN__
 applications:
   ceilometer:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__ceilometer
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     num_units: __NUM_TELEMETRY_UNITS__
     constraints: mem=1G
     options:
@@ -15,10 +15,10 @@ applications:
       openstack-origin: *openstack_origin
   ceilometer-agent:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__ceilometer-agent
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
   aodh:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__aodh
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     num_units: __NUM_TELEMETRY_UNITS__
     constraints: mem=1G
     options:
@@ -26,7 +26,7 @@ applications:
       openstack-origin: *openstack_origin
   mongodb:
     charm: __CHARM_STORE____CHARM_NS____CHARM_PREFIX__mongodb
-    channel: __CHARM_CHANNEL____CHARM_TRACK__
+    channel: __CHARM_TRACK____CHARM_CHANNEL__
     num_units: 1
     constraints: mem=1G
 relations:
