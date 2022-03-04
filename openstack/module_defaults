@@ -11,6 +11,7 @@ if [[ ${MOD_PARAMS[__CHARM_STORE__]} == cs: ]]; then
     MOD_PARAMS[__CHARM_NS__]=~openstack-charmers-next/
     MOD_PARAMS[__CHARM_PREFIX__]=
     MOD_PARAMS[__CHARM_TRACK__]=
+    MOD_PARAMS[__CHARM_RABBIT_TRACK__]=
     MOD_PARAMS[__CHARM_CHANNEL__]=stable
 else
     MOD_PARAMS[__CHARM_NS__]=
