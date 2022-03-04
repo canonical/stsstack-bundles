@@ -235,6 +235,14 @@ do
                 set -- $@ --keystone-ha:1 && cache $@
             fi
             ;;
+        --multus)
+	    MOD_MSGS[multus.0]="Run the following commands from k8s model to add multus"
+	    MOD_MSGS[multus.1]="juju scp kubernetes-master/0:config ~/.kube/config"
+	    MOD_MSGS[multus.2]="juju add-k8s multus-k8s-cloud --controller $(juju switch | cut -d: -f1)"
+	    MOD_MSGS[multus.3]="juju add-model multus-k8s-model multus-k8s-cloud"
+	    MOD_MSGS[multus.4]="juju deploy cs:~containers/multus"
+	    MOD_MSGS[multus.5]="To add network-attachment-definition, do 'juju config network-attachment-definitions=<>'"
+	    ;;
         *)
             echo "ERROR: invalid input '$1'"
             _usage
