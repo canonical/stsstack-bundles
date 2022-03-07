@@ -86,12 +86,6 @@ if ${MASTER_OPTS[HYPERCONVERGED_DEPLOYMENT]}; then
     . $MOD_DIR/common/render.d/unit_placement
 fi
 
-if has_opt --use-stable-charms; then
-    msg="using stable charms"
-else
-    msg="using dev/next charms"
-fi
-
 # Make copy of base template, render, and store in named dir.
 dtmp=`mktemp -d`
 template_path=$dtmp/`basename $MOD_BASE_TEMPLATE`
@@ -138,10 +132,10 @@ if ((${#MOD_OVERLAYS[@]})); then
         fi
     done
 
-    echo "Created ${MASTER_OPTS[TARGET_RELEASE_NAME]} bundle and overlays ($msg):"
+    echo "Created ${MASTER_OPTS[TARGET_RELEASE_NAME]} bundle and overlays:"
     echo -e " ${msgs[@]}"
 else
-    echo -e "Created ${MASTER_OPTS[TARGET_RELEASE_NAME]} bundle ($msg)\n"
+    echo -e "Created ${MASTER_OPTS[TARGET_RELEASE_NAME]} bundle\n"
 fi
 
 # Generate placement overlay for use with MAAS provider

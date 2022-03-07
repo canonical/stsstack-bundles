@@ -106,10 +106,7 @@ OPTIONS:
      -s, --series s
         Ubuntu series.
     --use-stable-charms
-	If using charmstore (cs:), by default the development
-        (cs:~openstack-charmers-next) version of Openstack charms
-        are used where available. Use this flag if you want to
-        use the stable (released) charms i.e. cs:<charm>.
+	This is now the default for the charmstore since it is read-only.
     --revision-info
         Path to a yaml-format bundle file or the output of a "juju
         status" command that will be used to pin charms to specific
@@ -753,11 +750,8 @@ declare -A CH_PREFIXED_CHARMS=()
 . $MOD_DIR/common/ch_prefix_map/charmed-osm
 . $MOD_DIR/common/ch_prefix_map/containers
 declare -A CS_NS_CHARMS=()
-if ! has_opt --use-stable-charms; then
-    . $MOD_DIR/common/cs_ns_map/charmed-osm
-    . $MOD_DIR/common/cs_ns_map/containers
-    . $MOD_DIR/common/cs_ns_map/openstack-charmers-next
-fi
+. $MOD_DIR/common/cs_ns_map/charmed-osm
+. $MOD_DIR/common/cs_ns_map/containers
 
 if [ -n "$ppa" ]; then
     source="ppa:$ppa"
