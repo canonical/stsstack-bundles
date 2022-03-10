@@ -153,3 +153,7 @@ function is_ksv3 () {
         return 1
     fi
 }
+
+function heat_setup() {
+    juju run-action --wait heat/leader domain-setup
+}

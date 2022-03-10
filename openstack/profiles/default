@@ -48,6 +48,10 @@ if ((`juju status ceilometer --format=json 2>/dev/null| jq '.machines| length'`)
     juju run-action --wait ceilometer/leader ceilometer-upgrade
 fi
 
+if ((`juju status heat --format=json 2>/dev/null| jq '.machines| length'`)); then
+    heat_setup
+fi
+
 # Configure neutron networking on overcloud
 source novarc
 
