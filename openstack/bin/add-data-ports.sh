@@ -23,6 +23,9 @@ fi
 echo "Managing ports for $application units"
 
 . ~/novarc
+openstack port list --long --format json \
+    | jq '.[] | select(.Name == "data-port" and .Status == "DOWN" and ."Device Owner" == "")' \
+    | xargs --no-run-if-empty --verbose openstack port delete
 [ -n "$network" ] || network="${OS_PROJECT_NAME}_admin_net"
 
 readarray -t instances<<<"`juju status $application --format=json| jq -r '.machines[].\"instance-id\"'`"
