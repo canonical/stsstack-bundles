@@ -2,6 +2,10 @@
 debug:                      &debug                     True
 openstack_origin:           &openstack_origin          __OS_ORIGIN__
 
+ssl_ca:                     &ssl_ca                    __SSL_CA__
+ssl_cert:                   &ssl_cert                  __SSL_CERT__
+ssl_key:                    &ssl_key                   __SSL_KEY__
+
 applications:
   placement:
     charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__placement
@@ -10,6 +14,10 @@ applications:
     options:
       debug: *debug
       openstack-origin: *openstack_origin
+      ssl_ca: *ssl_ca
+      ssl_cert: *ssl_cert
+      ssl_key: *ssl_key
+
 relations:
   - [ placement:shared-db, __MYSQL_INTERFACE__ ]
   - [ placement, keystone ]
