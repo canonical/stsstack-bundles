@@ -506,6 +506,10 @@ do
             MOD_OVERLAYS+=( "openstack-dashboard-ha.yaml" )
             set -- $@ --openstack-dashboard && cache $@
             ;;
+        --placement-ha*)
+            get_units $1 __NUM_NOVA_PLACEMENT_UNITS__ 3
+            MOD_OVERLAYS+=( "placement-ha.yaml" )
+            ;;
         --swift)
             conflicts_with $1 --ceph-rgw
             MOD_OVERLAYS+=( "swift.yaml" )
@@ -596,7 +600,7 @@ do
                 set -- $@ $svc_ha:$units && cache $@
             done
             # now check optional overlays
-            for svc in openstack-dashboard swift ceph-rgw; do
+            for svc in openstack-dashboard swift ceph-rgw placement; do
                 svc_ha=--${svc}-ha
                 # don't override ones that have been explicity provided as HA and
                 # ignore ones that are not even requested.
