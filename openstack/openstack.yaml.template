@@ -81,19 +81,7 @@ applications:
       ssl_ca: *ssl_ca
       ssl_cert: *ssl_cert
       ssl_key: *ssl_key
-  glance:
-    num_units: __NUM_GLANCE_UNITS__
-    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__glance
-    constraints: mem=1G
-    options:
-      debug: *debug
-      verbose: *verbose
-      openstack-origin: *openstack_origin
-      ssl_ca: *ssl_ca
-      ssl_cert: *ssl_cert
-      ssl_key: *ssl_key
 relations:
-  - [ keystone:shared-db, __MYSQL_INTERFACE__ ]
   - [ nova-cloud-controller:shared-db, __MYSQL_INTERFACE__ ]
   - [ "nova-cloud-controller:amqp", rabbitmq-server ]
   - [ nova-cloud-controller, glance ]
@@ -102,8 +90,6 @@ relations:
   - - nova-compute
     - rabbitmq-server:amqp
   - [ nova-compute, glance ]
-  - [ glance:shared-db, __MYSQL_INTERFACE__ ]
-  - [ glance, keystone ]
   - [ glance, "cinder:image-service" ]
   - [ glance, rabbitmq-server ]
   - [ cinder:shared-db, __MYSQL_INTERFACE__ ]
