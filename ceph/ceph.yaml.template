@@ -4,10 +4,7 @@
 # Juju 2.x native deployer bundle for development ('next') charms
 
 ## Variables
-debug:                      &debug                     True
-verbose:                    &verbose                   True
 loglevel:                   &loglevel                  1
-openstack_origin:           &openstack_origin          __OS_ORIGIN__
 source:                     &source                    __SOURCE__
 num_mon_units:              &num_mon_units             __NUM_CEPH_MON_UNITS__
 
@@ -33,17 +30,5 @@ applications:
       osd-devices: ''  # must be empty string when using juju storage
     storage:
       osd-devices: cinder,10G,1
-  glance:
-    num_units: 1
-    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__glance
-    constraints: mem=1G
-    options:
-      debug: *debug
-      verbose: *verbose
-      openstack-origin: *openstack_origin
 relations:
-  - [ keystone:shared-db, __MYSQL_INTERFACE__ ]
   - [ ceph-mon, ceph-osd ]
-  - [ glance:shared-db, __MYSQL_INTERFACE__ ]
-  - [ glance, keystone ]
-  - [ glance, __CEPH_INTERFACE__]

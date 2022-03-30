@@ -17,7 +17,10 @@ is_neutron_gateway_required ()
 }
 
 # Needed in all cases
-MOD_OVERLAYS+=( "keystone.yaml" )
+MOD_OVERLAYS+=(
+    glance.yaml
+    keystone.yaml
+)
 
 if is_neutron_gateway_required; then
     MOD_OVERLAYS+=( "neutron-gateway.yaml" )

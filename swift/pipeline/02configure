@@ -7,7 +7,10 @@
 
 
 # Needed in all cases
-MOD_OVERLAYS+=( "keystone.yaml" )
+MOD_OVERLAYS+=( 
+    glance.yaml
+    keystone.yaml
+)
 
 # NOTE: this is (should be) the same across all modules using mysql
 if has_min_series focal; then

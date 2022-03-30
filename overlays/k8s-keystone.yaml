@@ -3,5 +3,4 @@ applications:
     options:
       enable-keystone-authorization: true
 relations:
-  - [ keystone:shared-db, __MYSQL_INTERFACE__ ]
   - [ 'kubernetes-master:keystone-credentials', 'keystone:identity-credentials' ]
