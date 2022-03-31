@@ -389,6 +389,7 @@ do
             ;;
         --octavia-ovn-provider)
             MOD_OVERLAYS+=( "octavia-ovn-provider.yaml" )
+            assert_min_release victoria octavia-ovn-provider
             # ensure octavia and ovn
             set -- $@ --octavia && cache $@
             set -- $@ --ovn && cache $@
