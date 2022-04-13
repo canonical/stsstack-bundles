@@ -6,9 +6,9 @@ juju run-action --format=json keystone-saml-mellon/0 get-sp-metadata --wait | jq
 openstack domain create federated_domain
 openstack group create federated_users --domain federated_domain
 
-# Get the federated_users group id and assign the role Member
+# Get the federated_users group id and assign the role member
 GROUP_ID=$(openstack group show federated_users --domain federated_domain | grep -v domain_id | grep id |awk '{print $4}')
-openstack role add --group ${GROUP_ID} --domain federated_domain Member
+openstack role add --group ${GROUP_ID} --domain federated_domain member
 
 # Use the URL for your idP's metadata for remote-id. The name can be
 # arbitrary.
@@ -34,7 +34,7 @@ cat > rules.json <<EOF
                     "name": "{0}_project",
                     "roles": [
                                  {
-                                     "name": "Member"
+                                     "name": "member"
                                  }
                              ]
                 }
