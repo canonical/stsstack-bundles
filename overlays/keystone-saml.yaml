@@ -2,6 +2,8 @@ applications:
   keystone-saml-mellon:
     charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__keystone-saml-mellon
     options:
+      debug: True
+      verbose: True
       idp-name: 'samltest'
       protocol-name: 'mapped'
       user-facing-name: 'samltest.id'
