@@ -6,6 +6,6 @@ MOD_DIR=`dirname $0`
 . $MOD_DIR/pipeline/02configure
 . $MOD_DIR/pipeline/03build
 # Ensure no unrendered variables
-out="`grep -r __ $MOD_DIR/b/${MASTER_OPTS[BUNDLE_NAME]} --exclude=config --exclude-dir=p`" || exit 0
+out="`grep -r __ $MOD_DIR/b/${MASTER_OPTS[BUNDLE_NAME]} --exclude=config --exclude-dir=p| egrep -v '^.*#'`" || exit 0
 echo -e "ERROR: there are unrendered variables in your bundle:\n$out"
 exit 1

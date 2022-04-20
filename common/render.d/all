@@ -16,7 +16,7 @@ render_mod_params ()
 
     local charms
     # get list of charms in this template
-    readarray -t charms<<<`sed -rn 's,.+ charm:\s+.+__CHARM_CH_PREFIX__(.+)\s*$,\1,p' $1`
+    readarray -t charms<<<`sed -rn 's,.+ charm:\s+.+__CHARM_CH_PREFIX__(__SKIP_PREFIX__)?(.+)\s*$,\2,p' $template`
 
     config_renderer=`mktemp`
     export INTERNAL_BUNDLE_CONFIG=`mktemp`
@@ -28,8 +28,12 @@ render_mod_params ()
             channel=${CHARM_CHANNEL[$c]:-$service_default_channel}
             echo "-e '/__CHARM_CS_NS____CHARM_CH_PREFIX__${c}\s*$/a\ \ \ \ channel: $channel'" >> $config_renderer
 
-            prefix=${CH_PREFIXED_CHARMS[$c]:-""}
-            echo "-e 's,__CHARM_CS_NS____CHARM_CH_PREFIX__${c}\s*$,$prefix${c},'" >> $config_renderer
+            if `grep -q "__SKIP_PREFIX__$c" $template`; then
+                echo "-e 's,__CHARM_CS_NS____CHARM_CH_PREFIX____SKIP_PREFIX__${c}\s*$,${c},'" >> $config_renderer
+            else
+                prefix=${CH_PREFIXED_CHARMS[$c]:-""}
+                echo "-e 's,__CHARM_CS_NS____CHARM_CH_PREFIX__${c}\s*$,$prefix${c},'" >> $config_renderer
+            fi
         else
             # apply ns, if required, for each charm
             ns=${CS_NS_CHARMS[$c]:-""}
