@@ -1,7 +1,18 @@
 #!/usr/bin/env bash
+
 set -ex
 
-juju run-action --format=json keystone-saml-mellon/0 get-sp-metadata --wait | jq -r '."unit-keystone-saml-mellon-0".results.output' > keystone-metadata.xml && curl --form userfile=@"./keystone-metadata.xml" -s -o /dev/null -w "%{http_code}\n" --form "submit=OK" "https://samltest.id/upload.php" 2>&1 && rm keystone-metadata.xml
+if ! juju show-application keystone-saml-mellon 2>&1; then
+    echo "Missing keystone-saml-mellon application"
+    exit 1
+fi
+
+juju run-action --format=json keystone-saml-mellon/0 get-sp-metadata --wait \
+    | jq -r '."unit-keystone-saml-mellon-0".results.output' \
+    > keystone-metadata.xml \
+    && curl --form userfile=@"./keystone-metadata.xml" -s -o /dev/null \
+    -w "%{http_code}\n" --form "submit=OK" "https://samltest.id/upload.php" 2>&1 \
+    && rm keystone-metadata.xml
 
 openstack domain create federated_domain
 openstack group create federated_users --domain federated_domain
