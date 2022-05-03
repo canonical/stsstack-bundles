@@ -5,5 +5,6 @@ export -A APP_RELEASE_NAMES=( [firefly]=icehouse
                               [mimic]=rocky
                               [nautilus]=train
                               [octopus]=ussuri
-                              [pacific]=wallaby )
+                              [pacific]=xena # xena and wallaby both have pacific
+                              [quincy]=yoga )
 
