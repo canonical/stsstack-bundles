@@ -1,2 +1,0 @@
-relations:
-  - ['ceilometer:certificates', 'vault:certificates']

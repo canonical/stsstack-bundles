@@ -1,5 +1,0 @@
-#!/bin/bash
-. $MOD_DIR/common/generate_bundle_base
-
-print_msgs
-

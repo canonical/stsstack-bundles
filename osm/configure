@@ -1,3 +1,0 @@
-#!/bin/bash -u
-
-echo "See doc/deploy_osd.md for setup info"

@@ -1,7 +1,0 @@
-# Start with dependency defaults in case we want to override any locally
-. $MOD_DIR/../.module_defaults/ceph
-. $MOD_DIR/../.module_defaults/swift
-. $MOD_DIR/../.module_defaults/kubernetes  # needed for etcd, easyrsa etc
-
-# Current module imports
-. $MOD_DIR/module_defaults

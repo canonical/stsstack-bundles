@@ -1,2 +1,0 @@
-relations:
-  - [ glance, __CEPH_INTERFACE__]

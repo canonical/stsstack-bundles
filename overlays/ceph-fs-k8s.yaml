@@ -1,4 +1,0 @@
-applications:
-  kubernetes-master:
-    options:
-      default-storage: cephfs

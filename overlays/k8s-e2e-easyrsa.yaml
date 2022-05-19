@@ -1,2 +1,0 @@
-relations:
-  - [ 'e2e', 'easyrsa' ]

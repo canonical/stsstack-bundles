@@ -1,2 +1,0 @@
-relations:
-  - [ 'etcd:certificates', 'easyrsa:client' ]

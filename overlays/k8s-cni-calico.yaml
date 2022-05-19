@@ -1,7 +1,0 @@
-applications:
-  calico:
-    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__calico
-relations:
-  - [ 'calico:cni', 'kubernetes-master:cni' ]
-  - [ 'calico:cni', 'kubernetes-worker:cni' ]
-  - [ 'calico:etcd', 'etcd:db' ]

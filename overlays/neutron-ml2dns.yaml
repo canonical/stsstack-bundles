@@ -1,8 +1,0 @@
-# Variables
-dns_domain:                 &dns_domain                '__DNS_DOMAIN__'
-
-applications:
-  neutron-api:
-    options:
-      enable-ml2-dns: True
-      dns-domain: *dns_domain

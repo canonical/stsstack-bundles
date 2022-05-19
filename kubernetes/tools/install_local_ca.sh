@@ -1,1 +1,0 @@
-../../openstack/tools/install_local_ca.sh

@@ -1,7 +1,0 @@
-applications:
-  octavia-ovn-chassis:
-    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__ovn-chassis
-relations:
-  - [ octavia:ovsdb-subordinate, octavia-ovn-chassis:ovsdb-subordinate ]
-  - [ octavia-ovn-chassis:ovsdb, ovn-central:ovsdb ]
-  - [ octavia-ovn-chassis:certificates, vault:certificates ]

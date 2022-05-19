@@ -1,2 +1,0 @@
-relations:
-  - ['barbican:certificates', 'vault:certificates']

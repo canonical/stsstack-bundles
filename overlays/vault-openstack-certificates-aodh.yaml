@@ -1,2 +1,0 @@
-relations:
-  - ['aodh:certificates', 'vault:certificates']

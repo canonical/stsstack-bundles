@@ -1,2 +1,0 @@
-relations:
-  - [ 'etcd:db', 'vault:etcd' ]

@@ -1,7 +1,0 @@
-# Variables
-dns_servers:                &dns_servers               '__ML2_DNS_FORWARDER__'
-
-applications:
-  neutron-gateway:
-    options:
-      dns-servers: *dns_servers

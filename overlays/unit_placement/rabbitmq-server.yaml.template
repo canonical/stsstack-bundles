@@ -1,3 +1,0 @@
-  rabbitmq-server:
-    to:
-__UNIT_PLACEMENT_LXD__.__UNITS__.__NUM_RABBIT_UNITS__

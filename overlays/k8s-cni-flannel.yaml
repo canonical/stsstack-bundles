@@ -1,7 +1,0 @@
-applications:
-  flannel:
-    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__flannel
-relations:
-  - [ 'flannel:cni', 'kubernetes-master:cni' ]
-  - [ 'flannel:cni', 'kubernetes-worker:cni' ]
-  - [ 'flannel:etcd', 'etcd:db' ]

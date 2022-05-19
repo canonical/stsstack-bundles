@@ -1,2 +1,0 @@
-relations:
-  - ['mysql:certificates', 'vault:certificates']

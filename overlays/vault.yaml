@@ -1,8 +1,0 @@
-applications:
-  vault:
-    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__vault
-    num_units: __NUM_VAULT_UNITS__
-    options:
-      auto-generate-root-ca-cert: true
-relations:
-  - [ vault:shared-db, __MYSQL_INTERFACE__ ]

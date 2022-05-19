@@ -1,3 +1,0 @@
-  nova-compute:
-    to:
-__UNIT_PLACEMENT_METAL__.__UNITS__.__NUM_COMPUTE_UNITS__

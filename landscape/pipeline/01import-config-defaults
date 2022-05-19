@@ -1,4 +1,0 @@
-# Start with dependency defaults in case we want to override any locally
-
-# Current module imports
-. $MOD_DIR/module_defaults

@@ -1,6 +1,0 @@
-applications:
-  neutron-api:
-    options:
-      enable-l3ha: True
-      min-l3-agents-per-router: __NUM_AGENTS_PER_ROUTER__
-      max-l3-agents-per-router: __NUM_AGENTS_PER_ROUTER__
