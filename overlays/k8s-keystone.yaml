@@ -1,6 +1,0 @@
-applications:
-  kubernetes-master:
-    options:
-      enable-keystone-authorization: true
-relations:
-  - [ 'kubernetes-master:keystone-credentials', 'keystone:identity-credentials' ]

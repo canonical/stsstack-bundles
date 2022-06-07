@@ -1,9 +1,0 @@
-applications:
-  prometheus-ceph-exporter:
-    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__prometheus-ceph-exporter
-    num_units: 1
-relations:
-  - [ 'prometheus-ceph-exporter:ceph-exporter', 'prometheus:target' ]
-  - [ 'prometheus-ceph-exporter:ceph', '__CEPH_INTERFACE__:client' ]
-  - [ telegraf, __CEPH_INTERFACE__ ]
-  - [ telegraf, ceph-osd ]

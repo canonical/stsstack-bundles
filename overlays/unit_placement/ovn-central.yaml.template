@@ -1,3 +1,0 @@
-  ovn-central:
-    to:
-__UNIT_PLACEMENT_LXD__.__UNITS__.__NUM_OVN_CENTRAL_UNITS__

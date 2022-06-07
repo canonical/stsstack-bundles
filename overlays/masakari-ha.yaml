@@ -1,7 +1,0 @@
-applications:
-  masakari-hacluster:
-    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__hacluster
-relations:
-  - [ masakari:ha, masakari-hacluster:ha ]
-  - [ pacemaker-remote:pacemaker-remote, masakari-hacluster:pacemaker-remote ]
-

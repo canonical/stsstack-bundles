@@ -1,2 +1,0 @@
-relations:
- - ['kubeapi-load-balancer:certificates', 'vault:certificates']

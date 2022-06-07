@@ -1,7 +1,0 @@
-# kubernetes charms that have containers- prefix in ch:
-for c in ${K8S_CHARMS[@]}; do
-    if [[ $c == etcd ]]; then
-        continue
-    fi
-    CH_PREFIXED_CHARMS[$c]=containers-
-done

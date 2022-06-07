@@ -1,3 +1,0 @@
-relations:
-  - [ nrpe, __CEPH_INTERFACE__ ]
-  - [ nrpe, ceph-osd ]

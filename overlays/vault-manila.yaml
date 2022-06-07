@@ -1,2 +1,0 @@
-relations:
-  - ['manila:certificates', 'vault:certificates']

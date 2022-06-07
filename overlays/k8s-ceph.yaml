@@ -1,3 +1,0 @@
-relations:
-  - [ 'kubernetes-master:ceph-storage', 'ceph-mon:admin' ]
-  - [ 'kubernetes-master:ceph-client', __CEPH_INTERFACE__ ]

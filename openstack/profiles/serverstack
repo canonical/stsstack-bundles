@@ -1,7 +1,0 @@
-#!/bin/bash -ex
-
-# stsstack overrides
-[[ -z "$NAMESERVER" ]] && export NAMESERVER="10.245.160.2"
-[[ -z "$SWIFT_IP" ]] && export SWIFT_IP="10.245.161.162"
-
-./profiles/default $@

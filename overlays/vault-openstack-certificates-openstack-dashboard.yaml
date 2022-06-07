@@ -1,2 +1,0 @@
-relations:
-  - ['openstack-dashboard:certificates', 'vault:certificates']

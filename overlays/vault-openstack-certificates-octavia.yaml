@@ -1,2 +1,0 @@
-relations:
-  - ['octavia:certificates', 'vault:certificates']

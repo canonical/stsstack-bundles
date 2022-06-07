@@ -1,1 +1,0 @@
-common/generate-bundle.sh

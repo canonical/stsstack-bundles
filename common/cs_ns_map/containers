@@ -1,4 +1,0 @@
-# kubernetes charms that have ns in cs:
-for c in ${K8S_CHARMS[@]}; do
-    CS_NS_CHARMS[$c]=~containers/
-done

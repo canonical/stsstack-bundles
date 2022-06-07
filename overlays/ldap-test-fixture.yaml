@@ -1,5 +1,0 @@
-applications:
-  ldap-test-fixture:
-    series: bionic  # max supported by this charm
-    charm: cs:~openstack-charmers/ldap-test-fixture
-    num_units: 1

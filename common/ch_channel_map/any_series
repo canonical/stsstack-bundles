@@ -1,7 +1,0 @@
-for c in ${OST_CHARMS[@]}; do
-    CHARM_CHANNEL[$c]=$release/edge
-done
-
-for c in ${CEPH_CHARMS[@]}; do
-    CHARM_CHANNEL[$c]=$ceph_release/edge
-done

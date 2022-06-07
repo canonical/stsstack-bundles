@@ -1,7 +1,0 @@
-# Variables
-
-applications:
-  octavia-dashboard:
-    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__octavia-dashboard
-relations:
-  - [ octavia-dashboard:dashboard, openstack-dashboard:dashboard-plugin ]

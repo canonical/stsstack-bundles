@@ -1,9 +1,0 @@
-# Variables
-dns_servers:                &dns_servers               '__ML2_DNS_FORWARDER__'
-
-applications:
-  neutron-openvswitch:
-    options:
-      use-dvr-snat: True
-      data-port: '__DVR_DATA_PORT__'
-      dns-servers: *dns_servers

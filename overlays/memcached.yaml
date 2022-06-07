@@ -1,5 +1,0 @@
-applications:
-  memcached:
-    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__memcached
-    num_units: __NUM_MEMCACHED_UNITS__
-    constraints: mem=2G

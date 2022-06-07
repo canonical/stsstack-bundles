@@ -1,6 +1,0 @@
-# Start with dependency defaults in case we want to override any locally
-. $MOD_DIR/../.module_defaults/openstack  # needed for vault
-. $MOD_DIR/../.module_defaults/ceph
-
-# Current module imports
-. $MOD_DIR/module_defaults
