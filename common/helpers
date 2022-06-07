@@ -106,7 +106,7 @@ OPTIONS:
      -s, --series s
         Ubuntu series.
     --use-stable-charms
-	This is now the default for the charmstore since it is read-only.
+        This is now the default for the charmstore since it is read-only.
     --revision-info
         Path to a yaml-format bundle file or the output of a "juju
         status" command that will be used to pin charms to specific
