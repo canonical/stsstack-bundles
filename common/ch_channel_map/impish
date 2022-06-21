@@ -1,1 +1,16 @@
-focal
+# These are charmhub mappings for charms that are outside of the main large 
+# groupings like openstack and ceph etc.
+
+# Versions are based on https://github.com/openstack-charmers/release-tools/tree/master/lp-builder-config
+
+CHARM_CHANNEL[vault]=1.7/edge
+CHARM_CHANNEL[rabbitmq-server]=3.8/edge
+# 8.0.19 supports impish but does not actually work and has been replaced with 8.0 which
+# does not officially support impish so to deploy this you need to add --force juju deploy
+# and use a local copy of the charm downloaded from charmhub.
+CHARM_CHANNEL[mysql-router]=8.0/edge
+CHARM_CHANNEL[mysql-innodb-cluster]=8.0/edge
+CHARM_CHANNEL[hacluster]=2.4/edge
+CHARM_CHANNEL[ovn-central]=21.09/edge
+CHARM_CHANNEL[ovn-chassis]=21.09/edge
+CHARM_CHANNEL[ovn-dedicated-chassis]=21.09/edge
