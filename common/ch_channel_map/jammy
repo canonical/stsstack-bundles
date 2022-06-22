@@ -1,7 +1,7 @@
-# These are charmhub mappings for charms that are outside of the main large 
+# These are charmhub mappings for charms that are outside of the main large
 # groupings like openstack and ceph etc.
 
-# Versions are based on https://github.com/openstack-charmers/release-tools/tree/master/lp-builder-config
+# Versions are based on https://docs.openstack.org/charm-guide/latest/project/charm-delivery.html
 
 CHARM_CHANNEL[vault]=1.7/edge
 CHARM_CHANNEL[rabbitmq-server]=3.9/edge
