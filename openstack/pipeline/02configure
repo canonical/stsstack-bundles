@@ -68,6 +68,9 @@ do
     case "$1" in
         --num-compute)  #__OPT__type:<int>
             MOD_PARAMS[__NUM_COMPUTE_UNITS__]=$2
+            if (( $2 > 1 )); then
+                MOD_PARAMS[__LOADBALANCER_TOPOLOGY__]=ACTIVE_STANDBY
+            fi
             shift
             ;;
         --barbican)
@@ -624,4 +627,3 @@ done
 target=${series}-$release
 [ -z "$pocket" ] || target=${target}-$pocket
 MOD_PASSTHROUGH_OPTS+=( --release-name $target )
-

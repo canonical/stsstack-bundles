@@ -12,6 +12,7 @@ applications:
       openstack-origin: *openstack_origin
       amp-ssh-key-name: amphora-backdoor
       amp-ssh-pub-key: '__AMPHORA_SSH_PUB_KEY__'
+      loadbalancer-topology: '__LOADBALANCER_TOPOLOGY__'
 relations:
   - [ octavia:shared-db, __MYSQL_INTERFACE__ ]
   - [ octavia:identity-service, keystone:identity-service ]
