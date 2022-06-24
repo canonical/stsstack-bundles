@@ -745,6 +745,9 @@ ceph_release=`get_app_release_name $release`
 . $MOD_DIR/common/charm_lists
 declare -A CHARM_CHANNEL=()
 . $MOD_DIR/common/ch_channel_map/$series
+if [[ -f $MOD_DIR/common/ch_channel_map/$series-$release ]]; then
+    . $MOD_DIR/common/ch_channel_map/$series-$release
+fi
 . $MOD_DIR/common/ch_channel_map/any_series
 declare -A CH_PREFIXED_CHARMS=()
 . $MOD_DIR/common/ch_prefix_map/charmed-osm
