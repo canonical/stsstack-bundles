@@ -1,0 +1,18 @@
+name: Linter
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+jobs:
+  lint:
+    name: Lint bash scripts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install tools
+        run: sudo apt install --no-install-recommends --yes python3-bashate
+      - name: Get sources
+        uses: actions/checkout@v3
+      - name: Lint bash scripts
+        run: |
+          bashate --ignore E006 --verbose tools/*.sh
