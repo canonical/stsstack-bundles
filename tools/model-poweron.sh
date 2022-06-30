@@ -1,7 +1,10 @@
 #!/bin/bash -e
 model=$1
 
-(($#)) || { echo "You must provide a model name" && exit 1; }
+if (($# == 0)); then
+    echo "You must provide a model name"
+    exit 1
+fi
 
 source ~/novarc
 echo "Fetching vms for model '${model}'..."
