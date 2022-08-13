@@ -18,8 +18,9 @@ Example:
 
 Say you want to deploy Openstack using the Stein release on Bionic and you want to enable ceph and heat with keystone in HA:
 
-```
-cd openstack; $ ./generate-bundle.sh --name mytest -r stein --ceph --heat --keystone-ha
+```console
+$ cd openstack
+$ ./generate-bundle.sh --name mytest -r stein --ceph --heat --keystone-ha
 ```
 
 This will give you output like:
@@ -41,3 +42,11 @@ juju deploy ./b/mytest/openstack.yaml --overlay ./b/mytest/o/ceph.yaml --overlay
 Note that the generated bundles and overlays are stored under a directory with the name you specified. You can now either copy the command and execute it or add --run to automatically execute it.
 
 If you need to manually edit a bundle/overlay prior to deploying you can skip the --run argument and either manually run the deploy command once you have made your changes or alternatively re-run with --replay (which will prevent the files from being re-generated).
+
+Note that an OpenStack deployment will almost certainly require the `openstack`
+command line client. At the time of this writing, installing `openstackclients`
+via snap is not fully supported. Instead, please install the client via package:
+
+```console
+sudo apt install python3-openstackclient python3-neutronclient
+```
