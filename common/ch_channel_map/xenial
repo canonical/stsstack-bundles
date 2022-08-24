@@ -12,3 +12,7 @@ CHARM_CHANNEL[hacluster]=1.1.18/edge
 CHARM_CHANNEL[ovn-central]=openstack-${release}/edge
 CHARM_CHANNEL[ovn-chassis]=openstack-${release}/edge
 CHARM_CHANNEL[ovn-dedicated-chassis]=openstack-${release}/edge
+
+# At the moment of this patch, the barbican-vault only has {yoga,xena}/stable channels
+
+CHARM_CHANNEL[barbican-vault]=latest/stable
