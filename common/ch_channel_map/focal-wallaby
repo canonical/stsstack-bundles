@@ -6,3 +6,7 @@
 CHARM_CHANNEL[ovn-central]=20.12/edge
 CHARM_CHANNEL[ovn-chassis]=20.12/edge
 CHARM_CHANNEL[ovn-dedicated-chassis]=20.12/edge
+
+# At the moment of this patch, the barbican-vault only has {yoga,xena}/stable channels
+
+CHARM_CHANNEL[barbican-vault]=latest/stable
