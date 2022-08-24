@@ -54,7 +54,15 @@ else
     export OS_USER_DOMAIN_NAME=admin_domain
     export OS_PROJECT_NAME=admin
     export OS_PROJECT_DOMAIN_NAME=admin_domain
-    export OS_PASSWORD=openstack
+
+    # if the admin password is not set in the configuration, then it's read
+    # from the leader databag.
+    _CONFIG_PASSWD="$(juju config keystone admin-password| awk '{print tolower($0)}')"
+    if [ "${_CONFIG_PASSWD}" == "none" ] || [ "${_CONFIG_PASSWD}" == "" ]; then
+        export OS_PASSWORD=$(juju run -u keystone/leader leader-get admin_passwd)
+    else
+	export OS_PASSWORD="$(juju config keystone admin-password)"
+    fi
 fi
 export OS_REGION_NAME=RegionOne
 
