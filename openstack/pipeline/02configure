@@ -302,7 +302,14 @@ do
             MOD_OVERLAYS+=( "masakari.yaml" )
             # the charm deployment guide suggests 3 units to we do the same by default here
             get_units $1 __NUM_MASAKARI_UNITS__ 3
+            msg="REQUIRED: maas_url for masakari-hacluster:"
+            get_param $1 __MAAS_URL__ "$msg"
+            msg="REQUIRED: maas api key for masakari-hacluster:"
+            get_param $1 __MAAS_API_KEY__ "$msg"
             MOD_OVERLAYS+=( "masakari-ha.yaml" )
+            if has_opt --vault || has_opt --ovn; then
+                MOD_OVERLAYS+=( "vault-openstack-certificates-masakari.yaml" )
+            fi
             ;;
         --mysql-innodb-cluster*)
             conflicts_with $1 --mysql-ha*
