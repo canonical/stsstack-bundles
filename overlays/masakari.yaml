@@ -24,6 +24,6 @@ relations:
   - [ keystone:identity-credentials, masakari-monitors:identity-credentials ]
   - [ nova-compute:juju-info, pacemaker-remote:juju-info ]
   - [ masakari:identity-service, keystone:identity-service ]
-  - [ masakari:shared-db, mysql:shared-db ]
+  - [ masakari:shared-db, __MYSQL_INTERFACE__ ]
   - [ masakari:amqp, rabbitmq-server:amqp ]
 
