@@ -4,6 +4,7 @@ on:
     branches:
       - main
   workflow_dispatch:
+
 jobs:
   lint:
     name: Lint bash scripts
@@ -16,3 +17,17 @@ jobs:
       - name: Lint bash scripts
         run: |
           bashate --ignore E006 --verbose tools/*.sh openstack/novarc
+
+  check-commit-message:
+    name: Check Commit Message
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get sources
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Check Commit Message
+        run: |
+          ./tools/lint-git-messages.sh \
+            ${{ github.event.pull_request.base.sha }} \
+            ${{ github.event.pull_request.head.sha }}
