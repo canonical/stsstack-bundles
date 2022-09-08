@@ -61,7 +61,7 @@ else
     if [ "${_CONFIG_PASSWD}" == "none" ] || [ "${_CONFIG_PASSWD}" == "" ]; then
         export OS_PASSWORD=$(juju run -u keystone/leader leader-get admin_passwd)
     else
-	export OS_PASSWORD="$(juju config keystone admin-password)"
+    export OS_PASSWORD="$(juju config keystone admin-password)"
     fi
 fi
 export OS_REGION_NAME=RegionOne
