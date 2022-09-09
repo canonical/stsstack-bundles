@@ -32,7 +32,7 @@ This deployment is using vault-based ssl certificates
 but the vault seems to be not initialized yet.
 It is recommended to initialize it via running
 ./tools/vault-unseal-and-authorise.sh before doing anything else.
-Do you want to proceed anyway? (y/n): 
+Do you want to proceed anyway? (y/n):
 END
 )" yn
             case $yn in
