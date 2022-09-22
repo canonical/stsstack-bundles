@@ -4,6 +4,7 @@ set -u
 
 : "${machine:=0}"
 : "${model:=controller}"
+juju=$(command -v juju)
 
 while (( $# > 0 )); do
     case $1 in
@@ -32,19 +33,19 @@ EOF
     shift
 done
 
-read -d '' cmds <<'EOF'
+read -r -d '' cmds <<'EOF'
 conf=/var/lib/juju/agents/machine-*/agent.conf
-user=`sudo grep tag $conf | cut -d' ' -f2`
-password=`sudo grep statepassword $conf | cut -d' ' -f2`
+user=$(sudo awk '/tag/ {print $2}' ${conf})
+password=$(sudo awk '/statepassword/ {print $2}' ${conf})
 if [ -f /snap/bin/juju-db.mongo ]; then
     client=/snap/bin/juju-db.mongo
 elif [ -f /usr/lib/juju/mongo*/bin/mongo ]; then
     client=/usr/lib/juju/mongo*/bin/mongo
 else
-    client=/usr/bin/mongo
+    bcqclient=/usr/bin/mongo
 fi
-$client 127.0.0.1:37017/juju --authenticationDatabase admin \
+${client} 127.0.0.1:37017/juju --authenticationDatabase admin \
     --ssl --sslAllowInvalidCertificates \
-    --username "$user" --password "$password"
+    --username "${user}" --password "${password}"
 EOF
-juju ssh -m "${model}" "${machine}" "${cmds}"
+${juju} ssh -m "${model}" "${machine}" "${cmds}"
