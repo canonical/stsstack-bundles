@@ -35,27 +35,26 @@ for sha in $(git rev-list --no-merges ${base_commit}..${head_commit}); do
     readarray -t message < <(git log --format=%B --max-count=1 ${sha})
 
     # Check subject
-    echo "${sha} Checking subject: ${message[0]}"
+    echo "[INFO] ${sha} Checking subject: ${message[0]}"
     if (( $(wc --chars <<<${message[0]}) > 50 )); then
-        echo "Subject line is > 50 characters"
+        echo "[ERROR] Subject line is > 50 characters"
         exit 1
     fi
     if grep --quiet --invert-match --extended-regexp '^[[][^]]+[]].*$' <<<${message[0]}; then
-        echo "Subject needs to start with '[TYPE]' where TYPE is e.g. {bug, enhancement, doc, CI}"
-        exit 1
+        echo "[WARNING] Subject should start with '[TYPE]' where TYPE is e.g. {BUG, ENHANCEMENT, DOC, CI, TOOLS}"
     fi
 
     # Check body
-    echo "${sha} Checking commit message body"
+    echo "[INFO] ${sha} Checking commit message body"
     if (( ${#message[@]} > 1 )); then
         if [[ -n ${message[1]} ]]; then
-            echo "Empty line after subject required"
+            echo "[ERROR] Empty line after subject required"
             exit 1
         fi
         for i in $(seq 2 $(( ${#message[@]} - 1 ))); do
             if (( $(wc --chars <<<${message[${i}]}) > 72 )); then
-                echo "Body line is > 72 characters"
-                echo "${message[${i}]}"
+                echo "[ERROR] Body line is > 72 characters"
+                echo "  ${message[${i}]}"
                 exit 1
             fi
         done
