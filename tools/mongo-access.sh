@@ -4,6 +4,8 @@ set -u
 
 : "${machine:=0}"
 : "${model:=controller}"
+: "${ip_address:=}"
+
 juju=$(command -v juju)
 
 while (( $# > 0 )); do
@@ -18,6 +20,9 @@ Options:
 
 --machine ID    The machine ID to connect to (default ${machine})
 --model MODEL   The model the machine is a part of (default ${model})
+--ip IP         Instead of using "juju ssh", directly "ssh" to IP. This option
+                    can become useful in case the juju controller is not
+                    responding and "juju ssh" cannot be used.
 EOF
             exit 0
             ;;
@@ -28,6 +33,10 @@ EOF
         --model)
             shift
             model="$1"
+            ;;
+        --ip)
+            shift
+            ip_address="$1"
             ;;
     esac
     shift
@@ -48,4 +57,8 @@ ${client} 127.0.0.1:37017/juju --authenticationDatabase admin \
     --ssl --sslAllowInvalidCertificates \
     --username "${user}" --password "${password}"
 EOF
-${juju} ssh -m "${model}" "${machine}" "${cmds}"
+if [[ -z ${ip_address} ]]; then
+    ${juju} ssh -m "${model}" "${machine}" "${cmds}"
+else
+    ssh -t ${ip_address} "${cmds}"
+fi
