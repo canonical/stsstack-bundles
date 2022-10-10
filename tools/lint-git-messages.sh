@@ -18,6 +18,10 @@ set -e -u
 #
 # [TYPE] SUBJECT (<= 50 characters)
 #
+# or
+#
+# TYPE: SUBJECT (<= 50 characters)
+#
 # MESSAGE BODY (<= 72 characters per line)
 
 if (( $# == 2 )); then
@@ -40,7 +44,7 @@ for sha in $(git rev-list --no-merges ${base_commit}..${head_commit}); do
         echo "[ERROR] Subject line is > 50 characters"
         exit 1
     fi
-    if grep --quiet --invert-match --extended-regexp '^[[][^]]+[]].*$' <<<${message[0]}; then
+    if grep --quiet --invert-match --extended-regexp '^[[]?[^]: ]+[]:].*$' <<<${message[0]}; then
         echo "[WARNING] Subject should start with '[TYPE]' where TYPE is e.g. {BUG, ENHANCEMENT, DOC, CI, TOOLS}"
     fi
 
