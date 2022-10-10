@@ -13,3 +13,4 @@ applications:
       root-password: ChangeMe123
       sst-password: ChangeMe123
       min-cluster-size: __NUM_MYSQL_UNITS__
+      tuning-level: fast
