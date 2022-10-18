@@ -1,0 +1,139 @@
+#!/bin/bash
+
+set -e -u
+
+declare -A MACHINES=()
+declare -A CONTAINERS=()
+declare -A UNITS=()
+
+install_ssh_key() {
+    local unit
+    for unit in $@; do
+        echo "installing ssh key for ${unit}"
+        cat ~/.ssh/id_rsa.pub | timeout 10 juju ssh ${unit} -- sudo tee --append /root/.ssh/authorized_keys
+    done
+}
+
+get_application_units() {
+    local application=$1
+    local -a units=()
+    local i
+    for i in "${!UNITS[@]}"; do
+        if [[ ${i} =~ ^${application}/[0-9]+$ ]]; then
+            units=( "${units[@]}" "${i}" )
+        fi
+    done
+    echo "${units[@]}"
+}
+
+expand_unit() {
+    local -a split_string
+    local old_IFS=${IFS}
+    IFS=":"
+    read -r -a split_string <<<"$1"
+    IFS=${old_IFS}
+    local unit=${split_string[0]}
+    local files=${split_string[1]}
+    local ip_address
+    local i
+    if [[ ${unit} =~ ^[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+$ ]] ; then
+        ip_address=${unit}
+    elif [[ ${unit} =~ ^[0-9]+$ ]]; then
+        ip_address=${MACHINES[${unit}]}
+    elif [[ ${unit} =~ lxd ]]; then
+        ip_address=${CONTAINERS[${unit}]}
+    elif [[ ${unit} =~ / ]]; then
+        ip_address=${UNITS[${unit}]}
+    else
+        for i in $(get_application_units "${unit}"); do
+            expand_unit "${i}:${files}"
+        done
+        return
+    fi
+    echo "checking ssh key for ${ip_address}"
+    if ! timeout 5 ssh "root@${ip_address}" < /dev//null > /dev/null 2>&1; then
+        install_ssh_key "${ip_address}"
+    fi
+    lnav_arguments=( "${lnav_arguments[@]}" "root@${ip_address}:${files}" )
+}
+
+get_machine_IPs() {
+    local output
+    local line
+    readarray -t output < <(juju status --format json \
+        | jq --raw-output '.machines | to_entries[] | "\( .key ) \( .value."ip-addresses"[0] )"')
+    for line in "${output[@]}"; do
+        local -a temp
+        read -r -a temp <<<"${line}"
+        MACHINES[${temp[0]}]=${temp[1]}
+    done
+}
+
+get_container_IPs() {
+    local output
+    local line
+    readarray -t output < <(juju status --format json \
+        | jq --raw-output '.machines[] | select(.containers != null) | .containers | to_entries[] | "\( .key ) \( .value."ip-addresses"[0] )"')
+    for line in "${output[@]}"; do
+        local -a temp
+        read -r -a temp <<<"${line}"
+        CONTAINERS[${temp[0]}]=${temp[1]}
+    done
+}
+
+get_unit_IPs() {
+    local output
+    local line
+    readarray -t output < <(juju status --format=json \
+        | jq --raw-output '.applications[] | select(.units != null) | .units | to_entries[] | "\( .key ) \( .value."public-address" )"')
+    for line in "${output[@]}"; do
+        local -a temp
+        read -r -a temp <<<"${line}"
+        UNITS[${temp[0]}]=${temp[1]}
+    done
+}
+
+declare -a lnav_arguments=()
+juju_info_loaded=0
+
+if ! command -v lnav > /dev/null; then
+    cat <<EOF
+Please install lnav with
+
+sudo snap install --edge lnav
+
+And rerun this script.
+EOF
+    exit 1
+fi
+
+while (( $# > 0 )); do
+    case $1 in
+        -h|--help)
+            cat <<EOF
+Usage:
+
+$(basename "$0") UNIT:LOGFILES [UNIT:LOGFILES [UNIT:LOGFILES [...]]]
+
+Options:
+
+UNIT        is the name of the unit
+LOGFILES    is a regular shell GLOB
+EOF
+            exit 0
+            ;;
+        *)
+            if (( juju_info_loaded == 0 )); then
+                get_machine_IPs
+                get_container_IPs
+                get_unit_IPs
+                juju_info_loaded=1
+            fi
+            expand_unit "$1"
+            ;;
+    esac
+    shift
+done
+
+echo "lnav ${lnav_arguments[*]}"
+lnav "${lnav_arguments[@]}"
