@@ -10,7 +10,9 @@ install_ssh_key() {
     local unit
     for unit in $@; do
         echo "installing ssh key for ${unit}"
-        cat ~/.ssh/id_rsa.pub | timeout 10 juju ssh ${unit} -- sudo tee --append /root/.ssh/authorized_keys
+        cat ~/.ssh/id_rsa.pub \
+            | timeout 10 juju ssh ${unit} \
+            -- sudo tee --append /root/.ssh/authorized_keys
     done
 }
 
@@ -61,7 +63,8 @@ get_machine_IPs() {
     local output
     local line
     readarray -t output < <(juju status --format json \
-        | jq --raw-output '.machines | to_entries[] | "\( .key ) \( .value."ip-addresses"[0] )"')
+        | jq --raw-output '.machines | to_entries[]
+            | "\( .key ) \( .value."ip-addresses"[0] )"')
     for line in "${output[@]}"; do
         local -a temp
         read -r -a temp <<<"${line}"
@@ -73,7 +76,9 @@ get_container_IPs() {
     local output
     local line
     readarray -t output < <(juju status --format json \
-        | jq --raw-output '.machines[] | select(.containers != null) | .containers | to_entries[] | "\( .key ) \( .value."ip-addresses"[0] )"')
+        | jq --raw-output '.machines[] | select(.containers != null)
+            | .containers | to_entries[]
+            | "\( .key ) \( .value."ip-addresses"[0] )"')
     for line in "${output[@]}"; do
         local -a temp
         read -r -a temp <<<"${line}"
@@ -85,7 +90,9 @@ get_unit_IPs() {
     local output
     local line
     readarray -t output < <(juju status --format=json \
-        | jq --raw-output '.applications[] | select(.units != null) | .units | to_entries[] | "\( .key ) \( .value."public-address" )"')
+        | jq --raw-output '.applications[] | select(.units != null)
+            | .units | to_entries[]
+            | "\( .key ) \( .value."public-address" )"')
     for line in "${output[@]}"; do
         local -a temp
         read -r -a temp <<<"${line}"
@@ -101,6 +108,7 @@ if ! command -v lnav > /dev/null; then
 Please install lnav with
 
 sudo snap install --edge lnav
+sudo snap connect lnav:ssh-keys
 
 And rerun this script.
 EOF
@@ -114,6 +122,13 @@ while (( $# > 0 )); do
 Usage:
 
 $(basename "$0") UNIT:LOGFILES [UNIT:LOGFILES [UNIT:LOGFILES [...]]]
+
+
+Example:
+
+./tools/juju-lnav octavia:/var/log/octavia/*.log{,1,2.gz}
+
+Which loads logs from all Octavia units and the first two rotated logs. Note that lnav can read regular logs files as well as gzipped rotated files.
 
 Options:
 
