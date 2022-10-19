@@ -1,0 +1,88 @@
+series: __SERIES__
+applications:
+  kafka:
+    constraints: mem=8G
+    charm: fe-staging-kafka-broker
+    channel: beta
+    revision: 2
+    num_units: __NUM_KAFKA_UNITS__
+    options:
+      acl-enabled: true
+      clientAuth: true
+      cluster-count: __NUM_KAFKA_UNITS__
+      customize-failure-domain: false
+      distro: apache_snap
+      extra_sans: kafka.edftrading.com
+      filepath-jaas-conf: /var/snap/kafka/common/jaas.conf
+      filepath-kafka-client-properties: /var/snap/kafka/common/client.properties
+      filepath-log4j-properties: /var/snap/kafka/common/log4j.properties
+      filepath-server-properties: /var/snap/kafka/common/server.properties
+      filepath-zookeeper-client-properties: /var/snap/kafka/common/zk-client.properties
+      generate-root-ca: false
+      group: root
+      jmx_exporter_labels: job=kafka,env=prod
+      keystore-path: /var/snap/kafka/common/kafka-ks.jks
+      keystore-zookeeper-path: /var/snap/kafka/common/zk-ks.jks
+      log-dir: |
+        - fs_path : /var/snap/kafka/common/data
+          device:
+            name: /dev/vdb
+        - fs_path : /var/snap/kafka/common/data2
+          device:
+            name: /dev/vdc
+      log4j-root-logger: INFO, stdout, kafkaAppender
+      mapping_rules: RULE:^CN=([a-zA-Z.0-9@$-]+ [a-zA-Z.0-9@$-]+).*$/$1/,RULE:^CN=([a-zA-Z.0-9@-]+).*$/$1/,DEFAULT
+      server-properties: |
+        group.initial.rebalance.delay.ms: 3000
+        log.retention.check.interval.ms: 300000
+        log.retention.hours: 48
+        log.segment.bytes: 1073741824
+        num.io.threads: 16
+        num.network.threads: 8
+        num.partitions: 1
+        default.replication.factor: 4
+        min.insync.replicas: 2
+        num.recovery.threads.per.data.dir: 2
+        socket.receive.buffer.bytes: 102400
+        socket.request.max.bytes: 104857600
+        socket.send.buffer.bytes: 102400
+        zookeeper.connection.timeout.ms: 18000
+        confluent.support.metrics.enable: true
+        confluent.support.customer.id: anonymous
+      service-environment-overrides: |
+        LOG_DIR: "/var/snap/kafka/common/logs"
+        KAFKA_LOG4J_OPTS: "-Dlog4j.configuration=file:/var/snap/kafka/common/log4j.properties"
+        KAFKA_HEAP_OPTS: "-Xms6g -Xmx6g -XX:MetaspaceSize=96m -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:G1HeapRegionSize=16M -XX:MinMetaspaceFreeRatio=50 -XX:MaxMetaspaceFreeRatio=80"
+      super-users: User:VSP10VSFERGUT01.edftrading.com;User:DCPWVIFDEK01.edftrading.com
+      truststore-path: /var/snap/kafka/common/kafka-ts.jks
+      truststore-zookeeper-path: /var/snap/kafka/common/zk-ts.jks
+      user: root
+      version: latest/edge
+  zookeeper:
+    charm: fe-staging-zookeeper
+    channel: beta
+    revision: 1
+    num_units: __NUM_ZOOKEEPER_UNITS__
+    options:
+      cluster-count: __NUM_ZOOKEEPER_UNITS__
+      data-dir: |
+        ext4: /var/snap/kafka/common/data_dir
+      data-log-dir: |
+        ext4: /var/snap/kafka/common/data_log
+      distro: apache_snap
+      filepath-zookeeper-log4j-properties: /var/snap/kafka/common/log4j.properties
+      filepath-zookeeper-properties: /var/snap/kafka/common/zookeeper.properties
+      generate-root-ca: false
+      group: root
+      jmx_exporter_labels: job=zookeeper,env=prod
+      keystore-path: /var/snap/kafka/common/ssl-ks.jks
+      log4j-root-logger: DEBUG, stdout, zkAppender
+      quorum-keystore-path: /var/snap/kafka/common/quorum-ks.jks
+      quorum-truststore-path: /var/snap/kafka/common/quorum-ts.jks
+      sslQuorum: false
+      truststore-path: /var/snap/kafka/common/ssl-ts.jks
+      user: root
+      version: latest/edge
+relations:
+  - ['kafka:zookeeper', 'zookeeper:zookeeper']
+

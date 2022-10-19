@@ -1,0 +1,2 @@
+relations:
+  - ['zookeeper:certificates', 'vault:certificates']
