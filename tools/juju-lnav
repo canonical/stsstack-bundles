@@ -123,12 +123,12 @@ Usage:
 
 $(basename "$0") UNIT:LOGFILES [UNIT:LOGFILES [UNIT:LOGFILES [...]]]
 
-
 Example:
 
 ./tools/juju-lnav octavia:/var/log/octavia/*.log{,1,2.gz}
 
-Which loads logs from all Octavia units and the first two rotated logs. Note that lnav can read regular logs files as well as gzipped rotated files.
+Which loads logs from all Octavia units and the first two rotated logs. Note
+that lnav can read regular log files as well as gzipped rotated log files.
 
 Options:
 
