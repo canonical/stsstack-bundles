@@ -24,7 +24,8 @@ Example:
 
 $(basename $0) 10 xenial-ppc64el
 
-Note, cirros images will use m1.cirros flavor. All others will use m1.small flavor.
+Note, cirros images will use the m1.cirros flavor. All others will use the
+m1.small flavor.
 
 Options:
 
@@ -50,10 +51,6 @@ EOF
             IFS=','
             read -r -a net_names <<< "$1"
             IFS=${old_IFS}
-            ;;
-        -*)
-            echo "Unknown argument '$1'"
-            exit 1
             ;;
         --name)
             shift
