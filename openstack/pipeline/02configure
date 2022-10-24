@@ -149,11 +149,20 @@ do
             get_param $1 __BIND_DNS_FORWARDER__ "$msg"
             ns=${MOD_PARAMS[__ML2_DNS_FORWARDER__]}
             MOD_MSGS[designate.0]="Your upstream dns is currently $ns. Since you have designate deployed you can now do:"
-            is_neutron_gateway_required && app=neutron-gateway || app=neutron-openvswitch
-            MOD_MSGS[designate.1]="juju config $app dns-servers=<designate-bind unit address>"
-            if has_opt --dvr; then
+            if ! has_opt --ovn; then
                 app=neutron-openvswitch
-                MOD_MSGS[designate.2]="juju config $app dns-servers=<designate-bind unit address>"
+                if is_neutron_gateway_required; then
+                    app=neutron-gateway
+                    MOD_MSGS[designate.1]="juju config $app dns-servers=<designate-bind unit address>"
+                    if has_opt --dvr; then
+                        app=neutron-openvswitch
+                        MOD_MSGS[designate.2]="juju config $app dns-servers=<designate-bind unit address>"
+                    fi
+                else
+                    MOD_MSGS[designate.1]="juju config $app dns-servers=<designate-bind unit address>"
+                fi
+            else
+                MOD_MSGS[designate.1]="juju config neutron-api-plugin-ovn dns-servers=<designate-bind unit address>"
             fi
             MOD_OVERLAYS+=( "memcached.yaml" )
             MOD_OVERLAYS+=( "designate.yaml" )
