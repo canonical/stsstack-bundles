@@ -1,0 +1,61 @@
+#!/bin/bash
+# Global variables are first defined in 00setup and module
+# dependencies are defined in 01import-config-defaults
+#
+# All overlay/bundle variables (MOD_PARAMS) defaults must go into
+# the <module>/module_defaults file.
+
+
+# We always want vault
+set -- $@ --vault && cache $@
+
+add_mysql_overlay ()
+{
+    MOD_OVERLAYS+=( "mysql-innodb-cluster.yaml")
+    # this will be auto-generated for each app (see common/render.d/all)
+    MOD_OVERLAYS+=( "mysql-innodb-cluster-router.yaml" )
+}
+
+# Skip processing input if it includes exclusive passthrough options
+! has_excl_passthrough_opt && \
+while (($# > 0))
+do
+    case "$1" in
+        --kafka)  #__OPT__type:<int>
+            MOD_PARAMS[__NUM_KAFKA_UNITS__]=$2
+            shift
+            ;;
+        --zookeeper)  #__OPT__type:<int>
+            MOD_PARAMS[__NUM_ZOOKEEPER_UNITS__]=$2
+            shift
+            ;;
+        --vault)
+            add_mysql_overlay
+            MOD_OVERLAYS+=( "vault.yaml" )
+            MOD_OVERLAYS+=( "vault-certificates-kafka.yaml" )
+            MOD_OVERLAYS+=( "vault-certificates-zookeeper.yaml" )
+            MOD_MSGS[vault.0]="run ./tools/vault-unseal-and-authorise.sh"
+            ;;
+        --vault-ha*)
+            get_units $1 __NUM_VAULT_UNITS__ 3
+            get_units $1 __NUM_ETCD_UNITS__ 3
+            MOD_OVERLAYS+=( "vault-ha.yaml" )
+            MOD_OVERLAYS+=( "etcd.yaml" )
+            MOD_OVERLAYS+=( "easyrsa.yaml" )
+            MOD_OVERLAYS+=( "etcd-easyrsa.yaml" )
+            MOD_OVERLAYS+=( "vault-etcd.yaml" )
+            set -- $@ --vault && cache $@
+            ;;
+        --etcd-channel)  #__OPT__type:<str>
+            MOD_PARAMS[__ETCD_SNAP_CHANNEL__]=$2
+            shift
+            ;;
+        *)
+            echo "ERROR: invalid input '$1'"
+            _usage
+            exit 1
+            ;;
+    esac
+    shift
+done
+

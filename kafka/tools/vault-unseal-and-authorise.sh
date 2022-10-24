@@ -1,0 +1,1 @@
+../../tools/vault-unseal-and-authorise.sh
