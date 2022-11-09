@@ -8,7 +8,7 @@ declare -A UNITS=()
 
 install_ssh_key() {
     local unit
-    for unit in $@; do
+    for unit in "$@"; do
         echo "installing ssh key for ${unit}"
         cat ~/.ssh/id_rsa.pub \
             | timeout 10 juju ssh ${unit} \

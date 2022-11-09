@@ -40,7 +40,7 @@ for sha in $(git rev-list --no-merges ${base_commit}..${head_commit}); do
 
     # Check subject
     echo "[INFO] ${sha} Checking subject: ${message[0]}"
-    if [[ ${#message[0]} > 50 ]]; then
+    if (( ${#message[0]} > 50 )); then
         echo "[ERROR] Subject line is > 50 characters"
         exit 1
     fi
@@ -56,7 +56,7 @@ for sha in $(git rev-list --no-merges ${base_commit}..${head_commit}); do
             exit 1
         fi
         for i in $(seq 2 $(( ${#message[@]} - 1 ))); do
-            if [[ ${#message[${i}]} > 72 ]]; then
+            if (( ${#message[${i}]} > 72 )); then
                 echo "[ERROR] Body line is > 72 characters"
                 echo "  ${message[${i}]}"
                 exit 1

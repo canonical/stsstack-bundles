@@ -2,7 +2,7 @@
 
 juju_status_json_cache=`mktemp`
 cleanup () { rm -rf $juju_status_json_cache; }
-trap cleanup EXIT KILL
+trap cleanup EXIT
 
 scriptdir=$(readlink --canonicalize $(dirname ${BASH_SOURCE}))
 
@@ -10,7 +10,7 @@ scriptdir=$(readlink --canonicalize $(dirname ${BASH_SOURCE}))
 juju status --format=json > $juju_status_json_cache
 
 _OS_PARAMS=($(env | awk 'BEGIN {FS="="} /^OS_/ {print $1;}'))
-for param in ${_OS_PARAMS[@]}; do
+for param in "${_OS_PARAMS[@]}"; do
     unset $param
 done
 

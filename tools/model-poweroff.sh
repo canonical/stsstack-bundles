@@ -14,6 +14,6 @@ echo -en "Power off ${#vms[@]} instances for model '${model}'\nContinue? [y/N]"
 read answer
 [ "${answer,,}" = "y" ] || { echo "aborted"; exit 0; }
 
-echo "Stopping vms: ${vms[@]}"
-openstack server stop ${vms[@]}
+echo "Stopping vms: ${vms[*]}"
+openstack server stop "${vms[@]}"
 echo "Done."
