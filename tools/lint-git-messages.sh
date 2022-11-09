@@ -40,7 +40,7 @@ for sha in $(git rev-list --no-merges ${base_commit}..${head_commit}); do
 
     # Check subject
     echo "[INFO] ${sha} Checking subject: ${message[0]}"
-    if (( $(wc --chars <<<${message[0]}) > 50 )); then
+    if (( $(wc --chars <<<${message[0]}) > 51 )); then
         echo "[ERROR] Subject line is > 50 characters"
         exit 1
     fi
