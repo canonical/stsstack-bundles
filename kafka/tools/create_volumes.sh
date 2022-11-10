@@ -1,6 +1,5 @@
 #!/bin/bash -ux
 
-model=`juju show-model --format=json| jq -r '.| keys[]'`
 machines=`juju status kafka --format=json | jq -r '.machines | to_entries[].value."instance-id"'`
 num=`echo "$machines" | wc -l`
 
