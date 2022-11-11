@@ -136,7 +136,7 @@ render () {
     # service-specific replacements
     render_mod_params $1
 
-    num_vips=$(grep -c __VIP__ $1)
+    num_vips=$(grep -c __VIP__ $1) || true
     if ((num_vips)); then
         for ((i=0;i<num_vips;i++)); do
             vip=$VIP_START_PREFIX.$((VIP_START_SUFFIX++))
