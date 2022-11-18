@@ -1,7 +1,7 @@
 #!/bin/bash -ux
 
-machines=`juju status kafka --format=json | jq -r '.machines | to_entries[].value."instance-id"'`
-num=`echo "$machines" | wc -l`
+readarray -t machines < <(juju status kafka --format=json | jq --raw-output '.machines | to_entries[].value."instance-id"')
+num=${#machines[@]}
 
 volumeIds=()
 for i in $(seq 1 $((num*2))); do
@@ -13,7 +13,7 @@ for i in $(seq 1 $((num*2))); do
 done
 
 i=0
-for machine in $machines; do
+for machine in ${machines[@]}; do
 	openstack server add volume $machine ${volumeIds[$((i++))]}
 	openstack server add volume $machine ${volumeIds[$((i++))]}
 done
