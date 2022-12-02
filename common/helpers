@@ -1,7 +1,7 @@
 #!/bin/bash
 declare -a CACHED_STDIN=( $@ )
 declare -A MASTER_OPTS=(
-    [DEFAULT_BINDING]=alpha
+    [DEFAULT_BINDING]=
     [HYPERCONVERGED_DEPLOYMENT]=false
     [MODEL_CONFIG]=''
     [BUNDLE_NAME]=''
