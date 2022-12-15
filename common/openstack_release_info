@@ -24,6 +24,7 @@ declare -A lts=( [trusty]=icehouse
 )
 declare -A nonlts=( [hirsute]=wallaby
                     [impish]=xena
+                    [kinetic]=zed
 )
 
 # Reverse lookups (revision to series)
