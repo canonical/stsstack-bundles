@@ -6,4 +6,4 @@ applications:
       allocation-type: thin
       block-device: /var/lib/lvm_pool0.img|8G
 relations:
-  - [ cinder, cinder-lvm ]
+  - [ __CINDER_VOLUME_INTERFACE__, cinder-lvm ]

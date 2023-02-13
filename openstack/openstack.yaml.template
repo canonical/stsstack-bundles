@@ -66,6 +66,7 @@ applications:
       global-physnet-mtu: 8958  # maximum available mtu in stsstack
       path-mtu: 1550
       physical-network-mtus: physnet1:1500
+  # Changes made here may need to be replicated in overlays/cinder-volume.yaml
   cinder:
     num_units: __NUM_CINDER_UNITS__
     constraints: mem=2G
@@ -95,7 +96,7 @@ relations:
   - [ cinder:shared-db, __MYSQL_INTERFACE__ ]
   - [ cinder, rabbitmq-server ]
   - [ cinder, nova-cloud-controller ]
-  - [ cinder, keystone ]
+  - [ cinder:identity-service, keystone ]
   - [ neutron-api:shared-db, __MYSQL_INTERFACE__ ]
   - [ neutron-api, rabbitmq-server ]
   - [ neutron-api, nova-cloud-controller ]

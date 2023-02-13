@@ -1,0 +1,33 @@
+# Variables
+debug:                      &debug                     True
+verbose:                    &verbose                   True
+openstack_origin:           &openstack_origin          __OS_ORIGIN__
+source:                     &source                    __SOURCE__
+
+ssl_ca:                     &ssl_ca                    __SSL_CA__
+ssl_cert:                   &ssl_cert                  __SSL_CERT__
+ssl_key:                    &ssl_key                   __SSL_KEY__
+
+applications:
+  cinder:
+    options:
+      enabled-services: api,scheduler
+  cinder-volume:
+    num_units: __NUM_CINDER_UNITS__
+    constraints: mem=2G
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__cinder
+    options:
+      debug: *debug
+      verbose: *verbose
+      enabled-services: volume
+      block-device:
+      glance-api-version: 2
+      openstack-origin: *openstack_origin
+      ssl_ca: *ssl_ca
+      ssl_cert: *ssl_cert
+      ssl_key: *ssl_key
+relations:
+  - [ cinder-volume:shared-db, __MYSQL_INTERFACE__ ]
+  - [ cinder-volume, rabbitmq-server ]
+# Add when https://review.opendev.org/c/openstack/charm-cinder/+/845558 is merged
+#  - [ "cinder-volume:identity-credentials", keystone ]
