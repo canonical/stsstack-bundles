@@ -95,7 +95,7 @@ relations:
   - [ cinder:shared-db, __MYSQL_INTERFACE__ ]
   - [ cinder, rabbitmq-server ]
   - [ cinder, nova-cloud-controller ]
-  - [ cinder, keystone ]
+  - [ cinder:identity-service, keystone:identity-service ]
   - [ neutron-api:shared-db, __MYSQL_INTERFACE__ ]
   - [ neutron-api, rabbitmq-server ]
   - [ neutron-api, nova-cloud-controller ]
