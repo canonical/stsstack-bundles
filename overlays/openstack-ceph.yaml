@@ -17,7 +17,7 @@ applications:
     charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__cinder-ceph
 relations:
   - [ glance, __CEPH_INTERFACE__ ]
-  - [ cinder, cinder-ceph ]
+  - [ __CINDER_VOLUME_INTERFACE__, cinder-ceph ]
   - [ cinder-ceph:ceph, __CEPH_INTERFACE__ ]
   - [ nova-compute, cinder-ceph ]
   - [ nova-compute, __CEPH_INTERFACE__ ]

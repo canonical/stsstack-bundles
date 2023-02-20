@@ -1,0 +1,16 @@
+applications:
+  cinder:
+    options:
+      block-device:  ''
+      ephemeral-unmount: ''
+  cinder-purestorage:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__cinder-purestorage
+    options:
+      driver-source: ppa:openstack-charmers/purestorage-stable
+      protocol: iscsi
+      pure-api-token: __PURESTORAGE_API_TOKEN__
+      san-ip: __PURESTORAGE_SAN_IP__
+      use-multipath: false
+      volume-backend-name: cinder-purestorage
+relations:
+  - [ __CINDER_VOLUME_INTERFACE__, cinder-purestorage ]

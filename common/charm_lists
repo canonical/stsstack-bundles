@@ -5,6 +5,8 @@ ceilometer
 ceilometer-agent
 cinder
 cinder-ceph
+cinder-lvm
+cinder-purestorage
 designate
 designate-bind
 glance

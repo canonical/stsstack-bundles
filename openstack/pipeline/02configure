@@ -635,6 +635,31 @@ do
             assert_min_release queens 'cinder-lvm'
             MOD_OVERLAYS+=( "cinder-lvm.yaml" )
             ;;
+        --cinder-volume)
+            assert_min_release ussuri 'cinder-volume'
+            MOD_OVERLAYS+=( "cinder-volume.yaml" )
+            MOD_PARAMS[__CINDER_VOLUME_INTERFACE__]='cinder-volume'
+            ;;
+        --purestorage-api-token)  #__OPT__type:<str>
+            MOD_PARAMS[__PURESTORAGE_API_TOKEN__]=$2
+            shift
+            ;;
+        --purestorage-san-ip)  #__OPT__type:<str>
+            MOD_PARAMS[__PURESTORAGE_SAN_IP__]=$2
+            shift
+            ;;
+        --cinder-purestorage)
+            assert_min_release ussuri 'cinder-purestorage'
+
+            MOD_OVERLAYS+=( "cinder-purestorage.yaml" )
+
+            MOD_MSGS[cinder-purestorage.0]="For access to the serverstack purestorage SAN please contact the OpenStack team for the API Token / IP and specify them using --purestorage-api-token and --purestorage-san-ip"
+            MOD_MSGS[cinder-purestorage.1]="Volumes created on the PureStorage SAN are not easily identifiable - you cannot see which user created them and they all have the name volume-%s. Please ensure you delete all volumes before destroying this environment to prevent orphaned volumes accumulating."
+            MOD_MSGS[cinder-purestorage.2]="After creation create volume types like this:"
+            MOD_MSGS[cinder-purestorage.3]="openstack volume type create cinder-purestorage --property volume_backend_name=cinder-purestorage"
+            MOD_MSGS[cinder-purestorage.4]="openstack volume type create cinder-ceph --property volume_backend_name=cinder-ceph # If also deploying ceph"
+            MOD_MSGS[cinder-purestorage.5]="juju config cinder default-volume-type=cinder-ceph # or cinder-purestorage"
+            ;;
         *)
             echo "ERROR: invalid input '$1'"
             _usage
