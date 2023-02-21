@@ -1,8 +1,4 @@
 applications:
-  cinder:
-    options:
-      block-device:  ''
-      ephemeral-unmount: ''
   cinder-purestorage:
     charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__cinder-purestorage
     options:

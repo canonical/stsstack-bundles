@@ -2,8 +2,12 @@ applications:
   cinder-lvm:
     charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__cinder-lvm
     options:
-      alias: stsstack
-      allocation-type: thin
-      block-device: /var/lib/lvm_pool0.img|8G
+      allocation-type: auto
+      block-device: /dev/vdb
+      # https://bugs.launchpad.net/charm-cinder-lvm/+bug/1949074
+      config-flags: target_helper=lioadm
+  __CINDER_VOLUME_INTERFACE__:
+    storage:
+      block-devices: 'cinder,40G,1'
 relations:
   - [ __CINDER_VOLUME_INTERFACE__, cinder-lvm ]

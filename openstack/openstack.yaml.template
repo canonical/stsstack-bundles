@@ -74,9 +74,7 @@ applications:
     options:
       debug: *debug
       verbose: *verbose
-      block-device: /var/disk.img
-      ephemeral-unmount: "/mnt"
-      overwrite: "true"
+      block-device: None
       glance-api-version: 2
       openstack-origin: *openstack_origin
       ssl_ca: *ssl_ca
