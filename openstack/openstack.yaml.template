@@ -22,7 +22,6 @@ applications:
     charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__rabbitmq-server
     constraints: mem=1G
     options:
-      source: *source
       min-cluster-size: __NUM_RABBIT_UNITS__
   nova-compute:
     charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__nova-compute

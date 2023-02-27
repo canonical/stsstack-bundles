@@ -53,6 +53,11 @@ if has_min_release train; then
     set -- $@ --placement && cache $@
 fi
 
+# rabbitmq-server: Rely on charmhub channels for the source from jammy
+if ! has_min_series jammy; then
+    MOD_OVERLAYS+=( "rabbitmq-source.yaml" )
+fi
+
 get_amphora_ssh_pub_key ()
 {
     if ! [ -e $HOME/.ssh/id_amphora ]; then
