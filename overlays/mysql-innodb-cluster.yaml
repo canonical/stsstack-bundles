@@ -1,13 +1,9 @@
-# Variables
-source:                     &source          __OS_ORIGIN__
-
 applications:
   mysql:  # we call it 'mysql' since that's how other applications address this one.
     charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__mysql-innodb-cluster
     constraints: mem=4G
     num_units: __NUM_MYSQL_UNITS__  # min 3
     options:
-      source: *source
       innodb-buffer-pool-size: 50%
       max-connections: 20000
       tuning-level: fast

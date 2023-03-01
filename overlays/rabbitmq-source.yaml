@@ -1,0 +1,19 @@
+# rabbitmq-server is only in the trusty-mitaka and xenial-queens cloud-archive
+#
+# The charm isn't always updated with the latest release (e.g. jammy-zed) so
+# errors out if we set it unconditionally.
+#
+# For jammy onwards we can expect the charmhub channel to setup any required
+# source, but to maintain backwards compatability with trusty-mitaka and
+# xenial-queens we need to set source on those releases
+#
+# We do that here in an overlay so that the config value is not set at all on
+# jammy and uses the charm default
+
+# Variables
+source:                     &source                    __SOURCE__
+
+applications:
+  rabbitmq-server:
+    options:
+      source: __SOURCE__
