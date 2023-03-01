@@ -20,7 +20,7 @@ applications:
       debug: *debug
       verbose: *verbose
       enabled-services: volume
-      block-device:
+      block-device: None
       glance-api-version: 2
       openstack-origin: *openstack_origin
       ssl_ca: *ssl_ca
@@ -29,5 +29,4 @@ applications:
 relations:
   - [ cinder-volume:shared-db, __MYSQL_INTERFACE__ ]
   - [ cinder-volume, rabbitmq-server ]
-# Add when https://review.opendev.org/c/openstack/charm-cinder/+/845558 is merged
-#  - [ "cinder-volume:identity-credentials", keystone ]
+  - [ "cinder-volume:identity-credentials", keystone ]
