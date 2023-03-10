@@ -639,6 +639,10 @@ do
         --cinder-lvm)
             assert_min_release queens 'cinder-lvm'
             MOD_OVERLAYS+=( "cinder-lvm.yaml" )
+            if has_min_release wallaby; then
+              MOD_OVERLAYS+=( "cinder-lvm-wallaby.yaml" )
+            fi
+
             ;;
         --cinder-volume)
             assert_min_release ussuri 'cinder-volume'

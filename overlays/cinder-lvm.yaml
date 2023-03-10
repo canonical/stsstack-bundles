@@ -4,8 +4,6 @@ applications:
     options:
       allocation-type: auto
       block-device: /dev/vdb
-      # https://bugs.launchpad.net/charm-cinder-lvm/+bug/1949074
-      config-flags: target_helper=lioadm
   __CINDER_VOLUME_INTERFACE__:
     storage:
       block-devices: 'cinder,40G,1'
