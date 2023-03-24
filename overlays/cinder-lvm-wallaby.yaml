@@ -1,0 +1,5 @@
+applications:
+  cinder-lvm:
+    options:
+      # https://bugs.launchpad.net/charm-cinder-lvm/+bug/1949074
+      config-flags: target_helper=lioadm
