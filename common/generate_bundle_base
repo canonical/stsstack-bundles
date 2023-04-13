@@ -46,6 +46,7 @@ finish ()
 {
     local target
 
+    echo "${MOD_DIR}/generate-bundle.sh ${CACHED_STDIN[@]}" > ${bundles_dir}/generate-command
     if has_opt --replay; then
         target=${bundles_dir}/command
         echo -e "INFO: replaying last known command (from $target)\n"
