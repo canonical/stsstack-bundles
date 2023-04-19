@@ -1,5 +1,5 @@
 #!/bin/bash -eu
-MOD_DIR=`dirname $0`
+MOD_DIR=$(realpath $(dirname $0))
 . $MOD_DIR/common/helpers
 . $MOD_DIR/pipeline/00setup
 . $MOD_DIR/pipeline/01import-config-defaults
