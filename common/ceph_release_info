@@ -1,10 +1,16 @@
 # Series & Release Info (see http://docs.ceph.com/docs/master/releases/)
+
+# Note: If a Ceph version is used by multiple releases, it should be listed
+# against the first release that used it. The get_app_release_name function
+# sorts the list of releases and does a ">" comparison and will use it for
+# newer versions. This may break when the Ubuntu release name wraps past Z.
+
 export -A APP_RELEASE_NAMES=( [firefly]=icehouse
                               [jewel]=mitaka
                               [luminous]=pike
                               [mimic]=rocky
                               [nautilus]=train
                               [octopus]=ussuri
-                              [pacific]=xena # xena and wallaby both have pacific
+                              [pacific]=wallaby # xena and wallaby both have pacific
                               [quincy]=yoga )
 
