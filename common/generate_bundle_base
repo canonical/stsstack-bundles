@@ -116,6 +116,8 @@ if [ -d "$resource_path" ]; then
 fi
 
 # De-duplicate overlay list and create bundle structure.
+declare -a overlay_list=()
+
 if ((${#MOD_OVERLAYS[@]})); then
     mkdir -p $bundles_dir/o
     declare -a msgs=()
@@ -124,6 +126,7 @@ if ((${#MOD_OVERLAYS[@]})); then
         cp $MOD_DIR/overlays/$overlay $bundles_dir/o
         ((${#overlay_opts[@]}==0)) && overlay_opts+=("")  # left padding
         overlay_opts+=( --overlay $bundles_dir/o/$overlay )
+        overlay_list+=( "$bundles_dir/o/$overlay" )
         render $bundles_dir/o/$overlay
         overlays_deduped[$overlay]=true
         msgs+=( " + $overlay\n" )
@@ -143,6 +146,15 @@ else
     echo -e "Created ${MASTER_OPTS[TARGET_RELEASE_NAME]} bundle\n"
 fi
 
+# put together any mysql interface parts that may have been generated as part
+# of render()
+aggregate_mysql_interface_parts $bundles_dir/o
+
+# generate bundle list
+base_bundle=$bundles_dir/`basename $bundle`
+overlay_list+=( $base_bundle )
+readarray -t application_list < <("$MOD_DIR/../tools/juju-bundle-applications.py" ${overlay_list[@]})
+
 # Generate placement overlay for use with MAAS provider
 if ${MASTER_OPTS[HYPERCONVERGED_DEPLOYMENT]}; then
     cp  $MOD_DIR/overlays/unit_placement/header.yaml.template $bundles_dir/unit-placement.yaml
@@ -151,7 +163,7 @@ if ${MASTER_OPTS[HYPERCONVERGED_DEPLOYMENT]}; then
     # detect all apps used and generate placement info by doing:
     #  * search for all app names in generated bundles/overlays
     #  * search unit_placement template with same name
-    for app in `egrep -hr "^\s+[0-9a-z\-]+:(\s*#*.*)$" $bundles_dir --exclude-dir=p| sed -rn 's/\s+([[:alnum:]\-]+):.*/\1/p'| sort -u`; do
+    for app in ${application_list[@]}; do
         # filter juju keywords
         [[ $app == "options" ]] || [[ $app == "to" ]] || [[ $app == "storage" ]] && continue
         app_placement=${app}.yaml
@@ -177,13 +189,8 @@ if ${MASTER_OPTS[HYPERCONVERGED_DEPLOYMENT]}; then
     find $bundles_dir -name \*.yaml| xargs -l sed -i -r "/^\s+charm:.+/a$bindings"
 fi
 
-# put together any mysql interface parts that may have been generated as part
-# of render()
-aggregate_mysql_interface_parts $bundles_dir/o
-
 ((${#overlay_opts[@]})) && overlay_opts+=("")  # right padding
 
-base_bundle=$bundles_dir/`basename $bundle`
 echo -e "juju deploy${JUJU_DEPLOY_OPTS} ${base_bundle}${overlay_opts[@]:- }\n " > ${bundles_dir}/command
 finish
 
