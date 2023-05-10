@@ -3,16 +3,7 @@
 
 # Versions are based on https://docs.openstack.org/charm-guide/latest/project/charm-delivery.html
 
-CHARM_CHANNEL[vault]=1.6/edge
-CHARM_CHANNEL[rabbitmq-server]=3.8/edge
+CHARM_CHANNEL[vault]=1.5/edge
+CHARM_CHANNEL[rabbitmq-server]=3.6/edge
 CHARM_CHANNEL[percona-cluster]=5.7/edge
-CHARM_CHANNEL[mysql-router]=8.0/edge
-CHARM_CHANNEL[mysql-innodb-cluster]=8.0/edge
-CHARM_CHANNEL[hacluster]=2.0.3/edge
-CHARM_CHANNEL[ovn-central]=20.03/edge
-CHARM_CHANNEL[ovn-chassis]=20.03/edge
-CHARM_CHANNEL[ovn-dedicated-chassis]=20.03/edge
-
-# At the moment of this patch, the barbican-vault only has {yoga,xena}/stable channels
-
-CHARM_CHANNEL[barbican-vault]=latest/stable
+CHARM_CHANNEL[hacluster]=1.1.18/edge

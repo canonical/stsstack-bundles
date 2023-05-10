@@ -27,7 +27,10 @@ for charm in \
   ovn-{central,chassis,dedicated-chassis} \
   percona-cluster \
   rabbitmq-server \
-  vault
+  vault \
+  barbican-vault \
+  nova-compute \
+  ceph-osd
 do
   if [[ -v CHARM_CHANNEL[${charm}] ]]; then
     echo "${charm} ${CHARM_CHANNEL[${charm}]}" >> ${output}
@@ -35,5 +38,5 @@ do
     echo "${charm} unset" >> ${output}
   fi
 done
-cat ${output} | column --table
+cat ${output} | column -t
 rm ${output}

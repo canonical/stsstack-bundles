@@ -3,10 +3,11 @@
 
 # Versions are based on https://docs.openstack.org/charm-guide/latest/project/charm-delivery.html
 
+# Charm Delivery was changed to recommend OVN 22.03 for all OpenStack versions
+# from Ussuri onwards, however many customers originally deployed on this older
+# version. The older version is kept by default to make it more likely to
+# replicate a customer issue but you should check and match the customer
+# environment you are reproducing.
 CHARM_CHANNEL[ovn-central]=21.09/edge
 CHARM_CHANNEL[ovn-chassis]=21.09/edge
 CHARM_CHANNEL[ovn-dedicated-chassis]=21.09/edge
-
-# At the moment of this patch, the barbican-vault only has {yoga,xena}/stable channels
-
-CHARM_CHANNEL[barbican-vault]=xena/stable

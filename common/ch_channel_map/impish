@@ -14,7 +14,3 @@ CHARM_CHANNEL[hacluster]=2.4/edge
 CHARM_CHANNEL[ovn-central]=21.09/edge
 CHARM_CHANNEL[ovn-chassis]=21.09/edge
 CHARM_CHANNEL[ovn-dedicated-chassis]=21.09/edge
-
-#  At the moment of this patch, the barbican-vault only has {yoga,xena}/stable channels
-
-CHARM_CHANNEL[barbican-vault]=latest/stable
