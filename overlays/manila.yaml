@@ -21,6 +21,7 @@ applications:
       default-share-backend: cephfsnfs1
       share-protocols: NFS
       vip: __VIP__
+      vip_iface: __VIP_IFACE__
   manila-hacluster:
     charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__hacluster
     options:

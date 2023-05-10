@@ -2,6 +2,7 @@ applications:
   keystone:
     options:
       vip: __VIP__
+      vip_iface: __VIP_IFACE__
   keystone-hacluster:
     charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__hacluster
     options:

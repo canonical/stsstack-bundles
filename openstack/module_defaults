@@ -49,6 +49,7 @@ MOD_PARAMS[__OVERLAY_NETWORK_TYPE__]='vxlan'
 MOD_PARAMS[__MYSQL_INTERFACE__]='mysql:shared-db'
 MOD_PARAMS[__MAAS_URL__]=  # e.g. http://1.2.3.4:5240/MAAS
 MOD_PARAMS[__MAAS_API_KEY__]=
+MOD_PARAMS[__VIP_IFACE__]='ens3'
 
 # This is enough for creating one ubuntu vm or multiple cirros vms but some
 # scenarios may want to allow more per compute (e.g. octavia).

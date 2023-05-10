@@ -2,12 +2,15 @@ applications:
   ceilometer:
     options:
       vip: __VIP__
+      vip_iface: __VIP_IFACE__
   aodh:
     options:
       vip: __VIP__
+      vip_iface: __VIP_IFACE__
   gnocchi:
     options:
       vip: __VIP__
+      vip_iface: __VIP_IFACE__
   ceilometer-hacluster:
     charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__hacluster
     options:

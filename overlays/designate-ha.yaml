@@ -2,6 +2,7 @@ applications:
   designate:
     options:
       vip: __VIP__
+      vip_iface: __VIP_IFACE__
   designate-bind:
     num_units: 2
   designate-hacluster:
