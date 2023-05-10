@@ -41,6 +41,9 @@ if __name__ == '__main__':
     parser.add_option("--vlan-id",
                       help="Vlan_id",
                       dest="vlan_id", action="store", default='2')
+    parser.add_option("--physical-network",
+                      help="Physical network.",
+                      dest="physical_network", action="store", default='physnet1')
     (opts, args) = parser.parse_args()
 
     if len(args) != 1:
@@ -99,9 +102,9 @@ if __name__ == '__main__':
             network_msg['network']['provider:segmentation_id'] = 1234
         elif opts.network_type == 'vlan':
             network_msg['network']['provider:segmentation_id'] = opts.vlan_id
-            network_msg['network']['provider:physical_network'] = 'physnet1'
+            network_msg['network']['provider:physical_network'] = opts.physical_network
         elif opts.network_type == 'flat':
-            network_msg['network']['provider:physical_network'] = 'physnet1'
+            network_msg['network']['provider:physical_network'] = opts.physical_network
         else:
             network_msg['network']['provider:segmentation_id'] = 2
 
