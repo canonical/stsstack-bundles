@@ -1,4 +1,4 @@
 relations:
  - ['openstack-integrator', 'kubernetes-worker']
- - ['openstack-integrator', 'kubernetes-master:loadbalancer']
- - ['kubernetes-worker:kube-api-endpoint', 'kubernetes-master:kube-api-endpoint']
+ - ['openstack-integrator', 'kubernetes-control-plane:loadbalancer']
+ - ['kubernetes-worker:kube-api-endpoint', 'kubernetes-control-plane:kube-api-endpoint']

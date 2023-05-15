@@ -1,3 +1,3 @@
 relations:
-  - [ 'kubernetes-master:certificates', 'easyrsa:client' ]
+  - [ 'kubernetes-control-plane:certificates', 'easyrsa:client' ]
   - [ 'kubernetes-worker:certificates', 'easyrsa:client' ]

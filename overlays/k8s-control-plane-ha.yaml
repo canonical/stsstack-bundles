@@ -1,0 +1,11 @@
+applications:
+  kubernetes-control-plane:
+    options:
+      ha-cluster-vip: __VIP__
+  kubernetes-control-plane-hacluster:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__hacluster
+    options:
+      cluster_count: __NUM_K8S_MASTER_UNITS__
+relations:
+  - [ kubernetes-control-plane-hacluster, kubernetes-control-plane ]
+  - [ kubernetes-control-plane:kube-api-endpoint, kubernetes-worker:kube-api-endpoint ]

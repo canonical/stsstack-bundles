@@ -751,7 +751,6 @@ fi
 . $MOD_DIR/common/ch_channel_map/any_series
 declare -A CH_PREFIXED_CHARMS=()
 . $MOD_DIR/common/ch_prefix_map/charmed-osm
-. $MOD_DIR/common/ch_prefix_map/containers
 declare -A CS_NS_CHARMS=()
 . $MOD_DIR/common/cs_ns_map/charmed-osm
 . $MOD_DIR/common/cs_ns_map/containers

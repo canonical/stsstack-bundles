@@ -39,7 +39,7 @@ add_mysql_overlay ()
 
 using_kubeapi_lb ()
 {
-    ! has_opt --master-ha* && ! has_opt --lb-octavia
+    ! has_opt --control-plane-ha* && ! has_opt --lb-octavia
 }
 
 if using_kubeapi_lb; then
@@ -145,8 +145,8 @@ do
             ;;
         --lb-ha-hacluster*|--lb-ha-keepalived*)
             conflicts_with $1 --lb-octavia
-            if has_opt --master-ha*; then
-                echo "ERROR: you can't do --master-ha and ${1%%:*} at the same time."
+            if has_opt --control-plane-ha*; then
+                echo "ERROR: you can't do --control-plane-ha and ${1%%:*} at the same time."
                 exit 1
             fi
             get_units $1 __NUM_K8S_LB_UNITS__ 3
@@ -159,16 +159,16 @@ do
         --lb-octavia)
             conflicts_with $1 '--lb-ha-hacluster*'
             conflicts_with $1 '--lb-ha-keepalived*'
-            conflicts_with $1 '--master-ha*'
+            conflicts_with $1 '--control-plane-ha*'
             MOD_OVERLAYS+=( "k8s-octavia-lb.yaml" )
             ;;
-        --master-ha*)
+        --control-plane-ha*)
             if has_opt --lb-ha*; then
-                echo "ERROR: you can't do --lb-ha and --master-ha at the same time."
+                echo "ERROR: you can't do --lb-ha and --control-plane-ha at the same time."
                 exit 1
             fi
             get_units $1 __NUM_K8S_MASTER_UNITS__ 3
-            MOD_OVERLAYS+=( "k8s-master-ha.yaml" )
+            MOD_OVERLAYS+=( "k8s-control-plane-ha.yaml" )
             check_hacluster_channel
             ;;
         --vault)
@@ -192,7 +192,7 @@ do
             MOD_PARAMS[__NUM_K8S_WORKER_UNITS__]=$2
             shift
             ;;
-        --num-masters)  #__OPT__type:<int>
+        --num-control-planes)  #__OPT__type:<int>
             MOD_PARAMS[__NUM_K8S_MASTER_UNITS__]=$2
             shift
             ;;
@@ -214,7 +214,7 @@ do
             MOD_PARAMS[__SSL_CA__]=`base64 ${ssl_results}/cacert.pem| tr -d '\n'`
             MOD_PARAMS[__SSL_CERT__]=`base64 ${ssl_results}/servercert.pem| tr -d '\n'`
             MOD_PARAMS[__SSL_KEY__]=`base64 ${ssl_results}/serverkey.pem| tr -d '\n'`
-            MOD_OVERLAYS+=( "k8s-master-keystone-ssl.yaml" )
+            MOD_OVERLAYS+=( "k8s-control-plane-keystone-ssl.yaml" )
             # Make everything HA with 1 unit (unless --ha has already been set)
             if ! has_opt '--keystone-ha[:0-9]*$'; then
                 set -- $@ --keystone-ha:1 && cache $@
@@ -222,7 +222,7 @@ do
             ;;
         --multus)
 	    MOD_MSGS[multus.0]="Run the following commands from k8s model to add multus"
-	    MOD_MSGS[multus.1]="juju scp kubernetes-master/0:config ~/.kube/config"
+	    MOD_MSGS[multus.1]="juju scp kubernetes-control-plane/0:config ~/.kube/config"
 	    MOD_MSGS[multus.2]="juju add-k8s multus-k8s-cloud --controller $(juju switch | cut -d: -f1)"
 	    MOD_MSGS[multus.3]="juju add-model multus-k8s-model multus-k8s-cloud"
 	    MOD_MSGS[multus.4]="juju deploy cs:~containers/multus"

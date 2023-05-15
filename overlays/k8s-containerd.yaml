@@ -3,4 +3,4 @@ applications:
     charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__containerd
 relations:
  - [ 'containerd:containerd', 'kubernetes-worker:container-runtime' ]
- - [ 'containerd:containerd', 'kubernetes-master:container-runtime' ]
+ - [ 'containerd:containerd', 'kubernetes-control-plane:container-runtime' ]
