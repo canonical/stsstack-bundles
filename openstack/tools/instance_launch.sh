@@ -7,7 +7,8 @@ set -e -u
 # Presumes glance images exist and have been imported using the accompanying
 # configure script.
 
-declare -a net_names=(private)
+declare -a DEFAULT_NETS=(private)
+declare -a net_names=()
 instance_qty=0
 image_name=
 server_name=
@@ -33,7 +34,7 @@ Options:
 --image IMAGE       Use IMAGE
 --name NAME         The server name (defaults to IMAGE-DATE)
 --network NETWORK[,NETWORK[,NETWORK[...]]]
-                    Connect instances to NETWORK(s) (currently ${net_names[@]})
+                    Connect instances to NETWORK(s) (defaults to ${DEFAULT_NETS[@]})
 EOF
             exit
             ;;
@@ -49,8 +50,9 @@ EOF
             shift
             old_IFS=${IFS}
             IFS=','
-            read -r -a net_names <<< "$1"
+            read -r -a new_net_names <<< "$1"
             IFS=${old_IFS}
+            net_names+=( "${new_net_names[@]}" )
             ;;
         --name)
             shift
@@ -92,6 +94,10 @@ fi
 if [[ -z ${image_name} ]]; then
     echo "Missing image name"
     exit 1
+fi
+
+if (( ${#net_names[@]} == 0 )); then
+    net_names=( "${DEFAULT_NETS[@]}" )
 fi
 
 set -x
