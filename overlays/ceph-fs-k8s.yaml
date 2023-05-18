@@ -1,4 +1,4 @@
 applications:
-  kubernetes-master:
+  kubernetes-control-plane:
     options:
       default-storage: cephfs

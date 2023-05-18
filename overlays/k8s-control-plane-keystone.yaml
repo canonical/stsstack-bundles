@@ -1,6 +1,6 @@
 ssl_ca:                     &ssl_ca                    __SSL_CA__
 
 applications:
-  kubernetes-master:
+  kubernetes-control-plane:
     options:
       keystone-ssl-ca: *ssl_ca

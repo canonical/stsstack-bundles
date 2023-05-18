@@ -68,7 +68,7 @@ etcd
 flannel
 kubeapi-load-balancer
 kubernetes-e2e
-kubernetes-master
+kubernetes-control-plane
 kubernetes-worker
 openstack-integrator
 )

@@ -1,8 +1,8 @@
 #!/bin/bash -x
 which kubectl || sudo snap install kubectl --classic
 mkdir -p ~/.kube
-kubemaster_unit=$(juju status| sed -nr 's,(kubernetes-master/[[:digit:]]+)\*.*,\1,p')
-juju scp ${kubemaster_unit}:config ~/.kube/config
+kubecontrolplane_unit=$(juju status| sed -nr 's,(kubernetes-control-plane/[[:digit:]]+)\*.*,\1,p')
+juju scp ${kubecontrolplane_unit}:config ~/.kube/config
 
 # If we're using keystone, let's create the user and setup everything
 if [[ `juju status keystone --format=json 2>/dev/null| jq '.machines| length'` -ne 0 ]] ; then
@@ -23,7 +23,7 @@ if [[ `juju status keystone --format=json 2>/dev/null| jq '.machines| length'` -
 
     which client-keystone-auth || sudo snap install --edge client-keystone-auth
 
-    juju scp ${kubemaster_unit}:kube-keystone.sh .
+    juju scp ${kubecontrolplane_unit}:kube-keystone.sh .
     chmod a+w kube-keystone.sh
     sed -i 's/#export OS_PROJECT_NAME=k8s/export OS_PROJECT_NAME=k8s/g' kube-keystone.sh
     sed -i 's/#export OS_DOMAIN_NAME=k8s/export OS_DOMAIN_NAME=k8s/g' kube-keystone.sh

@@ -1,6 +1,6 @@
 applications:
-  kubernetes-master:
+  kubernetes-control-plane:
     options:
       enable-keystone-authorization: true
 relations:
-  - [ 'kubernetes-master:keystone-credentials', 'keystone:identity-credentials' ]
+  - [ 'kubernetes-control-plane:keystone-credentials', 'keystone:identity-credentials' ]

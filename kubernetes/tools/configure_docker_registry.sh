@@ -5,8 +5,8 @@ ip=`juju run --unit docker-registry/0 'network-get website --ingress-address'`
 port=`juju config docker-registry registry-port`
 registry=$ip:$port
 
-# Get the current image-registry configured in k8s master (default - rocks.canonical.com:443/cdk)
-old_image_registry=`juju config kubernetes-master image-registry`
+# Get the current image-registry configured in k8s control-plane (default - rocks.canonical.com:443/cdk)
+old_image_registry=`juju config kubernetes-control-plane image-registry`
 
 # All the images used from current image registry need to be uploaded to private docker-registry
 # Get the list of images used in the current deployment from the current image-registry
@@ -25,6 +25,6 @@ juju run-action docker-registry/0 push image=$registry/coredns/coredns-amd64:1.6
 juju run-action docker-registry/0 push image=k8s.gcr.io/pause-amd64:3.2 tag=$registry/pause-amd64:3.2 --wait
 
 # Update k8s to point to the private docker-registry
-juju config kubernetes-master image-registry=$registry
+juju config kubernetes-control-plane image-registry=$registry
 
-echo "Wait for the kubernetes master to be active"
+echo "Wait for the kubernetes control-plane to be active"

@@ -3,5 +3,5 @@ applications:
     charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__kubernetes-e2e
     num_units: 1
 relations:
-  - [ 'e2e:kube-control', 'kubernetes-master:kube-control' ]
-  - [ 'e2e:kubernetes-master', 'kubernetes-master:kube-api-endpoint' ]
+  - [ 'e2e:kube-control', 'kubernetes-control-plane:kube-control' ]
+  - [ 'e2e:kubernetes-control-plane', 'kubernetes-control-plane:kube-api-endpoint' ]
