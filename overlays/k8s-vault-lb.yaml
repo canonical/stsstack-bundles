@@ -1,2 +1,4 @@
 relations:
  - ['kubeapi-load-balancer:certificates', 'vault:certificates']
+ - ['kubernetes-control-plane:vault-kv',  'vault:secrets']
+
