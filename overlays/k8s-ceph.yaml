@@ -1,3 +1,2 @@
 relations:
-  - [ 'kubernetes-control-plane:ceph-storage', 'ceph-mon:admin' ]
   - [ 'kubernetes-control-plane:ceph-client', __CEPH_INTERFACE__ ]
