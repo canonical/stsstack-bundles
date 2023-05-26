@@ -56,7 +56,7 @@ for sha in $(git rev-list --no-merges ${base_commit}..${head_commit}); do
             exit 1
         fi
         for i in $(seq 2 $(( ${#message[@]} - 1 ))); do
-            if [[ ${#message[${i}]} > 72 ]]; then
+            if [[ ${#message[${i}]} -gt 72 ]]; then
                 echo "[ERROR] Body line is > 72 characters"
                 echo "  ${message[${i}]}"
                 exit 1
