@@ -1,13 +1,27 @@
 #!/bin/bash -eu
-model_ca_cert_path=${1:-}
+
+validate_or_remove_ca() {
+    if [ -f $1 ]; then
+        if grep -Fxq -- "-----BEGIN CERTIFICATE-----" $1; then
+            return 0
+        else
+            rm $1
+        fi
+    fi
+    return 1
+}
 
 if ((`juju status --format=json| jq -r '.applications[]| select(."charm-name"=="vault")'| wc -l`)); then
     model_uuid=`juju show-model --format=json| jq -r '.[]."model-uuid"'`
-    model_ca_cert_path=`find /tmp -name \*.stsstack-bundles.ssl.$model_uuid 2>/dev/null` || true
-    if [[ -z "$model_ca_cert_path" || "$(cat $model_ca_cert_path)" = "None" ]]; then
-        model_ca_cert_path=`mktemp --suffix=.stsstack-bundles.ssl.$model_uuid`
-        echo "Fetching CA cert from vault" 1>&2
-        juju run-action --format=json vault/leader get-root-ca --wait | jq -r .[].results.output > $model_ca_cert_path
+    model_ca_cert_path=/tmp/stsstack-bundles.ssl.$model_uuid
+
+    if ! validate_or_remove_ca ${model_ca_cert_path}; then
+      echo "Fetching CA cert from vault" 1>&2
+      juju run-action --format=json vault/leader get-root-ca --wait | jq -r .[].results.output > $model_ca_cert_path
+      if ! validate_or_remove_ca $model_ca_cert_path; then
+        echo "Didn't get a certificate from vault, check it's status and if necessary use ./tools/vault-unseal-and-authorise.sh" 1>&2
+        exit 1
+      fi
     fi
 elif [ -n "`juju config keystone ssl_cert`" ]; then
     MOD_DIR=$(dirname $0)/..
@@ -28,7 +42,7 @@ elif [ -n "`juju config keystone ssl_cert`" ]; then
     fi
 fi
 
-if [ -n "$model_ca_cert_path" ]; then
+if [ -n "$model_ca_cert_path" ] && [ -f "$model_ca_cert_path" ]; then
     if [ ! -f /usr/local/share/ca-certificates/cacert.crt ] || [ $(md5sum $model_ca_cert_path | awk '{print $1}') != $(md5sum /usr/local/share/ca-certificates/cacert.crt | awk '{print $1}') ]; then
         echo "INFO: installing stsstack-bundles openstack CA from /usr/local/share/ca-certificates/cacert.crt" 1>&2
         sudo cp ${model_ca_cert_path} /usr/local/share/ca-certificates/cacert.crt
