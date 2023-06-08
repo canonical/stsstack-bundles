@@ -27,6 +27,7 @@ render_mod_params ()
             # apply channel and prefix, if required, for each charm
             channel=${CHARM_CHANNEL[$c]:-$service_default_channel}
             echo "-e '/__CHARM_CS_NS____CHARM_CH_PREFIX__${c}\s*$/a\ \ \ \ channel: $channel'" >> $config_renderer
+            echo "-e '/__CHARM_CS_NS____CHARM_CH_PREFIX__${c}\s*$/a\ \ \ \ series: ${series}'" >> $config_renderer
 
             if `grep -q "__SKIP_PREFIX__$c" $template`; then
                 echo "-e 's,__CHARM_CS_NS____CHARM_CH_PREFIX____SKIP_PREFIX__${c}\s*$,${c},'" >> $config_renderer
@@ -161,4 +162,3 @@ render () {
     #       called so be sure to do so once all rendering complete.
     __create_mysql_interface_parts $1 $MOD_DIR/overlays
 }
-
