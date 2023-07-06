@@ -1,6 +1,7 @@
 #!/bin/bash
 declare -a CACHED_STDIN=( $@ )
 declare -A MASTER_OPTS=(
+    [DEFAULT_CHANNEL]=edge
     [DEFAULT_BINDING]=
     [HYPERCONVERGED_DEPLOYMENT]=false
     [MODEL_CONFIG]=''
@@ -461,7 +462,7 @@ assert_min_release ()
     local r=`get_release`
 
     [ -n "$r" ] || r=${lts[`get_series ${CACHED_STDIN[@]}`]:-${nonlts[`get_series ${CACHED_STDIN[@]}`]:-""}}
-    [[ "$r" < "$min" ]] || return 0
+    (( ${os_releases[$r]} < ${os_releases[$min]} )) || return 0
     echo "Min release '$min' required to be able to use $feature_name (currently using '$r')" 1>&2
     exit 1
 }
@@ -578,7 +579,9 @@ ost_series_autocorrect ()
         num_rels=${#lts_releases_sorted[@]}
         newseries=""
         for r in ${lts_releases_sorted[@]}; do
-            if [[ "$release" > "$r" ]]; then
+            a=${os_releases[$release]}
+            b=${os_releases[$r]}
+            if (( $a > $b )); then
                 newseries=${lts_rev[$r]}
                 break
             fi
@@ -618,7 +621,7 @@ get_app_release_name ()
     local ubuntu_release="$1"
     local release_name=
 
-    [ -n "$release" ] || return 0
+    [ -n "$ubuntu_release" ] || return 0
     readarray -t names_sorted_asc<<<"`echo ${!APP_RELEASE_NAMES[@]}| \
                                             tr ' ' '\n'| sort`"
     for name in ${names_sorted_asc[@]}; do
