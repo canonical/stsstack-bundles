@@ -25,8 +25,23 @@ declare -A lts=( [trusty]=icehouse
 declare -A nonlts=( [hirsute]=wallaby
                     [impish]=xena
                     [kinetic]=zed
+                    [lunar]=antelope
 )
-
+# NOTE: must be kept upt-to-date with all supported (non-eol) versions of openstack
+declare -A os_releases=( [icehouse]=0
+                         [mitaka]=1
+                         [queens]=2
+                         [rocky]=3
+                         [stein]=4
+                         [train]=5
+                         [ussuri]=6
+                         [victoria]=7
+                         [wallaby]=8
+                         [xena]=9
+                         [yoga]=10
+                         [zed]=11
+                         [antelope]=12
+)
 # Reverse lookups (revision to series)
 declare -A lts_rev=()
 for s in ${!lts[@]}; do

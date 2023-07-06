@@ -11,7 +11,6 @@ render_mod_params ()
     declare -A CHANNEL_DEFAULT=( [cs:]=stable [ch:]=latest/stable )
     local store=${MASTER_OPTS[CHARM_STORE]}
     local store_default_channel=${CHANNEL_DEFAULT[$store]}
-    local service_default_channel=${MASTER_OPTS[DEFAULT_CHANNEL]:-$store_default_channel}
     local channel
 
     local charms
@@ -25,7 +24,7 @@ render_mod_params ()
     for c in ${charms[@]}; do
         if [[ $store == "ch:" ]]; then
             # apply channel and prefix, if required, for each charm
-            channel=${CHARM_CHANNEL[$c]:-$service_default_channel}
+            channel=${CHARM_CHANNEL[$c]:-$store_default_channel}
             echo "-e '/__CHARM_CS_NS____CHARM_CH_PREFIX__${c}\s*$/a\ \ \ \ channel: $channel'" >> $config_renderer
             echo "-e '/__CHARM_CS_NS____CHARM_CH_PREFIX__${c}\s*$/a\ \ \ \ series: ${series}'" >> $config_renderer
 

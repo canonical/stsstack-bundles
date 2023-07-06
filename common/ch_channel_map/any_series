@@ -1,5 +1,9 @@
+# newer openstack release names map to a release number
+declare -A RELNAME_MAP=(
+    [antelope]=2023.1
+)
 for c in ${OST_CHARMS[@]}; do
-    CHARM_CHANNEL[$c]=$release/edge
+    CHARM_CHANNEL[$c]=${RELNAME_MAP[$release]:-$release}/edge
 done
 
 for c in ${CEPH_CHARMS[@]}; do
