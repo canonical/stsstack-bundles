@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Lint bash scripts
         run: |
-          bashate --ignore E006 --verbose tools/*.sh tools/juju-lnav openstack/novarc
+          bashate --ignore E006 --verbose openstack/tools/create-microceph-vm.sh tools/*.sh tools/juju-lnav openstack/novarc
 
   check-commit-message:
     name: Check Commit Message
