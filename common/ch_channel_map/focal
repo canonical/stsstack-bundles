@@ -3,11 +3,11 @@
 
 # Versions are based on https://docs.openstack.org/charm-guide/latest/project/charm-delivery.html
 
-CHARM_CHANNEL[vault]=1.7/edge
-CHARM_CHANNEL[rabbitmq-server]=3.8/edge
-CHARM_CHANNEL[mysql-router]=8.0/edge
-CHARM_CHANNEL[mysql-innodb-cluster]=8.0/edge
-CHARM_CHANNEL[hacluster]=2.0.3/edge
-CHARM_CHANNEL[ovn-central]=20.03/edge
-CHARM_CHANNEL[ovn-chassis]=20.03/edge
-CHARM_CHANNEL[ovn-dedicated-chassis]=20.03/edge
+CHARM_CHANNEL[vault]=1.7/stable
+CHARM_CHANNEL[rabbitmq-server]=3.8/stable
+CHARM_CHANNEL[mysql-router]=8.0/stable
+CHARM_CHANNEL[mysql-innodb-cluster]=8.0/stable
+CHARM_CHANNEL[hacluster]=2.0.3/stable
+CHARM_CHANNEL[ovn-central]=22.03/stable
+CHARM_CHANNEL[ovn-chassis]=22.03/stable
+CHARM_CHANNEL[ovn-dedicated-chassis]=22.03/stable
