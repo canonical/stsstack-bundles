@@ -5,12 +5,12 @@
 
 # "Charm Delivery" specifies vault 1.8 for jammy, however field have actually been using 1.7.
 # Stick with 1.7 to more closely replicate customer deployments.
-CHARM_CHANNEL[vault]=1.7/edge
+CHARM_CHANNEL[vault]=1.7/stable
 
-CHARM_CHANNEL[rabbitmq-server]=3.9/edge
-CHARM_CHANNEL[mysql-router]=8.0/edge
-CHARM_CHANNEL[mysql-innodb-cluster]=8.0/edge
-CHARM_CHANNEL[hacluster]=2.4/edge
-CHARM_CHANNEL[ovn-central]=22.03/edge
-CHARM_CHANNEL[ovn-chassis]=22.03/edge
-CHARM_CHANNEL[ovn-dedicated-chassis]=22.03/edge
+CHARM_CHANNEL[rabbitmq-server]=3.9/stable
+CHARM_CHANNEL[mysql-router]=8.0/stable
+CHARM_CHANNEL[mysql-innodb-cluster]=8.0/stable
+CHARM_CHANNEL[hacluster]=2.4/stable
+CHARM_CHANNEL[ovn-central]=22.03/stable
+CHARM_CHANNEL[ovn-chassis]=22.03/stable
+CHARM_CHANNEL[ovn-dedicated-chassis]=22.03/stable
