@@ -3,7 +3,7 @@
 
 # Versions are based on https://docs.openstack.org/charm-guide/latest/project/charm-delivery.html
 
-CHARM_CHANNEL[vault]=1.5/edge
-CHARM_CHANNEL[rabbitmq-server]=3.6/edge
-CHARM_CHANNEL[percona-cluster]=5.7/edge
-CHARM_CHANNEL[hacluster]=1.1.18/edge
+CHARM_CHANNEL[vault]=1.5/stable
+CHARM_CHANNEL[rabbitmq-server]=3.6/stable
+CHARM_CHANNEL[percona-cluster]=5.7/stable
+CHARM_CHANNEL[hacluster]=1.1.18/stable
