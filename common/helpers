@@ -763,7 +763,7 @@ if [ -n "$ppa" ]; then
 elif ! ltsmatch "$series" "$release" && ! nonltsmatch "$series" "$release" ; then
     source="cloud:${series}-${release}"
 else
-    source=""
+    source="distro"
 fi
 if [ -n "$pocket" ]; then
     if [ -n "$source" ]; then
