@@ -28,6 +28,11 @@ else
     MOD_PARAMS[__NUM_NEUTRON_GATEWAY_UNITS__]=0
 fi
 
+# Default to OVN for > Train
+if has_min_release ussuri && ! (has_opt --ovs || has_opt --ml2-ovs); then
+    set -- $@ --ml2-ovn && cache $@
+fi
+
 if ! has_opt --ovn*; then
     MOD_OVERLAYS+=( "neutron-openvswitch.yaml" )
 fi
@@ -472,7 +477,7 @@ do
             assert_min_release queens "neutron-sg-logging"
             MOD_OVERLAYS+=( "neutron-sg-logging.yaml" )
             ;;
-        --ovn)
+        --ovn|--ml2-ovn)
             assert_min_release train "ovn"
             # since ports typically set post-deployment ensure we don't clobber on re-run
             opt=`update_from_charm_config $1 ovn-chassis bridge-interface-mappings`
@@ -482,6 +487,8 @@ do
             if ! has_opt --vault*; then
                 set -- $@ --vault && cache $@
             fi
+            ;;
+        --ml2-ovs)
             ;;
         --placement)
             assert_min_release rocky "placement"
