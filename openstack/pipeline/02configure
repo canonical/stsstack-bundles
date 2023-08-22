@@ -463,10 +463,6 @@ do
                 set -- $@ --ha:1 && cache $@
             fi
             ;;
-        --nova-network)
-            # NOTE(hopem) yes this is a hack and we'll get rid of it when nova-network is finally no more
-            export MOD_BASE_TEMPLATE=openstack-nova-network.yaml.template
-            ;;
         --neutron-sg-logging)
             conflicts_with $1 --ovn
             assert_min_release queens "neutron-sg-logging"
