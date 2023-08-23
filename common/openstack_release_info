@@ -27,21 +27,26 @@ declare -A nonlts=( [hirsute]=wallaby
                     [kinetic]=zed
                     [lunar]=antelope
 )
-# NOTE: must be kept upt-to-date with all supported (non-eol) versions of openstack
+# NOTE: must be kept up-to-date with ALL versions of openstack.
 declare -A os_releases=( [icehouse]=0
-                         [mitaka]=1
-                         [ocata]=2
-                         [queens]=3
-                         [rocky]=4
-                         [stein]=5
-                         [train]=6
-                         [ussuri]=7
-                         [victoria]=8
-                         [wallaby]=9
-                         [xena]=10
-                         [yoga]=11
-                         [zed]=12
-                         [antelope]=13
+                         [juno]=1
+                         [kilo]=2
+                         [liberty]=3
+                         [mitaka]=4
+                         [newton]=5
+                         [ocata]=6
+                         [pike]=7
+                         [queens]=8
+                         [rocky]=9
+                         [stein]=10
+                         [train]=11
+                         [ussuri]=12
+                         [victoria]=13
+                         [wallaby]=14
+                         [xena]=15
+                         [yoga]=16
+                         [zed]=17
+                         [antelope]=18
 )
 # Reverse lookups (revision to series)
 declare -A lts_rev=()
