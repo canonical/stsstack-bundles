@@ -14,3 +14,4 @@ CHARM_CHANNEL[hacluster]=2.4/stable
 CHARM_CHANNEL[ovn-central]=22.03/stable
 CHARM_CHANNEL[ovn-chassis]=22.03/stable
 CHARM_CHANNEL[ovn-dedicated-chassis]=22.03/stable
+CHARM_CHANNEL[mongodb]=5/stable

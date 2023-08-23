@@ -7,3 +7,4 @@ CHARM_CHANNEL[vault]=1.5/stable
 CHARM_CHANNEL[rabbitmq-server]=3.6/stable
 CHARM_CHANNEL[percona-cluster]=5.7/stable
 CHARM_CHANNEL[hacluster]=1.1.18/stable
+CHARM_CHANNEL[mongodb]=3.6/stable
