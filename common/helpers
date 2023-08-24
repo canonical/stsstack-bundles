@@ -12,7 +12,7 @@ declare -A MASTER_OPTS=(
     [CHARM_REVISIONS]=
     [CHARM_STORE]=ch:
 )
-DEFAULT_SERIES=focal
+DEFAULT_SERIES=jammy
 JUJU_VERSION="`juju show-controller| sed -r 's/.+controller-model-version:\s+(.+)/\1/g;t;d' 2>/dev/null`" || true
 [ -n "$JUJU_VERSION" ] || JUJU_VERSION="`juju --version 2>/dev/null| sed -r 's/^([[:digit:]\.]+).*/\1/g'`"
 JUJU_DEPLOY_OPTS=""
