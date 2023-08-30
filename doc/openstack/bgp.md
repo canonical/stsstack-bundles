@@ -10,7 +10,7 @@ NOTE: based on https://docs.openstack.org/ocata/networking-guide/config-bgp-dyna
 
 ```
 source novarc
-neutron agent-list --agent-type="BGP dynamic routing agent"
+openstack network agent list --agent-type bgp
 openstack address scope create --share --ip-version 4 bgp
 openstack subnet pool create --pool-prefix 10.5.0.0/16 \
                              --address-scope bgp provider
@@ -50,9 +50,9 @@ openstack router add subnet router1 subnet1
 openstack router add subnet router2 subnet2
 openstack router add subnet router3 subnet3
 
-neutron router-gateway-set router1 provider
-neutron router-gateway-set router2 provider
-neutron router-gateway-set router3 provider
+openstack router set --external-gateway provider router1
+openstack router set --external-gateway provider router2
+openstack router set --external-gateway provider router3
 ```
 
 ```
@@ -71,9 +71,9 @@ openstack bgp speaker show bgppeer
 # Assumes no l3-HA
 
 ```
-dr_agent=`neutron agent-list --agent-type="BGP dynamic routing agent" -c id -f value`
+dr_agent=`openstack network agent list --agent-type bgp -c id -f value`
 
 openstack bpg dragent add speaker $dr_agent bgpspeaker
-neutron bgp-dragent-list-hosting-speaker bgpspeaker
-neutron bgp-speaker-list-on-dragent $dr_agent
+openstack bgp dragent list --bgp-speaker bgpspeaker
+openstack bgp speaker list --agent $dr_agent
 ```
