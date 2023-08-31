@@ -21,8 +21,6 @@ elif [ -z "$MOD_DIR" ]; then
     exit 1
 fi
 
-# If we need a model for this deployment, ensure it exists
-ensure_model
 if [ -n "${MASTER_OPTS[MODEL_CONFIG]}" ]; then
     juju model-config ${MASTER_OPTS[MODEL_CONFIG]}
 fi
@@ -67,14 +65,6 @@ has_opt --replay && finish
 # Purge any existing overlays and parts
 rm -f $bundles_dir/o/*
 rm -rf $bundles_dir/parts
-
-# Establish what cloud provider is in use and if it's MAAS, use unit placement.
-cloud=`juju show-model| sed -rn 's/.+cloud:\s*(.+).*/\1/p'| uniq`
-type=`juju show-cloud $cloud| sed -rn 's/^type:\s*(.+).*/\1/p'| uniq`
-if [[ $type = maas ]]; then
-    echo "INFO: maas provider detected - enabling hyperconverged deployment"
-    MASTER_OPTS[HYPERCONVERGED_DEPLOYMENT]=true
-fi
 
 # load renderers
 RENDER_PARTS_DIR=$bundles_dir/parts

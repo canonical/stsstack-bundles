@@ -25,6 +25,15 @@ is_neutron_gateway_required ()
     fi
 }
 
+is_hyperconverged ()
+{
+    if has_opt --hyperconverged || ${MASTER_OPTS[HYPERCONVERGED_DEPLOYMENT]}; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 # Needed in all cases
 MOD_OVERLAYS+=(
     glance.yaml
@@ -40,6 +49,11 @@ if is_neutron_gateway_required; then
     MOD_OVERLAYS+=( "neutron-gateway.yaml" )
 else
     MOD_PARAMS[__NUM_NEUTRON_GATEWAY_UNITS__]=0
+fi
+
+if is_hyperconverged; then
+    MOD_PARAMS[__GLOBAL_MTU__]=1500
+    MOD_PARAMS[__PATH_MTU__]=1500
 fi
 
 if ! is_ml2_ovn; then
@@ -115,6 +129,9 @@ do
         --ceph)
             MOD_OVERLAYS+=( "ceph.yaml" )
             MOD_OVERLAYS+=( "openstack-ceph.yaml" )
+            if ! is_hyperconverged; then
+                MOD_OVERLAYS+=( "ceph-juju-storage.yaml" )
+            fi
             ;;
         --num-ceph-mons)  #__OPT__type:<int>
             MOD_PARAMS[__NUM_CEPH_MON_UNITS__]=$2
@@ -612,7 +629,9 @@ do
             conflicts_with $1 --ssl
             assert_min_release queens "vault"
             MOD_OVERLAYS+=( "vault.yaml" )
-            MOD_OVERLAYS+=( "vault-openstack-secrets.yaml" )
+            if ! is_hyperconverged; then
+                MOD_OVERLAYS+=( "vault-openstack-secrets.yaml" )
+            fi
             if ! has_opt --ssl; then
                 MOD_OVERLAYS+=( "vault-openstack-certificates.yaml" )
                 for opt in --heat --octavia --barbican --designate --placement --openstack-dashboard --ironic; do

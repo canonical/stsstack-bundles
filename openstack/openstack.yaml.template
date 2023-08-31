@@ -62,8 +62,8 @@ applications:
       ssl_ca: *ssl_ca
       ssl_cert: *ssl_cert
       ssl_key: *ssl_key
-      global-physnet-mtu: 8958  # maximum available mtu in stsstack
-      path-mtu: 1550
+      global-physnet-mtu: __GLOBAL_MTU__
+      path-mtu: __PATH_MTU__ 
       physical-network-mtus: physnet1:1500
   # Changes made here may need to be replicated in overlays/cinder-volume.yaml
   cinder:
