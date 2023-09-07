@@ -766,7 +766,7 @@ else
     source="distro"
 fi
 if [ -n "$pocket" ]; then
-    if [ -n "$source" ]; then
+    if [ -n "$source" ] && [ "$source" != "distro" ]; then
         source="${source}\/${pocket}"
     else
         source="$pocket";
