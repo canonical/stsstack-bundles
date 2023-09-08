@@ -778,6 +778,18 @@ else
     os_origin="$source"
 fi
 
+# If we need a model for this deployment, ensure it exists
+ensure_model
+# Establish what cloud provider is in use and if it's MAAS, use unit placement.
+# NOTE: this has to be done AFTER the model has been created and we have
+#       switched context.
+cloud=`juju show-model| sed -rn 's/.+cloud:\s*(.+).*/\1/p'| uniq`
+type=`juju show-cloud $cloud| sed -rn 's/^type:\s*(.+).*/\1/p'| uniq`
+if [[ $type = maas ]]; then
+    echo "INFO: maas provider detected - enabling hyperconverged deployment"
+    MASTER_OPTS[HYPERCONVERGED_DEPLOYMENT]=true
+fi
+
 print_msgs ()
 {
     if ((${#MOD_MSGS[@]})); then
