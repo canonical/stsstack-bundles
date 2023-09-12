@@ -283,6 +283,9 @@ do
             if is_neutron_gateway_required; then
                 MOD_OVERLAYS+=( "nagios-neutron-gateway.yaml" )
             fi
+            if is_ml2_ovn; then
+                MOD_OVERLAYS+=( "nagios-ovn.yaml" )
+            fi
             ;;
         --openstack-service-checks)
             MOD_OVERLAYS+=( "openstack-service-checks.yaml" )

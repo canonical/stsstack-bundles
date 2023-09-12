@@ -1,0 +1,3 @@
+relations:
+  - [ nrpe, ovn-central ]
+  - [ nrpe, ovn-chassis ]
