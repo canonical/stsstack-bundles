@@ -13,7 +13,7 @@ jobs:
       - name: Install tools
         run: sudo apt install --no-install-recommends --yes python3-bashate
       - name: Get sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Lint bash scripts
         run: |
           bashate --ignore E006 --verbose openstack/tools/create-microceph-vm.sh tools/*.sh tools/juju-lnav openstack/novarc
@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Check Commit Message
