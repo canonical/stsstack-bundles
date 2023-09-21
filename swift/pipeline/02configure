@@ -8,8 +8,8 @@
 
 # Needed in all cases
 MOD_OVERLAYS+=( 
-    glance.yaml
-    keystone.yaml
+    openstack/glance.yaml
+    openstack/keystone.yaml
 )
 
 # NOTE: this is (should be) the same across all modules using mysql
@@ -65,7 +65,7 @@ do
         --vault)
             assert_min_release queens "vault" $@
             MOD_OVERLAYS+=( "vault.yaml" )
-            MOD_OVERLAYS+=( "vault-swift.yaml" )
+            MOD_OVERLAYS+=( "openstack/vault-swift.yaml" )
             ;;
         --etcd-channel)  #__OPT__type:<str>
             MOD_PARAMS[__ETCD_SNAP_CHANNEL__]=$2
@@ -83,7 +83,7 @@ do
             ;;
         --ha*)
             get_units $1 __NUM_SWIFT_PROXY_UNITS__ 3
-            MOD_OVERLAYS+=( "swift-ha.yaml" )
+            MOD_OVERLAYS+=( "openstack/swift-ha.yaml" )
             ;;
         *)
             echo "ERROR: invalid input '$1'"

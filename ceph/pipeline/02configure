@@ -19,9 +19,9 @@ if ! has_opt --no-openstack; then
     else
         MOD_OVERLAYS+=( "mysql.yaml" )
     fi
-    MOD_OVERLAYS+=( "keystone.yaml" )
-    MOD_OVERLAYS+=( "glance.yaml" )
-    MOD_OVERLAYS+=( "glance-ceph.yaml" )
+    MOD_OVERLAYS+=( "openstack/keystone.yaml" )
+    MOD_OVERLAYS+=( "openstack/glance.yaml" )
+    MOD_OVERLAYS+=( "openstack/glance-ceph.yaml" )
 fi
 
 # Skip processing input if it includes exclusive passthrough options
@@ -65,27 +65,27 @@ do
             fi
             ;;
         --rgw|--ceph-rgw)
-            MOD_OVERLAYS+=( "ceph-rgw.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph-rgw.yaml" )
             ;;
         --rgw-ha*|--ceph-rgw-ha*)
             get_units $1 __NUM_CEPH_RGW_UNITS__ 3
-            MOD_OVERLAYS+=( "ceph-rgw.yaml" )
-            MOD_OVERLAYS+=( "ceph-rgw-ha.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph-rgw.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph-rgw-ha.yaml" )
             ;;
         --rgw-multisite|--ceph-rgw-multisite)
-            MOD_OVERLAYS+=( "ceph-rgw.yaml" )
-            MOD_OVERLAYS+=( "ceph-rgw-multisite.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph-rgw.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph-rgw-multisite.yaml" )
             ;;
         --rgw-multisite-ha*|--ceph-rgw-multisite*)
             get_units $1 __NUM_CEPH_RGW_UNITS__ 3
-            MOD_OVERLAYS+=( "ceph-rgw.yaml" )
-            MOD_OVERLAYS+=( "ceph-rgw-ha.yaml" )
-            MOD_OVERLAYS+=( "ceph-rgw-multisite.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph-rgw.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph-rgw-ha.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph-rgw-multisite.yaml" )
             ;;
         --vault)
             assert_min_release queens "vault" $@
             MOD_OVERLAYS+=( "vault.yaml" )
-            MOD_OVERLAYS+=( "vault-ceph.yaml" )
+            MOD_OVERLAYS+=( "ceph/vault-ceph.yaml" )
             ;;
         --etcd-channel)  #__OPT__type:<str>
             MOD_PARAMS[__ETCD_SNAP_CHANNEL__]=$2
@@ -103,22 +103,22 @@ do
             ;;
         --ceph-proxy)
             MOD_PARAMS[__CEPH_INTERFACE__]='ceph-proxy'
-            MOD_OVERLAYS+=( "ceph-proxy.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph-proxy.yaml" )
             MOD_MSGS[ceph-proxy.0]="once ceph is ready, do 'juju config admin-key=<key> fsid=<fsid> monitor-hosts=<mon-addr-list>'"
             MOD_MSGS[ceph-proxy.1]="e.g. juju config ceph-proxy admin-key=AQALEzleKLCNDBAAxrOY8WbxF2B7lDx0TaswGA== fsid=e5e6aee2-4719-11ea-8264-fa163e50d5d1 monitor-hosts='10.5.0.11:6789 10.5.0.12:6789 10.5.0.13:6789'"
             ;;
         --ceph-fs)
             assert_min_release ocata "ceph-mds"
-            MOD_OVERLAYS+=( "ceph-fs.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph-fs.yaml" )
             ;;
         --ceph-fs-ha*)
             assert_min_release ocata "ceph-mds"
             get_units $1 __NUM_CEPH_FS_UNITS__ 3
-            MOD_OVERLAYS+=( "ceph-fs.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph-fs.yaml" )
             ;;
        --ceph-iscsi)
             assert_min_release ussuri "ceph-iscsi"
-            MOD_OVERLAYS+=( "ceph-iscsi.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph-iscsi.yaml" )
             ;;
         --num-osds-per-host)  #__OPT__type:<int>
             MOD_PARAMS[__NUM_OSDS_PER_HOST__]=$2
