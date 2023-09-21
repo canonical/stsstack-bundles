@@ -36,8 +36,8 @@ is_hyperconverged ()
 
 # Needed in all cases
 MOD_OVERLAYS+=(
-    glance.yaml
-    keystone.yaml
+    openstack/glance.yaml
+    openstack/keystone.yaml
 )
 
 # Default to OVN for > Train
@@ -46,7 +46,7 @@ if has_min_release ussuri && ! has_opt --ml2-ovs; then
 fi
 
 if is_neutron_gateway_required; then
-    MOD_OVERLAYS+=( "neutron-gateway.yaml" )
+    MOD_OVERLAYS+=( "openstack/neutron-gateway.yaml" )
 else
     MOD_PARAMS[__NUM_NEUTRON_GATEWAY_UNITS__]=0
 fi
@@ -57,7 +57,7 @@ if is_hyperconverged; then
 fi
 
 if ! is_ml2_ovn; then
-    MOD_OVERLAYS+=( "neutron-openvswitch.yaml" )
+    MOD_OVERLAYS+=( "openstack/neutron-openvswitch.yaml" )
 fi
 
 # Enable this by default since it is commonly used.
@@ -83,7 +83,7 @@ fi
 
 # rabbitmq-server: Rely on charmhub channels for the source from jammy
 if ! has_min_series jammy; then
-    MOD_OVERLAYS+=( "rabbitmq-source.yaml" )
+    MOD_OVERLAYS+=( "openstack/rabbitmq-source.yaml" )
 fi
 
 get_amphora_ssh_pub_key ()
@@ -108,15 +108,15 @@ do
             ;;
         --barbican)
             assert_min_release rocky "barbican"
-            MOD_OVERLAYS+=( "barbican.yaml" )
+            MOD_OVERLAYS+=( "openstack/barbican.yaml" )
             # always use barbican-vault for now since that is the most common
             # use-case.
-            MOD_OVERLAYS+=( "barbican-vault.yaml" )
+            MOD_OVERLAYS+=( "openstack/barbican-vault.yaml" )
             set -- $@ --vault && cache $@
             ;;
         --barbican-ha*)
             get_units $1 __NUM_BARBICAN_UNITS__ 3
-            MOD_OVERLAYS+=( "barbican-ha.yaml" )
+            MOD_OVERLAYS+=( "openstack/barbican-ha.yaml" )
             set -- $@ --barbican && cache $@
             ;;
         --bgp)
@@ -124,13 +124,13 @@ do
                 conflicts_with $1 --ml2-ovn
             fi
             assert_min_release queens "dynamic routing"
-            MOD_OVERLAYS+=( "neutron-bgp.yaml" )
+            MOD_OVERLAYS+=( "openstack/neutron-bgp.yaml" )
             ;;
         --ceph)
-            MOD_OVERLAYS+=( "ceph.yaml" )
-            MOD_OVERLAYS+=( "openstack-ceph.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph.yaml" )
+            MOD_OVERLAYS+=( "openstack/openstack-ceph.yaml" )
             if ! is_hyperconverged; then
-                MOD_OVERLAYS+=( "ceph-juju-storage.yaml" )
+                MOD_OVERLAYS+=( "ceph/ceph-juju-storage.yaml" )
             fi
             ;;
         --num-ceph-mons)  #__OPT__type:<int>
@@ -145,20 +145,20 @@ do
             if ! has_opt --ceph; then
                 set -- $@ --ceph && cache $@
             fi
-            MOD_OVERLAYS+=( "ceph-rgw.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph-rgw.yaml" )
             ;;
         --ceph-rgw-ha*)
             get_units $1 __NUM_CEPH_RGW_UNITS__ 3
-            MOD_OVERLAYS+=( "ceph-rgw-ha.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph-rgw-ha.yaml" )
             set -- $@ --ceph-rgw && cache $@
             ;;
         --ceph-rgw-multisite)
-            MOD_OVERLAYS+=( "ceph.yaml" )
-            MOD_OVERLAYS+=( "ceph-rgw-multisite.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph-rgw-multisite.yaml" )
             ;;
         --ceph-proxy)
             MOD_PARAMS[__CEPH_INTERFACE__]='ceph-proxy'
-            MOD_OVERLAYS+=( "ceph-proxy.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph-proxy.yaml" )
             MOD_MSGS[ceph-proxy.0]="once ceph is ready, do 'juju config admin-key=<key> fsid=<fsid> monitor-hosts=<mon-addr-list>'"
             MOD_MSGS[ceph-proxy.1]="e.g. juju config ceph-proxy admin-key=AQALEzleKLCNDBAAxrOY8WbxF2B7lDx0TaswGA== fsid=e5e6aee2-4719-11ea-8264-fa163e50d5d1 monitor-hosts='10.5.0.11:6789 10.5.0.12:6789 10.5.0.13:6789'"
             ;;
@@ -167,18 +167,18 @@ do
             if ! has_opt --ceph; then
                 set -- $@ --ceph && cache $@
             fi
-            MOD_OVERLAYS+=( "ceph-ec-pools.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph-ec-pools.yaml" )
             ;;
         --ceph-fs)
             assert_min_release ocata "ceph-mds"
             if ! has_opt --ceph; then
                 set -- $@ --ceph && cache $@
             fi
-            MOD_OVERLAYS+=( "ceph-fs.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph-fs.yaml" )
             ;;
         --ceph-fs-ha*)
             get_units $1 __NUM_CEPH_FS_UNITS__ 3
-            MOD_OVERLAYS+=( "ceph-fs.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph-fs.yaml" )
             set -- $@ --ceph-fs && cache $@
             ;;
         --designate)
@@ -203,7 +203,7 @@ do
                 MOD_MSGS[designate.1]="juju config neutron-api-plugin-ovn dns-servers=<designate-bind unit address>"
             fi
             MOD_OVERLAYS+=( "memcached.yaml" )
-            MOD_OVERLAYS+=( "designate.yaml" )
+            MOD_OVERLAYS+=( "openstack/designate.yaml" )
             ;;
         --dvr)
             if is_ml2_ovn; then
@@ -211,7 +211,7 @@ do
             fi
             # since ports typically set post-deployment ensure we don't clobber on re-run
             opt=`update_from_charm_config $1 neutron-openvswitch data-port`
-            MOD_OVERLAYS+=( "neutron-dvr.yaml" )
+            MOD_OVERLAYS+=( "openstack/neutron-dvr.yaml" )
             ;;
         --dvr-l3ha*)
             if is_ml2_ovn; then
@@ -223,7 +223,7 @@ do
                 get_units $1 __NUM_NEUTRON_GATEWAY_UNITS__ 3
             fi
             has_opt --dvr || { set -- $@ --dvr && cache $@; }
-            MOD_OVERLAYS+=( "neutron-l3ha.yaml" )
+            MOD_OVERLAYS+=( "openstack/neutron-l3ha.yaml" )
             ;;
         --dvr-snat-l3ha*)
             if is_ml2_ovn; then
@@ -232,7 +232,7 @@ do
             assert_min_release queens "dvr-snat-l3ha"
             has_opt --num-compute || get_units $1 __NUM_COMPUTE_UNITS__ 3
             get_units $1 __NUM_AGENTS_PER_ROUTER__ 3
-            MOD_OVERLAYS+=( "neutron-dvr-snat.yaml" )
+            MOD_OVERLAYS+=( "openstack/neutron-dvr-snat.yaml" )
             has_opt --dvr-snat* || \
                 { set -- $@ --dvr-snat:${MOD_PARAMS[__NUM_COMPUTE_UNITS__]} && cache $@; }
             set -- $@ --dvr-l3ha:${MOD_PARAMS[__NUM_AGENTS_PER_ROUTER__]} && cache $@
@@ -244,7 +244,7 @@ do
             assert_min_release queens "dvr-snat"
             has_opt --num-compute || get_units $1 __NUM_COMPUTE_UNITS__ 1
             has_opt --dvr || { set -- $@ --dvr && cache $@; }
-            MOD_OVERLAYS+=( "neutron-dvr-snat.yaml" )
+            MOD_OVERLAYS+=( "openstack/neutron-dvr-snat.yaml" )
             ;;
         --lma)
             # Logging Monitoring and Alarming
@@ -264,38 +264,38 @@ do
             ;;
         --grafana)
             MOD_OVERLAYS+=( "grafana.yaml ")
-            MOD_OVERLAYS+=( "prometheus-openstack.yaml ")
+            MOD_OVERLAYS+=( "openstack/prometheus-openstack.yaml ")
             if is_neutron_gateway_required; then
-                MOD_OVERLAYS+=( "prometheus-openstack-neutron-gateway.yaml ")
+                MOD_OVERLAYS+=( "openstack/prometheus-openstack-neutron-gateway.yaml ")
             fi
             if has_opt --ceph; then
-                MOD_OVERLAYS+=( "prometheus-ceph.yaml ")
+                MOD_OVERLAYS+=( "ceph/prometheus-ceph.yaml ")
             fi
             MOD_MSGS[grafana.0]="need to manually relate telegraf to any services you want to monitor"
             ;;
         --nagios)
             MOD_OVERLAYS+=( "nagios.yaml ")
             if has_opt --ceph; then
-                MOD_OVERLAYS+=( "nagios-ceph.yaml ")
+                MOD_OVERLAYS+=( "ceph/nagios-ceph.yaml ")
             fi
             # If using any variant of dvr-snat, there is no need to relate
             # nagios to neutron-gateway
             if is_neutron_gateway_required; then
-                MOD_OVERLAYS+=( "nagios-neutron-gateway.yaml" )
+                MOD_OVERLAYS+=( "openstack/nagios-neutron-gateway.yaml" )
             fi
             if is_ml2_ovn; then
-                MOD_OVERLAYS+=( "nagios-ovn.yaml" )
+                MOD_OVERLAYS+=( "openstack/nagios-ovn.yaml" )
             fi
             ;;
         --openstack-service-checks)
-            MOD_OVERLAYS+=( "openstack-service-checks.yaml" )
+            MOD_OVERLAYS+=( "openstack/openstack-service-checks.yaml" )
             # openstack-service-checks depends on nagios+nrpe
             if ! has_opt --nagios; then
                 set -- $@ --nagios && cache $@
             fi
             ;;
         --heat)
-            MOD_OVERLAYS+=( "heat.yaml ")
+            MOD_OVERLAYS+=( "openstack/heat.yaml ")
             ;;
         --ldap)
             msg="REQUIRED: address of ldap server (leave blank to set later):"
@@ -319,16 +319,16 @@ do
                 set -- $@ --dvr-snat-l3ha:${MOD_PARAMS[__NUM_AGENTS_PER_ROUTER__]} && cache $@
             else
                 get_units $1 __NUM_NEUTRON_GATEWAY_UNITS__ 3
-                MOD_OVERLAYS+=( "neutron-l3ha.yaml" )
+                MOD_OVERLAYS+=( "openstack/neutron-l3ha.yaml" )
             fi
             ;;
         --keystone-v3)
             # useful for <= pike since queens is v3 only
-            MOD_OVERLAYS+=( "keystone-v3.yaml" )
+            MOD_OVERLAYS+=( "openstack/keystone-v3.yaml" )
             ;;
         --keystone-saml)
             assert_min_release rocky "keystone saml"
-            MOD_OVERLAYS+=( "keystone-saml.yaml" )
+            MOD_OVERLAYS+=( "openstack/keystone-saml.yaml" )
             if ! has_opt --openstack-dashboard*; then
                 set -- $@ --openstack-dashboard && cache $@
             fi
@@ -336,18 +336,18 @@ do
             ;;
         --manila)
             assert_min_release rocky "manila"
-            MOD_OVERLAYS+=( "manila.yaml" )
-            MOD_OVERLAYS+=( "ceph-fs.yaml" )
+            MOD_OVERLAYS+=( "openstack/manila.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph-fs.yaml" )
             set -- $@ --ceph && cache $@
             # need to list both here in case --ovn comes after --manila on cli
             # since --ovn adds --vault as a dep.
             if has_opt --vault || is_ml2_ovn; then
-                MOD_OVERLAYS+=( "vault-manila.yaml" )
+                MOD_OVERLAYS+=( "openstack/vault-manila.yaml" )
             fi
             ;;
         --manila-ganesha-ha*)
             get_units $1 __NUM_MANILA_GANESHA_UNITS__ 3
-            MOD_OVERLAYS+=( "manila-ganesha-ha.yaml" )
+            MOD_OVERLAYS+=( "openstack/manila-ganesha-ha.yaml" )
             set -- $@ --manila && cache $@
             ;;
         --mysql-ha*)
@@ -359,20 +359,20 @@ do
             assert_min_release ussuri masakari
             # need at least 2 units of compute
             has_opt --num-compute || MOD_PARAMS[__NUM_COMPUTE_UNITS__]=2
-            MOD_OVERLAYS+=( "masakari.yaml" )
+            MOD_OVERLAYS+=( "openstack/masakari.yaml" )
             # the charm deployment guide suggests 3 units to we do the same by default here
             get_units $1 __NUM_MASAKARI_UNITS__ 3
             msg="REQUIRED: maas_url for masakari-hacluster:"
             get_param $1 __MAAS_URL__ "$msg"
             msg="REQUIRED: maas api key for masakari-hacluster:"
             get_param $1 __MAAS_API_KEY__ "$msg"
-            MOD_OVERLAYS+=( "masakari-ha.yaml" )
+            MOD_OVERLAYS+=( "openstack/masakari-ha.yaml" )
             if has_opt --vault || is_ml2_ovn; then
-                MOD_OVERLAYS+=( "vault-openstack-certificates-masakari.yaml" )
+                MOD_OVERLAYS+=( "openstack/vault-openstack-certificates-masakari.yaml" )
             fi
             ;;
         --mysql-innodb-cluster-ssl)
-            MOD_OVERLAYS+=( "vault-certificates-mysql-innodb-cluster.yaml" )
+            MOD_OVERLAYS+=( "openstack/vault-certificates-mysql-innodb-cluster.yaml" )
             ;;
         --mysql-innodb-cluster*)
             conflicts_with $1 --mysql-ha*
@@ -394,21 +394,21 @@ do
                 msg="REQUIRED: ml2-dns upstream dns server to forward requests to:"
                 get_param $1 __ML2_DNS_FORWARDER__ "$msg"
             fi
-            MOD_OVERLAYS+=( "neutron-ml2dns.yaml" )
+            MOD_OVERLAYS+=( "openstack/neutron-ml2dns.yaml" )
             if ! is_ml2_ovn; then
                 if is_neutron_gateway_required; then
-                    MOD_OVERLAYS+=( "neutron-ml2dns-gateway.yaml" )
+                    MOD_OVERLAYS+=( "openstack/neutron-ml2dns-gateway.yaml" )
                 fi
-                MOD_OVERLAYS+=( "neutron-ml2dns-openvswitch.yaml" )
+                MOD_OVERLAYS+=( "openstack/neutron-ml2dns-openvswitch.yaml" )
             fi
             ;;
         --nova-cells)
             assert_min_release rocky "nova cells"
-            MOD_OVERLAYS+=( "nova-cells.yaml" )
+            MOD_OVERLAYS+=( "openstack/nova-cells.yaml" )
             ;;
         --nova-console*)
             MOD_OVERLAYS+=( "memcached.yaml" )
-            MOD_OVERLAYS+=( "nova-console.yaml" )
+            MOD_OVERLAYS+=( "openstack/nova-console.yaml" )
             get_param $1 __CONSOLE_TYPE__ "REQUIRES: nova console access protocol:"
             ;;
         --nfs-server)
@@ -417,14 +417,14 @@ do
         --octavia)
             if is_ml2_ovn; then
                 assert_min_release train "octavia+ovn"
-                MOD_OVERLAYS+=( "octavia-ovn.yaml" )
+                MOD_OVERLAYS+=( "openstack/octavia-ovn.yaml" )
             else
                 assert_min_release rocky "octavia"
-                MOD_OVERLAYS+=( "octavia-ovs.yaml" )
+                MOD_OVERLAYS+=( "openstack/octavia-ovs.yaml" )
             fi
-            MOD_OVERLAYS+=( "octavia.yaml" )
+            MOD_OVERLAYS+=( "openstack/octavia.yaml" )
             if has_opt --openstack-dashboard*; then
-                MOD_OVERLAYS+=( "octavia-dashboard.yaml" )
+                MOD_OVERLAYS+=( "openstack/octavia-dashboard.yaml" )
             fi
             # no amphora if using ovn provider
             if ! has_opt --octavia-ovn-provider; then
@@ -435,10 +435,10 @@ do
                 MOD_PARAMS[__NOVA_COMPUTE_UNIT_CONSTRAINTS__]="mem=8G"
                 if ! has_opt --no-octavia-diskimage-retrofit; then
                     # By default we let retrofit use images uploaded by the post-deploy configure script.
-                    MOD_OVERLAYS+=( "octavia-diskimage-retrofit.yaml" )
+                    MOD_OVERLAYS+=( "openstack/octavia-diskimage-retrofit.yaml" )
                     MOD_PARAMS[__OCTAVIA_RETROFIT_UCA__]=`get_ost_release`
                     if ! has_opt --octavia-diskimage-retrofit-glance-simplestreams; then
-                       MOD_OVERLAYS+=( "octavia-diskimage-retrofit-glance.yaml" )
+                       MOD_OVERLAYS+=( "openstack/octavia-diskimage-retrofit-glance.yaml" )
                     fi
                 fi
                 MOD_MSGS[octavia.0]="you need to to create an amphora image before you can use Octavia"
@@ -458,7 +458,7 @@ do
             MOD_MSGS[octavia.11]="openstack loadbalancer create --name lb2 --vip-network-id lb-mgmt"
             ;;
         --octavia-ovn-provider)
-            MOD_OVERLAYS+=( "octavia-ovn-provider.yaml" )
+            MOD_OVERLAYS+=( "openstack/octavia-ovn-provider.yaml" )
             assert_min_release victoria octavia-ovn-provider
             # ensure octavia and ovn
             set -- $@ --octavia && cache $@
@@ -466,17 +466,17 @@ do
             ;;
         --octavia-ha*)
             get_units $1 __NUM_OCTAVIA_UNITS__ 3
-            MOD_OVERLAYS+=( "octavia-ha.yaml" )
+            MOD_OVERLAYS+=( "openstack/octavia-ha.yaml" )
             set -- $@ --octavia && cache $@
             ;;
         --octavia-ipv4)
-            MOD_OVERLAYS+=( "octavia-ipv4.yaml" )
+            MOD_OVERLAYS+=( "openstack/octavia-ipv4.yaml" )
             set -- $@ --octavia && cache $@
             ;;
         --octavia-diskimage-retrofit-glance-simplestreams)
             conflicts_with $1 --no-octavia-diskimage-retrofit
             set -- $@ --glance-simplestreams && cache $@
-            MOD_OVERLAYS+=( "octavia-diskimage-retrofit-glance-simplestreams.yaml" )
+            MOD_OVERLAYS+=( "openstack/octavia-diskimage-retrofit-glance-simplestreams.yaml" )
             ;;
         --overlay-network-type) #__OPT__type:[gre|vxlan|geneve]
             MOD_PARAMS[__OVERLAY_NETWORK_TYPE__]="$2"
@@ -490,7 +490,7 @@ do
             set -- $@ --glance-simplestreams --ceph-rgw && cache $@
             ;;
         --glance-simplestreams)
-            MOD_OVERLAYS+=( "glance-simplestreams-sync.yaml" )
+            MOD_OVERLAYS+=( "openstack/glance-simplestreams-sync.yaml" )
             ;;
         --rabbitmq-server-ha*)
             get_units $1 __NUM_RABBIT_UNITS__ 3
@@ -514,13 +514,13 @@ do
                 conflicts_with $1 --ml2-ovn
             fi
             assert_min_release queens "neutron-sg-logging"
-            MOD_OVERLAYS+=( "neutron-sg-logging.yaml" )
+            MOD_OVERLAYS+=( "openstack/neutron-sg-logging.yaml" )
             ;;
         --ovn|--ml2-ovn)
             assert_min_release train "ovn"
             # since ports typically set post-deployment ensure we don't clobber on re-run
             opt=`update_from_charm_config $1 ovn-chassis bridge-interface-mappings`
-            MOD_OVERLAYS+=( "neutron-ovn.yaml" )
+            MOD_OVERLAYS+=( "openstack/neutron-ovn.yaml" )
             # needs to be left blank since it is configured by the neutron-api-plugin-ovn charm
             MOD_PARAMS[__OVERLAY_NETWORK_TYPE__]=""
             if ! has_opt --vault*; then
@@ -531,42 +531,42 @@ do
             ;;
         --placement)
             assert_min_release rocky "placement"
-            MOD_OVERLAYS+=( "placement.yaml" )
+            MOD_OVERLAYS+=( "openstack/placement.yaml" )
             ;;
         --cinder-ha*)
             get_units $1 __NUM_CINDER_UNITS__ 3
-            MOD_OVERLAYS+=( "cinder-ha.yaml" )
+            MOD_OVERLAYS+=( "openstack/cinder-ha.yaml" )
             ;;
         --designate-ha*)
             get_units $1 __NUM_DESIGNATE_UNITS__ 3
-            MOD_OVERLAYS+=( "designate-ha.yaml" )
+            MOD_OVERLAYS+=( "openstack/designate-ha.yaml" )
             set -- $@ --designate && cache $@
             ;;
         --glance-ha*)
             get_units $1 __NUM_GLANCE_UNITS__ 3
-            MOD_OVERLAYS+=( "glance-ha.yaml" )
+            MOD_OVERLAYS+=( "openstack/glance-ha.yaml" )
             ;;
         --heat-ha*)
             get_units $1 __NUM_HEAT_UNITS__ 3
-            MOD_OVERLAYS+=( "heat.yaml ")
-            MOD_OVERLAYS+=( "heat-ha.yaml ")
+            MOD_OVERLAYS+=( "openstack/heat.yaml ")
+            MOD_OVERLAYS+=( "openstack/heat-ha.yaml ")
             set -- $@ --heat && cache $@
             ;;
         --keystone-ha*)
             get_units $1 __NUM_KEYSTONE_UNITS__ 3
-            MOD_OVERLAYS+=( "keystone-ha.yaml" )
+            MOD_OVERLAYS+=( "openstack/keystone-ha.yaml" )
             ;;
         --neutron-api-ha*)
             get_units $1 __NUM_NEUTRON_API_UNITS__ 3
-            MOD_OVERLAYS+=( "neutron-api-ha.yaml" )
+            MOD_OVERLAYS+=( "openstack/neutron-api-ha.yaml" )
             ;;
         --nova-cloud-controller-ha*)
             get_units $1 __NUM_NOVACC_UNITS__ 3
-            MOD_OVERLAYS+=( "nova-cloud-controller-ha.yaml" )
+            MOD_OVERLAYS+=( "openstack/nova-cloud-controller-ha.yaml" )
             MOD_OVERLAYS+=( "memcached.yaml" )
             ;;
         --openstack-dashboard)
-            MOD_OVERLAYS+=( "openstack-dashboard.yaml" )
+            MOD_OVERLAYS+=( "openstack/openstack-dashboard.yaml" )
             # Ensure that we re-run --ha if it has already run so that it
             # picks up the fact that dashboard has been added (possibly by
             # another hook as a dependency).
@@ -577,55 +577,55 @@ do
             ;;
         --openstack-dashboard-ha*)
             get_units $1 __NUM_HORIZON_UNITS__ 3
-            MOD_OVERLAYS+=( "openstack-dashboard-ha.yaml" )
+            MOD_OVERLAYS+=( "openstack/openstack-dashboard-ha.yaml" )
             set -- $@ --openstack-dashboard && cache $@
             ;;
         --placement-ha*)
             get_units $1 __NUM_NOVA_PLACEMENT_UNITS__ 3
-            MOD_OVERLAYS+=( "placement-ha.yaml" )
+            MOD_OVERLAYS+=( "openstack/placement-ha.yaml" )
             ;;
         --swift)
             conflicts_with $1 --ceph-rgw
-            MOD_OVERLAYS+=( "swift.yaml" )
+            MOD_OVERLAYS+=( "openstack/swift.yaml" )
             ;;
         --swift-ha*)
             get_units $1 __NUM_SWIFT_PROXY_UNITS__ 3
-            MOD_OVERLAYS+=( "swift-ha.yaml" )
+            MOD_OVERLAYS+=( "openstack/swift-ha.yaml" )
             set -- $@ --swift && cache $@
             ;;
         --telemetry|--telemetry-gnocchi)
             # ceilometer + aodh + gnocchi (>= pike)
             assert_min_release pike "gnocchi"
-            MOD_OVERLAYS+=( "ceph.yaml" )
-            MOD_OVERLAYS+=( "gnocchi.yaml" )
-            MOD_OVERLAYS+=( "memcached.yaml" )
-            MOD_OVERLAYS+=( "telemetry.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph.yaml" )
+            MOD_OVERLAYS+=( "openstack/gnocchi.yaml" )
+            MOD_OVERLAYS+=( "openstack/memcached.yaml" )
+            MOD_OVERLAYS+=( "openstack/telemetry.yaml" )
 
             if has_opt --vault; then
-                MOD_OVERLAYS+=( "vault-openstack-certificates-gnocchi.yaml" )
-                MOD_OVERLAYS+=( "vault-openstack-certificates-ceilometer.yaml" )
-                MOD_OVERLAYS+=( "vault-openstack-certificates-aodh.yaml" )
+                MOD_OVERLAYS+=( "openstack/vault-openstack-certificates-gnocchi.yaml" )
+                MOD_OVERLAYS+=( "openstack/vault-openstack-certificates-ceilometer.yaml" )
+                MOD_OVERLAYS+=( "openstack/vault-openstack-certificates-aodh.yaml" )
             fi
             ;;
         --telemetry-legacy-aodh)
             # ceilometer + aodh + mongodb (<= pike)
             assert_max_release pike "legacy-aodh"
-            MOD_OVERLAYS+=( "telemetry-legacy-aodh.yaml" )
+            MOD_OVERLAYS+=( "openstack/telemetry-legacy-aodh.yaml" )
             if has_opt --vault; then
-                MOD_OVERLAYS+=( "vault-openstack-certificates-ceilometer.yaml" )
-                MOD_OVERLAYS+=( "vault-openstack-certificates-aodh.yaml" )
+                MOD_OVERLAYS+=( "openstack/vault-openstack-certificates-ceilometer.yaml" )
+                MOD_OVERLAYS+=( "openstack/vault-openstack-certificates-aodh.yaml" )
             fi
             ;;
         --telemetry-legacy)
             # ceilometer + mongodb (<= pike)
-            MOD_OVERLAYS+=( "telemetry-legacy.yaml" )
+            MOD_OVERLAYS+=( "openstack/telemetry-legacy.yaml" )
             if has_opt --vault; then
-                MOD_OVERLAYS+=( "vault-openstack-certificates-ceilometer.yaml" )
+                MOD_OVERLAYS+=( "openstack/vault-openstack-certificates-ceilometer.yaml" )
             fi
             ;;
         --telemetry-ha*)
             get_units $1 __NUM_TELEMETRY_UNITS__ 3
-            MOD_OVERLAYS+=( "telemetry-ha.yaml" )
+            MOD_OVERLAYS+=( "openstack/telemetry-ha.yaml" )
             set -- $@ --telemetry && cache $@
             ;;
         --vault)
@@ -633,15 +633,15 @@ do
             assert_min_release queens "vault"
             MOD_OVERLAYS+=( "vault.yaml" )
             if ! is_hyperconverged; then
-                MOD_OVERLAYS+=( "vault-openstack-secrets.yaml" )
+                MOD_OVERLAYS+=( "openstack/vault-openstack-secrets.yaml" )
             fi
             if ! has_opt --ssl; then
-                MOD_OVERLAYS+=( "vault-openstack-certificates.yaml" )
+                MOD_OVERLAYS+=( "openstack/vault-openstack-certificates.yaml" )
                 for opt in --heat --octavia --barbican --designate --placement --openstack-dashboard --ironic; do
-                    has_opt $opt* && MOD_OVERLAYS+=( "vault-openstack-certificates-${opt##--}.yaml" )
+                    has_opt $opt* && MOD_OVERLAYS+=( "openstack/vault-openstack-certificates-${opt##--}.yaml" )
                 done
             fi
-            has_opt --ceph && MOD_OVERLAYS+=( "vault-ceph.yaml" )
+            has_opt --ceph && MOD_OVERLAYS+=( "ceph/vault-ceph.yaml" )
             MOD_MSGS[vault.0]="run ./tools/vault-unseal-and-authorise.sh"
             ;;
         --etcd-channel)  #__OPT__type:<str>
@@ -649,9 +649,9 @@ do
             shift
             ;;
         --ironic)
-            MOD_OVERLAYS+=( "ironic.yaml" )
-            MOD_OVERLAYS+=( "neutron-gateway.yaml" )
-            MOD_OVERLAYS=( ${MOD_OVERLAYS[@]/"neutron-openvswitch.yaml"} )
+            MOD_OVERLAYS+=( "openstack/ironic.yaml" )
+            MOD_OVERLAYS+=( "openstack/neutron-gateway.yaml" )
+            MOD_OVERLAYS=( ${MOD_OVERLAYS[@]/"openstack/neutron-openvswitch.yaml"} )
             set -- $@ --no-ml2dns --ceph --ceph-rgw && cache $@
             MOD_MSGS[ironic-conductor.0]="juju run-action ironic-conductor/leader set-temp-url-secret"
             ;;
@@ -686,15 +686,15 @@ do
             ;;
         --cinder-lvm)
             assert_min_release queens 'cinder-lvm'
-            MOD_OVERLAYS+=( "cinder-lvm.yaml" )
+            MOD_OVERLAYS+=( "openstack/cinder-lvm.yaml" )
             if has_min_release wallaby; then
-              MOD_OVERLAYS+=( "cinder-lvm-wallaby.yaml" )
+              MOD_OVERLAYS+=( "openstack/cinder-lvm-wallaby.yaml" )
             fi
 
             ;;
         --cinder-volume)
             assert_min_release ussuri 'cinder-volume'
-            MOD_OVERLAYS+=( "cinder-volume.yaml" )
+            MOD_OVERLAYS+=( "openstack/cinder-volume.yaml" )
             MOD_PARAMS[__CINDER_VOLUME_INTERFACE__]='cinder-volume'
             ;;
         --purestorage-api-token)  #__OPT__type:<str>
@@ -708,7 +708,7 @@ do
         --cinder-purestorage)
             assert_min_release ussuri 'cinder-purestorage'
 
-            MOD_OVERLAYS+=( "cinder-purestorage.yaml" )
+            MOD_OVERLAYS+=( "openstack/cinder-purestorage.yaml" )
 
             MOD_MSGS[cinder-purestorage.0]="For access to the serverstack purestorage SAN please contact the OpenStack team for the API Token / IP and specify them using --purestorage-api-token and --purestorage-san-ip"
             MOD_MSGS[cinder-purestorage.1]="Volumes created on the PureStorage SAN are not easily identifiable - you cannot see which user created them and they all have the name volume-%s. Please ensure you delete all volumes before destroying this environment to prevent orphaned volumes accumulating."

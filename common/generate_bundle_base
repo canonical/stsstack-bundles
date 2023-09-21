@@ -63,7 +63,7 @@ finish ()
 has_opt --replay && finish
 
 # Purge any existing overlays and parts
-rm -f $bundles_dir/o/*
+rm -rf $bundles_dir/o/*
 rm -rf $bundles_dir/parts
 
 # load renderers
@@ -113,7 +113,13 @@ if ((${#MOD_OVERLAYS[@]})); then
     declare -a msgs=()
     for overlay in ${MOD_OVERLAYS[@]}; do
         [ "${overlays_deduped[$overlay]:-null}" = "null" ] || continue
-        cp $MOD_DIR/overlays/$overlay $bundles_dir/o
+        subdir=`dirname $overlay`
+        if [[ $subdir != . ]]; then
+            mkdir -p "$bundles_dir/o/$subdir"
+        else
+            unset subdir
+        fi
+        cp $MOD_DIR/overlays/$overlay $bundles_dir/o/${subdir:-""}
         ((${#overlay_opts[@]}==0)) && overlay_opts+=("")  # left padding
         overlay_opts+=( --overlay $bundles_dir/o/$overlay )
         overlay_list+=( "$bundles_dir/o/$overlay" )

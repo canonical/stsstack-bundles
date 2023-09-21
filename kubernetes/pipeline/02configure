@@ -17,7 +17,7 @@ MOD_OVERLAYS+=(
     "etcd.yaml"
     "etcd-easyrsa.yaml"
     "easyrsa.yaml"
-    "k8s-etcd.yaml"
+    "kubernetes/k8s-etcd.yaml"
 )
 
 add_mysql_overlay ()
@@ -43,23 +43,23 @@ using_kubeapi_lb ()
 }
 
 if using_kubeapi_lb; then
-    MOD_OVERLAYS+=( "k8s-lb.yaml"  )
+    MOD_OVERLAYS+=( "kubernetes/k8s-lb.yaml"  )
 fi
 # default to flannel cni
 if ! has_opt --calico && ! has_opt --canal; then
-    MOD_OVERLAYS+=( "k8s-cni-flannel.yaml" )
+    MOD_OVERLAYS+=( "kubernetes/k8s-cni-flannel.yaml" )
 fi
 if ! has_opt --vault*; then
-    MOD_OVERLAYS+=( "k8s-easyrsa.yaml" )
+    MOD_OVERLAYS+=( "kubernetes/k8s-easyrsa.yaml" )
     if using_kubeapi_lb; then
-        MOD_OVERLAYS+=( "k8s-lb-easyrsa.yaml" )
+        MOD_OVERLAYS+=( "kubernetes/k8s-lb-easyrsa.yaml" )
     fi
 fi
 
 # See https://bugs.launchpad.net/juju/+bug/1849636 for reason why we
 # need min 2.7
 if ! has_opt --no-trust && [[ ! "$JUJU_VERSION" < "2.7" ]]; then
-    MOD_OVERLAYS+=( "k8s-openstack-integrator-trust.yaml" )
+    MOD_OVERLAYS+=( "kubernetes/k8s-openstack-integrator-trust.yaml" )
     JUJU_DEPLOY_OPTS=" --trust"
 fi
 
@@ -75,12 +75,12 @@ do
             ;;
         --ceph)
             conflicts_with $1 --rook-ceph
-            MOD_OVERLAYS+=( "ceph.yaml" )
-            MOD_OVERLAYS+=( "k8s-ceph.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph.yaml" )
+            MOD_OVERLAYS+=( "kubernetes/k8s-ceph.yaml" )
             ;;
         --ceph-proxy)
             MOD_PARAMS[__CEPH_INTERFACE__]='ceph-proxy'
-            MOD_OVERLAYS+=( "ceph-proxy.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph-proxy.yaml" )
             MOD_MSGS[ceph-proxy.0]="once ceph is ready, do 'juju config admin-key=<key> fsid=<fsid> monitor-hosts=<mon-addr-list>'"
             MOD_MSGS[ceph-proxy.1]="e.g. juju config ceph-proxy admin-key=AQALEzleKLCNDBAAxrOY8WbxF2B7lDx0TaswGA== fsid=e5e6aee2-4719-11ea-8264-fa163e50d5d1 monitor-hosts='10.5.0.11:6789 10.5.0.12:6789 10.5.0.13:6789'"
             ;;
@@ -88,12 +88,12 @@ do
             if ! has_opt --ceph; then
                 set -- $@ --ceph && cache $@
             fi
-            MOD_OVERLAYS+=( "ceph-fs.yaml" )
-            MOD_OVERLAYS+=( "ceph-fs-k8s.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph-fs.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph-fs-k8s.yaml" )
             ;;
         --ceph-fs-ha*)
             get_units $1 __NUM_CEPH_FS_UNITS__ 3
-            MOD_OVERLAYS+=( "ceph-fs.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph-fs.yaml" )
             set -- $@ --ceph-fs && cache $@
             ;;
         --etcd-ha*)
@@ -101,46 +101,46 @@ do
             ;;
         --containerd)
             conflicts_with $1 --docker
-            MOD_OVERLAYS+=( "k8s-containerd.yaml" )
+            MOD_OVERLAYS+=( "kubernetes/k8s-containerd.yaml" )
             ;;
         --calico)
             conflicts_with $1 --canal
-            MOD_OVERLAYS+=( "k8s-cni-calico.yaml" )
+            MOD_OVERLAYS+=( "kubernetes/k8s-cni-calico.yaml" )
             ;;
         --canal)
             conflicts_with $1 --calico
-            MOD_OVERLAYS+=( "k8s-cni-canal.yaml" )
+            MOD_OVERLAYS+=( "kubernetes/k8s-cni-canal.yaml" )
             ;;
         --docker)
             conflicts_with $1 --containerd
-            MOD_OVERLAYS+=( "k8s-docker.yaml" )
+            MOD_OVERLAYS+=( "kubernetes/k8s-docker.yaml" )
             MOD_PARAMS[__CONTAINER_RUNTIME__]='docker'
             ;;
         --docker-registry)
-            MOD_OVERLAYS+=( "k8s-docker-registry.yaml" )
+            MOD_OVERLAYS+=( "kubernetes/k8s-docker-registry.yaml" )
             if has_opt --vault*; then
-                MOD_OVERLAYS+=( "k8s-vault-docker-registry.yaml" )
+                MOD_OVERLAYS+=( "kubernetes/k8s-vault-docker-registry.yaml" )
             else
-                MOD_OVERLAYS+=( "k8s-easyrsa-docker-registry.yaml" )
+                MOD_OVERLAYS+=( "kubernetes/k8s-easyrsa-docker-registry.yaml" )
             fi
             MOD_MSGS[docker-registry.0]="execute tools/configure_docker_registry.sh to upload the images and set image registry of the cluster to point to docker registry"
             ;;
         --e2e)
-            MOD_OVERLAYS+=( "k8s-e2e.yaml" )
+            MOD_OVERLAYS+=( "kubernetes/k8s-e2e.yaml" )
             if ! has_opt --vault*; then
-                MOD_OVERLAYS+=( "k8s-e2e-easyrsa.yaml" )
+                MOD_OVERLAYS+=( "kubernetes/k8s-e2e-easyrsa.yaml" )
             else
-                MOD_OVERLAYS+=( "k8s-e2e-vault.yaml" )
+                MOD_OVERLAYS+=( "kubernetes/k8s-e2e-vault.yaml" )
             fi
             ;;
         --keystone)
-            MOD_OVERLAYS+=( "keystone.yaml" )
-            MOD_OVERLAYS+=( "k8s-keystone.yaml" )
+            MOD_OVERLAYS+=( "openstack/keystone.yaml" )
+            MOD_OVERLAYS+=( "kubernetes/k8s-keystone.yaml" )
             add_mysql_overlay
             ;;
         --keystone-ha*)
             get_units $1 __NUM_KEYSTONE_UNITS__ 3
-            MOD_OVERLAYS+=( "keystone-ha.yaml" )
+            MOD_OVERLAYS+=( "openstack/keystone-ha.yaml" )
             set -- $@ --keystone && cache $@
             ;;
         --lb-ha-hacluster*|--lb-ha-keepalived*)
@@ -151,16 +151,16 @@ do
             fi
             get_units $1 __NUM_K8S_LB_UNITS__ 3
             if has_opt --lb-ha-keepalived*; then
-                MOD_OVERLAYS+=( "k8s-lb-ha-keepalived.yaml" )
+                MOD_OVERLAYS+=( "kubernetes/k8s-lb-ha-keepalived.yaml" )
             else
-                MOD_OVERLAYS+=( "k8s-lb-ha-hacluster.yaml" )
+                MOD_OVERLAYS+=( "kubernetes/k8s-lb-ha-hacluster.yaml" )
             fi
             ;;
         --lb-octavia)
             conflicts_with $1 '--lb-ha-hacluster*'
             conflicts_with $1 '--lb-ha-keepalived*'
             conflicts_with $1 '--control-plane-ha*'
-            MOD_OVERLAYS+=( "k8s-octavia-lb.yaml" )
+            MOD_OVERLAYS+=( "kubernetes/k8s-octavia-lb.yaml" )
             ;;
         --control-plane-ha*)
             if has_opt --lb-ha*; then
@@ -168,15 +168,15 @@ do
                 exit 1
             fi
             get_units $1 __NUM_K8S_MASTER_UNITS__ 3
-            MOD_OVERLAYS+=( "k8s-control-plane-ha.yaml" )
+            MOD_OVERLAYS+=( "kubernetes/k8s-control-plane-ha.yaml" )
             check_hacluster_channel
             ;;
         --vault)
             MOD_OVERLAYS+=( "vault.yaml" )
             add_mysql_overlay
-            MOD_OVERLAYS+=( "k8s-vault.yaml" )
-            using_kubeapi_lb && MOD_OVERLAYS+=( "k8s-vault-lb.yaml" )
-            has_opt --ceph && MOD_OVERLAYS+=( "vault-ceph.yaml" )
+            MOD_OVERLAYS+=( "kubernetes/k8s-vault.yaml" )
+            using_kubeapi_lb && MOD_OVERLAYS+=( "kubernetes/k8s-vault-lb.yaml" )
+            has_opt --ceph && MOD_OVERLAYS+=( "ceph/vault-ceph.yaml" )
             ;;
         --etcd-channel)  #__OPT__type:<str>
             MOD_PARAMS[__ETCD_SNAP_CHANNEL__]=$2
@@ -202,9 +202,9 @@ do
             ;;
         --lma)
             MOD_OVERLAYS+=( "grafana.yaml ")
-            MOD_OVERLAYS+=( "prometheus-k8s.yaml ")
+            MOD_OVERLAYS+=( "kubernetes/prometheus-k8s.yaml ")
             if has_opt --ceph; then
-                MOD_OVERLAYS+=( "prometheus-ceph.yaml ")
+                MOD_OVERLAYS+=( "ceph/prometheus-ceph.yaml ")
             fi
             MOD_MSGS[grafana.0]="need to manually relate telegraf to any services you want to monitor"
             ;;
@@ -214,7 +214,7 @@ do
             MOD_PARAMS[__SSL_CA__]=`base64 ${ssl_results}/cacert.pem| tr -d '\n'`
             MOD_PARAMS[__SSL_CERT__]=`base64 ${ssl_results}/servercert.pem| tr -d '\n'`
             MOD_PARAMS[__SSL_KEY__]=`base64 ${ssl_results}/serverkey.pem| tr -d '\n'`
-            MOD_OVERLAYS+=( "k8s-control-plane-keystone-ssl.yaml" )
+            MOD_OVERLAYS+=( "kubernetes/k8s-control-plane-keystone-ssl.yaml" )
             # Make everything HA with 1 unit (unless --ha has already been set)
             if ! has_opt '--keystone-ha[:0-9]*$'; then
                 set -- $@ --keystone-ha:1 && cache $@
