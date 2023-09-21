@@ -1,0 +1,138 @@
+# This is a Juju bundle template and is part of
+# https://github.com/canonical/stsstack-bundles
+# The template is used in conjunction with the provided generate-bundle.sh tool
+# to generate a Juju bundle along with optional overlays. If you need to make
+# modifications it is suggested to make them to the template then re-generate
+# your bundle.
+
+# Variables
+ssl_ca:                     &ssl_ca                    __SSL_CA__
+ssl_cert:                   &ssl_cert                  __SSL_CERT__
+ssl_key:                    &ssl_key                   __SSL_KEY__
+candid-location:            &candid-location           "https://candid.se"
+jimm-dns-name:              &jimm-dns-name             "jimm.se"
+jaas-controller-admin:      &jaas-controller-admin     "ubuntu"
+jimm-uuid:                  &jimm-uuid                 "e36c3d32-654d-446d-989a-97399a5a2c63"
+
+series: __SERIES__
+applications:
+  postgresql:
+    charm: postgresql
+    channel: 14/stable
+    num_units: 1
+  tls-certificates-operator:
+    charm: tls-certificates-operator
+    num_units: 1
+    options:
+      generate-self-signed-certificates: true
+      ca-common-name: "Internal JAAS CA"
+  candid:
+    series: focal
+    charm: candid
+    channel: latest/candidate
+    num_units: 1
+    options:
+      location: *candid-location
+      rendezvous-timeout: 10m
+      admin-agent-public-key: __CANDID_ADMIN_AGENT_KEY__
+      private-key: __CANDID_PRIV_KEY__
+      public-key: __CANDID_PUB_KEY__
+      identity-providers: |
+        - type: static
+          name: static
+          domain: se
+          description: Static Identity Provider
+          users:
+            user1:
+              name: User One
+              email: user1@se
+              password: password1
+              groups: [group1, group2]
+            user2:
+              name: User Two
+              email: user2@se
+              password: password2
+              groups: [group1, group2]
+            central-admin:
+              name: central admin
+              email: central-admin@se
+              password: central-admin
+              groups: [group1, group5]
+          hidden: false
+  candid-haproxy:
+    series: jammy
+    charm: haproxy
+    num_units: 1
+    options:
+      default_mode: tcp
+      enable_monitoring: True
+      peering_mode: active-active
+      ssl_cert: *ssl_cert
+      ssl_key: *ssl_key
+      services: |
+        - service_name: app-candid
+          service_host: "0.0.0.0"
+          service_port: 443
+          service_options:
+            - mode http
+            - balance source # JIRA: #CSS-4991
+            - cookie SRVNAME insert
+            - timeout server 12m
+            - option httpchk GET /debug/info HTTP/1.0
+            - acl metrics path -i /metrics
+            - http-request deny if metrics
+          crts: [DEFAULT]
+          server_options: check inter 2000 rise 2 fall 5 maxconn 4096
+        - service_name: api_http
+          service_host: "0.0.0.0"
+          service_port: 80
+          service_options:
+            - mode http
+            - http-request redirect scheme https
+  jimm-haproxy:
+    series: jammy
+    charm: haproxy
+    num_units: 1
+    options:
+      default_mode: tcp
+      enable_monitoring: True
+      peering_mode: active-active
+      ssl_cert: *ssl_cert
+      ssl_key: *ssl_key
+      services: |
+        - service_name: app-jimm
+          service_host: "0.0.0.0"
+          service_port: 443
+          service_options:
+            - mode http
+            - balance leastconn
+            - cookie SRVNAME insert
+            - option httpchk GET /debug/info HTTP/1.0
+            - acl metrics path -i /metrics
+            - http-request deny if metrics
+          server_options: check inter 2000 rise 2 fall 5 maxconn 4096
+          crts: [DEFAULT]
+        - service_name: api_http
+          service_host: "0.0.0.0"
+          service_port: 80
+          service_options:
+            - mode http
+            - http-request redirect scheme https
+  jimm:
+    series: focal
+    charm: juju-jimm
+    channel: 1/candidate
+    num_units: 1
+    options:
+      candid-url: *candid-location
+      controller-admins: *jaas-controller-admin
+      uuid: *jimm-uuid
+      dns-name: *jimm-dns-name
+ 
+relations:
+- ["tls-certificates-operator", "postgresql"]
+- ["candid", "postgresql:db"]
+- ["candid-haproxy:reverseproxy", "candid:website"]
+- ["jimm-haproxy:reverseproxy", "jimm:website"]
+- ["jimm", "postgresql"]
+
