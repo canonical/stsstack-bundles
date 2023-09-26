@@ -1,5 +1,7 @@
 #!/bin/bash -eu
 
+. $(dirname $0)/../common/juju_helpers
+
 validate_or_remove_ca() {
     if [ -f $1 ]; then
         if grep -Fxq -- "-----BEGIN CERTIFICATE-----" $1; then
@@ -17,7 +19,7 @@ if ((`juju status --format=json| jq -r '.applications[]| select(."charm-name"=="
 
     if ! validate_or_remove_ca ${model_ca_cert_path}; then
       echo "Fetching CA cert from vault" 1>&2
-      juju run-action --format=json vault/leader get-root-ca --wait | jq -r .[].results.output > $model_ca_cert_path
+      juju $JUJU_RUN_CMD --format=json vault/leader get-root-ca| jq -r .[].results.output > $model_ca_cert_path
       if ! validate_or_remove_ca $model_ca_cert_path; then
         echo "Didn't get a certificate from vault, check it's status and if necessary use ./tools/vault-unseal-and-authorise.sh" 1>&2
         exit 1

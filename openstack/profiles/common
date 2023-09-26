@@ -1,5 +1,7 @@
 #!/bin/bash
 
+. $(dirname $0)/../common/juju_helpers
+
 function upload_image {
     src=$1
     image_name=$2
@@ -155,5 +157,5 @@ function is_ksv3 () {
 }
 
 function heat_setup() {
-    juju run-action --wait heat/leader domain-setup
+    juju $JUJU_RUN_CMD heat/leader domain-setup
 }

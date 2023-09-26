@@ -1,5 +1,7 @@
 #!/bin/bash -ux
 
+. $(dirname $0)/../common/juju_helpers
+
 # Get the private docker-registry ip and port
 ip=`juju run --unit docker-registry/0 'network-get website --ingress-address'`
 port=`juju config docker-registry registry-port`
@@ -17,12 +19,12 @@ images=`kubectl get po --all-namespaces -o json | jq '.items[].spec.containers[]
 # https://github.com/charmed-kubernetes/bundle/blob/master/container-images.txt
 for image in ${images}; do 
     tag=${image/$old_image_registry/$registry};
-    juju run-action docker-registry/0 push image=$image tag=$tag --wait
+    juju $JUJU_RUN_CMD docker-registry/0 push image=$image tag=$tag
 done
 
 # Caveats: 1. Image names are different for coredns 2. Add pause container
-juju run-action docker-registry/0 push image=$registry/coredns/coredns-amd64:1.6.7 tag=$registry/coredns/coredns:1.6.7 --wait
-juju run-action docker-registry/0 push image=k8s.gcr.io/pause-amd64:3.2 tag=$registry/pause-amd64:3.2 --wait
+juju $JUJU_RUN_CMD docker-registry/0 push image=$registry/coredns/coredns-amd64:1.6.7 tag=$registry/coredns/coredns:1.6.7
+juju $JUJU_RUN_CMD docker-registry/0 push image=k8s.gcr.io/pause-amd64:3.2 tag=$registry/pause-amd64:3.2
 
 # Update k8s to point to the private docker-registry
 juju config kubernetes-control-plane image-registry=$registry

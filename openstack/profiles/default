@@ -45,7 +45,7 @@ if ! ${BARE_METAL:-false} && ((`juju status neutron-gateway --format=json 2>/dev
 fi
 
 if ((`juju status ceilometer --format=json 2>/dev/null| jq '.machines| length'`)); then
-    juju run-action --wait ceilometer/leader ceilometer-upgrade
+    juju $JUJU_RUN_CMD ceilometer/leader ceilometer-upgrade
 fi
 
 if ((`juju status heat --format=json 2>/dev/null| jq '.machines| length'`)); then

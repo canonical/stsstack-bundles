@@ -1,5 +1,7 @@
 #!/bin/bash -ux
 
+. $(dirname $0)/../common/juju_helpers
+
 which vault > /dev/null || sudo snap install vault
 
 model=`juju show-model --format=json| jq -r '.| keys[]'`
@@ -41,4 +43,4 @@ for addr in ${addrs[@]}; do
     vault token create -ttl=10m
 done
 
-juju run-action $leader --wait authorize-charm token=$token
+juju $JUJU_RUN_CMD $leader authorize-charm token=$token
