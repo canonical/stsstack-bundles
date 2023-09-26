@@ -1,0 +1,12 @@
+#!/bin/bash
+
+is_juju_2 ()
+{
+    juju --version| egrep -q "^2."
+}
+
+if is_juju_2; then
+    JUJU_RUN_CMD="run-action --wait"
+else
+    JUJU_RUN_CMD="run"
+fi

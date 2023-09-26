@@ -1,6 +1,8 @@
 #!/bin/bash -eux
 # NOTE: assumes that you have already added amphorae image to glance.
 
+. $(dirname $0)/../common/juju_helpers
+
 dout=`mktemp -d`
 (
 cd $dout
@@ -39,7 +41,7 @@ juju config octavia \
     lb-mgmt-controller-cacert="$(base64 $dout/controller_ca.pem)" \
     lb-mgmt-controller-cert="$(base64 $dout/controller_cert_bundle.pem)"
 
-juju run-action octavia/leader configure-resources --wait
+juju $JUJU_RUN_CMD octavia/leader configure-resources
 
 # Add load-balancer_admin role for admin user
 source $(readlink --canonicalize $(dirname $0))/../novarc

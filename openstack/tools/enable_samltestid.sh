@@ -1,13 +1,13 @@
-#!/usr/bin/env bash
+#!/bin/bash -ex
 
-set -ex
+. $(dirname $0)/../common/juju_helpers
 
 if ! juju show-application keystone-saml-mellon 2>&1; then
     echo "Missing keystone-saml-mellon application"
     exit 1
 fi
 
-juju run-action --format=json keystone-saml-mellon/0 get-sp-metadata --wait \
+juju $JUJU_RUN_CMD --format=json keystone-saml-mellon/0 get-sp-metadata \
     | jq -r '."unit-keystone-saml-mellon-0".results.output' \
     > keystone-metadata.xml \
     && curl --form userfile=@"./keystone-metadata.xml" -s -o /dev/null \

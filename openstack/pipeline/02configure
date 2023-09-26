@@ -444,7 +444,7 @@ do
                 MOD_MSGS[octavia.0]="you need to to create an amphora image before you can use Octavia"
                 MOD_MSGS[octavia.1]="this can be done in one of two ways:"
                 MOD_MSGS[octavia.2]="run ./tools/upload_octavia_amphora_image.sh --release $release to use a pre-created image (recommended)"
-                MOD_MSGS[octavia.3]="create a new image with 'juju run-action octavia-diskimage-retrofit/0 --wait retrofit-image source-image=<uuid>' with id of image in Glance to use as base"
+                MOD_MSGS[octavia.3]="create a new image with 'juju $JUJU_RUN_CMD octavia-diskimage-retrofit/0 retrofit-image source-image=<uuid>' with id of image in Glance to use as base"
             fi
             if has_opt --octavia-ipv4; then
                 MOD_MSGS[octavia.4]="run tools/create_ipv4_octavia.sh"
@@ -653,7 +653,7 @@ do
             MOD_OVERLAYS+=( "openstack/neutron-gateway.yaml" )
             MOD_OVERLAYS=( ${MOD_OVERLAYS[@]/"openstack/neutron-openvswitch.yaml"} )
             set -- $@ --no-ml2dns --ceph --ceph-rgw && cache $@
-            MOD_MSGS[ironic-conductor.0]="juju run-action ironic-conductor/leader set-temp-url-secret"
+            MOD_MSGS[ironic-conductor.0]="juju $JUJU_RUN_CMD ironic-conductor/leader set-temp-url-secret"
             ;;
         --vault-ha*)
             get_units $1 __NUM_VAULT_UNITS__ 3
