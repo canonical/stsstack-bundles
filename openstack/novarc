@@ -40,8 +40,8 @@ END
                     return;;
             esac
         fi
-        export OS_AUTH_PROTOCOL=https
     fi
+    export OS_AUTH_PROTOCOL=https
 else
     unset OS_AUTH_PROTOCOL
 fi
