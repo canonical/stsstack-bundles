@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Globals
+export MOD_NAME=jaas
+export MOD_BASE_TEMPLATE=jaas.yaml.template
+export MOD_SSL_STATE_DIR=${MOD_NAME}
+[ -n "${MASTER_OPTS[BUNDLE_NAME]}" ] && \
+    MOD_SSL_STATE_DIR="${MOD_SSL_STATE_DIR}-${MASTER_OPTS[BUNDLE_NAME]}"
+
+# opts that 02configure does not recognise that get passed to the generator
+export -a MOD_PASSTHROUGH_OPTS=()
+
+# Collection of messages to display at the end
+export -A MOD_MSGS=()
+
+# Array list of overlays to use with this deployment.
+export -a MOD_OVERLAYS=()
+
+export -A MOD_PARAMS=()
