@@ -5,6 +5,8 @@
 # All overlay/bundle variables (MOD_PARAMS) defaults must go into
 # the <module>/module_defaults file.
 
+. $(dirname $0)/../common/juju_helpers
+
 is_ml2_ovn ()
 {
   if has_opt --ovn || has_opt --ml2-ovn; then
