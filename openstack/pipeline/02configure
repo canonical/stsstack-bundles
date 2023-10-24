@@ -27,15 +27,6 @@ is_neutron_gateway_required ()
     fi
 }
 
-is_hyperconverged ()
-{
-    if has_opt --hyperconverged || ${MASTER_OPTS[HYPERCONVERGED_DEPLOYMENT]}; then
-        return 0
-    else
-        return 1
-    fi
-}
-
 # Needed in all cases
 MOD_OVERLAYS+=(
     openstack/glance.yaml
