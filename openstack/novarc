@@ -16,7 +16,7 @@ done
 
 keystone_addr=`juju config keystone vip`
 if [ -z "$keystone_addr" ]; then
-    keystone_addr=`jq -r '.applications.keystone.units."keystone/0"."public-address"' $juju_status_json_cache`
+    keystone_addr=$(jq --raw-output '.applications.keystone.units[] | select (.leader == true) | .["public-address"]' $juju_status_json_cache)
 fi
 
 # check config-based ssl first
