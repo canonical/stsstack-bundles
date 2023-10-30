@@ -1,0 +1,3 @@
+  kubeapi-load-balancer:
+    to:
+__UNIT_PLACEMENT_LXD__.__UNITS__.__NUM_K8S_LB_UNITS__

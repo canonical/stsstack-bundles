@@ -830,3 +830,13 @@ get_local_upstream_dns ()
     (($?==0)) && echo $server && return 0
     echo "10.198.200.1"  # stsstack upstream dns
 }
+
+is_hyperconverged ()
+{
+    if has_opt --hyperconverged || ${MASTER_OPTS[HYPERCONVERGED_DEPLOYMENT]}; then
+        return 0
+    else
+        return 1
+    fi
+}
+
