@@ -4,7 +4,7 @@ declare -A MASTER_OPTS=(
     [DEFAULT_CHANNEL]=edge
     [DEFAULT_BINDING]=
     [HYPERCONVERGED_DEPLOYMENT]=false
-    [MODEL_CONFIG]=''
+    [MODEL_CONFIG]='test-mode=true'
     [BUNDLE_NAME]=''
     [CLOUD_NAME]=''
     [TARGET_RELEASE_NAME]=''
