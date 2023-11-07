@@ -1,0 +1,10 @@
+debug:                      &debug                     True
+
+applications:
+  ceph-dashboard:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__ceph-dashboard
+    options:
+      debug: *debug
+relations:
+  - [ ceph-dashboard:dashboard, ceph-mon:dashboard ]
+  - [ ceph-dashboard:certificates, vault:certificates ]

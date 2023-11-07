@@ -49,6 +49,7 @@ ovn-dedicated-chassis
 )
 
 declare -a CEPH_CHARMS=(
+ceph-dashboard
 ceph-fs
 ceph-iscsi
 ceph-mon
