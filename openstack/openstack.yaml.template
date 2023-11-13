@@ -81,14 +81,14 @@ applications:
       ssl_key: *ssl_key
 relations:
   - [ nova-cloud-controller:shared-db, __MYSQL_INTERFACE__ ]
-  - [ "nova-cloud-controller:amqp", rabbitmq-server ]
+  - [ nova-cloud-controller:amqp, rabbitmq-server ]
   - [ nova-cloud-controller, glance ]
   - [ nova-cloud-controller, keystone ]
   - [ nova-compute, nova-cloud-controller ]
   - - nova-compute
     - rabbitmq-server:amqp
   - [ nova-compute, glance ]
-  - [ glance, "cinder:image-service" ]
+  - [ glance, cinder:image-service ]
   - [ glance, rabbitmq-server ]
   - [ cinder:shared-db, __MYSQL_INTERFACE__ ]
   - [ cinder, rabbitmq-server ]
