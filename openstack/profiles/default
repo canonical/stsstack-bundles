@@ -13,6 +13,7 @@ install_packages
 [[ -z "$CIDR_EXT" ]] && export CIDR_EXT="10.5.0.0/16"
 [[ -z "$FIP_RANGE" ]] && export FIP_RANGE="10.5.150.0:10.5.200.254"
 [[ -z "$CIDR_PRIV" ]] && export CIDR_PRIV="192.168.21.0/24"
+[[ -z "$UNDERCLOUD_NETWORK_NAME" ]] && export UNDERCLOUD_NETWORK_NAME="${OS_PROJECT_NAME}_admin_net"
 
 NS_ARG=""
 [ "`juju config neutron-api enable-ml2-dns`" = "true" ] && unset NAMESERVER || NS_ARG="-N $NAMESERVER"
@@ -34,7 +35,7 @@ if [ "$dvr_enabled" = "true" ] || $ovn_enabled; then
     if ${BARE_METAL:-false}; then
         echo "INFO: set 'juju config neutron-openvswitch data-port=...'"
     else
-        ./bin/add-data-ports.sh
+        ./bin/add-data-ports.sh "" "$UNDERCLOUD_NETWORK_NAME"
     fi
 fi
 
