@@ -29,6 +29,6 @@ for release in ussuri victoria wallaby xena yoga; do
 done
 
 series=jammy
-for release in yoga zed antelope; do
+for release in yoga zed antelope bobcat; do
     ${basedir}/test-channel-map.sh $series $release > ${output_prefix}$series-$release.txt
 done

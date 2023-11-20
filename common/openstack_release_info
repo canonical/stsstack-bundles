@@ -26,6 +26,7 @@ declare -A nonlts=( [hirsute]=wallaby
                     [impish]=xena
                     [kinetic]=zed
                     [lunar]=antelope
+                    [mantic]=bobcat
 )
 # NOTE: must be kept up-to-date with ALL versions of openstack.
 declare -A os_releases=( [icehouse]=0
@@ -47,6 +48,7 @@ declare -A os_releases=( [icehouse]=0
                          [yoga]=16
                          [zed]=17
                          [antelope]=18
+                         [bobcat]=19
 )
 # Reverse lookups (revision to series)
 declare -A lts_rev=()
