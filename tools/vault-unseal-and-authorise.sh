@@ -3,6 +3,7 @@
 . $(dirname $0)/../common/juju_helpers
 
 which vault > /dev/null || sudo snap install vault
+which jq > /dev/null || sudo apt install -y jq
 
 model=`juju show-model --format=json| jq -r '.| keys[]'`
 model_uuid=`juju show-model --format=json| jq -r '.[]."model-uuid"'`
