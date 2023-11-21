@@ -79,6 +79,7 @@ applications:
       ssl_ca: *ssl_ca
       ssl_cert: *ssl_cert
       ssl_key: *ssl_key
+---
 relations:
   - [ nova-cloud-controller:shared-db, __MYSQL_INTERFACE__ ]
   - [ nova-cloud-controller:amqp, rabbitmq-server ]
