@@ -19,6 +19,8 @@ applications:
     options:
       debug: *debug
       openstack-origin: *openstack_origin
+      notification-expiration: 300
+      check-expired-interval: 10
 relations:
   - [ nova-compute:juju-info, masakari-monitors:container ]
   - [ keystone:identity-credentials, masakari-monitors:identity-credentials ]
