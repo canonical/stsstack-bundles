@@ -1,0 +1,8 @@
+# These are charmhub mappings for charms that are outside of the main large
+# groupings like openstack and ceph etc.
+
+# Versions are based on https://docs.openstack.org/charm-guide/latest/project/charm-delivery.html
+
+CHARM_CHANNEL[ovn-central]=23.09/edge
+CHARM_CHANNEL[ovn-chassis]=23.09/edge
+CHARM_CHANNEL[ovn-dedicated-chassis]=23.09/edge
