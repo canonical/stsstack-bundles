@@ -2,6 +2,8 @@
 
 set -e -u
 
+source "$(realpath $(dirname $0))/../novarc"
+
 # Launch N quantity of XYZ instances
 #
 # Presumes glance images exist and have been imported using the accompanying
