@@ -1,6 +1,6 @@
 #!/bin/bash -ex
 
-# stsstack overrides
+# prodstack6 overrides
 [[ -z "$NAMESERVER" ]] && export NAMESERVER="91.189.91.131"
 [[ -z "$SWIFT_IP" ]] && export SWIFT_IP="10.140.56.22"
 
@@ -10,6 +10,6 @@
 [[ -z "$FIP_RANGE" ]] && export FIP_RANGE="10.142.35.200:10.142.35.254"
 [[ -z "$CIDR_PRIV" ]] && export CIDR_PRIV="192.168.21.0/24"
 
-export UNDERCLOUD_NETWORK_NAME="$(sed -rn "s/.+OS_PROJECT_NAME=(.+)_project/net_\1/p" ~/novarc)"
+export UNDERCLOUD_NETWORK_NAME="$(sed -E --quiet "s/.+OS_PROJECT_NAME=(.+)_project/net_\1/p" ~/novarc)"
 
-./profiles/default $@
+./profiles/default "$@"

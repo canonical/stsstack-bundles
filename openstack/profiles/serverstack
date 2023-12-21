@@ -1,7 +1,9 @@
 #!/bin/bash -ex
 
-# stsstack overrides
+# serverstack overrides
 [[ -z "$NAMESERVER" ]] && export NAMESERVER="10.245.160.2"
 [[ -z "$SWIFT_IP" ]] && export SWIFT_IP="10.245.161.162"
 
-./profiles/default $@
+export UNDERCLOUD_NETWORK_NAME="$(sed -E --quiet "s/.+OS_PROJECT_NAME=(.+)/\1_admin_net/p" ~/novarc)"
+
+./profiles/default "$@"
