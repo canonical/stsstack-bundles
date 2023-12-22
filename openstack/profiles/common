@@ -144,10 +144,10 @@ function create_default_flavors {
 }
 
 function is_ksv3 () {
-    api_ver="`juju config keystone preferred-api-version`"
-    rel="`juju config keystone openstack-origin| sed -r 's/.+-(.+)/\1/g'`"
-    rel="`echo -e "$rel\nqueens"| sort| head -n 1`"
-    series=`juju status keystone --format=json| jq .machines[].series| tr -d '"'`
+    api_ver="$(juju config keystone preferred-api-version)"
+    rel="$(juju config keystone openstack-origin| sed -r 's/.+-(.+)/\1/g')"
+    rel="$(echo -e "$rel\nqueens"| sort| head -n 1)"
+    series=$(juju status keystone --format=json| jq .machines[].series| tr -d '"')
     if [ "$api_ver" = "3" ] || [[ "${rel%%/*}" > "pike" ]] || \
         { [[ "$series" > "artful" ]] && [[ "$series" < "trusty" ]]; }; then
         return 0
