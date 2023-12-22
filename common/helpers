@@ -618,19 +618,18 @@ ost_release_autocorrect ()
 # Requires APP_RELEASE_NAMES set by module generate-bundle.sh
 get_app_release_name ()
 {
-    local ubuntu_release="$1"
+    local ubuntu_release=$1
     local release_name=
 
     [ -n "$ubuntu_release" ] || return 0
-    readarray -t names_sorted_asc<<<"`echo ${!APP_RELEASE_NAMES[@]}| \
-                                            tr ' ' '\n'| sort`"
-    for name in ${names_sorted_asc[@]}; do
-        rel=${APP_RELEASE_NAMES[$name]}
-        if ! [[ "$rel" > "$ubuntu_release" ]]; then
-            release_name=$name
+    readarray -t names_sorted_asc <<<"$(echo ${!APP_RELEASE_NAMES[@]} | tr ' ' '\n' | sort)"
+    for name in "${names_sorted_asc[@]}"; do
+        rel=${APP_RELEASE_NAMES[${name}]}
+        if (( ${os_releases[${rel}]} <= ${os_releases[${ubuntu_release}]} )); then
+            release_name=${name}
         fi
     done
-    echo $release_name
+    echo "${release_name}"
     return 0
 }
 
@@ -839,4 +838,3 @@ is_hyperconverged ()
         return 1
     fi
 }
-
