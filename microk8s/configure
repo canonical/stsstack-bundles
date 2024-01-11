@@ -1,0 +1,36 @@
+#!/bin/bash -x
+
+juju_major_version=$(juju --version | awk -F. {'print $1'})
+juju_run_cmd="juju run"
+
+if [ "${juju_major_version}" -gt 2 ]; then
+	juju_run_cmd="juju exec"
+fi
+
+if ! [ -f ./dockercreds ]; then
+	echo "ERROR: Dockerhub credentials not found"
+	echo "Please create a file named 'dockercreds' with your dockerhub user and password"
+	echo "This is necessary in order to circumvent the API limitations in docker"
+	echo "https://docs.docker.com/docker-hub/download-rate-limit/"
+	echo "You can 'cp dockercreds.template dockercreds'"
+	echo "And adjust your credentials in the file"
+	exit 1
+fi
+
+microk8s_unit=$(juju status| sed -nr 's,(microk8s/[[:digit:]]+)\*.*,\1,p')
+${juju_run_cmd} --unit ${microk8s_unit} -- sudo grep -q docker /var/snap/microk8s/current/args/containerd-template.toml
+if [ $? -ne 0 ]; then
+	echo "updating docker credentials on microk8s..."
+	juju scp ./dockercreds ${microk8s_unit}:
+	${juju_run_cmd} --unit ${microk8s_unit} -- "cat /home/ubuntu/dockercreds | sudo tee -a /var/snap/microk8s/current/args/containerd-template.toml"
+	${juju_run_cmd} --unit ${microk8s_unit} -- "sudo microk8s stop && sudo microk8s start"
+fi
+
+which kubectl || sudo snap install kubectl --classic
+mkdir -p ~/.kube
+
+${juju_run_cmd} --unit ${microk8s_unit} microk8s.config > ~/.kube/config
+
+kubectl get pods -A
+
+echo "You can now use microk8s."

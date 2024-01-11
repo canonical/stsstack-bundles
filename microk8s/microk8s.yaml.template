@@ -1,0 +1,7 @@
+series: __SERIES__
+applications:
+  microk8s:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__microk8s
+    num_units: __NUM_MICROK8S_UNITS__
+    constraints: mem=8G
+    expose: true

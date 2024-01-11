@@ -1,0 +1,11 @@
+#!/bin/bash
+# Global variables are first defined in 00setup and module
+# dependencies are defined in 01import-config-defaults
+#
+# All overlay/bundle variables (MOD_PARAMS) defaults must go into
+# the <module>/module_defaults file.
+
+target=$series
+[ -z "$pocket" ] || target=${target}-$pocket
+target=${target}:${MOD_PARAMS[__MICROK8S_CHANNEL__]}
+MOD_PASSTHROUGH_OPTS+=( --release-name $target )

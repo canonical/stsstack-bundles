@@ -12,3 +12,4 @@ for c in ${CEPH_CHARMS[@]}; do
 done
 
 CHARM_CHANNEL[pacemaker-remote]=${series}/edge
+CHARM_CHANNEL[microk8s]=1.28/stable
