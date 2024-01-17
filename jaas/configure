@@ -1,0 +1,55 @@
+#!/bin/sh -u
+
+status=$(juju status  --format=json)
+candid_haproxy_machine=$(echo $status | jq '.applications."candid-haproxy".units."candid-haproxy/0".machine')
+candid_haproxy_hostname=$(echo $status | jq -r ".machines.${candid_haproxy_machine}.hostname")
+
+jimm_haproxy_machine=$(echo $status | jq '.applications."jimm-haproxy".units."jimm-haproxy/0".machine')
+jimm_haproxy_hostname=$(echo $status | jq -r ".machines.${jimm_haproxy_machine}.hostname")
+
+jimm_machine=$(echo $status | jq -r '.applications.jimm.units."jimm/0".machine')
+
+model_name=$(echo $status | jq -r ".model.name")
+ssl_dir=jaas-${model_name}
+domain_name=cloud.sts
+
+(cd ssl; ./create_ca_cert_jaas.sh ${ssl_dir} ${candid_haproxy_hostname}.${domain_name} ${jimm_haproxy_hostname}.${domain_name};)
+
+ssl_results="ssl/${ssl_dir}/results"
+ssl_cert=$(base64 ${ssl_results}/servercert.pem| tr -d '\n')
+ssl_key=$(base64 ${ssl_results}/serverkey.pem| tr -d '\n')
+
+# install CA locally
+sudo cp ${ssl_results}/cacert.pem /usr/local/share/ca-certificates/jaas.crt
+sudo update-ca-certificates
+
+# install CA on jimm server
+juju scp ${ssl_results}/cacert.pem $jimm_machine:
+juju exec --machine $jimm_machine -- sudo mv cacert.pem /usr/local/share/ca-certificates/jaas.crt
+juju exec --machine $jimm_machine -- sudo update-ca-certificates
+juju exec --machine $jimm_machine -- sudo systemctl restart jimm
+
+# install CA on controller
+# TODO: fix for HA controller
+juju scp -m controller ${ssl_results}/cacert.pem 0:
+juju exec -m controller --machine 0 -- sudo mv cacert.pem /usr/local/share/ca-certificates/jaas.crt
+juju exec -m controller --machine 0 -- sudo update-ca-certificates
+juju exec -m controller --machine 0 -- sudo systemctl restart jujud-machine-0
+
+# Wait for services to come back
+echo "Wating for processes to restart..."
+sleep 30
+
+juju config jimm-haproxy ssl_cert=$ssl_cert
+juju config jimm-haproxy ssl_key=$ssl_key
+juju config candid-haproxy ssl_cert=$ssl_cert
+juju config candid-haproxy ssl_key=$ssl_key
+
+juju config candid location=https://${candid_haproxy_hostname}.${domain_name}
+juju config jimm candid-url=https://${candid_haproxy_hostname}.${domain_name}
+juju config jimm dns-name=${jimm_haproxy_hostname}.${domain_name}
+juju config jimm controller-admins=user1
+
+echo "Run 'juju login ${jimm_haproxy_hostname}.${domain_name}' to register your juju client to the JAAS controller"
+echo "You may need to add the ${ssl_results}/cacert.pem file to your browser to validate the https connection to candid"
+echo "For loging into candid you can use user1 / password1"

@@ -22,15 +22,9 @@ cat ${candid_keys}/bakery-key.json | jq -r .private | tr -d '\n' > ${candid_keys
 CANDID_URL=https://candid.sts candid create-agent --admin   -f ${candid_keys}/admin.agent
 cat ${candid_keys}/admin.agent | jq -r .key.public | tr -d '\n' > ${candid_keys}/admin-agent-public-key
 
-(cd ssl; . ./create_ca_cert.sh $MOD_SSL_STATE_DIR;)
-ssl_results="ssl/$MOD_SSL_STATE_DIR/results"
-MOD_PARAMS[__SSL_PATH__]=$ssl_results
 MOD_PARAMS[__CANDID_PUB_KEY__]=`cat $candid_keys/public-key`
 MOD_PARAMS[__CANDID_PRIV_KEY__]=`cat $candid_keys/private-key`
 MOD_PARAMS[__CANDID_ADMIN_AGENT_KEY__]=`cat $candid_keys/admin-agent-public-key`
-MOD_PARAMS[__SSL_CA__]=`base64 ${ssl_results}/cacert.pem| tr -d '\n'`
-MOD_PARAMS[__SSL_CERT__]=`base64 ${ssl_results}/servercert.pem| tr -d '\n'`
-MOD_PARAMS[__SSL_KEY__]=`base64 ${ssl_results}/serverkey.pem| tr -d '\n'`
 
 # Skip processing input if it includes exclusive passthrough options
 ! has_excl_passthrough_opt && \

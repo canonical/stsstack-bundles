@@ -6,9 +6,6 @@
 # your bundle.
 
 # Variables
-ssl_ca:                     &ssl_ca                    __SSL_CA__
-ssl_cert:                   &ssl_cert                  __SSL_CERT__
-ssl_key:                    &ssl_key                   __SSL_KEY__
 candid-location:            &candid-location           "https://candid.se"
 jimm-dns-name:              &jimm-dns-name             "jimm.se"
 jaas-controller-admin:      &jaas-controller-admin     "ubuntu"
@@ -67,8 +64,6 @@ applications:
       default_mode: tcp
       enable_monitoring: True
       peering_mode: active-active
-      ssl_cert: *ssl_cert
-      ssl_key: *ssl_key
       services: |
         - service_name: app-candid
           service_host: "0.0.0.0"
@@ -97,8 +92,6 @@ applications:
       default_mode: tcp
       enable_monitoring: True
       peering_mode: active-active
-      ssl_cert: *ssl_cert
-      ssl_key: *ssl_key
       services: |
         - service_name: app-jimm
           service_host: "0.0.0.0"
