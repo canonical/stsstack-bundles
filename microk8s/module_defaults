@@ -1,0 +1,10 @@
+# This file must contain defaults for all variables used in bundles/overlays.
+# They are used to render to final product in the event they are not provided
+# elsewhere. It is inserted into the global context at the start of the
+# pipeline.
+#
+# You can check that none are missing by running lint/check_var_defaults.sh
+#
+
+MOD_PARAMS[__MICROK8S_CHANNEL__]="latest/edge"
+MOD_PARAMS[__NUM_MICROK8S_UNITS__]=1
