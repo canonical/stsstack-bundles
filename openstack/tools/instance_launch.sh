@@ -144,4 +144,4 @@ openstack server create --wait \
     --max $instance_qty \
     $server_name
 
-echo 'Hint: use ssh -i ~/testkey.pem ubuntu@<ip> to access new instances (may also need a floating IP, see ./tools/float_all.sh).'
+echo 'Hint: use ssh -i ~/testkey.priv ubuntu@<ip> to access new instances (may also need a floating IP, see ./tools/float_all.sh).'
