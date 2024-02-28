@@ -825,8 +825,13 @@ print_msgs ()
 
 get_local_upstream_dns ()
 {
-    local server="`systemd-resolve --status 2>/dev/null| sed -r 's/\s+DNS Servers:\s+([[:digit:]]+)/\1/g;t;d'| head -n 1`"
-    (($?==0)) && echo $server && return 0
+    # Use old systemd-resolve command if present
+    if command -v systemd-resolve > /dev/null; then
+        local server=$(systemd-resolve --status 2> /dev/null | sed --regexp-extended 's/\s*DNS Servers:\s+([[:digit:]]+)/\1/g;t;d'| head -n 1)
+    else
+        local server=$(resolvectl 2> /dev/null | sed --regexp-extended 's/\s*Current DNS Server:\s+([[:digit:]]+)/\1/g;t;d')
+    fi
+    (($? == 0)) && echo $server && return 0
     echo "10.198.200.1"  # stsstack upstream dns
 }
 
