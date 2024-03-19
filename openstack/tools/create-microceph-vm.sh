@@ -7,21 +7,25 @@
 #
 # juju add-model microceph
 # juju deploy --constraints mem=16G --series jammy ubuntu microceph-vm
-# juju ssh microceph-vm/0 -- sudo usermod --append --groups lxd ubuntu
-# juju ssh microceph-vm/0 -- lxd init --auto
-# juju scp openstack/tools/create-microceph-vm.sh microceph-vm/1:
+# juju scp openstack/tools/create-microceph-vm.sh microceph-vm/0:
 # juju ssh microceph-vm/0 -- ./create-microceph-vm.sh
 #
-# After everything is deployed, ceph can be used via the microceph.ceph
+# After everything is deployed, ceph can be used via the ceph
 # command, e.g.
 #
-# juju ssh microceph-vm/0 -- lxc exec microceph-1 microceph.ceph status
+# juju ssh microceph-vm/0 -- lxc exec microceph-1 ceph status
 
 set -e -u
 
 : ${VM_USER:=ubuntu}
 : ${VM_NAME:=microceph}
 : ${OSD_SIZE:=10}
+
+init() {
+    sudo usermod --append --groups lxd ubuntu
+    lxd init --auto
+    sudo snap install yq
+}
 
 as_root() {
     local VM_NAME=$1
@@ -83,17 +87,18 @@ parse_commandline() {
     done
 }
 
+init
 parse_commandline "$@"
 
 # Create machines
-for i in $(seq 3); do
+for i in {1..3}; do
     echo "Creating ${VM_NAME}-${i}"
     create_vm ${VM_NAME}-${i}
 done
 
 # Wait for VMs to be fully up
 echo -n "Waiting for VMs to become available"
-for i in $(seq 3); do
+for i in {1..3}; do
     while true; do
         if $(vm_is_running ${VM_NAME}-${i}); then
             echo -n "${i}"
@@ -107,8 +112,9 @@ done
 echo "done"
 
 # Add storage
-for i in $(seq 3); do
-    if ! lxc storage volume show default osd-${i}; then
+for i in {1..3}; do
+    if ! lxc storage volume show default osd-${i} 2>/dev/null; then
+        echo "No storage pools found. Creating..."
         lxc storage volume create default osd-${i} \
             --type block size=${OSD_SIZE}GiB
     fi
@@ -117,27 +123,24 @@ for i in $(seq 3); do
 done
 
 # Wait for VMs
-for i in $(seq 3); do
-    while true; do
-        if as_user ${VM_NAME}-${i} snap list; then
-            break
-        fi
+for i in {1..3}; do
+    while ! as_user ${VM_NAME}-${i} snap list; do
         sleep 1
     done
 done
 
 # Prepare VMs
-for i in $(seq 3); do
+for i in {1..3}; do
     echo dm_crypt | as_root ${VM_NAME}-${i} tee --append /etc/modules
 done
 
 # Install Microceph
-for i in $(seq 3); do
+for i in {1..3}; do
     as_root ${VM_NAME}-${i} snap install microceph
 done
 
 # Prevent updates of snap
-for i in $(seq 3); do
+for i in {1..3}; do
     as_root ${VM_NAME}-${i} snap refresh --hold microceph
 done
 
@@ -147,14 +150,14 @@ as_root ${VM_NAME}-1 microceph cluster bootstrap
 
 # Get IP address of all cluster members
 declare -a IPS=()
-for i in $(seq 3); do
+for i in {1..3}; do
     IPS+=($(lxc info ${VM_NAME}-${i} \
         | yq '.Resources.["Network usage"].[].["IP addresses"].inet' \
-        | grep global | awk '{print $1}' | awk --field / '{print $1}'))
+        | awk --field / '/global/{print $1}'))
 done
 
-for i in $(seq 3); do
-    for j in $(seq 3); do
+for i in {1..3}; do
+    for j in {1..3}; do
         printf "%s %s\n" ${IPS[j - 1]} ${VM_NAME}-${j} \
             | as_root ${VM_NAME}-${i} tee --append /etc/hosts
     done
@@ -166,21 +169,21 @@ TOKEN_3=$(as_root ${VM_NAME}-1 microceph cluster add ${VM_NAME}-3)
 as_root ${VM_NAME}-2 microceph cluster join ${TOKEN_2}
 as_root ${VM_NAME}-3 microceph cluster join ${TOKEN_3}
 
-as_user ${VM_NAME}-1 microceph.ceph status
+as_root ${VM_NAME}-1 ceph status
 
 # Add osds
-for i in $(seq 3); do
+for i in {1..3}; do
     as_root ${VM_NAME}-${i} microceph disk add /dev/sdb --wipe
 done
 
 sleep 2
 
-as_user ${VM_NAME}-1 microceph.ceph status
-as_user ${VM_NAME}-1 microceph.ceph osd status
+as_root ${VM_NAME}-1 ceph status
+as_root ${VM_NAME}-1 ceph osd status
 as_root ${VM_NAME}-1 microceph enable rgw
 
-as_root ${VM_NAME}-1 microceph.radosgw-admin user create \
+as_root ${VM_NAME}-1 radosgw-admin user create \
     --uid=test --display-name=testuser
-as_root ${VM_NAME}-1 microceph.radosgw-admin key create \
+as_root ${VM_NAME}-1 radosgw-admin key create \
     --uid=test --key-type=s3 --access-key fooAccessKey \
     --secret-key fooSecretKey
