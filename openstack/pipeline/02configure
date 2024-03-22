@@ -596,7 +596,7 @@ do
             assert_min_release pike "gnocchi"
             MOD_OVERLAYS+=( "ceph/ceph.yaml" )
             MOD_OVERLAYS+=( "openstack/gnocchi.yaml" )
-            MOD_OVERLAYS+=( "openstack/memcached.yaml" )
+            MOD_OVERLAYS+=( "memcached.yaml" )
             MOD_OVERLAYS+=( "openstack/telemetry.yaml" )
 
             if has_opt --vault; then
