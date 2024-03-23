@@ -53,6 +53,22 @@ vm_is_running() {
     return 1
 }
 
+enable_rgw() {
+    as_root ${VM_NAME}-1 microceph enable rgw
+    as_root ${VM_NAME}-1 radosgw-admin user create \
+        --uid=test --display-name=testuser
+    as_root ${VM_NAME}-1 radosgw-admin key create \
+        --uid=test --key-type=s3 --access-key fooAccessKey \
+        --secret-key fooSecretKey
+}
+
+enable_cephfs() {
+    as_root ${VM_NAME}-1 microceph enable mds
+    as_root ${VM_NAME}-1 ceph osd pool create cephfs_data
+    as_root ${VM_NAME}-1 ceph osd pool create cephfs_metadata
+    as_root ${VM_NAME}-1 ceph fs new cephfs cephfs_metadata cephfs_data
+}
+
 print_help() {
     cat <<EOF
 Usage:
@@ -178,12 +194,9 @@ done
 
 sleep 2
 
+enable_rgw
+enable_cephfs
+
 as_root ${VM_NAME}-1 ceph status
 as_root ${VM_NAME}-1 ceph osd status
-as_root ${VM_NAME}-1 microceph enable rgw
-
-as_root ${VM_NAME}-1 radosgw-admin user create \
-    --uid=test --display-name=testuser
-as_root ${VM_NAME}-1 radosgw-admin key create \
-    --uid=test --key-type=s3 --access-key fooAccessKey \
-    --secret-key fooSecretKey
+as_root ${VM_NAME}-1 ceph fs ls
