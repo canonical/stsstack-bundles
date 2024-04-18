@@ -5,17 +5,15 @@ series: __SERIES__
 applications:
   kubernetes-control-plane:
     charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__kubernetes-control-plane
+    channel: *k8s_channel
     constraints: mem=2G
     expose: true
     num_units: __NUM_K8S_CONTROL_PLANE_UNITS__
-    options:
-      channel: *k8s_channel
   kubernetes-worker:
     charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__kubernetes-worker
+    channel: *k8s_channel
     constraints: mem=4G
     expose: true
     num_units: __NUM_K8S_WORKER_UNITS__
-    options:
-      channel: *k8s_channel
 relations:
   - [ 'kubernetes-control-plane:kube-control', 'kubernetes-worker:kube-control' ]
