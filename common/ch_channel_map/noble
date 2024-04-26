@@ -1,0 +1,16 @@
+# These are charmhub mappings for charms that are outside of the main large
+# groupings like openstack and ceph etc.
+
+# Versions are based on https://docs.openstack.org/charm-guide/latest/project/charm-delivery.html
+
+# "Charm Delivery" specifies vault 1.8 for jammy, however field have actually been using 1.7.
+# Stick with 1.7 to more closely replicate customer deployments.
+CHARM_CHANNEL[vault]=latest/edge
+
+CHARM_CHANNEL[rabbitmq-server]=latest/edge
+CHARM_CHANNEL[mysql-router]=latest/edge
+CHARM_CHANNEL[mysql-innodb-cluster]=latest/edge
+CHARM_CHANNEL[hacluster]=2.4/edge
+CHARM_CHANNEL[ovn-central]=23.09/edge # FIXME: update once caracal released
+CHARM_CHANNEL[ovn-chassis]=23.09/edge # FIXME: update once caracal released
+CHARM_CHANNEL[ovn-dedicated-chassis]=23.09/edge # FIXME: update once caracal released

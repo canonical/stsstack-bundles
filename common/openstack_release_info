@@ -15,12 +15,14 @@ declare -A lts_order=( [0]=trusty
                        [2]=bionic
                        [3]=focal
                        [4]=jammy
+                       [5]=noble
 )
 declare -A lts=( [trusty]=icehouse
                  [xenial]=mitaka
                  [bionic]=queens
                  [focal]=ussuri
                  [jammy]=yoga
+                 [noble]=caracal
 )
 declare -A nonlts=( [hirsute]=wallaby
                     [impish]=xena
@@ -49,6 +51,7 @@ declare -A os_releases=( [icehouse]=0
                          [zed]=17
                          [antelope]=18
                          [bobcat]=19
+                         [caracal]=20
 )
 # Reverse lookups (revision to series)
 declare -A lts_rev=()
