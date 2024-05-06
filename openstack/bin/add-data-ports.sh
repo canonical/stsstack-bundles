@@ -4,6 +4,8 @@
 # application unit host such each unit has one (and only one)
 # extra port.
 #
+# This script expects your undercloud novarc to be found at ~/novarc .
+#
 application=${1:-""}
 (($#>1)) && network="$2" || network=""
 (($#>2)) && bridge="$3" || bridge="br-data"
@@ -22,6 +24,7 @@ fi
 
 echo "Managing ports for $application units"
 
+# this is your novarc for the undercloud here.
 . ~/novarc
 openstack port list --long --format json \
     | jq -r '.[] | select(.Name == "data-port" and .Status == "DOWN" and ."Device Owner" == "")| .ID' \
