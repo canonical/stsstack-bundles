@@ -5,7 +5,8 @@
 # All overlay/bundle variables (MOD_PARAMS) defaults must go into
 # the <module>/module_defaults file.
 
-if ! `juju --version| egrep -q "^3.2"`; then
+IFS='-'; juju_ver=($(juju --version)); unset IFS;
+if [ "3.2" != "$(echo -e "3.2\n${juju_ver[0]}" | sort -V | head -n1)" ]; then
     echo "ERROR: juju version 3.2 or above is required for deploying JAAS"
     exit 1
 fi
