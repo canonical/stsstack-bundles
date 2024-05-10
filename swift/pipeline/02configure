@@ -26,7 +26,7 @@ else
 fi
 
 # We always add this overlay since it contains core apps for this module.
-MOD_OVERLAYS+=( swift.yaml )
+MOD_OVERLAYS+=( "openstack/swift.yaml" )
 
 # Skip processing input if it includes exclusive passthrough options
 ! has_excl_passthrough_opt && \
