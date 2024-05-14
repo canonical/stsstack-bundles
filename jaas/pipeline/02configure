@@ -5,14 +5,14 @@
 # All overlay/bundle variables (MOD_PARAMS) defaults must go into
 # the <module>/module_defaults file.
 
-IFS='-'; juju_ver=($(juju --version)); unset IFS;
-if [ "3.2" != "$(echo -e "3.2\n${juju_ver[0]}" | sort -V | head -n1)" ]; then
-    echo "ERROR: juju version 3.2 or above is required for deploying JAAS"
+IFS='.' read -r major minor ignore < <(juju --version)
+if [[ $major$minor -lt 32 ]]; then
+    echo "ERROR: juju >=3.2 is required for deploying JAAS but found juju $major.$minor"
     exit 1
 fi
 
 if ! `snap list| grep -q candid`; then
-    sudo snap install candid --channel latest/candidate    
+    sudo snap install candid --channel latest/candidate
 fi
 
 candid_keys=$(pwd)/keys
