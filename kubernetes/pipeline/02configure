@@ -60,6 +60,7 @@ fi
 # need min 2.7
 if ! is_hyperconverged; then
     MOD_OVERLAYS+=( "kubernetes/k8s-openstack-integrator.yaml" )
+    MOD_OVERLAYS+=( "kubernetes/k8s-openstack-cloud-controller.yaml" )
     if ! has_opt --no-trust && [[ ! "$JUJU_VERSION" < "2.7" ]]; then
         MOD_OVERLAYS+=( "kubernetes/k8s-openstack-integrator-trust.yaml" )
         JUJU_DEPLOY_OPTS=" --trust"
