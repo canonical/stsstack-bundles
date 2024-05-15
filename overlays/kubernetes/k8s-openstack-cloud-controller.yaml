@@ -1,0 +1,7 @@
+applications:
+  openstack-cloud-controller:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__openstack-cloud-controller
+relations:
+  - [openstack-cloud-controller:certificates,            easyrsa:client]
+  - [openstack-cloud-controller:kube-control,            kubernetes-control-plane:kube-control]
+  - [openstack-cloud-controller:external-cloud-provider, kubernetes-control-plane:external-cloud-provider]
