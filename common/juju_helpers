@@ -6,7 +6,9 @@ is_juju_2 ()
 }
 
 if is_juju_2; then
+    JUJU_VERSION=2
     JUJU_RUN_CMD="run-action --wait"
 else
+    JUJU_VERSION=3
     JUJU_RUN_CMD="run"
 fi

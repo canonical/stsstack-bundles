@@ -2,17 +2,57 @@
 
 . $(dirname $0)/../common/juju_helpers
 
-if ! juju show-application keystone-saml-mellon 2>&1; then
-    echo "Missing keystone-saml-mellon application"
+credentials=$(env | grep OS_ || true)
+
+if [[ -z $credentials ]];then
+    echo "Missing cloud credentials"
     exit 1
 fi
 
-juju $JUJU_RUN_CMD --format=json keystone-saml-mellon/0 get-sp-metadata \
-    | jq -r '."unit-keystone-saml-mellon-0".results.output' \
-    > keystone-metadata.xml \
-    && curl --form userfile=@"./keystone-metadata.xml" -s -o /dev/null \
-    -w "%{http_code}\n" --form "submit=OK" "https://samltest.id/upload.php" 2>&1 \
-    && rm keystone-metadata.xml
+check_app_exists () {
+    if ! juju show-application $1 2>&1; then
+        echo "Missing $1 application"
+        exit 1
+    fi
+}
+
+check_app_exists keystone-saml-mellon
+
+check_app_exists test-saml-idp1
+
+juju $JUJU_RUN_CMD --format=json test-saml-idp1/0 get-idp-metadata > idp-metadata.json
+
+if [ $JUJU_VERSION -eq 2 ]; then
+    cat idp-metadata.json | jq -r '."unit-test-saml-idp1-0".results.output' > idp-metadata.xml
+else
+    cat idp-metadata.json | jq -r '."test-saml-idp1/0".results.output' > idp-metadata.xml
+fi
+
+juju attach-resource keystone-saml-mellon idp-metadata=./idp-metadata.xml
+
+status='foo'
+while [[ $status != 'active' ]]; do
+	sleep 3
+	status=$(juju status keystone-saml-mellon --format json | jq -r '."applications"."keystone-saml-mellon"."application-status"."current"')
+done
+
+juju $JUJU_RUN_CMD --format=json keystone-saml-mellon/0 get-sp-metadata > sp-metadata.json
+
+if [ $JUJU_VERSION -eq 2 ]; then
+    cat sp-metadata.json | jq -r '."unit-keystone-saml-mellon-0".results.output' > sp-metadata.xml
+else
+    cat sp-metadata.json | jq -r '."keystone-saml-mellon/0".results.output' > sp-metadata.xml
+fi  
+
+juju attach-resource test-saml-idp1 sp-metadata=./sp-metadata.xml
+
+status='foo'
+while [[ $status != 'active' ]]; do
+	sleep 3
+	status=$(juju status test-saml-idp1 --format json | jq -r '."applications"."test-saml-idp1"."application-status"."current"')
+done
+
+ENTITY_ID=$(egrep -o "entityID=\"(.*)\"" idp-metadata.xml | cut -d "=" -f2 | cut -d '"' -f2)
 
 openstack domain create federated_domain
 openstack group create federated_users --domain federated_domain
@@ -23,7 +63,7 @@ openstack role add --group ${GROUP_ID} --domain federated_domain member
 
 # Use the URL for your idP's metadata for remote-id. The name can be
 # arbitrary.
-openstack identity provider create --remote-id https://samltest.id/saml/idp --domain federated_domain samltest
+openstack identity provider create --remote-id $ENTITY_ID --domain federated_domain test-saml-idp1
 
 # Get the federated_domain id and add it to the rules.json map
 DOMAIN_ID=$(openstack domain show federated_domain |grep id |awk '{print $4}')
@@ -61,12 +101,16 @@ cat > rules.json <<EOF
 EOF
 
 # Use the rules.json created above.
-openstack mapping create --rules rules.json samltest_mapping
+openstack mapping create --rules rules.json test-saml-idp1_mapping
 # The name should be mapped or saml here and must match the configuration
 # setting protocol-name. We recommend using "mapped"
-openstack federation protocol create mapped --mapping samltest_mapping --identity-provider samltest
+openstack federation protocol create mapped --mapping test-saml-idp1_mapping --identity-provider test-saml-idp1
 # list related projects
 openstack federation project list
-# Note and auto generated domain has been created. This is where auto
-# generated users and projects will be created.
+# list domains
 openstack domain list
+
+rm idp-metadata.json
+rm idp-metadata.xml
+rm sp-metadata.json
+rm sp-metadata.xml

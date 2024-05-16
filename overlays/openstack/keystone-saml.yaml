@@ -4,15 +4,24 @@ applications:
     options:
       debug: True
       verbose: True
-      idp-name: 'samltest'
+      idp-name: 'test-saml-idp1'
       protocol-name: 'mapped'
-      user-facing-name: 'samltest.id'
-      nameid-formats: 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress'
+      user-facing-name: 'test-saml-idp1'
+      nameid-formats: 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient'
       subject-confirmation-data-address-check: false
     resources:
-      idp-metadata: '__RESOURCES_PATH__idp-metadata.xml'
       sp-signing-keyinfo: '__RESOURCES_PATH__sp-signing-keyinfo.xml'
       sp-private-key: '__RESOURCES_PATH__sp-private-key.pem'
+  test-saml-idp1:
+    charm: ionutbalutoiu-test-saml-idp
+    channel: latest/stable
+    series: focal
+    num_units: 1
+    options:
+      auth-user-name: user1
+      auth-user-password: userpass1
+      idp-name: test-saml-idp1
+      protocol-name: mapped
 relations:
   - [ 'keystone:keystone-fid-service-provider', 'keystone-saml-mellon:keystone-fid-service-provider' ]
   - [ 'openstack-dashboard:websso-fid-service-provider', 'keystone-saml-mellon:websso-fid-service-provider' ]
