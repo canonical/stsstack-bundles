@@ -93,18 +93,6 @@ if [ -r "$INTERNAL_BUNDLE_CONFIG" ]; then
 fi
 rmdir $dtmp
 
-# Copy base bundle resources to bundles dir (if exists)
-resource_path=$MOD_DIR/resources/
-if [ -d "$resource_path" ]; then
-    mkdir -p $bundles_dir/resources
-    name=`basename $bundle`
-    if [ -d "$resource_path/${name%%.yaml}" ]; then
-        cp -r $resource_path/${name%%.yaml} $bundles_dir/resources
-        # add absolute path for resources
-        render_resources_path $bundles_dir/$name
-    fi
-fi
-
 # De-duplicate overlay list and create bundle structure.
 declare -a overlay_list=()
 
@@ -126,7 +114,7 @@ if ((${#MOD_OVERLAYS[@]})); then
         render $bundles_dir/o/$overlay
         overlays_deduped[$overlay]=true
         msgs+=( " + $overlay\n" )
-        # Copy overla resources to bundles dir (if exists)
+        # Copy overlay resources to bundles dir (if exists)
         resource_path=$MOD_DIR/resources/${overlay%%.*}
         if [ -d "$resource_path" ]; then
             mkdir -p $bundles_dir/resources
