@@ -135,9 +135,7 @@ do
             shift
             ;;
         --ceph-rgw)
-            if ! has_opt --ceph; then
-                set -- $@ --ceph && cache $@
-            fi
+            has_opt --ceph || set -- $@ --ceph && cache $@
             MOD_OVERLAYS+=( "ceph/ceph-rgw.yaml" )
             ;;
         --ceph-rgw-ha*)
@@ -146,7 +144,7 @@ do
             set -- $@ --ceph-rgw && cache $@
             ;;
         --ceph-rgw-multisite)
-            MOD_OVERLAYS+=( "ceph/ceph.yaml" )
+            has_opt --ceph || set -- $@ --ceph && cache $@
             MOD_OVERLAYS+=( "ceph/ceph-rgw-multisite.yaml" )
             ;;
         --ceph-proxy)
@@ -157,31 +155,22 @@ do
             ;;
         --ceph-ec)
             assert_min_release stein "ceph-ec"
-            if ! has_opt --ceph; then
-                set -- $@ --ceph && cache $@
-            fi
+            has_opt --ceph || set -- $@ --ceph && cache $@
             MOD_OVERLAYS+=( "ceph/ceph-ec-pools.yaml" )
             ;;
         --ceph-fs)
             assert_min_release ocata "ceph-mds"
-            if ! has_opt --ceph; then
-                set -- $@ --ceph && cache $@
-            fi
+            has_opt --ceph || set -- $@ --ceph && cache $@
             MOD_OVERLAYS+=( "ceph/ceph-fs.yaml" )
             ;;
         --ceph-fs-ha*)
             get_units $1 __NUM_CEPH_FS_UNITS__ 3
-            MOD_OVERLAYS+=( "ceph/ceph-fs.yaml" )
             set -- $@ --ceph-fs && cache $@
             ;;
         --ceph-dashboard)
             MOD_OVERLAYS+=( "ceph/ceph-dashboard.yaml" )
-            if ! has_opt --ceph; then
-                set -- $@ --ceph && cache $@
-            fi
-            if ! has_opt --vault; then
-                set -- $@ --vault && cache $@
-            fi
+            has_opt --ceph || set -- $@ --ceph && cache $@
+            has_opt --vault || set -- $@ --vault && cache $@
             ;;
         --designate)
             assert_min_release ocata "designate"
@@ -339,8 +328,7 @@ do
         --manila)
             assert_min_release rocky "manila"
             MOD_OVERLAYS+=( "openstack/manila.yaml" )
-            MOD_OVERLAYS+=( "ceph/ceph-fs.yaml" )
-            set -- $@ --ceph && cache $@
+            has_opt --ceph-fs || set -- $@ --ceph-fs && cache $@
             # need to list both here in case --ovn comes after --manila on cli
             # since --ovn adds --vault as a dep.
             if has_opt --vault || is_ml2_ovn; then
@@ -594,7 +582,7 @@ do
         --telemetry|--telemetry-gnocchi)
             # ceilometer + aodh + gnocchi (>= pike)
             assert_min_release pike "gnocchi"
-            MOD_OVERLAYS+=( "ceph/ceph.yaml" )
+            has_opt --ceph || set -- $@ --ceph && cache $@
             MOD_OVERLAYS+=( "openstack/gnocchi.yaml" )
             MOD_OVERLAYS+=( "memcached.yaml" )
             MOD_OVERLAYS+=( "openstack/telemetry.yaml" )
