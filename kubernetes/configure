@@ -2,7 +2,9 @@
 which kubectl || sudo snap install kubectl --classic
 mkdir -p ~/.kube
 kubecontrolplane_unit=$(juju status| sed -nr 's,(kubernetes-control-plane/[[:digit:]]+)\*.*,\1,p')
-juju scp ${kubecontrolplane_unit}:config ~/.kube/config
+ftmp=`mktemp -p .`
+juju scp ${kubecontrolplane_unit}:config $ftmp 
+mv ./$ftmp ~/.kube/config
 
 # If we're using keystone, let's create the user and setup everything
 if [[ `juju status keystone --format=json 2>/dev/null| jq '.machines| length'` -ne 0 ]] ; then
