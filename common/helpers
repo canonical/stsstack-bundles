@@ -8,7 +8,7 @@ declare -A MASTER_OPTS=(
     [BUNDLE_NAME]=''
     [CLOUD_NAME]=''
     [TARGET_RELEASE_NAME]=''
-    [VIP_ADDR_START]=10.5.100.0
+    [VIP_ADDR_START]=
     [CHARM_REVISIONS]=
     [CHARM_STORE]=ch:
 )

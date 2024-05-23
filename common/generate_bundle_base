@@ -10,6 +10,17 @@ declare -a overlay_opts=()
 update_master_opts ${MOD_PASSTHROUGH_OPTS[@]}
 
 vip_start=${MASTER_OPTS[VIP_ADDR_START]}
+if [[ -z $vip_start ]]; then
+    # prodstack
+    cidr=$(source ~/novarc; openstack subnet show subnet_${OS_USERNAME} -c cidr -f value 2>/dev/null)
+    if [[ -z $cidr ]]; then
+        # stsstack
+        cidr=$(source ~/novarc; openstack subnet show ${OS_USERNAME}_admin_subnet -c cidr -f value 2>/dev/null)
+    fi
+    if [[ -n $cidr ]]; then
+        vip_start=$(echo $cidr| sed -r 's/([0-9]+\.[0-9]+).+/\1/g').150.0
+    fi
+fi
 VIP_START_PREFIX=${vip_start%\.*}
 VIP_START_SUFFIX=${vip_start##*\.}
 
