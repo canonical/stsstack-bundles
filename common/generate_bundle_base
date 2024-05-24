@@ -12,10 +12,10 @@ update_master_opts ${MOD_PASSTHROUGH_OPTS[@]}
 vip_start=${MASTER_OPTS[VIP_ADDR_START]}
 if [[ -z $vip_start ]]; then
     # prodstack
-    cidr=$(source ~/novarc; openstack subnet show subnet_${OS_USERNAME} -c cidr -f value 2>/dev/null || true)
+    cidr=$(source ~/novarc; openstack subnet list --name subnet_${OS_USERNAME} -c Subnet -f value 2>/dev/null)
     if [[ -z $cidr ]]; then
         # stsstack
-        cidr=$(source ~/novarc; openstack subnet show ${OS_USERNAME}_admin_subnet -c cidr -f value 2>/dev/null || true)
+        cidr=$(source ~/novarc; openstack subnet list --name ${OS_USERNAME}_admin_subnet -c Subnet -f value 2>/dev/null)
     fi
     if [[ -n $cidr ]]; then
         vip_start=$(echo $cidr| sed -r 's/([0-9]+\.[0-9]+).+/\1/g').150.0
