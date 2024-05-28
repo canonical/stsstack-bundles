@@ -333,6 +333,7 @@ do
             # since --ovn adds --vault as a dep.
             if has_opt --vault || is_ml2_ovn; then
                 MOD_OVERLAYS+=( "openstack/vault-manila.yaml" )
+                MOD_OVERLAYS+=( "openstack/vault-manila-ganesha.yaml" )
             fi
             ;;
         --manila-ganesha-ha*)

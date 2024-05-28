@@ -1,0 +1,2 @@
+relations:
+  - ['manila-ganesha:certificates', 'vault:certificates']
