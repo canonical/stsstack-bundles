@@ -1,0 +1,6 @@
+applications:
+  ceph-csi:
+    options:
+      cephfs-enable: "true"
+relations:
+  - [ 'ceph-fs:ceph-mds', 'ceph-mon:mds']

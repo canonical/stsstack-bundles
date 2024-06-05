@@ -1,0 +1,12 @@
+applications:
+  ceph-csi:
+    charm: ceph-csi
+    channel: stable
+  kubernetes-control-plane:
+    options:
+      allow-privileged: "true"
+
+relations:
+  - [ 'kubernetes-control-plane:juju-info', 'ceph-csi:kubernetes' ]
+  - [ 'ceph-csi:ceph-client', 'ceph-mon:client']
+

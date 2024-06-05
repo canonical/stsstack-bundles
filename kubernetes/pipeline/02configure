@@ -80,7 +80,9 @@ do
         --ceph)
             conflicts_with $1 --rook-ceph
             MOD_OVERLAYS+=( "ceph/ceph.yaml" )
+            MOD_OVERLAYS+=( "ceph/ceph-juju-storage.yaml" )
             MOD_OVERLAYS+=( "kubernetes/k8s-ceph.yaml" )
+            MOD_OVERLAYS+=( "kubernetes/k8s-ceph-csi.yaml" )
             ;;
         --ceph-proxy)
             MOD_PARAMS[__CEPH_INTERFACE__]='ceph-proxy'
@@ -94,6 +96,7 @@ do
             fi
             MOD_OVERLAYS+=( "ceph/ceph-fs.yaml" )
             MOD_OVERLAYS+=( "ceph/ceph-fs-k8s.yaml" )
+            MOD_OVERLAYS+=( "kubernetes/k8s-cephfs-csi.yaml" )
             ;;
         --ceph-fs-ha*)
             get_units $1 __NUM_CEPH_FS_UNITS__ 3
