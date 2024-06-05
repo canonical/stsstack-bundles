@@ -257,11 +257,17 @@ fi
 
 if ! has_opt --*-ha*; then
     if [ -r ~/novarc ]; then
+        source ~/novarc
+        for name in ${OS_PROJECT_NAME}_port_sec_enabled net_${OS_USERNAME}-pse; do
+            if `openstack network show $name &>/dev/null`; then
+                NET_NAME=$name
+                break
+            fi
+        done
         echo "INFO: juju model will use network with port security enabled."
-        OS_PROJECT_NAME=`sed -r 's/.+OS_PROJECT_NAME=(.+)/\1/g;t;d' ~/novarc`
-        MOD_PASSTHROUGH_OPTS+=( --model-config "network=${OS_PROJECT_NAME}_port_sec_enabled" )
+        MOD_PASSTHROUGH_OPTS+=( --model-config "network=${NET_NAME}" )
     else
-        echo "WARNING: ~/novarc not found - unable to setup octavia tenant network"
+        echo "WARNING: ~/novarc not found - unable to setup kubernetes network"
     fi
 fi
 

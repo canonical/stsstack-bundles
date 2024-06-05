@@ -1,4 +1,4 @@
 #!/bin/sh -u
-profile=${1:-stsstack}
+profile=${1:-prodstack6}
 net_type=${2:-""}
 ./profiles/$profile $net_type
