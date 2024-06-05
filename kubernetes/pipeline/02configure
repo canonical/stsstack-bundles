@@ -173,7 +173,6 @@ do
             fi
             get_units $1 __NUM_K8S_CONTROL_PLANE_UNITS__ 3
             MOD_OVERLAYS+=( "kubernetes/k8s-control-plane-ha.yaml" )
-            check_hacluster_channel
             ;;
         --vault)
             MOD_OVERLAYS+=( "vault.yaml" )
