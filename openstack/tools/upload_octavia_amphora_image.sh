@@ -5,6 +5,7 @@
 
 declare release=
 declare image_format=
+declare profile=stsstack
 
 scriptpath=$(readlink --canonicalize $(dirname $0))
 
@@ -18,15 +19,20 @@ while (( $# > 0 )); do
             image_format=$2
             shift
             ;;
+        --profile)
+            profile=$2
+            shift
+            ;;
         --help|-h)
             cat <<EOF
 Usage:
 
-./tools/upload_octavia_amphora_image.sh --release RELEASE [--image-format FORMAT]
+./tools/upload_octavia_amphora_image.sh [--profile PROFILE] --release RELEASE [--image-format FORMAT]
 
 Options:
 
 --help | -h             This help
+--profile               Profile {stsstack, prodstack6, serverstack}
 --release | -r          The OpenStack release
 --image-format | -f     The image format {'qcow2', 'raw'}. The default
                         is qcow2.
@@ -56,7 +62,7 @@ ts=`sed -r "s/.+-([[:digit:]]+)-$release.+/\1/g;t;d" $tmp| sort -h| tail -n 1`
 img="`egrep "${ts}.+$release" $tmp| tail -n 1`"
 rm $tmp
 
-export SWIFT_IP="10.230.19.58"
+eval $(grep SWIFT_URI openstack/profiles/${profile})
 source ${scriptpath}/../profiles/common
 source ${scriptpath}/../novarc
 upload_image swift octavia-amphora $img $image_format

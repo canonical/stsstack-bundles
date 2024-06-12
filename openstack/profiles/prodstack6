@@ -5,7 +5,7 @@ CIDR=`openstack subnet show subnet_$OS_USERNAME -c cidr -f value`
 ABC=${CIDR%%.0*}
 
 [[ -z "$NAMESERVER" ]] && export NAMESERVER="91.189.91.131"
-[[ -z "$SWIFT_IP" ]] && export SWIFT_IP="10.140.56.22"
+[[ -z "$SWIFT_URI" ]] && export SWIFT_URI="https://radosgw.ps6.canonical.com"
 
 # Set defaults, if not already set.
 [[ -z "$GATEWAY" ]] && export GATEWAY="$GATEWAY"

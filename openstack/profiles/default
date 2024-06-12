@@ -6,7 +6,7 @@ install_packages
 
 # Set sts-stack overrides, if not already set.
 [[ -z "$NAMESERVER" ]] && export NAMESERVER="10.230.64.2"
-[[ -z "$SWIFT_IP" ]] && export SWIFT_IP="10.230.19.58"
+[[ -z "$SWIFT_URI" ]] && export SWIFT_URI="http://10.230.19.58"
 
 # Set defaults, if not already set.
 [[ -z "$GATEWAY" ]] && export GATEWAY="10.5.0.1"
