@@ -2,7 +2,7 @@
 
 # stsstack overrides
 [[ -z "$NAMESERVER" ]] && export NAMESERVER="10.230.64.2"
-[[ -z "$SWIFT_IP" ]] && export SWIFT_IP="10.230.19.58"
+[[ -z "$SWIFT_URI" ]] && export SWIFT_URI="http://10.230.19.58"
 
 export UNDERCLOUD_NETWORK_NAME="$(sed -E --quiet "s/.+OS_PROJECT_NAME=(.+)/\1_admin_net/p" ~/novarc)"
 

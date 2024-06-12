@@ -10,7 +10,7 @@ function upload_image {
     image_arch=${5:-"x86_64"}
 
     case "$src" in
-        swift) http_root="http://$SWIFT_IP:80/swift/v1/images";;
+        swift) http_root="${SWIFT_URI}/swift/v1/images";;
         cloudimages) http_root="http://cloud-images.ubuntu.com/${image_name}/current";;
     esac
 
