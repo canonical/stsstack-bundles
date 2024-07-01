@@ -5,8 +5,19 @@
 credentials=$(env | grep OS_ || true)
 
 if [[ -z $credentials ]];then
-    echo "Missing cloud credentials"
+    echo "Missing overcloud credentials"
     exit 1
+fi
+
+if [[ $OS_AUTH_URL == *keystone.ps6* ]] || [[ $OS_AUTH_URL == *10.230* ]];then
+    echo "Use the overcloud credentials, not undercloud"
+    exit 1
+fi
+
+HTTPS=false
+
+if [[ $OS_AUTH_URL == https://* ]];then
+    HTTPS=true
 fi
 
 check_app_exists () {
@@ -28,7 +39,14 @@ else
     cat idp-metadata.json | jq -r '."test-saml-idp1/0".results.output' > idp-metadata.xml
 fi
 
-juju attach-resource keystone-saml-mellon idp-metadata=./idp-metadata.xml
+IDP_XML=idp-metadata.xml
+
+if $HTTPS; then
+    sed 's/http:\/\/10/https:\/\/10/g' idp-metadata.xml > idp-metadata_https.xml
+    IDP_XML=idp-metadata_https.xml
+fi
+
+juju attach-resource keystone-saml-mellon idp-metadata=./$IDP_XML
 
 status='foo'
 while [[ $status != 'active' ]]; do
@@ -114,3 +132,4 @@ rm idp-metadata.json
 rm idp-metadata.xml
 rm sp-metadata.json
 rm sp-metadata.xml
+rm -f idp-metadata_https.xml
