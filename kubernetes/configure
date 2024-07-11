@@ -1,4 +1,11 @@
-#!/bin/bash -x
+#!/bin/bash
+
+profile=${1:-stsstack}
+
+if [[ $profile == "stsstack" ]]; then
+    echo "Configure k8s cluster with profile $profile. Use ./$0 prodstack6 to use prodstack6 profile"
+fi
+
 which kubectl || sudo snap install kubectl --classic
 mkdir -p ~/.kube
 kubecontrolplane_unit=$(juju status| sed -nr 's,(kubernetes-control-plane/[[:digit:]]+)\*.*,\1,p')
@@ -35,3 +42,48 @@ if [[ `juju status keystone --format=json 2>/dev/null| jq '.machines| length'` -
 fi
 
 kubectl --namespace kube-system get pods
+
+if [[ $profile == "stsstack" ]]; then
+    exit 0
+fi
+
+# Configure proxy and docker for all worker nodes
+for worker in $(juju status --format json | jq -r '.applications."kubernetes-worker".units | keys[]' | paste -sd " "); do
+    echo "Waiting worker $worker to be ready"
+    while [ "$(juju ssh $worker 'dpkg -l|grep containerd' &> /dev/null; echo $?)"  -ne 0 ]; do
+        sleep 5;
+        echo "Waiting for worker $worker to be online";
+    done
+    echo "done"
+done
+
+cat << EOF > $HOME/containerd-proxy.conf
+[Service]
+Environment="HTTP_PROXY=http://squid.internal:3128"
+Environment="HTTPS_PROXY=http://squid.internal:3128"
+Environment="NO_PROXY=127.0.0.1,10.0.0.0/8,192.168.0.0/16,172.16.0.0/12,registry.jujucharms.com,rocks.canonical.com,autocert.canonical.com,keystone.ps6.canonical.com,neutron.ps6.canonical.com,nova.ps6.canonical.com,glance.ps6.canonical.com,api.charmhub.io"
+EOF
+
+echo -n "Insert your hub.docker.com username:"
+read docker_username
+echo  -n "Insert your hub.docker.com password:"
+read docker_password
+
+cat << EOF > $HOME/docker.conf
+
+[plugins."io.containerd.grpc.v1.cri".registry.configs."registry-1.docker.io".auth]
+username = "$docker_username"
+password = "$docker_password"
+EOF
+
+for worker in $(juju status --format json | jq -r '.applications."kubernetes-worker".units | keys[]' | paste -sd " "); do
+    juju ssh $worker 'sudo mkdir -p /etc/systemd/system/containerd.service.d'
+    juju scp $HOME/containerd-proxy.conf $worker:
+    juju ssh $worker 'sudo mv $HOME/containerd-proxy.conf /etc/systemd/system/containerd.service.d/proxy.conf'
+
+    juju scp $HOME/docker.conf $worker:
+    juju ssh $worker 'sudo cat $HOME/docker.conf | sudo tee -a /etc/containerd/config.toml'
+
+    juju ssh $worker "sudo systemctl daemon-reload"
+    juju ssh $worker "sudo systemctl restart containerd"
+done
