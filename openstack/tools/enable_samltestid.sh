@@ -9,14 +9,14 @@ if [[ -z $credentials ]];then
     exit 1
 fi
 
-if [[ $OS_AUTH_URL == *keystone.ps6* ]] || [[ $OS_AUTH_URL == *10.230* ]];then
+if [[ $OS_AUTH_URL =~ keystone.ps6 ]] || [[ $OS_AUTH_URL =~ 10.230 ]];then
     echo "Use the overcloud credentials, not undercloud"
     exit 1
 fi
 
 HTTPS=false
 
-if [[ $OS_AUTH_URL == https://* ]];then
+if [[ $OS_AUTH_URL =~ ^https:// ]];then
     HTTPS=true
 fi
 
