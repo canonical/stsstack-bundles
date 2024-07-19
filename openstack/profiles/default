@@ -90,8 +90,7 @@ set_img_properties ()
 # Download images if not already present
 mkdir -vp ~/images
 upload_image cloudimages jammy jammy-server-cloudimg-amd64.img &
-${BARE_METAL:-false} || upload_image swift cirros cirros-0.4.0-x86_64-disk.img &
-${BARE_METAL:-false} || upload_image swift cirros2 cirros-0.3.5-x86_64-disk.img &
+upload_image cirros cirros-0.6.2 0.6.2/cirros-0.6.2-x86_64-disk.img &
 wait
 # Set properties needed by octavia-disk-image-retrofit (See LP: #1842430)
 set_img_properties jammy 22.04 jammy-server-cloudimg-amd64.img &

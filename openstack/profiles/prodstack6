@@ -1,8 +1,11 @@
 #!/bin/bash -ex
 source ~/novarc
-GATEWAY=`openstack subnet show subnet_$OS_USERNAME -c gateway_ip -f value`
-CIDR=`openstack subnet show subnet_$OS_USERNAME -c cidr -f value`
-ABC=${CIDR%%.0*}
+# this is currently assumed to be a /25 network
+EXT_SUBNET=subnet_${OS_USERNAME}-psd-extra
+CIDR=`openstack subnet show $EXT_SUBNET -c cidr -f value`
+ABC=${CIDR%.0*}
+
+export GATEWAY=`openstack subnet show $EXT_SUBNET -c gateway_ip -f value`
 
 [[ -z "$NAMESERVER" ]] && export NAMESERVER="91.189.91.131"
 [[ -z "$SWIFT_IP" ]] && export SWIFT_IP="10.140.56.22"
@@ -10,9 +13,9 @@ ABC=${CIDR%%.0*}
 # Set defaults, if not already set.
 [[ -z "$GATEWAY" ]] && export GATEWAY="$GATEWAY"
 [[ -z "$CIDR_EXT" ]] && export CIDR_EXT="$CIDR"
-[[ -z "$FIP_RANGE" ]] && export FIP_RANGE="${ABC}.200:${ABC}.254"
+[[ -z "$FIP_RANGE" ]] && export FIP_RANGE="${ABC}.20:${ABC}.126"
 [[ -z "$CIDR_PRIV" ]] && export CIDR_PRIV="192.168.21.0/24"
 
-export UNDERCLOUD_NETWORK_NAME="$(sed -E --quiet "s/.+OS_PROJECT_NAME=(.+)_project/net_\1/p" ~/novarc)"
+export UNDERCLOUD_NETWORK_NAME="$(sed -E --quiet "s/.+OS_PROJECT_NAME=(.+)_project/net_\1-psd-extra/p" ~/novarc)"
 
 ./profiles/default "$@"

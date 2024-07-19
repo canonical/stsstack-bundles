@@ -12,12 +12,14 @@ function upload_image {
     case "$src" in
         swift) http_root="http://$SWIFT_IP:80/swift/v1/images";;
         cloudimages) http_root="http://cloud-images.ubuntu.com/${image_name}/current";;
+        cirros) http_root="http://download.cirros-cloud.net";;
     esac
 
     mkdir -vp ~/images
 
-    [ -f ~/images/$image_file ] || {
-        wget -O ~/images/$image_file ${http_root}/${image_file}
+    image_file_base=`basename $image_file`
+    [ -f ~/images/$image_file_base ] || {
+        wget -O ~/images/$image_file_base ${http_root}/${image_file}
     }
 
     # Downloaded images are in qcow2 format already, so we
@@ -32,7 +34,7 @@ function upload_image {
     openstack image show $image_name || {
         openstack image create --public \
             --container-format=bare --disk-format=$image_format \
-            --file=${HOME}/images/$image_file  $image_name \
+            --file=${HOME}/images/$image_file_base  $image_name \
             --property architecture=$image_arch
     }
 }
