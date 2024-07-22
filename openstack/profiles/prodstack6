@@ -5,7 +5,7 @@ EXT_SUBNET=subnet_${OS_USERNAME}-psd-extra
 CIDR=`openstack subnet show $EXT_SUBNET -c cidr -f value`
 # We reserve the last 64 of the /25 to FIP.
 # We get the last usable IP on the subnet
-FIP_RANGE_LASTIP=`openstack subnet show subnet_stg-reproducer-dnegreira-psd-extra -c allocation_pools -f json | jq -r '.allocation_pools[0].end'`
+FIP_RANGE_LASTIP=`openstack subnet show ${EXT_SUBNET} -c allocation_pools -f json | jq -r '.allocation_pools[0].end'`
 # Get the first major subnet information, IE, 10.149.123 on a 10.149.123.0/25 subnet
 SUBNET_RANGE=${FIP_RANGE_LASTIP%.*}
 
