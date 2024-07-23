@@ -3,7 +3,15 @@ source ~/novarc
 # this is currently assumed to be a /25 network
 EXT_SUBNET=subnet_${OS_USERNAME}-psd-extra
 CIDR=`openstack subnet show $EXT_SUBNET -c cidr -f value`
-ABC=${CIDR%.0*}
+# We reserve the last 64 of the /25 to FIP.
+# We get the last usable IP on the subnet
+FIP_RANGE_LASTIP=`openstack subnet show ${EXT_SUBNET} -c allocation_pools -f json | jq -r '.allocation_pools[0].end'`
+# Get the first major subnet information, IE, 10.149.123 on a 10.149.123.0/25 subnet
+SUBNET_RANGE=${FIP_RANGE_LASTIP%.*}
+
+# We figure out from the last usable IP the last 64 usable IPs and concatenate it into the SUBNET_RANGE.
+FIP_RANGE_FIRSTIP="${SUBNET_RANGE}.$((${FIP_RANGE_LASTIP##*.} - 64))"
+
 
 export GATEWAY=`openstack subnet show $EXT_SUBNET -c gateway_ip -f value`
 
@@ -13,7 +21,7 @@ export GATEWAY=`openstack subnet show $EXT_SUBNET -c gateway_ip -f value`
 # Set defaults, if not already set.
 [[ -z "$GATEWAY" ]] && export GATEWAY="$GATEWAY"
 [[ -z "$CIDR_EXT" ]] && export CIDR_EXT="$CIDR"
-[[ -z "$FIP_RANGE" ]] && export FIP_RANGE="${ABC}.20:${ABC}.126"
+[[ -z "$FIP_RANGE" ]] && export FIP_RANGE="${FIP_RANGE_FIRSTIP}:${FIP_RANGE_LASTIP}"
 [[ -z "$CIDR_PRIV" ]] && export CIDR_PRIV="192.168.21.0/24"
 
 export UNDERCLOUD_NETWORK_NAME="$(sed -E --quiet "s/.+OS_PROJECT_NAME=(.+)_project/net_\1-psd-extra/p" ~/novarc)"
