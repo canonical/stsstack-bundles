@@ -24,6 +24,7 @@ export GATEWAY=`openstack subnet show $EXT_SUBNET -c gateway_ip -f value`
 [[ -z "$FIP_RANGE" ]] && export FIP_RANGE="${FIP_RANGE_FIRSTIP}:${FIP_RANGE_LASTIP}"
 [[ -z "$CIDR_PRIV" ]] && export CIDR_PRIV="192.168.21.0/24"
 
-export UNDERCLOUD_NETWORK_NAME="$(sed -E --quiet "s/.+OS_PROJECT_NAME=(.+)_project/net_\1-psd-extra/p" ~/novarc)"
+export UNDERCLOUD_OAM_NET="$(sed -E --quiet "s/.+OS_PROJECT_NAME=(.+)_project/net_\1-psd/p" ~/novarc)"
+export UNDERCLOUD_EXT_NET="$(sed -E --quiet "s/.+OS_PROJECT_NAME=(.+)_project/net_\1-psd-extra/p" ~/novarc)"
 
 ./profiles/default "$@"
