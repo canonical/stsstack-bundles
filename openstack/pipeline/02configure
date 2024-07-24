@@ -36,6 +36,10 @@ MOD_OVERLAYS+=(
 # Default to OVN for > Train
 if has_min_release ussuri && ! has_opt --ml2-ovs; then
     set -- $@ --ml2-ovn && cache $@
+    # The following will be set anyway by ml2-ovn overlay but we do here since
+    # there will be other overlays that depend on it and if they are executed
+    # first (before it is set) they will not use it.
+    set -- $@ --vault && cache $@
 fi
 
 if is_neutron_gateway_required; then
