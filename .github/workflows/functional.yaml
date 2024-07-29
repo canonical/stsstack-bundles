@@ -1,0 +1,40 @@
+name: Functional Testing
+
+on:
+    pull_request:
+        branches:
+            - main
+
+jobs:
+    functional:
+        name: Run functional tests
+        runs-on: ubuntu-latest
+        steps:
+
+            - name: Get sources
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - uses: canonical/setup-lxd@v0.1.1
+
+            - name: Install Juju
+              run: |
+                set -e -u -x
+                sudo snap install juju --channel 2.9 --classic
+
+            - name: Bootstrap controller
+              run: |
+                set -e -u -x
+                juju bootstrap localhost controller
+                juju controllers
+                juju status --model controller
+
+            - name: Focal / Ussuri
+              run: |
+                set -e -u -x
+                cd openstack
+                ./generate-bundle.sh --name functional --series focal --release ussuri --run
+                juju status
+                juju switch default
+                juju destroy-model --yes --destroy-storage --force --no-wait functional
