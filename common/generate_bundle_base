@@ -23,7 +23,9 @@ if [[ -z $vip_start ]] && [[ -e ~/novarc ]]; then
         # Our primary network is /25 and we are arbitrarily using the
         # last 20 addresses for vips which is prone to collisions but
         # we have no alternative currently.
-        vip_start=$(echo $cidr| sed -r 's/([0-9]+\.[0-9]+\.[0-9]+).+/\1/g').106
+        net_start=$(awk -F'.' '/HostMin/{print $NF}' <<<$(ipcalc -b $cidr))
+        net_start_suffix=${net_start##*\.}
+        vip_start=$(echo $cidr| sed -r 's/([0-9]+\.[0-9]+\.[0-9]+).+/\1/g').$((net_start_suffix + 105))
     fi
 fi
 VIP_START_PREFIX=${vip_start%\.*}
