@@ -340,8 +340,12 @@ do
                 MOD_OVERLAYS+=( "openstack/vault-manila-ganesha.yaml" )
             fi
             ;;
+	--manila-ha*)
+	    set -- $@ --manila-ganesha-ha && cache $@
+	    ;;
         --manila-ganesha-ha*)
             get_units $1 __NUM_MANILA_GANESHA_UNITS__ 3
+            get_units $1 __NUM_MANILA_UNITS__ 3
             MOD_OVERLAYS+=( "openstack/manila-ganesha-ha.yaml" )
             set -- $@ --manila && cache $@
             ;;
