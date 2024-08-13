@@ -89,10 +89,12 @@ set_img_properties ()
 
 # Download images if not already present
 mkdir -vp ~/images
+upload_image cloudimages focal focal-server-cloudimg-amd64.img &
 upload_image cloudimages jammy jammy-server-cloudimg-amd64.img &
 upload_image cirros cirros-0.6.2 0.6.2/cirros-0.6.2-x86_64-disk.img &
 wait
 # Set properties needed by octavia-disk-image-retrofit (See LP: #1842430)
+set_img_properties focal 20.04 focal-server-cloudimg-amd64.img &
 set_img_properties jammy 22.04 jammy-server-cloudimg-amd64.img &
 wait
 
