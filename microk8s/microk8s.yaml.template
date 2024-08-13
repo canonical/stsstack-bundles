@@ -5,3 +5,7 @@ applications:
     num_units: __NUM_MICROK8S_UNITS__
     constraints: mem=8G
     expose: true
+    options:
+      containerd_http_proxy: __CONTAINERD_PROXY__
+      containerd_https_proxy: __CONTAINERD_PROXY__
+      containerd_no_proxy: __CONTAINERD_NO_PROXY__

@@ -1,6 +1,10 @@
 applications:
   containerd:
     charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__containerd
+    options:
+      http_proxy: __CONTAINERD_PROXY__
+      https_proxy: __CONTAINERD_PROXY__
+      no_proxy: __CONTAINERD_NO_PROXY__
 relations:
  - [ 'containerd:containerd', 'kubernetes-worker:container-runtime' ]
  - [ 'containerd:containerd', 'kubernetes-control-plane:container-runtime' ]

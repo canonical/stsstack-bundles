@@ -67,6 +67,12 @@ if ! is_hyperconverged; then
     fi
 fi
 
+# Automatically use proxy if in prodstack only
+if $(timeout 1s getent hosts squid.internal &> /dev/null) && [ -z "${MOD_PARAMS[__CONTAINERD_PROXY__]}" ]; then
+    MOD_MSGS[1_proxy.0]='PROXY: Hostname squid.internal resolves, setting containerd proxy to http://squid.internal:3128'
+    MOD_PARAMS[__CONTAINERD_PROXY__]=http://squid.internal:3128
+fi
+
 # Skip processing input if it includes exclusive passthrough options
 ! has_excl_passthrough_opt && \
 while (($# > 0))
@@ -109,6 +115,14 @@ do
         --containerd)
             conflicts_with $1 --docker
             MOD_OVERLAYS+=( "kubernetes/k8s-containerd.yaml" )
+            ;;
+        --containerd-proxy)  #__OPT__type:<str> (default="" unless the hostname squid.internal resolves, then it's http://squid.internal:3128)
+            MOD_PARAMS[__CONTAINERD_PROXY__]=$2
+            shift
+            ;;
+        --containerd-no-proxy)  #__OPT__type:<str> (default=127.0.0.1,localhost,::1,10.149.0.0/16,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16)
+            MOD_PARAMS[__CONTAINERD_NO_PROXY__]=$2
+            shift
             ;;
         --calico)
             conflicts_with $1 --canal
