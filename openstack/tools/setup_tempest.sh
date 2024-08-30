@@ -9,15 +9,15 @@ source ${scriptpath}/../novarc
 # TODO: remove fallbacks once we move to queens (they are there for clients still on ocata)
 ext_net=$(openstack network list --name ext_net -f value -c ID 2>/dev/null || openstack network list| awk '$4=="ext_net" {print $2}')
 router=$(openstack router list --name provider-router -f value -c ID 2>/dev/null || openstack router list| awk '$4=="provider-router" {print $2}')
-keystone=$(juju run --unit keystone/0 unit-get private-address)
-ncc=$(juju run --unit nova-cloud-controller/0 unit-get private-address)
+keystone=$(juju exec --unit keystone/0 unit-get private-address)
+ncc=$(juju exec --unit nova-cloud-controller/0 unit-get private-address)
 http=${OS_AUTH_PROTOCOL:-http}
 if is_ksv3; then
     default_domain_id=$(openstack domain list | awk '/default/ {print $2}')
 else
     dashboard="localhost"
     set +e
-    dashboard_ip=$(juju run --unit openstack-dashboard/0 unit-get private-address)
+    dashboard_ip=$(juju exec --unit openstack-dashboard/0 unit-get private-address)
     if [ "$?" == "1" ]; then
         dashboard=$dashboard_ip
     fi

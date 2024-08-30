@@ -21,7 +21,7 @@ OS_PROJECT_DOMAIN_NAME=service_domain
 OS_USERNAME=octavia
 OS_PROJECT_NAME=services
 OS_USER_DOMAIN_NAME=service_domain
-OS_PASSWORD=$(juju run --unit octavia/0 "grep -v "auth" /etc/octavia/octavia.conf | grep password" | awk '{print $3}')
+OS_PASSWORD=$(juju exec --unit octavia/0 "grep -v "auth" /etc/octavia/octavia.conf | grep password" | awk '{print $3}')
 EOF
 source /tmp/novarc.services
 

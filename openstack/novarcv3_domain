@@ -6,7 +6,7 @@ done
 keystone_addr=`juju config keystone vip`
 # TODO(hopem): remove fix for bug 1789415 once released
 if [ -z "$keystone_addr" ] || [ "$keystone_addr" = "<nil>" ]; then
-  keystone_addr=`juju run --unit keystone/0 unit-get private-address`
+  keystone_addr=`juju exec --unit keystone/0 unit-get private-address`
 fi
 
 ssl_cert=`juju config keystone ssl_cert`
