@@ -56,8 +56,8 @@ unset _OS_PARAMS
 
 # If user was specified use it
 if [[ $# -gt 1 && $1 = --service ]]; then
-    RELATION_ID=$(juju run --unit $2/leader -- relation-ids identity-service | cut -d : -f 2)
-    readarray -t CREDENTIALS < <(juju run --unit $2/leader -- relation-get --relation ${RELATION_ID} --format json - keystone/0)
+    RELATION_ID=$(juju exec --unit $2/leader -- relation-ids identity-service | cut -d : -f 2)
+    readarray -t CREDENTIALS < <(juju exec --unit $2/leader -- relation-get --relation ${RELATION_ID} --format json - keystone/0)
 
     export OS_USERNAME=$(echo ${CREDENTIALS} | jq --raw-output .service_username)
     export OS_USER_DOMAIN_NAME=$(echo ${CREDENTIALS} | jq --raw-output .service_domain)
@@ -74,7 +74,7 @@ else
     # from the leader databag.
     _CONFIG_PASSWD="$(juju config keystone admin-password| awk '{print tolower($0)}')"
     if [ "${_CONFIG_PASSWD}" == "none" ] || [ "${_CONFIG_PASSWD}" == "" ]; then
-        export OS_PASSWORD=$(juju run -u keystone/leader leader-get admin_passwd)
+        export OS_PASSWORD=$(juju exec --unit keystone/leader leader-get admin_passwd)
     else
     export OS_PASSWORD="$(juju config keystone admin-password)"
     fi
