@@ -5,6 +5,7 @@ declare -A MASTER_OPTS=(
     [DEFAULT_BINDING]=
     [HYPERCONVERGED_DEPLOYMENT]=false
     [MODEL_CONFIG]='test-mode=true'
+    [MODEL_CONSTRAINTS]=''
     [BUNDLE_NAME]=''
     [CLOUD_NAME]=''
     [TARGET_RELEASE_NAME]=''
@@ -178,6 +179,14 @@ filter_master_opts ()
                     MASTER_OPTS[MODEL_CONFIG]="$2"
                 else
                     MASTER_OPTS[MODEL_CONFIG]+=" $2"
+                fi
+                shift
+                ;;
+            --model-constraints)
+                if [ -z "${MASTER_OPTS[MODEL_CONSTRAINTS]}" ]; then
+                    MASTER_OPTS[MODEL_CONSTRAINTS]="$2"
+                else
+                    MASTER_OPTS[MODEL_CONSTRAINTS]+=" $2"
                 fi
                 shift
                 ;;
