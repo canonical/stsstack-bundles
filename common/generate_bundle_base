@@ -42,6 +42,12 @@ if [ -n "${MASTER_OPTS[MODEL_CONFIG]}" ]; then
     juju model-config ${MASTER_OPTS[MODEL_CONFIG]}
 fi
 
+if [ -n "${MASTER_OPTS[MODEL_CONSTRAINTS]}" ]; then
+    juju set-model-constraints ${MASTER_OPTS[MODEL_CONSTRAINTS]}
+else
+    juju set-model-constraints root-disk-source=volume
+fi
+
 if has_opt --list; then
     state_root=`get_bundle_state_root`
     if [ -d "$state_root" ]; then
