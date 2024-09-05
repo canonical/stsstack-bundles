@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
-
+# pylint: disable=invalid-name
+"""
+Parse bundle information.
+"""
 import argparse
-import yaml
 import re
 import sys
 
-lpid = r"([~a-z0-9\-]+/)?"
-charm = r"([a-z0-9\-]+)"
-charm_match = re.compile(r".*cs:{}{}-([0-9]+)\s*$".format(lpid, charm))
-status_match = re.compile("^App.*Version.*Status")
-empty_line = re.compile("^\s*$")
+import yaml
+
+lpid_expr = r"([~a-z0-9\-]+/)?"
+charm_name_expr = r"([a-z0-9\-]+)"
+charm_expr = re.compile(fr".*cs:{lpid_expr}{charm_name_expr}-([0-9]+)\s*$")
+status_match = re.compile(r"^App.*Version.*Status")
+empty_line = re.compile(r"^\s*$")
 
 
 def parse_arguments():
+    """ Parse cli args. """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "FILE",
@@ -26,6 +31,7 @@ def parse_arguments():
 
 
 def get_charms(bundle):
+    """ Get charms from bundle. """
     charms = {}
     for app in bundle['applications']:
         charms[app] = bundle['applications'][app]['charm']
@@ -33,21 +39,23 @@ def get_charms(bundle):
 
 
 def process_bundle(bundle):
+    """ Extra charm info from bundle. """
     versions_found = False
     charms = get_charms(bundle)
-    for app in charms:
-        ret = charm_match.match(charms[app])
+    for appinfo in charms.values():
+        ret = charm_expr.match(appinfo)
         if ret:
             versions_found = True
             _charm = ret.group(2)
             if ret.group(1):
-                _charm = "{}{}".format(ret.group(1), _charm)
+                _charm = f"{ret.group(1)}{_charm}"
 
-            print(_charm, charms[app])
+            print(_charm, appinfo)
     return versions_found
 
 
 def process_status(model_status):
+    """ Extract charm versions from model status. """
     versions_found = False
     processing = False
     for line in model_status:
@@ -58,19 +66,19 @@ def process_status(model_status):
             processing = False
             continue
         if processing:
-            ret = [l.strip() for l in line.split()]
-            version = ret[1]
+            ret = line.strip().split()
             charm = ret[4]
             store = ret[5]
             rev = ret[6]
             if store == 'jujucharms':
                 versions_found = True
-                print("{} cs:{}-{}".format(charm, charm, rev))
+                print(f"{charm} cs:{charm}-{rev}")
 
     return versions_found
 
 
 def process(bundle_file, options):
+    """ Process a bundle. """
     bundle = {}
     versions_found = False
     # Process revisions file assuming it is an exported bundle in yaml
@@ -78,7 +86,8 @@ def process(bundle_file, options):
     try:
         bundle = yaml.load(bundle_file, Loader=yaml.SafeLoader)
     except yaml.scanner.ScannerError:
-        sys.stderr.write("INFO: input file does not appear to be in YAML format")
+        sys.stderr.write("INFO: input file does not appear to be in YAML "
+                         "format\n")
     if 'applications' in bundle:
         if options.get_charms:
             versions_found = process_bundle(bundle)
@@ -91,19 +100,15 @@ def process(bundle_file, options):
             versions_found = process_status(model_status)
 
     if not versions_found:
-        sys.stderr.write("WARNING: no valid charm revisions found in {}\n\n".
-                         format(bundle_file.name))
-
-
-def main():
-    options = parse_arguments()
-    if options.FILE == "-":
-        with sys.stdin as bundle:
-            process(bundle, options)
-    else:
-        with open(options.FILE) as bundle:
-            process(bundle, options)
+        sys.stderr.write(f"WARNING: no valid charm revisions found in "
+                         f"{bundle_file.name}\n\n")
 
 
 if __name__ == "__main__":
-    main()
+    _options = parse_arguments()
+    if _options.FILE == "-":
+        with sys.stdin as _bundle:
+            process(_bundle, _options)
+    else:
+        with open(_options.FILE, encoding='utf-8') as _bundle:
+            process(_bundle, _options)
