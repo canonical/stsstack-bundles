@@ -9,3 +9,31 @@ target=$series
 [ -z "$pocket" ] || target=${target}-$pocket
 target=${target}:${MOD_PARAMS[__MICROK8S_CHANNEL__]}
 MOD_PASSTHROUGH_OPTS+=( --release-name $target )
+
+# Automatically use proxy if in prodstack only
+if $(timeout 1s getent hosts squid.internal &> /dev/null) && [ -z "${MOD_PARAMS[__CONTAINERD_PROXY__]}" ]; then
+    MOD_MSGS[1_proxy.0]='PROXY: squid.internal exists, setting containerd proxy to http://squid.internal:3128'
+    MOD_PARAMS[__CONTAINERD_PROXY__]=http://squid.internal:3128
+fi
+
+# Skip processing input if it includes exclusive passthrough options
+! has_excl_passthrough_opt && \
+while (($# > 0))
+do
+    case "$1" in
+        --containerd-proxy)  #__OPT__type:<str> (default="" unless the hostname squid.internal resolves, then it's http://squid.internal:3128)
+            MOD_PARAMS[__CONTAINERD_PROXY__]=$2
+            shift
+            ;;
+        --containerd-no-proxy)  #__OPT__type:<str> (default=127.0.0.1,localhost,::1,10.149.0.0/16,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16)
+            MOD_PARAMS[__CONTAINERD_NO_PROXY__]=$2
+            shift
+            ;;
+        *)
+            echo "ERROR: invalid input '$1'"
+            _usage
+            exit 1
+            ;;
+    esac
+    shift
+done

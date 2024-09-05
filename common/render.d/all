@@ -45,7 +45,8 @@ render_mod_params ()
 
     if ((${#MOD_PARAMS[@]})); then
         for p in ${!MOD_PARAMS[@]}; do
-            echo -n "-e 's,$p,${MOD_PARAMS[$p]},g' " >> $config_renderer
+            # Escape any comma characters in the value, otherwise it breaks
+            echo -n "-e 's,$p,${MOD_PARAMS[$p]//,/\\,},g' " >> $config_renderer
             echo "${p}: \"${MOD_PARAMS[$p]}\"" >> $INTERNAL_BUNDLE_CONFIG
         done
     fi
