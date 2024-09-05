@@ -46,6 +46,9 @@ EOF
 while (($# > 0))
 do
     case "$1" in
+        --debug)
+           set -x
+           ;;
         --func-test-target)
            FUNC_TEST_TARGET=$2
            shift
@@ -72,8 +75,6 @@ do
     esac
     shift
 done
-
-set -x
 
 source ~/novarc
 export {,TEST_}CIDR_EXT=`openstack subnet show subnet_${OS_USERNAME}-psd-extra -c cidr -f value`
