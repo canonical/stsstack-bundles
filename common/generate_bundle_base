@@ -9,8 +9,9 @@ declare -a overlay_opts=()
 # Catch any changes/additions to master opts
 update_master_opts ${MOD_PASSTHROUGH_OPTS[@]}
 
+type=$(get_cloud_type)
 vip_start=${MASTER_OPTS[VIP_ADDR_START]}
-if [[ -z $vip_start ]] && [[ -e ~/novarc ]]; then
+if [[ -z $vip_start ]] && [[ -e ~/novarc ]] && [[ $type = openstack  ]]; then
     # prodstack
     cidr=$(source ~/novarc; openstack subnet show subnet_${OS_USERNAME}-psd -c cidr -f value 2>/dev/null)
     if [[ -z $cidr ]]; then
