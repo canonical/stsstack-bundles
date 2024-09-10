@@ -12,10 +12,13 @@ update_master_opts ${MOD_PASSTHROUGH_OPTS[@]}
 vip_start=${MASTER_OPTS[VIP_ADDR_START]}
 if [[ -z $vip_start ]] && [[ -e ~/novarc ]]; then
     # prodstack
-    cidr=$(source ~/novarc; openstack subnet show subnet_${OS_USERNAME}-psd -c cidr -f value 2>/dev/null)
+    cidr=$(source ~/novarc; openstack subnet show subnet_${OS_USERNAME}-psd \
+                            -c cidr -f value 2>/dev/null)
     if [[ -z $cidr ]]; then
         # stsstack
-        cidr=$(source ~/novarc; openstack subnet show ${OS_USERNAME}_admin_subnet -c cidr -f value 2>/dev/null)
+        cidr=$(source ~/novarc; openstack subnet show \
+                                ${OS_USERNAME}_admin_subnet \
+                                -c cidr -f value 2>/dev/null)
         if [[ -n $cidr ]]; then
             vip_start=$(echo $cidr| sed -r 's/([0-9]+\.[0-9]+).+/\1/g').150.0
         fi
@@ -24,7 +27,9 @@ if [[ -z $vip_start ]] && [[ -e ~/novarc ]]; then
         # last 20 addresses for vips which is prone to collisions but
         # we have no alternative currently.
         net_end=$(awk -F'.' '/HostMax/{print $NF}' <<<$(ipcalc -b $cidr))
-        vip_start=$(echo $cidr| sed -r 's/([0-9]+\.[0-9]+\.[0-9]+).+/\1/g').$((net_end - 19))
+        vip_start=$(echo $cidr|
+                    sed -r 's/([0-9]+\.[0-9]+\.[0-9]+).+/\1/g').$((net_end -
+                    19))
     fi
 fi
 VIP_START_PREFIX=${vip_start%\.*}
@@ -67,7 +72,8 @@ finish ()
 {
     local target
 
-    echo "${MOD_DIR}/generate-bundle.sh ${CACHED_STDIN[@]}" > ${bundles_dir}/generate-command
+    echo "${MOD_DIR}/generate-bundle.sh ${CACHED_STDIN[@]}" > \
+            ${bundles_dir}/generate-command
     if has_opt --replay; then
         target=${bundles_dir}/command
         echo -e "INFO: replaying last known command (from $target)\n"
@@ -160,20 +166,27 @@ aggregate_mysql_interface_parts $bundles_dir/o
 # generate bundle list
 base_bundle=$bundles_dir/`basename $bundle`
 overlay_list+=( $base_bundle )
-readarray -t application_list < <("$MOD_DIR/../tools/juju-bundle-applications.py" ${overlay_list[@]})
+readarray -t \
+    application_list < <("$MOD_DIR/../tools/juju-bundle-applications.py" \
+    ${overlay_list[@]})
 
 # Generate placement overlay for use with MAAS provider
 if ${MASTER_OPTS[HYPERCONVERGED_DEPLOYMENT]}; then
-    cp  $MOD_DIR/overlays/unit_placement/header.yaml.template $bundles_dir/unit-placement.yaml
+    cp $MOD_DIR/overlays/unit_placement/header.yaml.template \
+       $bundles_dir/unit-placement.yaml
     if [[ $MOD_NAME = openstack ]]; then
         # these two represent total machines since e.g. ceph is deployed on compute but compute and gateway are never colocated
-        num_placement_machines=$((${MOD_PARAMS[__NUM_NEUTRON_GATEWAY_UNITS__]}+${MOD_PARAMS[__NUM_COMPUTE_UNITS__]}))
+        num_placement_machines=$((${MOD_PARAMS[__NUM_NEUTRON_GATEWAY_UNITS__]}+
+                                    ${MOD_PARAMS[__NUM_COMPUTE_UNITS__]}))
     elif [[ $MOD_NAME = kubernetes ]]; then
-        num_placement_machines=$((${MOD_PARAMS[__NUM_K8S_CONTROL_PLANE_UNITS__]}+${MOD_PARAMS[__NUM_K8S_WORKER_UNITS__]}))
+        num_placement_machines=\
+            $((${MOD_PARAMS[__NUM_K8S_CONTROL_PLANE_UNITS__]}+
+                ${MOD_PARAMS[__NUM_K8S_WORKER_UNITS__]}))
     elif [[ $MOD_NAME = ceph ]]; then
         num_placement_machines=$((${MOD_PARAMS[__NUM_CEPH_OSD_UNITS__]}))
     else
-        echo "ERROR: module '$MOD_NAME' does not yet have support for hyperconverged mode" 1>&2
+        echo -n "ERROR: module '$MOD_NAME'" 1>&2
+        echo " does not yet have support for hyperconverged mode" 1>&2
         exit 1
     fi
     # detect all apps used and generate placement info by doing:
@@ -181,33 +194,39 @@ if ${MASTER_OPTS[HYPERCONVERGED_DEPLOYMENT]}; then
     #  * search unit_placement template with same name
     for app in ${application_list[@]}; do
         # filter juju keywords
-        [[ $app == "options" ]] || [[ $app == "to" ]] || [[ $app == "storage" ]] && continue
+        [[ $app =~ ^(options|to|storage)$ ]] && continue
         app_placement=${app}.yaml
         t=$MOD_DIR/overlays/unit_placement/${app_placement}.template
         [ -r "$t" ] || continue
         # load template
         cp $t $PLACEMENT_OVERLAYS_DIR/$app_placement
         # apply all renderers
-        render_placement_units_lxd $PLACEMENT_OVERLAYS_DIR/$app_placement $num_placement_machines
-        render_placement_units_metal $PLACEMENT_OVERLAYS_DIR/$app_placement $num_placement_machines
+        render_placement_units_lxd $PLACEMENT_OVERLAYS_DIR/$app_placement \
+                                   $num_placement_machines
+        render_placement_units_metal $PLACEMENT_OVERLAYS_DIR/$app_placement \
+                                     $num_placement_machines
         render $PLACEMENT_OVERLAYS_DIR/$app_placement
         # add to master placement overlay
-        cat $PLACEMENT_OVERLAYS_DIR/$app_placement >> $bundles_dir/unit-placement.yaml
+        cat $PLACEMENT_OVERLAYS_DIR/$app_placement >> \
+                $bundles_dir/unit-placement.yaml
     done
     # finally render master machine list
-    render_placement_machines $bundles_dir/unit-placement.yaml $num_placement_machines
+    render_placement_machines $bundles_dir/unit-placement.yaml \
+                              $num_placement_machines
     render $bundles_dir/unit-placement.yaml
     # and add to list of overlays
     overlay_opts+=( --overlay $bundles_dir/unit-placement.yaml )
 
     # add default binding to all applications
     bindings="\    bindings:\n      '': ${MASTER_OPTS[DEFAULT_BINDING]}"
-    find $bundles_dir -name \*.yaml| xargs -l sed -i -r "/^\s+charm:.+/a$bindings"
+    find $bundles_dir -name \*.yaml|\
+        xargs -l sed -i -r "/^\s+charm:.+/a$bindings"
 fi
 
 ((${#overlay_opts[@]})) && overlay_opts+=("")  # right padding
 
-echo -e "juju deploy${JUJU_DEPLOY_OPTS} ${base_bundle}${overlay_opts[@]:- }\n " > ${bundles_dir}/command
+echo -e "juju deploy${JUJU_DEPLOY_OPTS} \
+    ${base_bundle}${overlay_opts[@]:- }\n " > ${bundles_dir}/command
 finish
 
 for f in $INTERNAL_BUNDLE_CONFIG; do
