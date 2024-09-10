@@ -9,6 +9,7 @@ FUNC_TEST_PR=
 FUNC_TEST_TARGET=
 MODIFY_BUNDLE_CONSTRAINTS=true
 SKIP_BUILD=false
+WAIT_ON_DESTROY=true
 
 usage () {
     cat << EOF
@@ -32,6 +33,9 @@ OPTIONS:
     --func-test-pr
         Provides similar functionality to Func-Test-Pr in commit message. Set
         to zaza-openstack-tests Pull Request ID.
+    --no-wait
+        By default we wait before destroying the model after a test run. This
+        flag can used to override that behaviour.
     --skip-build
         Skip building charm if already done to save time.
     --skip-modify-bundle-constraints
@@ -57,6 +61,9 @@ do
            FUNC_TEST_PR=$2
            shift
            ;;
+        --no-wait)
+           WAIT_ON_DESTROY=false
+           ;;
         --skip-modify-bundle-constraints)
           MODIFY_BUNDLE_CONSTRAINTS=false
           ;;
@@ -75,6 +82,15 @@ do
     esac
     shift
 done
+
+TOOLS_PATH=$(realpath $(dirname $0))/func_test_tools
+CHARM_PATH=$(pwd)
+
+# Get commit we are running tests against.
+COMMIT_ID=$(git -C $CHARM_PATH rev-parse --short HEAD)
+CHARM_NAME=$(awk '/^name: .+/{print $2}' metadata.yaml)
+
+echo "Running functional tests for charm $CHARM_NAME commit $COMMIT_ID"
 
 source ~/novarc
 export {,TEST_}CIDR_EXT=`openstack subnet show subnet_${OS_USERNAME}-psd-extra -c cidr -f value`
@@ -135,10 +151,13 @@ if [[ -n $FUNC_TEST_PR ]]; then
     )
 fi
 
+declare -A func_targets=()
 if [[ -n $FUNC_TEST_TARGET ]]; then
-  func_targets=( $FUNC_TEST_TARGET )
+    func_targets[$FUNC_TEST_TARGET]=null
 else
-  func_targets=( $(python3 $(realpath $(dirname $0))/identify_charm_func_tests.py) )
+    for target in $(python3 $TOOLS_PATH/identify_charm_func_tests.py); do
+        func_targets[target]=null
+    done
 fi
 
 if $MODIFY_BUNDLE_CONSTRAINTS; then
@@ -148,13 +167,41 @@ if $MODIFY_BUNDLE_CONSTRAINTS; then
     )
 fi
 
-for target in ${func_targets[@]}; do
-    [[ -d src ]] && pushd src || true
-    tox -re func-target -- $target
+for target in ${!func_targets[@]}; do
+    [[ -d src ]] && pushd src &>/dev/null || true
+    fail=false
+    tox -re func-target -- $target || fail=true
 
-    read -p "Destroy model and run next test? [ENTER]"
+    if $fail; then
+        func_targets[$target]='fail'
+    else
+        func_targets[$target]='success'
+    fi
+
+    if $WAIT_ON_DESTROY; then
+        read -p "Destroy model and run next test? [ENTER]"
+    fi
     # cleanup before next run
     model=`juju list-models| egrep -o "^zaza-\S+"|tr -d '*'`
     juju destroy-model --no-prompt $model --force --no-wait --destroy-storage
+done
+popd &>/dev/null || true
+
+# Report results
+echo "Test results for charm $CHARM_NAME functional tests @ commit $COMMIT_ID:"
+for target in ${!func_targets[@]}; do
+    if $(python3 $TOOLS_PATH/test_is_voting.py $target); then
+        voting_info=""
+    else
+        voting_info=" (non-voting)"
+    fi
+
+    if [[ ${func_targets[$target]} = null ]]; then
+        echo "  * $target: SKIPPED$voting_info"
+    elif [[ ${func_targets[$target]} = success ]]; then
+        echo "  * $target: SUCCESS$voting_info"
+    else
+        echo "  * $target: FAILURE$voting_info"
+    fi
 done
 
