@@ -137,7 +137,9 @@ if ((${#MOD_OVERLAYS[@]})); then
             unset subdir
         fi
         cp $MOD_DIR/overlays/$overlay $bundles_dir/o/${subdir:-""}
-        ((${#overlay_opts[@]}==0)) && overlay_opts+=("")  # left padding
+        if ((${#overlay_opts[@]}==0)); then
+            overlay_opts+=("")  # left padding
+        fi
         overlay_opts+=( --overlay $bundles_dir/o/$overlay )
         overlay_list+=( "$bundles_dir/o/$overlay" )
         render $bundles_dir/o/$overlay
@@ -223,7 +225,9 @@ if ${MASTER_OPTS[HYPERCONVERGED_DEPLOYMENT]}; then
         xargs -l sed -i -r "/^\s+charm:.+/a$bindings"
 fi
 
-((${#overlay_opts[@]})) && overlay_opts+=("")  # right padding
+if ((${#overlay_opts[@]})); then
+    overlay_opts+=("")  # right padding
+fi
 
 echo -e "juju deploy${JUJU_DEPLOY_OPTS} \
     ${base_bundle}${overlay_opts[@]:- }\n " > ${bundles_dir}/command

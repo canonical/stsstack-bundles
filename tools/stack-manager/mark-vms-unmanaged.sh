@@ -2,7 +2,9 @@
 . `dirname $0`/common.sh
 vms=( $@ )
 
-(("${#vms[@]}")) || { echo "ERROR: no vms provided"; exit 1; }
+if (("${#vms[@]}" == 0)); then
+    echo "ERROR: no vms provided"; exit 1;
+fi
 
 openstack object save stack-manager-${OS_PROJECT_NAME} --file $STAGING_DIR/managed_vms.json managed_vms.json
 echo "Marking ${#vms[@]} vms as managed=false"

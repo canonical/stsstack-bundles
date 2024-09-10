@@ -50,8 +50,8 @@ juju attach-resource keystone-saml-mellon idp-metadata=./$IDP_XML
 
 status='foo'
 while [[ $status != 'active' ]]; do
-	sleep 3
-	status=$(juju status keystone-saml-mellon --format json | jq -r '."applications"."keystone-saml-mellon"."application-status"."current"')
+    sleep 3
+    status=$(juju status keystone-saml-mellon --format json | jq -r '."applications"."keystone-saml-mellon"."application-status"."current"')
 done
 
 juju $JUJU_RUN_CMD --format=json keystone-saml-mellon/0 get-sp-metadata > sp-metadata.json
@@ -60,14 +60,14 @@ if [ $JUJU_VERSION -eq 2 ]; then
     cat sp-metadata.json | jq -r '."unit-keystone-saml-mellon-0".results.output' > sp-metadata.xml
 else
     cat sp-metadata.json | jq -r '."keystone-saml-mellon/0".results.output' > sp-metadata.xml
-fi  
+fi
 
 juju attach-resource test-saml-idp1 sp-metadata=./sp-metadata.xml
 
 status='foo'
 while [[ $status != 'active' ]]; do
-	sleep 3
-	status=$(juju status test-saml-idp1 --format json | jq -r '."applications"."test-saml-idp1"."application-status"."current"')
+    sleep 3
+    status=$(juju status test-saml-idp1 --format json | jq -r '."applications"."test-saml-idp1"."application-status"."current"')
 done
 
 ENTITY_ID=$(egrep -o "entityID=\"(.*)\"" idp-metadata.xml | cut -d "=" -f2 | cut -d '"' -f2)
