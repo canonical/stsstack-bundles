@@ -105,8 +105,8 @@ OAM_MIN=$(ipcalc $CIDR_OAM| awk '$1=="HostMin:" {print $2}')
 OAM_MIN_ABC=${OAM_MIN%.*}
 OAM_MAX_D=${OAM_MAX##*.}
 # Picking last two addresses and hoping they dont get used by Neutron.
-export OS_VIP00=${OAM_MIN_ABC}.$(($OAM_MAX_D - 1))
-export OS_VIP01=${OAM_MIN_ABC}.$(($OAM_MAX_D - 2))
+export {OS,TEST}_VIP00=${OAM_MIN_ABC}.$(($OAM_MAX_D - 1))
+export {OS,TEST}_VIP01=${OAM_MIN_ABC}.$(($OAM_MAX_D - 2))
 
 # More information on config https://github.com/openstack-charmers/zaza/blob/master/doc/source/runningcharmtests.rst
 export {,TEST_}NET_ID=$(openstack network show net_${OS_USERNAME}-psd-extra -f value -c id)
@@ -128,7 +128,10 @@ export TEST_CONSTRAINTS_FILE=https://raw.githubusercontent.com/openstack-charmer
 
 # 2. Build
 if ! $SKIP_BUILD; then
-    sudo snap refresh charmcraft --channel $(grep charmcraft_channel osci.yaml| sed -r 's/.+:\s+(\S+)/\1/')
+    # default value is 1.5/stable, assumed that later charm likely have charmcraft_channel value
+    CHARMCRAFT_CHANNEL=$(grep charmcraft_channel osci.yaml | sed -r 's/.+:\s+(\S+)/\1/') || CHARMCRAFT_CHANNEL="1.5/stable"
+
+    sudo snap refresh charmcraft --channel "$CHARMCRAFT_CHANNEL"
 
     # ensure lxc initialised
     lxd init --auto || true
