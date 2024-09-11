@@ -156,7 +156,7 @@ if [[ -n $FUNC_TEST_TARGET ]]; then
     func_targets[$FUNC_TEST_TARGET]=null
 else
     for target in $(python3 $TOOLS_PATH/identify_charm_func_tests.py); do
-        func_targets[target]=null
+        func_targets[$target]=null
     done
 fi
 
