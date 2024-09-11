@@ -7,8 +7,11 @@
 #
 FUNC_TEST_PR=
 FUNC_TEST_TARGET=
+MANUAL_FUNCTESTS=false
 MODIFY_BUNDLE_CONSTRAINTS=true
+REMOTE_BUILD=
 SKIP_BUILD=false
+SLEEP=
 WAIT_ON_DESTROY=true
 
 usage () {
@@ -36,12 +39,22 @@ OPTIONS:
     --no-wait
         By default we wait before destroying the model after a test run. This
         flag can used to override that behaviour.
+    --manual-functests
+        Runs functest commands separately (deploy,configure,test)instead of
+        the entire suite.
+    --remote-build
+        Builds the charm in a remote location and transfers the charm file over.
+        The destination needs to be prepared for the build and authorized for
+        ssh. Implies --skip-build. Specify parameter as <destination>,<path>.
+        Example: --remote-build ubuntu@10.171.168.1,~/git/charm-nova-compute
     --skip-build
         Skip building charm if already done to save time.
     --skip-modify-bundle-constraints
         By default we modify test bundle constraints to ensure that applications
         have the resources they need. For example nova-compute needs to have
         enough capacity to boot the vms required by the tests.
+    --sleep
+        Specify amount of seconds to sleep between functest steps.
     --help
         This help message.
 EOF
@@ -60,14 +73,26 @@ while (($# > 0)); do
             FUNC_TEST_PR=$2
             shift
             ;;
+        --manual-functests)
+            MANUAL_FUNCTESTS=true
+            ;;
         --no-wait)
             WAIT_ON_DESTROY=false
+            ;;
+        --remote-build)
+            REMOTE_BUILD=$2
+            SKIP_BUILD=true
+            shift
             ;;
         --skip-modify-bundle-constraints)
             MODIFY_BUNDLE_CONSTRAINTS=false
             ;;
         --skip-build)
             SKIP_BUILD=true
+            ;;
+        --sleep)
+            SLEEP=$2
+            shift
             ;;
         --help|-h)
             usage
@@ -139,6 +164,15 @@ if ! $SKIP_BUILD; then
     lxd init --auto || true
 
     tox -re build
+else
+    if [[ -n $REMOTE_BUILD ]]; then
+        IFS=',' read -ra remote_build_params <<< "$REMOTE_BUILD"
+        REMOTE_BUILD_DESTINATION=${remote_build_params[0]}
+        REMOTE_BUILD_PATH=${remote_build_params[1]}
+        ssh $REMOTE_BUILD_DESTINATION "cd $REMOTE_BUILD_PATH;git log -1;rm -rf *.charm;tox -re build"
+        rm -rf *.charm
+        rsync -vza $REMOTE_BUILD_DESTINATION:$REMOTE_BUILD_PATH/*.charm .
+    fi
 fi
 
 # 3. Run functional tests.
@@ -179,10 +213,20 @@ if $MODIFY_BUNDLE_CONSTRAINTS; then
     )
 fi
 
+# We don't need to rebuild when running different bundles for the same branch
+rm -rf .tox/func-target
+rm -rf .tox/func-noop
+
 for target in ${!func_targets[@]}; do
     [[ -d src ]] && pushd src &>/dev/null || true
     fail=false
-    tox -re func-target -- $target || fail=true
+    if ! $MANUAL_FUNCTESTS; then
+        tox -e func-target -- $target || fail=true
+        model=`juju list-models| egrep -o "^zaza-\S+"|tr -d '*'`
+    else
+        $TOOLS_PATH/manual_functests_runner.sh $target $SLEEP || fail=true
+        model=test-$target
+    fi
 
     if $fail; then
         func_targets[$target]='fail'
@@ -194,7 +238,6 @@ for target in ${!func_targets[@]}; do
         read -p "Destroy model and run next test? [ENTER]"
     fi
     # cleanup before next run
-    model=`juju list-models| egrep -o "^zaza-\S+"|tr -d '*'`
     juju destroy-model --no-prompt $model --force --no-wait --destroy-storage
 done
 popd &>/dev/null || true
