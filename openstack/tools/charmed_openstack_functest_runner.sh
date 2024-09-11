@@ -47,38 +47,37 @@ OPTIONS:
 EOF
 }
 
-while (($# > 0))
-do
+while (($# > 0)); do
     case "$1" in
         --debug)
-           set -x
-           ;;
+            set -x
+            ;;
         --func-test-target)
-           FUNC_TEST_TARGET=$2
-           shift
-           ;;
+            FUNC_TEST_TARGET=$2
+            shift
+            ;;
         --func-test-pr)
-           FUNC_TEST_PR=$2
-           shift
-           ;;
+            FUNC_TEST_PR=$2
+            shift
+            ;;
         --no-wait)
-           WAIT_ON_DESTROY=false
-           ;;
+            WAIT_ON_DESTROY=false
+            ;;
         --skip-modify-bundle-constraints)
-          MODIFY_BUNDLE_CONSTRAINTS=false
-          ;;
+            MODIFY_BUNDLE_CONSTRAINTS=false
+            ;;
         --skip-build)
-          SKIP_BUILD=true
-          ;;
+            SKIP_BUILD=true
+            ;;
         --help|-h)
-          usage
-          exit 0
-          ;;
+            usage
+            exit 0
+            ;;
         *)
-          echo "ERROR: invalid input '$1'"
-          usage      
-          exit 1
-          ;;
+            echo "ERROR: invalid input '$1'"
+            usage
+            exit 1
+            ;;
     esac
     shift
 done

@@ -126,9 +126,9 @@ done
 
 # Determining flavor to use
 if [[ "${image_name}" =~ cirros ]]; then
-  flavor="m1.cirros"
+    flavor="m1.cirros"
 else
-  flavor="m1.small"
+    flavor="m1.small"
 fi
 
 # Create instances
