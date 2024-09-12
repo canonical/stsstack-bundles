@@ -129,9 +129,8 @@ export TEST_CONSTRAINTS_FILE=https://raw.githubusercontent.com/openstack-charmer
 # 2. Build
 if ! $SKIP_BUILD; then
     # default value is 1.5/stable, assumed that later charm likely have charmcraft_channel value
-    CHARMCRAFT_CHANNEL=$(grep charmcraft_channel osci.yaml | sed -r 's/.+:\s+(\S+)/\1/') || CHARMCRAFT_CHANNEL="1.5/stable"
-
-    sudo snap refresh charmcraft --channel "$CHARMCRAFT_CHANNEL"
+    CHARMCRAFT_CHANNEL=$(grep charmcraft_channel osci.yaml | sed -r 's/.+:\s+(\S+)/\1/')
+    sudo snap refresh charmcraft --channel ${CHARMCRAFT_CHANNEL:-"1.5/stable"}
 
     # ensure lxc initialised
     lxd init --auto || true
