@@ -82,6 +82,9 @@ while (($# > 0)); do
     shift
 done
 
+# Install dependencies
+snap info yq &>/dev/null || sudo snap install yq
+
 TOOLS_PATH=$(realpath $(dirname $0))/func_test_tools
 CHARM_PATH=$(pwd)
 
@@ -161,10 +164,18 @@ else
     done
 fi
 
+# Ensure nova-compute has enough resources to create vms in tests. Not all
+# charms have bundles with constraints set so we need to cover both cases here.
 if $MODIFY_BUNDLE_CONSTRAINTS; then
     (
     [[ -d src ]] && cd src
-    sed -i -r '/\s+nova-compute:$/{n;s/mem=[0-9]+M/root-disk=80G mem=8G/}' tests/bundles/*.yaml
+    for f in tests/bundles/*.yaml; do
+        if [[ $(yq '.applications' $f) = null ]]; then
+            yq -i '.services.nova-compute.constraints="root-disk=80G mem=8G"' $f
+        else
+            yq -i '.applications.nova-compute.constraints="root-disk=80G mem=8G"' $f
+        fi
+    done
     )
 fi
 
