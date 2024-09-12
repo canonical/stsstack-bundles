@@ -7,7 +7,8 @@ Takes a func test target name as input.
 import os
 import sys
 
-import yaml
+from common import OSCIConfig  # pylint: disable=import-error
+
 
 if __name__ == "__main__":
     target_name = sys.argv[1]
@@ -16,11 +17,9 @@ if __name__ == "__main__":
                          f"{target_name} is voting.\n")
         sys.exit(0)
 
-    with open('osci.yaml', encoding='utf-8') as fd:
-        osci_config = yaml.safe_load(fd)
-
+    osci_config = OSCIConfig()
     try:
-        jobs = osci_config[0]['project']['check']['jobs']
+        jobs = osci_config.project_check_jobs
         if target_name in jobs:
             # default is voting=True
             sys.exit(0)
