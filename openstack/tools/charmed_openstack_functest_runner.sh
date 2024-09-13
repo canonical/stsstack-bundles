@@ -42,7 +42,7 @@ OPTIONS:
     --manual-functests
         Runs functest commands separately (deploy,configure,test) instead of
         the entire suite.
-    --remote-build
+    --remote-build USER@HOST,GIT_PATH
         Builds the charm in a remote location and transfers the charm file over.
         The destination needs to be prepared for the build and authorized for
         ssh. Implies --skip-build. Specify parameter as <destination>,<path>.
@@ -176,15 +176,13 @@ if ! $SKIP_BUILD; then
     lxd init --auto || true
 
     tox -re build
-else
-    if [[ -n $REMOTE_BUILD ]]; then
-        IFS=',' read -ra remote_build_params <<< "$REMOTE_BUILD"
-        REMOTE_BUILD_DESTINATION=${remote_build_params[0]}
-        REMOTE_BUILD_PATH=${remote_build_params[1]}
-        ssh $REMOTE_BUILD_DESTINATION "cd $REMOTE_BUILD_PATH;git log -1;rm -rf *.charm;tox -re build"
-        rm -rf *.charm
-        rsync -vza $REMOTE_BUILD_DESTINATION:$REMOTE_BUILD_PATH/*.charm .
-    fi
+elif [[ -n $REMOTE_BUILD ]]; then
+    IFS=',' read -ra remote_build_params <<< "$REMOTE_BUILD"
+    REMOTE_BUILD_DESTINATION=${remote_build_params[0]}
+    REMOTE_BUILD_PATH=${remote_build_params[1]}
+    ssh $REMOTE_BUILD_DESTINATION "cd $REMOTE_BUILD_PATH;git log -1;rm -rf *.charm;tox -re build"
+    rm -rf *.charm
+    rsync -vza $REMOTE_BUILD_DESTINATION:$REMOTE_BUILD_PATH/*.charm .
 fi
 
 # 3. Run functional tests.
@@ -223,19 +221,25 @@ if $MODIFY_BUNDLE_CONSTRAINTS; then
     )
 fi
 
-# We don't need to rebuild when running different bundles for the same branch
-rm -rf .tox/func-target
-rm -rf .tox/func-noop
-
+first=true
+init_noop_target=true
 for target in ${!func_targets[@]}; do
+    # Only rebuild on first run.
+    if $first; then
+        first=false
+        tox_args="-re func-target"
+    else
+        tox_args="-e func-target"
+    fi
     [[ -d src ]] && pushd src &>/dev/null || true
     fail=false
     if ! $MANUAL_FUNCTESTS; then
-        tox -e func-target -- $target || fail=true
+        tox ${tox_args} -- $target || fail=true
         model=`juju list-models| egrep -o "^zaza-\S+"|tr -d '*'`
     else
-        $TOOLS_PATH/manual_functests_runner.sh $target $SLEEP || fail=true
+        $TOOLS_PATH/manual_functests_runner.sh $target $SLEEP $init_noop_target || fail=true
         model=test-$target
+        init_noop_target=false
     fi
 
     if $fail; then

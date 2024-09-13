@@ -17,9 +17,10 @@
 
 TARGET=$1
 SLEEP=$2
+INIT_NOOP_TARGET=$3
 
-if [[ ! -d ./.tox/func-noop ]]; then
-    tox -e func-noop
+if [[ $INIT_NOOP_TARGET = true ]]; then
+    tox -re func-noop
 fi
 
 juju add-model test-$TARGET --no-switch
