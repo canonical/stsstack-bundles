@@ -31,3 +31,22 @@ class OSCIConfig():
         for item in self._osci_config:
             if 'job' in item:
                 yield item['job']
+
+
+class ProjectTemplatesConfig():
+    """ Extract information from project_templates.yaml """
+    def __init__(self, path):
+        if not os.path.exists(path):
+            self._config = {}
+        else:
+            with open(path, encoding='utf-8') as fd:
+                self._config = yaml.safe_load(fd)
+
+    @property
+    def project_templates(self):
+        """ Generator returning all project check jobs defined. """
+        for item in self._config:
+            if 'project-template' not in item:
+                continue
+
+            yield item['project-template']
