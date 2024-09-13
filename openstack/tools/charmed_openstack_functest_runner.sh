@@ -40,7 +40,7 @@ OPTIONS:
         By default we wait before destroying the model after a test run. This
         flag can used to override that behaviour.
     --manual-functests
-        Runs functest commands separately (deploy,configure,test)instead of
+        Runs functest commands separately (deploy,configure,test) instead of
         the entire suite.
     --remote-build
         Builds the charm in a remote location and transfers the charm file over.
