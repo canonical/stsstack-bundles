@@ -29,11 +29,11 @@ python 3.8 and others python 3.10. Some tests might require Juju 2.9 and others
 Juju 3.x - the assumption in this runner is that Juju 3.x is ok to use.
 
 OPTIONS:
-    --func-test-target
+    --func-test-target TARGET_NAME
         Provide the name of a specific test target to run. If none provided
         all tests are run based on what is defined in osci.yaml i.e. will do
         what osci would do by default.
-    --func-test-pr
+    --func-test-pr PR_ID
         Provides similar functionality to Func-Test-Pr in commit message. Set
         to zaza-openstack-tests Pull Request ID.
     --no-wait
@@ -53,7 +53,7 @@ OPTIONS:
         By default we modify test bundle constraints to ensure that applications
         have the resources they need. For example nova-compute needs to have
         enough capacity to boot the vms required by the tests.
-    --sleep
+    --sleep TIME_SECS
         Specify amount of seconds to sleep between functest steps.
     --help
         This help message.
