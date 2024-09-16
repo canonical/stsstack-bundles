@@ -7,27 +7,46 @@ Takes a func test target name as input.
 import os
 import sys
 
-from common import OSCIConfig  # pylint: disable=import-error
+from common import (  # pylint: disable=import-error
+    OSCIConfig,
+    ProjectTemplatesConfig,
+)
 
 
 if __name__ == "__main__":
     target_name = sys.argv[1]
-    if not os.path.exists('osci.yaml'):
-        sys.stderr.write(f"ERROR: osci.yaml not found - assuming "
-                         f"{target_name} is voting.\n")
-        sys.exit(0)
+    zosci_path = os.path.join(os.environ['HOME'], "zosci-config")
+    project_templates = os.path.join(zosci_path,
+                                     "zuul.d/project-templates.yaml")
+    """
+    First look for the func-target in osci
+    """
+    if os.path.exists('osci.yaml'):
+        osci_config = OSCIConfig()
+        try:
+            jobs = osci_config.project_check_jobs
+            if target_name in jobs:
+                # default is voting=True
+                sys.exit(0)
 
-    osci_config = OSCIConfig()
-    try:
-        jobs = osci_config.project_check_jobs
-        if target_name in jobs:
-            # default is voting=True
-            sys.exit(0)
+            for check in jobs:
+                if isinstance(check, dict) and target_name in check:
+                    if not check[target_name]['voting']:
+                        sys.exit(1)
+                    else:
+                        sys.exit(0)
+        except KeyError as exc:
+            sys.stderr.write(f"ERROR: failed to process osci.yaml - assuming "
+                             f"{target_name} is voting (key {exc} not found)."
+                             "\n")
 
-        for check in jobs:
-            if isinstance(check, dict) and target_name in check:
-                if not check[target_name]['voting']:
-                    sys.exit(1)
-    except KeyError as exc:
-        sys.stderr.write(f"ERROR: failed to process osci.yaml - assuming "
-                         f"{target_name} is voting (key {exc} not found).\n")
+    # If the target was not found in osci.yaml then osci will fallback to
+    # looking at https://github.com/openstack-charmers/zosci-config/blob/master/zuul.d/project-templates.yaml  # noqa, pylint: disable=line-too-long
+    if os.path.exists(project_templates):
+        config = ProjectTemplatesConfig(project_templates)
+        for project in config.project_templates:
+            if project['name'] == "charm-functional-jobs":
+                for job in project['check']['jobs']:
+                    if target_name in job:
+                        if not job[target_name]['voting']:
+                            sys.exit(1)

@@ -110,6 +110,18 @@ done
 # Install dependencies
 snap info yq &>/dev/null || sudo snap install yq
 
+# Ensure zosic-config checked out and up-to-date
+(
+cd
+if [[ -d zosci-config ]]; then
+    cd zosci-config
+    git checkout master
+    git pull
+else
+    git clone https://github.com/openstack-charmers/zosci-config
+fi
+)
+
 TOOLS_PATH=$(realpath $(dirname $0))/func_test_tools
 CHARM_PATH=$(pwd)
 
@@ -182,8 +194,6 @@ if [[ -n $FUNC_TEST_PR ]]; then
     (
     [[ -d src ]] && cd src
     # We use the zosci-config tools to do this.
-    [[ -d ~/zosci-config ]] || ( cd; git clone https://github.com/openstack-charmers/zosci-config; )
-    (cd ~/zosci-config; git checkout master; git pull;)
     MSG=$(echo "Func-Test-Pr: https://github.com/openstack-charmers/zaza-openstack-tests/pull/$FUNC_TEST_PR"| base64)
     ~/zosci-config/roles/handle-func-test-pr/files/process_func_test_pr.py -f ./test-requirements.txt "$MSG"
     )
