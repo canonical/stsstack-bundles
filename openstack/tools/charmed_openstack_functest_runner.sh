@@ -108,7 +108,7 @@ while (($# > 0)); do
 done
 
 # Install dependencies
-snap info yq &>/dev/null || sudo snap install yq
+which yq &>/dev/null || sudo snap install yq
 
 # Ensure zosic-config checked out and up-to-date
 (
