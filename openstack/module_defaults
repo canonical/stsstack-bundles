@@ -54,7 +54,7 @@ MOD_PARAMS[__PATH_MTU__]=
 
 # This is enough for creating one ubuntu vm or multiple cirros vms but some
 # scenarios may want to allow more per compute (e.g. octavia).
-MOD_PARAMS[__NOVA_COMPUTE_UNIT_CONSTRAINTS__]="mem=4G root-disk=80G"
+MOD_PARAMS[__NOVA_COMPUTE_UNIT_CONSTRAINTS__]="mem=4G cores=2"
 
 # Try to use current model (or newly requested one) as subdomain name
 model_subdomain=`get_juju_model`
