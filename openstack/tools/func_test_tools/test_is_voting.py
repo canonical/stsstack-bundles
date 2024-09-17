@@ -48,5 +48,5 @@ if __name__ == "__main__":
             if project['name'] == "charm-functional-jobs":
                 for job in project['check']['jobs']:
                     if target_name in job:
-                        if not job[target_name]['voting']:
+                        if not job[target_name].get('voting', True):
                             sys.exit(1)
