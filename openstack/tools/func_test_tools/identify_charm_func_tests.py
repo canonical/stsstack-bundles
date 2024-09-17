@@ -20,7 +20,7 @@ def extract_targets(bundle_list):
     value so this accounts for both formats.
     """
     extracted = []
-    for item in bundle_list:
+    for item in bundle_list or []:
         if isinstance(item, dict):
             extracted.append(list(item.values())[0])
         else:
