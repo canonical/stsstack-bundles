@@ -429,7 +429,7 @@ do
             # This equates to m1.large (rather than m1.medium) which should
             # allow creating 1x ubunu vm + 1x amphora vm on the same host thus
             # avoiding the need for > 1 compute host.
-            MOD_PARAMS[__NOVA_COMPUTE_UNIT_CONSTRAINTS__]="mem=8G root-disk=80G"
+            MOD_PARAMS[__NOVA_COMPUTE_UNIT_CONSTRAINTS__]="mem=8G cores=2"
             if ! has_opt --no-octavia-diskimage-retrofit; then
                 # By default we let retrofit use images uploaded by the
                 # post-deploy configure script.

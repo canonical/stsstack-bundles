@@ -51,7 +51,7 @@ fi
 if [ -n "${MASTER_OPTS[MODEL_CONSTRAINTS]}" ]; then
     juju set-model-constraints ${MASTER_OPTS[MODEL_CONSTRAINTS]}
 else
-    juju set-model-constraints root-disk-source=volume
+    juju set-model-constraints root-disk-source=volume root-disk=20G
 fi
 
 if has_opt --list; then
