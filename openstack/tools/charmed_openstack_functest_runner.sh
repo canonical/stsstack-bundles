@@ -212,10 +212,13 @@ if $MODIFY_BUNDLE_CONSTRAINTS; then
     (
     [[ -d src ]] && cd src
     for f in tests/bundles/*.yaml; do
-        if [[ $(yq '.applications' $f) = null ]]; then
-            yq -i '.services.nova-compute.constraints="root-disk=80G mem=8G"' $f
-        else
-            yq -i '.applications.nova-compute.constraints="root-disk=80G mem=8G"' $f
+        # Dont do this if the test does not have nova-compute
+        if $(grep -q "nova-compute:" $f); then
+            if [[ $(yq '.applications' $f) = null ]]; then
+                yq -i '.services.nova-compute.constraints="root-disk=80G mem=8G"' $f
+            else
+                yq -i '.applications.nova-compute.constraints="root-disk=80G mem=8G"' $f
+            fi
         fi
     done
     )
