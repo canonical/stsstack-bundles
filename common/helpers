@@ -45,8 +45,8 @@ list_overlays ()
 
 get_cloud_type ()
 {
-   local cloud=$(juju show-model --format json |jq -r '[.[].cloud] | unique[]')
-   local type=$(juju show-cloud $cloud --format json | jq -r '[.[].type] | unique[]')
+   local cloud=`juju show-model| sed -rn 's/.+cloud:\s*(.+).*/\1/p'| uniq`
+   local type=`juju show-cloud $cloud| sed -rn 's/^type:\s*(.+).*/\1/p'| uniq`
    echo "$type"
 }
 
