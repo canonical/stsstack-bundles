@@ -166,6 +166,8 @@ export TEST_ZAZA_BUG_LP1987332=1
 # Some charms point to an upstream constraints file that installs python-libjuju 2.x so we need to do this to ensure we get 3.x
 export TEST_CONSTRAINTS_FILE=https://raw.githubusercontent.com/openstack-charmers/zaza/master/constraints-juju34.txt
 
+LOGFILE=$(mktemp --suffix=-charm-func-test-results)
+(
 # 2. Build
 if ! $SKIP_BUILD; then
     # default value is 1.5/stable, assumed that later charm likely have charmcraft_channel value
@@ -201,7 +203,17 @@ declare -A func_targets=()
 if [[ -n $FUNC_TEST_TARGET ]]; then
     func_targets[$FUNC_TEST_TARGET]=null
 else
+    voting_targets=()
+    non_voting_targets=()
     for target in $(python3 $TOOLS_PATH/identify_charm_func_tests.py); do
+        if $(python3 $TOOLS_PATH/test_is_voting.py $target); then
+            voting_targets+=( $target )
+        else
+            non_voting_targets+=( $target )
+        fi
+    done
+    # Ensure voting targets processed first.
+    for target in ${voting_targets[@]} ${non_voting_targets[@]}; do
         func_targets[$target]=null
     done
 fi
@@ -260,7 +272,7 @@ done
 popd &>/dev/null || true
 
 # Report results
-echo "Test results for charm $CHARM_NAME functional tests @ commit $COMMIT_ID:"
+echo -e "\nTest results for charm $CHARM_NAME functional tests @ commit $COMMIT_ID:"
 for target in ${!func_targets[@]}; do
     if $(python3 $TOOLS_PATH/test_is_voting.py $target); then
         voting_info=""
@@ -276,4 +288,5 @@ for target in ${!func_targets[@]}; do
         echo "  * $target: FAILURE$voting_info"
     fi
 done
-
+) | tee $LOGFILE
+echo -e "\nResults also saved to $LOGFILE"
