@@ -288,5 +288,5 @@ for target in ${!func_targets[@]}; do
         echo "  * $target: FAILURE$voting_info"
     fi
 done
-) | tee $LOGFILE
+) 2>&1 | tee $LOGFILE
 echo -e "\nResults also saved to $LOGFILE"
