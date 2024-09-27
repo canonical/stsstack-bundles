@@ -16,7 +16,7 @@ WAIT_ON_DESTROY=true
 
 usage () {
     cat << EOF
-USAGE: `basename $0` OPTIONS
+USAGE: $(basename $0) OPTIONS
 
 Run OpenStack charms functional tests manually in a similar way to how
 Openstack CI (OSCI) would do it. This tool should be run from within a charm
@@ -110,7 +110,7 @@ done
 # Install dependencies
 which yq &>/dev/null || sudo snap install yq
 
-# Ensure zosic-config checked out and up-to-date
+# Ensure zosci-config checked out and up-to-date
 (
 cd
 if [[ -d zosci-config ]]; then
@@ -123,7 +123,7 @@ fi
 )
 
 TOOLS_PATH=$(realpath $(dirname $0))/func_test_tools
-CHARM_PATH=$(pwd)
+CHARM_PATH=$PWD
 
 # Get commit we are running tests against.
 COMMIT_ID=$(git -C $CHARM_PATH rev-parse --short HEAD)
@@ -132,14 +132,14 @@ CHARM_NAME=$(awk '/^name: .+/{print $2}' metadata.yaml)
 echo "Running functional tests for charm $CHARM_NAME commit $COMMIT_ID"
 
 source ~/novarc
-export {,TEST_}CIDR_EXT=`openstack subnet show subnet_${OS_USERNAME}-psd-extra -c cidr -f value`
+export {,TEST_}CIDR_EXT=$(openstack subnet show subnet_${OS_USERNAME}-psd-extra -c cidr -f value)
 FIP_MAX=$(ipcalc $CIDR_EXT| awk '$1=="HostMax:" {print $2}')
 FIP_MIN=$(ipcalc $CIDR_EXT| awk '$1=="HostMin:" {print $2}')
 FIP_MIN_ABC=${FIP_MIN%.*}
 FIP_MIN_D=${FIP_MIN##*.}
 FIP_MIN=${FIP_MIN_ABC}.$(($FIP_MIN_D + 64))
 
-CIDR_OAM=`openstack subnet show subnet_${OS_USERNAME}-psd -c cidr -f value`
+CIDR_OAM=$(openstack subnet show subnet_${OS_USERNAME}-psd -c cidr -f value)
 OAM_MAX=$(ipcalc $CIDR_OAM| awk '$1=="HostMax:" {print $2}')
 OAM_MIN=$(ipcalc $CIDR_OAM| awk '$1=="HostMin:" {print $2}')
 OAM_MIN_ABC=${OAM_MIN%.*}
@@ -250,7 +250,7 @@ for target in ${!func_targets[@]}; do
     fail=false
     if ! $MANUAL_FUNCTESTS; then
         tox ${tox_args} -- $target || fail=true
-        model=`juju list-models| egrep -o "^zaza-\S+"|tr -d '*'`
+        model=$(juju list-models| egrep -o "^zaza-\S+"|tr -d '*')
     else
         $TOOLS_PATH/manual_functests_runner.sh $target $SLEEP $init_noop_target || fail=true
         model=test-$target
