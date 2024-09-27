@@ -23,7 +23,12 @@ class OSCIConfig():
             if 'check' not in item['project']:
                 continue
 
-            yield from item['project']['check'].get('jobs', [])
+            for job in item['project']['check'].get('jobs', []):
+                # can be a dict with voting info
+                if isinstance(job, dict):
+                    yield list(job.keys())[0]
+                else:
+                    yield job
 
     @property
     def jobs(self):
