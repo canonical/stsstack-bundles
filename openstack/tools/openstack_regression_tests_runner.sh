@@ -127,7 +127,7 @@ if [[ ! -f $TEST_TMPDIR/test_server.bin ]]; then
     cp $(dirname $0)/tempest_test_resources/test_server.bin $TEST_TMPDIR
 fi
 
-LOGFILE=$(mktemp --suffix=-charm-func-test-results)
+LOGFILE=$(mktemp --suffix=-openstack-release-test-results)
 (
     # Ensure charmed-openstack-tester checked out and up-to-date
     if [[ -d $HOME/charmed-openstack-tester ]]; then
