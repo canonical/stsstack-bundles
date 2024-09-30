@@ -22,14 +22,22 @@ def extract_targets(bundle_list):
     extracted = []
     for item in bundle_list or []:
         if isinstance(item, dict):
-            extracted.append(list(item.values())[0])
+            values = list(item.values())
+            for value in values:
+                if isinstance(value, list):
+                    # its a list of overlays so we get the key name and go find
+                    # the corresponding job in osci.yaml
+                    extracted.append(list(item.keys())[0])
+                else:
+                    # its a bundle name
+                    extracted.append(value)
         else:
             extracted.append(item)
 
     return extracted
 
 
-def get_aliased_targets():
+def get_aliased_targets(bundles):
     """
     Extract aliased targets. A charm can define aliased targets which is where
     Zaza tests are run and use configuration steps from an alias section rather
@@ -38,10 +46,14 @@ def get_aliased_targets():
     job definition in osci.yaml where the target name has a <alias>: prefix.
 
     We extract any aliased targets here and return as a list.
+
+    @param bundles: list of extracted bundles
     """
     targets = []
     osci = OSCIConfig()
-    for jobname in osci.project_check_jobs:
+    project_check_jobs = list(osci.project_check_jobs)
+    jobs = project_check_jobs + bundles
+    for jobname in jobs:
         for job in osci.jobs:
             if job['name'] != jobname:
                 continue
@@ -49,12 +61,29 @@ def get_aliased_targets():
             if 'tox_extra_args' not in job['vars']:
                 continue
 
-            ret = re.search(r"-- (\S+:\S+)",
+            ret = re.search(r"-- (.+)",
                             str(job['vars']['tox_extra_args']))
             if ret:
-                targets.append(ret.group(1))
+                target = ret.group(1)
+                # NOTE: will need to reverse this when we use the target name
+                target = target.replace(' ', '+')
+                targets.append(target)
+                for _target in target.split():
+                    name = _target.partition(':')[2]
+                    if name in bundles:
+                        bundles.remove(name)
 
-    return targets
+                if jobname in bundles:
+                    bundles.remove(jobname)
+
+                # Some jobs will depend on other tests that need to be run but
+                # are not defined in tests.yaml so we need to add them from
+                # here as well.
+                for name in job.get('dependencies', []):
+                    if name in project_check_jobs:
+                        bundles.append(name)
+
+    return targets + bundles
 
 
 def get_tests_bundles():
@@ -76,6 +105,6 @@ def get_tests_bundles():
 
 
 if __name__ == "__main__":
-    aliased_bundles = get_aliased_targets()
-    tests_bundles = get_tests_bundles()
-    print(' '.join(sorted(set(tests_bundles + aliased_bundles))))
+    _bundles = get_tests_bundles()
+    _bundles = get_aliased_targets(list(set(_bundles)))
+    print(' '.join(sorted(set(_bundles))))

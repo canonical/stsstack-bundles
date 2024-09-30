@@ -248,6 +248,8 @@ for target in ${!func_targets[@]}; do
     fi
     [[ -d src ]] && pushd src &>/dev/null || true
     fail=false
+    # Remove substitutions and replace with whitespace
+    target=${target//+/ }
     if ! $MANUAL_FUNCTESTS; then
         tox ${tox_args} -- $target || fail=true
         model=$(juju list-models| egrep -o "^zaza-\S+"|tr -d '*')
