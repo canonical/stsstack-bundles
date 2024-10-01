@@ -6,6 +6,8 @@ FUNC_TEST_PR=
 FUNC_TEST_TARGET=
 IMAGES_PATH=$HOME/tmp
 
+. $(dirname $0)/func_test_tools/common.sh
+
 usage () {
     cat << EOF
 USAGE: $(basename $0) OPTIONS
@@ -65,16 +67,7 @@ fi
 which yq &>/dev/null || sudo snap install yq
 
 # Ensure zosci-config checked out and up-to-date
-(
-cd
-if [[ -d zosci-config ]]; then
-    cd zosci-config
-    git checkout master
-    git pull
-else
-    git clone https://github.com/openstack-charmers/zosci-config
-fi
-)
+get_and_update_repo https://github.com/openstack-charmers/zosci-config
 
 TOOLS_PATH=$(realpath $(dirname $0))/func_test_tools
 CHARM_PATH=$PWD
@@ -130,15 +123,7 @@ fi
 LOGFILE=$(mktemp --suffix=-openstack-release-test-results)
 (
     # Ensure charmed-openstack-tester checked out and up-to-date
-    if [[ -d $HOME/charmed-openstack-tester ]]; then
-        cd $HOME/charmed-openstack-tester
-        git checkout master
-        git pull
-    else
-        cd
-        git clone https://github.com/openstack-charmers/charmed-openstack-tester
-        cd charmed-openstack-tester
-    fi
+    get_and_update_repo https://github.com/openstack-charmers/charmed-openstack-tester
 
     # If a func test pr is provided switch to that pr.
     if [[ -n $FUNC_TEST_PR ]]; then
