@@ -74,7 +74,7 @@ if __name__ == '__main__':
             raise ValueError('Unable to find network {}'.format(net_id))
     else:
         # Preserve existing default behavior (eg. manual testing)
-        net_name = os.environ.get('UNDERCLOUD_OAM_NET')
+        net_name = os.environ.get('UNDERCLOUD_EXT_NET')
         if not net_name:
             net_name = os.environ['OS_USERNAME'] + '_admin_net'
 
