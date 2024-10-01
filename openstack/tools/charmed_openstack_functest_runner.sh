@@ -14,6 +14,8 @@ SKIP_BUILD=false
 SLEEP=
 WAIT_ON_DESTROY=true
 
+. $(dirname $0)/func_test_tools/common.sh
+
 usage () {
     cat << EOF
 USAGE: $(basename $0) OPTIONS
@@ -111,16 +113,7 @@ done
 which yq &>/dev/null || sudo snap install yq
 
 # Ensure zosci-config checked out and up-to-date
-(
-cd
-if [[ -d zosci-config ]]; then
-    cd zosci-config
-    git checkout master
-    git pull
-else
-    git clone https://github.com/openstack-charmers/zosci-config
-fi
-)
+get_and_update_repo https://github.com/openstack-charmers/zosci-config
 
 TOOLS_PATH=$(realpath $(dirname $0))/func_test_tools
 CHARM_PATH=$PWD
@@ -239,6 +232,10 @@ fi
 first=true
 init_noop_target=true
 for target in ${!func_targets[@]}; do
+    # Destroy any existing zaza models to ensure we have all the resources we
+    # need.
+    destroy_zaza_models
+
     # Only rebuild on first run.
     if $first; then
         first=false
@@ -268,8 +265,9 @@ for target in ${!func_targets[@]}; do
     if $WAIT_ON_DESTROY; then
         read -p "Destroy model and run next test? [ENTER]"
     fi
-    # cleanup before next run
-    juju destroy-model --no-prompt $model --force --no-wait --destroy-storage
+
+    # Cleanup before next run
+    destroy_zaza_models
 done
 popd &>/dev/null || true
 
