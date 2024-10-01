@@ -23,12 +23,7 @@ class OSCIConfig():
             if 'check' not in item['project']:
                 continue
 
-            for job in item['project']['check'].get('jobs', []):
-                # can be a dict with voting info
-                if isinstance(job, dict):
-                    yield list(job.keys())[0]
-                else:
-                    yield job
+            yield from item['project']['check'].get('jobs', [])
 
     @property
     def jobs(self):
@@ -36,6 +31,17 @@ class OSCIConfig():
         for item in self._osci_config:
             if 'job' in item:
                 yield item['job']
+
+    def get_job(self, name):
+        """ Get job by name.
+
+        @param name: string name
+        """
+        for job in self.jobs:
+            if job['name'] == name:
+                return job
+
+        return None
 
 
 class ProjectTemplatesConfig():
