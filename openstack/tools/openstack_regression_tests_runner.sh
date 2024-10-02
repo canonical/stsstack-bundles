@@ -5,6 +5,7 @@
 FUNC_TEST_PR=
 FUNC_TEST_TARGET=
 IMAGES_PATH=$HOME/tmp
+MODIFY_BUNDLE_CONSTRAINTS=true
 
 . $(dirname $0)/func_test_tools/common.sh
 
@@ -20,6 +21,10 @@ OPTIONS:
     --func-test-pr PR_ID
         Provides similar functionality to Func-Test-Pr in commit message. Set
         to zaza-openstack-tests Pull Request ID.
+    --skip-modify-bundle-constraints
+        By default we modify test bundle constraints to ensure that applications
+        have the resources they need. For example nova-compute needs to have
+        enough capacity to boot the vms required by the tests.
     --help
         This help message.
 EOF
@@ -37,6 +42,9 @@ while (($# > 0)); do
         --func-test-pr)
             FUNC_TEST_PR=$2
             shift
+            ;;
+        --skip-modify-bundle-constraints)
+            MODIFY_BUNDLE_CONSTRAINTS=false
             ;;
         --help|-h)
             usage
@@ -124,6 +132,20 @@ LOGFILE=$(mktemp --suffix=-openstack-release-test-results)
 (
     # Ensure charmed-openstack-tester checked out and up-to-date
     get_and_update_repo https://github.com/openstack-charmers/charmed-openstack-tester
+
+    # Ensure nova-compute has enough resources to create vms in tests.
+    if $MODIFY_BUNDLE_CONSTRAINTS; then
+        for f in tests/distro-regression/tests/bundles/*.yaml; do
+            # Dont do this if the test does not have nova-compute
+            if $(grep -q "nova-compute:" $f); then
+                if [[ $(yq '.applications' $f) = null ]]; then
+                    yq -i '.services.nova-compute.constraints="root-disk=40G mem=4G"' $f
+                else
+                    yq -i '.applications.nova-compute.constraints="root-disk=40G mem=4G"' $f
+                fi
+            fi
+        done
+    fi
 
     # If a func test pr is provided switch to that pr.
     if [[ -n $FUNC_TEST_PR ]]; then
