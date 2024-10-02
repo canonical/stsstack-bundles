@@ -19,7 +19,7 @@ class ZOSCIConfig():
                   encoding='utf-8') as fd:
             yield from yaml.safe_load(fd)
 
-    def get_branch_jobs(self, branch):
+    def get_branch_jobs(self, branch, project_templates):
         """
         For a given branch name, find all jobs that need to be run against that
         branch.
@@ -27,11 +27,28 @@ class ZOSCIConfig():
         test_jobs = []
         for t in self.project_templates:
             t = t['project-template']
-            if t['name'] == 'charm-functional-jobs':
-                for jobs in t['check']['jobs']:
-                    for job, info in jobs.items():
-                        if branch in info['branches']:
-                            test_jobs.append(job)
+
+            # only look at functional test jobs
+            if 'functional' not in t['name']:
+                continue
+
+            if t['name'] not in project_templates:
+                continue
+
+            if 'check' not in t or 'jobs' not in t['check']:
+                continue
+
+            for jobs in t['check']['jobs']:
+                if not isinstance(jobs, dict):
+                    test_jobs.append(jobs)
+                    continue
+
+                for job, info in jobs.items():
+                    if t['name'] == 'charm-functional-jobs':
+                        if branch not in info['branches']:
+                            continue
+
+                    test_jobs.append(job)
 
         return test_jobs
 
@@ -44,6 +61,17 @@ class OSCIConfig():
         else:
             with open('osci.yaml', encoding='utf-8') as fd:
                 self._osci_config = yaml.safe_load(fd)
+
+    @property
+    def project_templates(self):
+        """ Returns all project templates. """
+        for item in self._osci_config:
+            if 'project' not in item:
+                continue
+
+            return item['project'].get('templates', [])
+
+        return []
 
     @property
     def project_check_jobs(self):
