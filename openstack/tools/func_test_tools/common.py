@@ -1,7 +1,39 @@
 """ Common helpers for func test runners. """
+from functools import cached_property
 import os
 
 import yaml
+
+
+class ZOSCIConfig():
+    """ Extract information from zosci-config """
+    def __init__(self, path):
+        self.path = path
+
+    @cached_property
+    def project_templates(self):
+        """
+        Generator returning each project-template defined.
+        """
+        with open(os.path.join(self.path, 'zuul.d/project-templates.yaml'),
+                  encoding='utf-8') as fd:
+            yield from yaml.safe_load(fd)
+
+    def get_branch_jobs(self, branch):
+        """
+        For a given branch name, find all jobs that need to be run against that
+        branch.
+        """
+        test_jobs = []
+        for t in self.project_templates:
+            t = t['project-template']
+            if t['name'] == 'charm-functional-jobs':
+                for jobs in t['check']['jobs']:
+                    for job, info in jobs.items():
+                        if branch in info['branches']:
+                            test_jobs.append(job)
+
+        return test_jobs
 
 
 class OSCIConfig():
