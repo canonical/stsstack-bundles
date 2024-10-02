@@ -14,7 +14,7 @@ from common import (  # pylint: disable=import-error
 
 
 if __name__ == "__main__":
-    target_name = sys.argv[1]
+    test_job = sys.argv[1]
     zosci_path = os.path.join(os.environ['HOME'], "zosci-config")
     project_templates = os.path.join(zosci_path,
                                      "zuul.d/project-templates.yaml")
@@ -25,19 +25,17 @@ if __name__ == "__main__":
         osci_config = OSCIConfig()
         try:
             jobs = osci_config.project_check_jobs
-            if target_name in jobs:
-                # default is voting=True
-                sys.exit(0)
-
-            for check in jobs:
-                if isinstance(check, dict) and target_name in check:
-                    if not check[target_name]['voting']:
+            for job in jobs:
+                if isinstance(job, dict) and test_job in job:
+                    if not job[test_job]['voting']:
                         sys.exit(1)
                     else:
+                        # default is true
                         sys.exit(0)
+
         except KeyError as exc:
             sys.stderr.write(f"ERROR: failed to process osci.yaml - assuming "
-                             f"{target_name} is voting (key {exc} not found)."
+                             f"{test_job} is voting (key {exc} not found)."
                              "\n")
 
     # If the target was not found in osci.yaml then osci will fallback to
@@ -47,6 +45,6 @@ if __name__ == "__main__":
         for project in config.project_templates:
             if project['name'] == "charm-functional-jobs":
                 for job in project['check']['jobs']:
-                    if target_name in job:
-                        if not job[target_name].get('voting', True):
+                    if test_job in job:
+                        if not job[test_job].get('voting', True):
                             sys.exit(1)

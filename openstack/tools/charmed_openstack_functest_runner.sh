@@ -192,13 +192,14 @@ if [[ -n $FUNC_TEST_PR ]]; then
     )
 fi
 
-declare -A func_targets=()
+declare -A func_target_state=()
+declare -a func_target_order
 if [[ -n $FUNC_TEST_TARGET ]]; then
-    func_targets[$FUNC_TEST_TARGET]=null
+    func_target_state[$FUNC_TEST_TARGET]=null
 else
     voting_targets=()
     non_voting_targets=()
-    for target in $(python3 $TOOLS_PATH/identify_charm_func_tests.py); do
+    for target in $(python3 $TOOLS_PATH/identify_charm_func_test_jobs.py); do
         if $(python3 $TOOLS_PATH/test_is_voting.py $target); then
             voting_targets+=( $target )
         else
@@ -207,7 +208,8 @@ else
     done
     # Ensure voting targets processed first.
     for target in ${voting_targets[@]} ${non_voting_targets[@]}; do
-        func_targets[$target]=null
+        func_target_order+=( $target )
+        func_target_state[$target]=null
     done
 fi
 
@@ -231,7 +233,7 @@ fi
 
 first=true
 init_noop_target=true
-for target in ${!func_targets[@]}; do
+for target in ${func_target_order[@]}; do
     # Destroy any existing zaza models to ensure we have all the resources we
     # need.
     destroy_zaza_models
@@ -245,21 +247,20 @@ for target in ${!func_targets[@]}; do
     fi
     [[ -d src ]] && pushd src &>/dev/null || true
     fail=false
-    # Remove substitutions and replace with whitespace
-    target=${target//+/ }
+    _target="$(python3 $TOOLS_PATH/extract_job_target.py $target)"
     if ! $MANUAL_FUNCTESTS; then
-        tox ${tox_args} -- $target || fail=true
+        tox ${tox_args} -- $_target || fail=true
         model=$(juju list-models| egrep -o "^zaza-\S+"|tr -d '*')
     else
-        $TOOLS_PATH/manual_functests_runner.sh $target $SLEEP $init_noop_target || fail=true
+        $TOOLS_PATH/manual_functests_runner.sh "$_target" $SLEEP $init_noop_target || fail=true
         model=test-$target
         init_noop_target=false
     fi
 
     if $fail; then
-        func_targets[$target]='fail'
+        func_target_state[$target]='fail'
     else
-        func_targets[$target]='success'
+        func_target_state[$target]='success'
     fi
 
     if $WAIT_ON_DESTROY; then
@@ -273,16 +274,16 @@ popd &>/dev/null || true
 
 # Report results
 echo -e "\nTest results for charm $CHARM_NAME functional tests @ commit $COMMIT_ID:"
-for target in ${!func_targets[@]}; do
+for target in ${func_target_order[@]}; do
     if $(python3 $TOOLS_PATH/test_is_voting.py $target); then
         voting_info=""
     else
         voting_info=" (non-voting)"
     fi
 
-    if [[ ${func_targets[$target]} = null ]]; then
+    if [[ ${func_target_state[$target]} = null ]]; then
         echo "  * $target: SKIPPED$voting_info"
-    elif [[ ${func_targets[$target]} = success ]]; then
+    elif [[ ${func_target_state[$target]} = success ]]; then
         echo "  * $target: SUCCESS$voting_info"
     else
         echo "  * $target: FAILURE$voting_info"
