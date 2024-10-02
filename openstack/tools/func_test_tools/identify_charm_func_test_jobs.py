@@ -4,58 +4,32 @@ run from within the charm root.
 
 Outputs space separated list of job names.
 """
+import configparser
 import os
 
-import yaml
-from common import OSCIConfig  # pylint: disable=import-error
-
-CLASSIC_TESTS_YAML = 'tests/tests.yaml'
-REACTIVE_TESTS_YAML = os.path.join('src', CLASSIC_TESTS_YAML)
+from common import ZOSCIConfig, OSCIConfig  # pylint: disable=import-error
 
 
-def extract_targets(bundle_list):
+def get_local_jobs_and_deps(jobs):
     """
-    Targets are provided as strings or dicts where the target name is the
-    value so this accounts for both formats.
-    """
-    extracted = []
-    for item in bundle_list or []:
-        if isinstance(item, dict):
-            values = list(item.values())
-            for value in values:
-                if isinstance(value, list):
-                    # its a list of overlays so we get the key name and go find
-                    # the corresponding job in osci.yaml
-                    extracted.append(list(item.keys())[0])
-                else:
-                    # its a bundle name
-                    extracted.append(value)
-        else:
-            extracted.append(item)
+    Get any locally defined jobs and add them to the list of jobs provided.
 
-    return extracted
-
-
-def get_job_deps(bundles):
-    """
-    Extract aliased targets. A charm can define aliased targets which is where
-    Zaza tests are run and use configuration steps from an alias section rather
-    than the default (see 'configure:' section in tests.yaml for aliases). An
-    alias is run by specifying the target to be run as a tox command using a
-    job definition in osci.yaml where the target name has a <alias>: prefix.
-
-    We extract any aliased targets here and return as a list.
-
-    @param bundles: list of extracted bundles
+    @param jobs: list of already identified jobs.
     """
     deps = []
+    local_jobs = []
     osci = OSCIConfig()
     project_check_jobs = list(osci.project_check_jobs)
-    jobs = project_check_jobs + bundles
-    for jobname in jobs:
+    all_jobs = project_check_jobs + jobs
+    for jobname in all_jobs:
+        if isinstance(jobname, dict):
+            jobname = list(jobname.keys())[0]
+
         job = osci.get_job(jobname)
         if not job:
             continue
+
+        local_jobs.append(jobname)
 
         # Some jobs will depend on other tests that need to be run but
         # are not defined in tests.yaml so we need to add them from
@@ -64,28 +38,22 @@ def get_job_deps(bundles):
             if name in project_check_jobs:
                 deps.append(name)
 
-    return deps + bundles
+    return deps + jobs + local_jobs
 
 
-def get_tests_bundles():
+def get_default_jobs():
     """
-    Extract test targets from primary location i.e. {src/}test/tests.yaml.
+    Get all jobs we need to run by default for the given branch.
     """
-    if os.path.exists(REACTIVE_TESTS_YAML):
-        tests_file = REACTIVE_TESTS_YAML
-    else:
-        tests_file = CLASSIC_TESTS_YAML
-
-    with open(tests_file, encoding='utf-8') as fd:
-        bundles = yaml.safe_load(fd)
-
-    smoke_bundles = extract_targets(bundles['smoke_bundles'])
-    gate_bundles = extract_targets(bundles['gate_bundles'])
-    dev_bundles = extract_targets(bundles['dev_bundles'])
-    return smoke_bundles + gate_bundles + dev_bundles
+    path = os.path.join(os.environ['HOME'], 'zosci-config')
+    c = configparser.ConfigParser()
+    c.read('.gitreview')
+    branch = c['gerrit']['defaultbranch']
+    jobs = ZOSCIConfig(path).get_branch_jobs(branch)
+    return jobs
 
 
 if __name__ == "__main__":
-    _bundles = get_tests_bundles()
-    _bundles = get_job_deps(list(set(_bundles)))
-    print(' '.join(sorted(set(_bundles))))
+    _jobs = get_default_jobs()
+    _jobs = get_local_jobs_and_deps(list(set(_jobs)))
+    print(' '.join(sorted(set(_jobs))))
