@@ -110,6 +110,15 @@ done
 # Install dependencies
 which yq &>/dev/null || sudo snap install yq
 
+# Cleanup zaza-* models before proceeding
+OLD_ZAZA_MODELS=$(juju list-models| grep -E "^zaza-\S+"|tr -d '*')
+if [ -n "${OLD_ZAZA_MODELS}" ]; then
+    echo "Old zaza-* models active, cleaning up."
+    for j in $(echo "${OLD_ZAZA_MODELS}"); do
+        juju destroy-model "${j}" --no-prompt --force --no-wait --destroy-storage
+    done
+fi
+
 # Ensure zosci-config checked out and up-to-date
 (
 cd
