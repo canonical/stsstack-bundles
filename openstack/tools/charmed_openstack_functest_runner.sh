@@ -197,6 +197,7 @@ declare -A func_target_state=()
 declare -a func_target_order
 if [[ -n $FUNC_TEST_TARGET ]]; then
     func_target_state[$FUNC_TEST_TARGET]=null
+    func_target_order=( $FUNC_TEST_TARGET )
 else
     voting_targets=()
     non_voting_targets=()
