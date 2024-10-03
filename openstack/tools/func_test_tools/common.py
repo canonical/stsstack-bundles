@@ -56,13 +56,11 @@ class ZOSCIConfig():
 class OSCIConfig():
     """ Extract information from osci.yaml """
     def __init__(self):
-        if not os.path.exists('osci.yaml'):
-            self._osci_config = {}
-        else:
-            with open('osci.yaml', encoding='utf-8') as fd:
-                self._osci_config = yaml.safe_load(fd)
+        path = os.path.join(os.environ.get('CHARM_ROOT_PATH', ''), 'osci.yaml')
+        with open(path, encoding='utf-8') as fd:
+            self._osci_config = yaml.safe_load(fd)
 
-    @property
+    @cached_property
     def project_templates(self):
         """ Returns all project templates. """
         for item in self._osci_config:
@@ -73,7 +71,7 @@ class OSCIConfig():
 
         return []
 
-    @property
+    @cached_property
     def project_check_jobs(self):
         """ Generator returning all project check jobs defined. """
         for item in self._osci_config:
@@ -103,21 +101,17 @@ class OSCIConfig():
 
         return None
 
+    def get_project_check_job(self, name):
+        """ Get job by name from project.check.jobs. Return can be string name
+        or dict.
 
-class ProjectTemplatesConfig():
-    """ Extract information from project_templates.yaml """
-    def __init__(self, path):
-        if not os.path.exists(path):
-            self._config = {}
-        else:
-            with open(path, encoding='utf-8') as fd:
-                self._config = yaml.safe_load(fd)
+        @param name: string name
+        """
+        for job in self.project_check_jobs:
+            if isinstance(job, dict):
+                if name in job:
+                    return job
+            elif job == name:
+                return job
 
-    @property
-    def project_templates(self):
-        """ Generator returning all project check jobs defined. """
-        for item in self._config:
-            if 'project-template' not in item:
-                continue
-
-            yield item['project-template']
+        return None

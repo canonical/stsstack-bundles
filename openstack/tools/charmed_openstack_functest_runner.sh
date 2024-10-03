@@ -116,10 +116,11 @@ which yq &>/dev/null || sudo snap install yq
 get_and_update_repo https://github.com/openstack-charmers/zosci-config
 
 TOOLS_PATH=$(realpath $(dirname $0))/func_test_tools
-CHARM_PATH=$PWD
+# This is used generally to identify the charm root.
+export CHARM_ROOT_PATH=$PWD
 
 # Get commit we are running tests against.
-COMMIT_ID=$(git -C $CHARM_PATH rev-parse --short HEAD)
+COMMIT_ID=$(git -C $CHARM_ROOT_PATH rev-parse --short HEAD)
 CHARM_NAME=$(awk '/^name: .+/{print $2}' metadata.yaml)
 
 echo "Running functional tests for charm $CHARM_NAME commit $COMMIT_ID"
