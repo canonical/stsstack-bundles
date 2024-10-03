@@ -48,7 +48,7 @@ def get_default_jobs():
     path = os.path.join(os.environ['HOME'], 'zosci-config')
     c = configparser.ConfigParser()
     c.read('.gitreview')
-    branch = c['gerrit']['defaultbranch']
+    branch = c['gerrit'].get('defaultbranch', 'master')
     osci = OSCIConfig()
     jobs = ZOSCIConfig(path).get_branch_jobs(branch, osci.project_templates)
     return jobs
