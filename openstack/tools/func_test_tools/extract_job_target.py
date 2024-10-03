@@ -21,7 +21,7 @@ def extract_job_target(testjob):
     if not job or 'vars' not in job or 'tox_extra_args' not in job['vars']:
         return testjob
 
-    ret = re.search(r"-- (.+)",
+    ret = re.search(r"(?:--)?\s*(.+)",
                     str(job['vars']['tox_extra_args']))
     if not ret:
         return testjob
