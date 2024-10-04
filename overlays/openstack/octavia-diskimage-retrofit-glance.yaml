@@ -1,6 +1,6 @@
 applications:
   glance:
-    constraints: mem=4G
+    constraints: mem=4G cores=4
 relations:
   - [ octavia-diskimage-retrofit:juju-info, glance:juju-info ]
 
