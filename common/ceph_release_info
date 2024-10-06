@@ -13,5 +13,6 @@ export -A APP_RELEASE_NAMES=( [firefly]=icehouse
                               [octopus]=ussuri
                               [pacific]=wallaby # xena and wallaby both have pacific
                               [quincy]=yoga
-                              [reef]=bobcat )   # bobcat and caracal both have reef
+                              [reef]=bobcat
+                              [squid]=caracal )
 
