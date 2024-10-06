@@ -185,12 +185,7 @@ fi
 
 # If a func test pr is provided switch to that pr.
 if [[ -n $FUNC_TEST_PR ]]; then
-    (
-    [[ -d src ]] && cd src
-    # We use the zosci-config tools to do this.
-    MSG=$(echo "Func-Test-Pr: https://github.com/openstack-charmers/zaza-openstack-tests/pull/$FUNC_TEST_PR"| base64)
-    ~/zosci-config/roles/handle-func-test-pr/files/process_func_test_pr.py -f ./test-requirements.txt "$MSG"
-    )
+    apply_func_test_pr $FUNC_TEST_PR
 fi
 
 declare -A func_target_state=()

@@ -32,3 +32,15 @@ get_and_update_repo ()
     fi
     )
 }
+
+apply_func_test_pr ()
+{
+    # Similar to https://github.com/openstack-charmers/zosci-config/blob/master/roles/handle-func-test-pr/tasks/main.yaml#L19
+    local pr_id=$1
+    # We use the zosci-config tools to do this.
+    local msg=$(echo "Func-Test-Pr: https://github.com/openstack-charmers/zaza-openstack-tests/pull/$pr_id"| base64)
+    ~/zosci-config/roles/handle-func-test-pr/files/process_func_test_pr.py \
+        -f './test-requirements*.txt' \
+        -f './src/test-requirements*.txt' \
+        "$msg"
+}
