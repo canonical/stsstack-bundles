@@ -138,9 +138,19 @@ OAM_MAX=$(ipcalc $CIDR_OAM| awk '$1=="HostMax:" {print $2}')
 OAM_MIN=$(ipcalc $CIDR_OAM| awk '$1=="HostMin:" {print $2}')
 OAM_MIN_ABC=${OAM_MIN%.*}
 OAM_MAX_D=${OAM_MAX##*.}
-# Picking last two addresses and hoping they dont get used by Neutron.
-export {OS,TEST}_VIP00=${OAM_MIN_ABC}.$(($OAM_MAX_D - 1))
-export {OS,TEST}_VIP01=${OAM_MIN_ABC}.$(($OAM_MAX_D - 2))
+
+NUM_VIPS=2
+for ((i=$NUM_VIPS;i;i-=1)); do
+    vip_port_name=zaza-vip-port-$((i-1))
+    vip_addr=$(openstack port show -c fixed_ips $vip_port_name -f yaml| yq .fixed_ips[0].ip_address)
+    if [[ $vip_addr = null ]]; then
+        vip_addr=${OAM_MIN_ABC}.$(($OAM_MAX_D - $i))
+        # Pre-allocate ports with addresses used for VIPs so that they don't
+        # collide with the deployment itself.
+        allocate_port $vip_addr net_${OS_USERNAME}-psd $vip_port_name
+    fi
+    export {OS,TEST}_VIP0$((i-1))=$vip_addr
+done
 
 # More information on config https://github.com/openstack-charmers/zaza/blob/master/doc/source/runningcharmtests.rst
 export {,TEST_}NET_ID=$(openstack network show net_${OS_USERNAME}-psd-extra -f value -c id)
