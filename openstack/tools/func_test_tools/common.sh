@@ -44,3 +44,12 @@ apply_func_test_pr ()
         -f './src/test-requirements*.txt' \
         "$msg"
 }
+
+allocate_port ()
+{
+    local addr=$1
+    local net_name=$2
+    local port_name=$3
+    openstack port create --network $net_name --fixed-ip ip-address=$addr \
+        $port_name
+}
