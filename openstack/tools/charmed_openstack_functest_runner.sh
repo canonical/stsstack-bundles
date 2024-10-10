@@ -218,11 +218,12 @@ if $MODIFY_BUNDLE_CONSTRAINTS; then
     for f in tests/bundles/*.yaml; do
         # Dont do this if the test does not have nova-compute
         if $(grep -q "nova-compute:" $f); then
-            if [[ $(yq '.applications' $f) = null ]]; then
-                yq -i '.services.nova-compute.constraints="root-disk=80G mem=8G"' $f
-            else
-                yq -i '.applications.nova-compute.constraints="root-disk=80G mem=8G"' $f
-            fi
+            # Taking nova-compute machines and add root-disk=80G to machine constraints
+            MACHINES=($(yq eval '(.services.nova-compute.to[] // .applications.nova-compute.to[])' "$f"))
+
+            for MACHINE in "${MACHINES[@]}"; do
+                yq eval -i ".machines[\"${MACHINE}\"].constraints = \"root-disk=80G mem=8G\"" "$f"
+            done
         fi
     done
     )
