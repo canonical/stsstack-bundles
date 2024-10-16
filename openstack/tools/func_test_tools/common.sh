@@ -8,10 +8,10 @@ destroy_zaza_models ()
     for model in $(juju list-models| egrep -o "^zaza-\S+"|tr -d '*'); do
         if $j3; then
             juju destroy-model --no-prompt --force --no-wait \
-                                --destroy-storage $model
+                                --destroy-storage $model || true
         else
             juju destroy-model --yes --force --no-wait --destroy-storage \
-                                $model
+                                $model || true
         fi
     done
 }
