@@ -14,6 +14,7 @@ export -a MOD_PASSTHROUGH_OPTS=()
 export -A MOD_MSGS=()
 # Use order 0 to ensure this is first displayed
 MOD_MSGS[0_common.0]="run ./configure to initialise your deployment"
+MOD_MSGS[0_common.1]="run ./tools/bootstrap-k8s-cloud.sh to deploy k8s bundles"
 
 # Array list of overlays to use with this deployment.
 export -a MOD_OVERLAYS=()
