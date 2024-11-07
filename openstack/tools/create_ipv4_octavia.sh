@@ -6,8 +6,8 @@ set -u -e -x
 while true; do
     [[ `juju status keystone --format json | jq -r '.applications.keystone.units."keystone/0"."workload-status".current'` = active ]] \
         && break
-    if [[ `juju status keystone --format json | jq -r '.applications.keystone.units."keystone/0"."workload-status".current'` = error ]]
-    then
+    if [[ `juju status keystone --format json | \
+            jq -r '.applications.keystone.units."keystone/0"."workload-status".current'` = error ]]; then
         echo "ERROR: Octavia deployment failed"
         break
     fi

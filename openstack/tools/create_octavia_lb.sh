@@ -54,9 +54,9 @@ while (( $# > 0 )); do
                 echo "missing protocol for healthmonitor"
                 exit 1
             fi
-	    hm_protocol=$2
-	    shift
-	    ;;
+            hm_protocol=$2
+            shift
+            ;;
         -h|--help)
             cat <<EOF
 Usage:
@@ -148,7 +148,10 @@ openstack loadbalancer healthmonitor list
 # Add vm(s) to pool
 if (( ${#member_vm[@]} == 0 )); then
     readarray -t member_vm < <(openstack server list --column ID --format value)
-    (( ${#member_vm[@]} )) || { echo "ERROR: could not find a vm to add to lb pool"; exit 1; }
+    if ((${#member_vm[@]}==0)); then
+        echo "ERROR: could not find a vm to add to lb pool"
+        exit 1
+    fi
 fi
 
 for member in "${member_vm[@]}"; do

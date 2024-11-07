@@ -2,3 +2,4 @@ b
 bundles
 ssl/*/
 microk8s/dockercreds
+__pycache__

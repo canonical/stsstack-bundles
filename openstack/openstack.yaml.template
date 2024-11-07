@@ -35,6 +35,8 @@ applications:
       migration-auth-type: ssh
       openstack-origin: *openstack_origin
       force-raw-images: false  # disable for stsstack since conversion kills the disks and is not needed
+    storage:
+      ephemeral-device: cinder,50G,1
   nova-cloud-controller:
     num_units: __NUM_NOVACC_UNITS__
     charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__nova-cloud-controller

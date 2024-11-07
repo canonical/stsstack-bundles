@@ -10,9 +10,12 @@ openstack floating ip list --project $project_name --project-domain $domain -c I
 
 openstack router unset --external-gateway ${project_name}-router &
 
-readarray -t ports<<<`openstack port list --router ${project_name}-router -c id -c device_owner -f value| awk '$2=="network:ha_router_replicated_interface" {print $1}'`
-((${#ports[@]})) && [ -n "${ports[0]}" ] || \
-    readarray -t ports<<<`openstack port list --router ${project_name}-router -c id -c device_owner -f value| awk '$2=="network:router_interface_distributed" {print $1}'`
+readarray -t ports<<<`openstack port list --router ${project_name}-router -c id -c device_owner -f value| \
+    awk '$2=="network:ha_router_replicated_interface" {print $1}'`
+if ! ((${#ports[@]})) && [ -n "${ports[0]}" ]; then
+    readarray -t ports<<<`openstack port list --router ${project_name}-router -c id -c device_owner -f value| \
+        awk '$2=="network:router_interface_distributed" {print $1}'`
+fi
 
 declare -A subnets=()
 if ((${#ports[@]})) && [ -n "${ports[0]}" ]; then
