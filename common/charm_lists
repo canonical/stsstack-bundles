@@ -88,3 +88,14 @@ prometheus
 ro
 zookeeper
 )
+
+declare -a IAM_CHARMS=(
+hydra
+identity-platform-login-ui-operator
+kratos
+kratos-external-idp-integrator
+oathkeeper
+postgresql-k8s
+self-signed-certificates
+traefik-k8s
+)

@@ -1,0 +1,63 @@
+#!/bin/bash -x
+
+# Check for kratos-external-idp-integrator
+if [ "$(juju status --format json| jq -r '.applications["kratos-external-idp-integrator"].units|to_entries[]|select(.value["leader"])|.key' 2> /dev/null)" == "" ]; then
+		echo 'ERROR: Cannot configure OIDC without kratos-external-idp-integrator!'
+		exit 1
+fi
+
+# Install Helm
+if ! snap list | grep -q helm; then
+		sudo snap install helm --classic
+fi
+
+# Install authentik
+kubectl get ns authentik &> /dev/null || kubectl create ns authentik
+https_proxy=http://squid.internal:3128 helm repo add authentik https://charts.goauthentik.io
+https_proxy=http://squid.internal:3128 helm repo update
+helm install authentik authentik/authentik -f ./authentik-values.yaml -n authentik || exit 1
+
+# Prepare port for API calls and wait
+kubectl patch svc -n authentik authentik-server -p '{"spec": {"type": "NodePort"}}' || exit 1
+AUTH_PORT=$(kubectl get svc -n authentik authentik-server -o jsonpath='{.spec.ports[].nodePort}')
+AUTH_IP=$(kubectl get po -n authentik -o json | jq -r '.items[] | select(.metadata.name | test("authentik-server-")) | .status.hostIP')
+
+timeout=0
+echo 'Waiting for Authentik to start...'
+until curl -s -X GET -H "accept: application/json" -H "Authorization: Bearer my-secure-bootstrap-token" "http://${AUTH_IP}:${AUTH_PORT}/api/v3/admin/system/" ; do
+	if [[ $timeout == 600 ]]; then
+		echo 'ERROR: Authentik failed to start.'
+		exit 1
+	fi
+	sleep 1
+	((timeout++))
+done
+
+# Configure OIDC
+## get auth flow id
+FLOW=$(curl -s -X GET -H "accept: application/json" -H "Authorization: Bearer my-secure-bootstrap-token" "http://${AUTH_IP}:${AUTH_PORT}/api/v3/flows/instances/?search=default-authentication-flow" | jq -r '.results[0].pk')
+
+## create provider
+curl -X POST "http://${AUTH_IP}:${AUTH_PORT}/api/v3/providers/oauth2/" -H "Authorization: Bearer my-secure-bootstrap-token" -H "accept: application/json" -H "content-type: application/json" -d "{\"name\":\"oidc-provider\",\"authentication_flow\":\"$FLOW\",\"authorization_flow\":\"$FLOW\",\"invalidation_flow\":\"$FLOW\",\"client_type\":\"confidential\",\"client_id\":\"canonical-support\",\"client_secret\":\"my-secure-oidc-secret\",\"access_code_validity\":\"hours=3\",\"access_token_validity\":\"hours=3\",\"refresh_token_validity\":\"hours=3\",\"include_claims_in_id_token\":false,\"redirect_uris\":\"*\",\"sub_mode\":\"hashed_user_id\",\"issuer_mode\":\"per_provider\"}"
+
+## create app
+curl -H "Authorization: Bearer my-secure-bootstrap-token" -X POST "http://${AUTH_IP}:${AUTH_PORT}/api/v3/core/applications/" -H "accept: application/json" -H "content-type: application/json" -d '{"name":"canonical-support","slug":"canonical-support","provider":1,"backchannel_providers":[1],"policy_engine_mode":"all"}'
+
+# Configure kratos
+juju config kratos-external-idp-integrator provider=generic
+juju config kratos-external-idp-integrator client_id=canonical-support
+juju config kratos-external-idp-integrator client_secret=my-secure-oidc-secret
+juju config kratos-external-idp-integrator issuer_url=http://"${AUTH_IP}:${AUTH_PORT}"/application/o/canonical-support/
+
+set +x
+echo "
+Configuration is complete! You can test a login with the following credentials:
+
+Authentik Dashboard: http://${AUTH_IP}:${AUTH_PORT}
+OIDC User: akadmin
+Password: Passw0rd"
+
+grafana_url="$(juju run grafana/0 get-admin-password 2> /dev/null | grep url | sed -e 's/url: //')"
+if [[ -n $grafana_url ]]; then
+	echo "Grafana Dashboard: $grafana_url"
+fi

@@ -1,0 +1,21 @@
+authentik:
+    secret_key: "my-secure-secret-key"
+    error_reporting:
+        enabled: false
+    postgresql:
+        password: "my-secure-psql-password"
+    bootstrap_token: "my-secure-bootstrap-token"
+    bootstrap_password: "Passw0rd"
+server:
+    ingress:
+        ingressClassName: nginx
+        enabled: false
+        hosts:
+            - authentik.secloud
+postgresql:
+    enabled: true
+    auth:
+        password: "my-secure-psql-password"
+redis:
+    enabled: true
+

@@ -1,0 +1,33 @@
+#!/bin/bash
+# Global variables are first defined in 00setup and module
+# dependencies are defined in 01import-config-defaults
+#
+# All overlay/bundle variables (MOD_PARAMS) defaults must go into
+# the <module>/module_defaults file.
+
+cloud="$(get_cloud_type)"
+if [[ "$cloud" != "k8s" ]]; then
+	echo "ERROR: Must switch to a Kubernetes model first."
+	exit 1
+fi
+
+while (($# > 0))
+do
+    case $1 in
+			--oidc)
+					MOD_OVERLAYS+=( "kubernetes/k8s-iam-oidc.yaml" )
+					MOD_MSGS[0_common.1]="Setup OIDC: ./configure"
+					;;
+			--grafana)
+					MOD_OVERLAYS+=( "kubernetes/k8s-iam-grafana.yaml" )
+					MOD_MSGS[grafana.0]="Get Grafana URL: juju run grafana/leader get-admin-password"
+					;;
+        *)
+            echo "ERROR: invalid input '$1'"
+            _usage
+            exit 1
+            ;;
+    esac
+    shift
+done
+
