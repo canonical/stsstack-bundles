@@ -1,4 +1,8 @@
 #!/bin/bash -x
+# Usage: ./tools/bootstrap-k8s-cloud.sh <cloud-name> <model-name>
+CLOUD="${1:-k8scloud}"
+MODEL="${2:-secloud}"
+
 check_kubeconfig() {
 	if [[ -z "$KUBECONFIG" && ! -f "${HOME}/.kube/config" ]]; then
 		echo 'ERROR: Cannot find KUBECONFIG! Set as environment variable.'
@@ -27,9 +31,9 @@ enable_storage() {
 }
 
 bootstrap_k8s() { 
-	juju add-k8s k8s-cloud --client
-	juju bootstrap k8s-cloud
-	juju add-model secloud
+	juju add-k8s "$CLOUD" --client
+	juju bootstrap "$CLOUD"
+	juju add-model "$MODEL"
 }
 
 check_kubeconfig
