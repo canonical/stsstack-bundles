@@ -65,6 +65,9 @@ if [[ -z $FUNC_TEST_TARGET ]]; then
 fi
 
 # This is required for magnum tests and zaza will look in swift if it is not cached so we need to cache it first.
+# Each openstack version uses a different fedora version, for example, focal-ussuri uses 32,
+# link for download: https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/32.20201104.3.0/x86_64/fedora-coreos-32.20201104.3.0-openstack.x86_64.qcow2.xz
+# All versions can be found in https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/builds.json
 mkdir -p $IMAGES_PATH
 if [[ ! -f $IMAGES_PATH/fedora-coreos-35.qcow2 ]]; then
     wget https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/35.20220424.3.0/x86_64/fedora-coreos-35.20220424.3.0-openstack.x86_64.qcow2.xz -O $IMAGES_PATH/fedora-coreos-35.qcow2.xz
@@ -132,7 +135,7 @@ LOGFILE=$(mktemp --suffix=-openstack-release-test-results)
 (
     # Ensure charmed-openstack-tester checked out and up-to-date
     get_and_update_repo https://github.com/openstack-charmers/charmed-openstack-tester
-
+    cd ~/charmed-openstack-tester
     # Ensure nova-compute has enough resources to create vms in tests.
     if $MODIFY_BUNDLE_CONSTRAINTS; then
         for f in tests/distro-regression/tests/bundles/*.yaml; do
