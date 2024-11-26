@@ -1,4 +1,10 @@
-#!/bin/bash -x
+#!/bin/bash
+
+# Reset
+if [[ "$1" == "reset" ]]; then
+	helm uninstall authentik -n authentik
+	kubectl delete pvc -n authentik data-authentik-postgresql-0 redis-data-authentik-redis-master-0
+fi
 
 # Check for kratos-external-idp-integrator
 if [ "$(juju status --format json| jq -r '.applications["kratos-external-idp-integrator"].units|to_entries[]|select(.value["leader"])|.key' 2> /dev/null)" == "" ]; then
@@ -15,16 +21,13 @@ fi
 kubectl get ns authentik &> /dev/null || kubectl create ns authentik
 https_proxy=http://squid.internal:3128 helm repo add authentik https://charts.goauthentik.io
 https_proxy=http://squid.internal:3128 helm repo update
-helm install authentik authentik/authentik -f ./authentik-values.yaml -n authentik || exit 1
-
-# Prepare port for API calls and wait
-kubectl patch svc -n authentik authentik-server -p '{"spec": {"type": "NodePort"}}' || exit 1
-AUTH_PORT=$(kubectl get svc -n authentik authentik-server -o jsonpath='{.spec.ports[].nodePort}')
-AUTH_IP=$(kubectl get po -n authentik -o json | jq -r '.items[] | select(.metadata.name | test("authentik-server-")) | .status.hostIP')
+helm install authentik authentik/authentik -f ./authentik-values.yaml -n authentik --version 2024.10.1
 
 timeout=0
 echo 'Waiting for Authentik to start...'
-until curl -s -X GET -H "accept: application/json" -H "Authorization: Bearer my-secure-bootstrap-token" "http://${AUTH_IP}:${AUTH_PORT}/api/v3/admin/system/" ; do
+up=0
+while [[ "$up" != 1 ]]; do
+	up="$(kubectl get deploy -n authentik authentik-server -o json | jq '.status.readyReplicas')"
 	if [[ $timeout == 600 ]]; then
 		echo 'ERROR: Authentik failed to start.'
 		exit 1
@@ -33,15 +36,24 @@ until curl -s -X GET -H "accept: application/json" -H "Authorization: Bearer my-
 	((timeout++))
 done
 
+# Prepare port for API calls and wait
+kubectl patch svc -n authentik authentik-server -p '{"spec": {"type": "NodePort"}}' || exit 1
+AUTH_PORT=$(kubectl get svc -n authentik authentik-server -o jsonpath='{.spec.ports[].nodePort}')
+AUTH_IP=$(kubectl get po -n authentik -o json | jq -r '.items[] | select(.metadata.name | test("authentik-server-")) | .status.hostIP')
+
 # Configure OIDC
-## get auth flow id
-FLOW=$(curl -s -X GET -H "accept: application/json" -H "Authorization: Bearer my-secure-bootstrap-token" "http://${AUTH_IP}:${AUTH_PORT}/api/v3/flows/instances/?search=default-authentication-flow" | jq -r '.results[0].pk')
+## get default values
+until [ -n "$AUTH_FLOW" ]; do AUTH_FLOW=$(curl -s -X GET -H "accept: application/json" -H "Authorization: Bearer my-secure-bootstrap-token" "http://${AUTH_IP}:${AUTH_PORT}/api/v3/flows/instances/?search=default-authentication-flow" | jq -r '.results[0].pk'); done
+until [ -n "$AUTHZ_FLOW" ]; do AUTHZ_FLOW=$(curl -s -X GET -H "accept: application/json" -H "Authorization: Bearer my-secure-bootstrap-token" "http://${AUTH_IP}:${AUTH_PORT}/api/v3/flows/instances/?search=default-provider-authorization-implicit-consent" | jq -r '.results[0].pk'); done
+until [ -n "$INVALID_FLOW" ]; do INVALID_FLOW=$(curl -s -X GET -H "accept: application/json" -H "Authorization: Bearer my-secure-bootstrap-token" "http://${AUTH_IP}:${AUTH_PORT}/api/v3/flows/instances/?search=default-invalidation-flow" | jq -r '.results[0].pk'); done
+until [ -n "$SIGN_KEY" ]; do SIGN_KEY=$(curl -s -X GET -H "accept: application/json" -H "Authorization: Bearer my-secure-bootstrap-token" "http://${AUTH_IP}:${AUTH_PORT}/api/v3/crypto/certificatekeypairs/" | jq -r '.results[0].pk'); done
+until [ -n "$SCOPE" ]; do SCOPE=$(curl -s -X GET -H "accept: application/json" -H "Authorization: Bearer my-secure-bootstrap-token" "http://${AUTH_IP}:${AUTH_PORT}/api/v3/propertymappings/provider/scope/?search=email" | jq -r '.results[0].pk'); done
 
 ## create provider
-curl -X POST "http://${AUTH_IP}:${AUTH_PORT}/api/v3/providers/oauth2/" -H "Authorization: Bearer my-secure-bootstrap-token" -H "accept: application/json" -H "content-type: application/json" -d "{\"name\":\"oidc-provider\",\"authentication_flow\":\"$FLOW\",\"authorization_flow\":\"$FLOW\",\"invalidation_flow\":\"$FLOW\",\"client_type\":\"confidential\",\"client_id\":\"canonical-support\",\"client_secret\":\"my-secure-oidc-secret\",\"access_code_validity\":\"hours=3\",\"access_token_validity\":\"hours=3\",\"refresh_token_validity\":\"hours=3\",\"include_claims_in_id_token\":false,\"redirect_uris\":\"*\",\"sub_mode\":\"hashed_user_id\",\"issuer_mode\":\"per_provider\"}"
+curl -X POST "http://${AUTH_IP}:${AUTH_PORT}/api/v3/providers/oauth2/" -H "Authorization: Bearer my-secure-bootstrap-token" -H "accept: application/json" -H "content-type: application/json" -d "{\"name\":\"oidc-provider\",\"authentication_flow\":\"$AUTH_FLOW\",\"authorization_flow\":\"$AUTHZ_FLOW\",\"invalidation_flow\":\"$INVALID_FLOW\",\"client_type\":\"confidential\",\"client_id\":\"canonical-support\",\"client_secret\":\"my-secure-oidc-secret\",\"access_code_validity\":\"hours=3\",\"access_token_validity\":\"hours=3\",\"refresh_token_validity\":\"hours=3\",\"include_claims_in_id_token\":true,\"redirect_uris\":\"*\",\"sub_mode\":\"hashed_user_id\",\"issuer_mode\":\"per_provider\",\"signing_key\":\"$SIGN_KEY\",\"property_mappings\":[\"$SCOPE\"]}"
 
 ## create app
-curl -H "Authorization: Bearer my-secure-bootstrap-token" -X POST "http://${AUTH_IP}:${AUTH_PORT}/api/v3/core/applications/" -H "accept: application/json" -H "content-type: application/json" -d '{"name":"canonical-support","slug":"canonical-support","provider":1,"backchannel_providers":[1],"policy_engine_mode":"all"}'
+curl -H "Authorization: Bearer my-secure-bootstrap-token" -X POST "http://${AUTH_IP}:${AUTH_PORT}/api/v3/core/applications/" -H "accept: application/json" -H "content-type: application/json" -d '{"name":"canonical-support","slug":"canonical-support","provider":1,"policy_engine_mode":"all"}'
 
 # Configure kratos
 juju config kratos-external-idp-integrator provider=generic
@@ -49,7 +61,6 @@ juju config kratos-external-idp-integrator client_id=canonical-support
 juju config kratos-external-idp-integrator client_secret=my-secure-oidc-secret
 juju config kratos-external-idp-integrator issuer_url=http://"${AUTH_IP}:${AUTH_PORT}"/application/o/canonical-support/
 
-set +x
 echo "
 Configuration is complete! You can test a login with the following credentials:
 
