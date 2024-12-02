@@ -6,7 +6,7 @@
 # Usage: clone/fetch charm to test and run from within charm root dir.
 #
 FUNC_TEST_PR=
-FUNC_TEST_TARGET=
+FUNC_TEST_TARGET=()
 MANUAL_FUNCTESTS=false
 MODIFY_BUNDLE_CONSTRAINTS=true
 REMOTE_BUILD=
@@ -34,7 +34,8 @@ OPTIONS:
     --func-test-target TARGET_NAME
         Provide the name of a specific test target to run. If none provided
         all tests are run based on what is defined in osci.yaml i.e. will do
-        what osci would do by default.
+        what osci would do by default. This option can be provided more than
+        once.
     --func-test-pr PR_ID
         Provides similar functionality to Func-Test-Pr in commit message. Set
         to zaza-openstack-tests Pull Request ID.
@@ -68,7 +69,7 @@ while (($# > 0)); do
             set -x
             ;;
         --func-test-target)
-            FUNC_TEST_TARGET=$2
+            FUNC_TEST_TARGET+=( $2 )
             shift
             ;;
         --func-test-pr)
@@ -186,9 +187,11 @@ fi
 
 declare -A func_target_state=()
 declare -a func_target_order
-if [[ -n $FUNC_TEST_TARGET ]]; then
-    func_target_state[$FUNC_TEST_TARGET]=null
-    func_target_order=( $FUNC_TEST_TARGET )
+if ((${#FUNC_TEST_TARGET[@]})); then
+    for t in ${FUNC_TEST_TARGET[@]}; do
+        func_target_state[$t]=null
+        func_target_order+=( $t )
+    done
 else
     voting_targets=()
     non_voting_targets=()
