@@ -10,9 +10,20 @@ install_ssh_key() {
     local unit
     for unit in $@; do
         echo "installing ssh key for ${unit}"
-        cat ~/.ssh/id_rsa.pub \
-            | timeout 10 juju ssh ${unit} \
-            -- sudo tee --append /root/.ssh/authorized_keys
+        if [[ -f ~/testkey.pub ]]; then
+            cat ~/testkey.pub \
+                | timeout 10 juju ssh ${unit} \
+                -- sudo tee --append /root/.ssh/authorized_keys
+        else
+            echo "missing key: ~/testkey.pub"
+        fi
+        if [[ -f ~/.ssh/id_rsa.pub ]]; then
+            cat ~/.ssh/id_rsa.pub \
+                | timeout 10 juju ssh ${unit} \
+                -- sudo tee --append /root/.ssh/authorized_keys
+        else
+            echo "missing key: ~/.ssh/id_rsa.pub"
+        fi
     done
 }
 
