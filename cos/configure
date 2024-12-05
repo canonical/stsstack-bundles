@@ -1,0 +1,48 @@
+#!/bin/bash -x
+COS_MODEL=cos
+SCRIPT_DIR=$(realpath $(dirname $0))
+
+juju_run_cmd="juju run"
+if (( $(juju --version | awk -F. {'print $1'}) > 2 )); then
+    juju_run_cmd="juju exec"
+fi
+
+which kubectl || sudo snap install kubectl --classic
+mkdir -p ~/.kube
+
+if $(juju list-models| egrep -q "^${COS_MODEL}\*"); then
+    echo "WARNING: currently in '$COS_MODEL' context - switch to microk8s model to re-run microk8s config"
+else
+    mk8s_unit=$(juju status| sed -nr 's,(^microk8s/[[:digit:]]+)\*.*,\1,p')
+    $juju_run_cmd --unit $mk8s_unit microk8s.config > ~/.kube/config
+    $juju_run_cmd --unit $mk8s_unit -- 'IPADDR=$( ip r get 2.2.2.2| sed -rn "s/.+src ([0-9\.]+) .+/\1/p"); microk8s enable metallb:$IPADDR-$IPADDR'
+fi
+
+kubectl get pods -A
+
+if ! $(juju list-clouds| egrep -q "^microk8s-cos"); then
+    KUBECONFIG=~/.kube/config juju add-k8s microk8s-cos --cluster-name=microk8s-cluster --client --controller ${OS_PROJECT_NAME/_/-} --storage=ceph-xfs
+fi
+if ! $(juju list-models| egrep -q "^${COS_MODEL}"); then
+    juju add-model $COS_MODEL microk8s-cos
+    juju deploy cos-lite --overlay ${SCRIPT_DIR}/overlays/cos/cos-lite-offers.yaml --trust
+else
+    echo "INFO: model '$COS_MODEL' already exists - skipping deploy"
+    juju switch $COS_MODEL
+fi
+
+juju wait-for application grafana
+
+set +x
+echo "INFO: COS should now be reachable at the following endpoints:"
+juju run traefik/0 show-proxied-endpoints --format=yaml| yq '."traefik/0".results."proxied-endpoints"' | jq
+
+GRAFANA_PASSWORD=$(juju run grafana/leader get-admin-password --model cos 2>/dev/null| sed -rn 's/admin-password:\s+(.+)/\1/p')
+GRAFANA_USER=$(juju config grafana admin_user)
+echo "Grafana login info: ${GRAFANA_USER}/$GRAFANA_PASSWORD"
+
+echo "INFO: run the following to consume COS from your microk8s model:"
+echo "juju switch <microk8s model>"
+for offer in $(juju list-offers| tail -n+2| awk '{print $1}'); do
+    echo "juju consume ${COS_MODEL}.$offer"
+done

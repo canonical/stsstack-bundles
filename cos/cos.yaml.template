@@ -1,0 +1,17 @@
+series: __SERIES__
+machines:
+  '0':
+    constraints: __MACHINE1_CONSTRAINTS__
+    series: __SERIES__
+applications:
+  microk8s:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__microk8s
+    num_units: 1
+    expose: true
+    options:
+      containerd_http_proxy: __CONTAINERD_PROXY__
+      containerd_https_proxy: __CONTAINERD_PROXY__
+      containerd_no_proxy: __CONTAINERD_NO_PROXY__
+    to:
+    - 0
+

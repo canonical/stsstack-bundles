@@ -1,0 +1,10 @@
+applications:
+  filebeat:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__filebeat
+    channel: stable
+    options:
+      logpath: /var/log/*.log /var/log/*/*.log /var/log/syslog
+relations:
+ - [ceph-mon:juju-info, filebeat:beats-host]
+ - [cos-proxy:filebeat, filebeat:logstash]
+ - [cos-proxy:juju-info, filebeat:beats-host]

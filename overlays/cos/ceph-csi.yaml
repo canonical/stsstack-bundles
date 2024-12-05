@@ -1,0 +1,11 @@
+applications:
+  ceph-csi:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__ceph-csi
+    # See https://github.com/charmed-kubernetes/ceph-csi-operator/issues/22
+    channel: 1.31/stable
+    options:
+      provisioner-replicas: 1
+      namespace: kube-system
+relations:
+  - [ ceph-csi:ceph-client, ceph-mon:client ]
+  - [ ceph-csi:kubernetes-info, microk8s ]
