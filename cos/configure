@@ -1,0 +1,32 @@
+#!/bin/bash -x
+
+juju_major_version=$(juju --version | awk -F. {'print $1'})
+juju_run_cmd="juju run"
+
+if [ "${juju_major_version}" -gt 2 ]; then
+	juju_run_cmd="juju exec"
+fi
+
+microk8s_unit=$(juju status| sed -nr 's,(^microk8s/[[:digit:]]+)\*.*,\1,p')
+which kubectl || sudo snap install kubectl --classic
+mkdir -p ~/.kube
+
+${juju_run_cmd} --unit ${microk8s_unit} microk8s.config > ~/.kube/config
+
+${juju_run_cmd} --unit ${microk8s_unit} -- 'IPADDR=$( ip r get 2.2.2.2| sed -rn "s/.+src ([0-9\.]+) .+/\1/p"); microk8s enable metallb:$IPADDR-$IPADDR'
+
+kubectl get pods -A
+
+KUBECONFIG=~/.kube/config juju add-k8s microk8s-cos --cluster-name=microk8s-cluster --client --controller stg-reproducer-hopem-project --storage=ceph-xfs
+
+juju bootstrap microk8s-cos
+
+juju list-controllers
+
+juju switch microk8s-cos-localhost
+
+juju deploy cos-lite --trust
+
+juju run traefik/0 show-proxied-endpoints --format=yaml   | yq '."traefik/0".results."proxied-endpoints"'   | jq
+
+echo "You can now use COS."
