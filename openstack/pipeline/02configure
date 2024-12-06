@@ -712,6 +712,16 @@ do
             MOD_MSGS[cinder-purestorage.4]="openstack volume type create cinder-ceph --property volume_backend_name=cinder-ceph # If also deploying ceph"
             MOD_MSGS[cinder-purestorage.5]="juju config cinder default-volume-type=cinder-ceph # or cinder-purestorage"
             ;;
+        --watcher)
+            if assert_min_release yoga 'watcher'; then
+                MOD_OVERLAYS+=( "openstack/watcher.yaml" )        
+            fi
+            ;;
+        --watcher-ha*)
+            get_units $1 __NUM_WATCHER_UNITS__ 3
+            MOD_OVERLAYS+=( "openstack/watcher-ha.yaml" )
+            set -- $@ --watcher && cache $@
+            ;;
         *)
             echo "ERROR: invalid input '$1'"
             _usage

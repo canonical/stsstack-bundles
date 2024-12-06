@@ -1,0 +1,10 @@
+applications:
+  watcher:
+    options:
+      vip: __VIP__
+  watcher-hacluster:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__hacluster
+    options:
+        cluster_count: __NUM_WATCHER_UNITS__
+relations:
+  - [ watcher, watcher-hacluster ]
