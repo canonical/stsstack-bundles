@@ -12,5 +12,9 @@ for c in ${CEPH_CHARMS[@]}; do
     CHARM_CHANNEL[$c]=$ceph_release/edge
 done
 
+for c in ${IAM_CHARMS[@]}; do
+    CHARM_CHANNEL[$c]=latest/edge
+done
+
 CHARM_CHANNEL[pacemaker-remote]=${series}/edge
 CHARM_CHANNEL[microk8s]=1.28/stable
