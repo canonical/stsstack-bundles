@@ -1,0 +1,25 @@
+#!/bin/bash -x
+juju_run_cmd="juju run"
+if (( $(juju --version | awk -F. {'print $1'}) > 2 )); then
+	juju_run_cmd="juju exec"
+fi
+
+mk8s_unit=$(juju status| sed -nr 's,(^microk8s/[[:digit:]]+)\*.*,\1,p')
+which kubectl || sudo snap install kubectl --classic
+mkdir -p ~/.kube
+
+$juju_run_cmd --unit $mk8s_unit microk8s.config > ~/.kube/config
+kubectl get pods -A
+
+$juju_run_cmd --unit $mk8s_unit -- 'IPADDR=$( ip r get 2.2.2.2| sed -rn "s/.+src ([0-9\.]+) .+/\1/p"); microk8s enable metallb:$IPADDR-$IPADDR'
+
+KUBECONFIG=~/.kube/config juju add-k8s microk8s-cos --cluster-name=microk8s-cluster --client --controller stg-reproducer-hopem-project --storage=ceph-xfs
+
+juju add-model cos microk8s-cos
+juju deploy cos-lite --trust
+
+juju wait-for application grafana
+
+echo "INFO: COS should now be reachable at the following endpoints:"
+juju run traefik/0 show-proxied-endpoints --format=yaml| yq '."traefik/0".results."proxied-endpoints"' | jq
+

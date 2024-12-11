@@ -1,0 +1,32 @@
+applications:
+  ceph-mon:
+    charm: ceph-mon
+    channel: quincy/stable
+    num_units: 3
+    to:
+    - 0
+    - 1
+    - 2
+  ceph-osd:
+    charm: ceph-osd
+    channel: quincy/stable
+    num_units: 3
+    to:
+    - 0
+    - 1
+    - 2
+    options:
+      osd-devices: ''  # must be empty string when using juju storage
+      config-flags: '{"osd": {"osd memory target": 1073741824}}' # matching 2G constraint
+    storage:
+      osd-devices: cinder,10G,1
+  ceph-csi:
+    charm: ceph-csi
+    channel: 1.28/stable
+    options:
+      provisioner-replicas: 1
+      namespace: kube-system
+relations:
+  - [ ceph-osd:mon, ceph-mon:osd ]
+  - [ ceph-csi:ceph-client, ceph-mon:client ]
+  - [ ceph-csi:kubernetes-info, microk8s ]
