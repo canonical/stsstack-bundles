@@ -83,14 +83,15 @@ Usage:
 
 $(basename "$0") [options]
 
---name NAME              The loadbalancer name base, default = ${lb} (things
-                         such as listener and pool are named using this base)
---member-vm NAME         The name of the member VM. Can be used multiple times.
-                         If not provided use the first VM running.
---provider PROVIDER      The Octavia provider {amphora, ovn}, default = ${provider}
---protocol PROTOCOL      TCP, HTTP, ..., default = ${protocol}
---protocol-port PORT     Port to use, default = ${protocol_port}
---vip-subnet SUBNET      Name or ID of VIP subnet ${vip_subnet}
+--name NAME                 The loadbalancer name base, default = ${lb} (things
+                            such as listener and pool are named using this base)
+--member-vm NAME            The name of the member VM. Can be used multiple times.
+                            If not provided use the first VM running.
+--provider PROVIDER         The Octavia provider {amphora, ovn}, default = ${provider}
+--protocol PROTOCOL         TCP, HTTP, ..., default = ${protocol}
+--protocol-port PORT        Port to use, default = ${protocol_port}
+--vip-subnet SUBNET         Name or ID of VIP subnet ${vip_subnet}
+--member-subnet SUBNET      Optional member subnet
 EOF
             exit 0
             ;;
