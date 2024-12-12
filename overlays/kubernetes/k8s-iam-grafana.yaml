@@ -1,0 +1,11 @@
+applications:
+  grafana:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__grafana-k8s
+    scale: 1
+    series: focal
+    storage:
+      database: kubernetes,1,1024M
+relations:
+  - [grafana:ingress, traefik-public:traefik-route]
+  - [grafana:oauth, hydra:oauth]
+  - [grafana:receive-ca-cert, self-signed-certificates:send-ca-cert]

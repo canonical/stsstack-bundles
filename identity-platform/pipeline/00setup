@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Globals
+export MOD_NAME=identity-platform
+export MOD_BASE_TEMPLATE=iam.yaml.template
+export MOD_SSL_STATE_DIR=${MOD_NAME}
+[ -n "${MASTER_OPTS[BUNDLE_NAME]}" ] && \
+    MOD_SSL_STATE_DIR="${MOD_SSL_STATE_DIR}-${MASTER_OPTS[BUNDLE_NAME]}"
+
+# opts that 02configure does not recognise that get passed to the generator
+export -a MOD_PASSTHROUGH_OPTS=()
+
+# Collection of messages to display at the end
+export -A MOD_MSGS=()
+# Use order 0 to ensure this is first displayed
+MOD_MSGS[0_common.0]="Ensure a LoadBalancer (e.g. MetalLB or Cilium) is enabled on k8s"
+MOD_MSGS[0_common.2]="Configure a local user: juju run kratos/0 create-admin-account email=admin@secloud.local password=Passw0rd username=admin"
+
+# Array list of overlays to use with this deployment.
+export -a MOD_OVERLAYS=()
+
+export -A MOD_PARAMS=()

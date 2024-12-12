@@ -1,0 +1,72 @@
+---
+bundle: kubernetes
+name: identity-platform
+website: https://github.com/canonical/iam-bundle
+issues: https://github.com/canonical/iam-bundle/issues
+applications:
+  hydra:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__hydra
+    scale: 1
+    series: jammy
+    trust: true
+  identity-platform-login-ui-operator:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__identity-platform-login-ui-operator
+    scale: 1
+    series: jammy
+    trust: true
+  kratos:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__kratos
+    scale: 1
+    series: jammy
+    options:
+      enforce_mfa: false
+    trust: true
+  oathkeeper:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__oathkeeper
+    scale: 1
+    series: jammy
+    trust: true
+  postgresql-k8s:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__postgresql-k8s
+    scale: 1
+    series: jammy
+    options:
+      plugin_btree_gin_enable: true
+      plugin_pg_trgm_enable: true
+    storage:
+      pgdata: kubernetes,1,1024M
+    trust: true
+  self-signed-certificates:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__self-signed-certificates
+    scale: 1
+  traefik-admin:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__traefik-k8s
+    scale: 1
+    series: focal
+    storage:
+      configurations: kubernetes,1,1024M
+    trust: true
+  traefik-public:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__traefik-k8s
+    scale: 1
+    series: focal
+    options:
+      enable_experimental_forward_auth: true
+    storage:
+      configurations: kubernetes,1,1024M
+    trust: true
+relations:
+  - [hydra:pg-database, postgresql-k8s:database]
+  - [kratos:pg-database, postgresql-k8s:database]
+  - [kratos:hydra-endpoint-info, hydra:hydra-endpoint-info]
+  - [hydra:admin-ingress, traefik-admin:ingress]
+  - [hydra:public-ingress, traefik-public:ingress]
+  - [kratos:admin-ingress, traefik-admin:ingress]
+  - [kratos:public-ingress, traefik-public:ingress]
+  - [identity-platform-login-ui-operator:ingress, traefik-public:ingress]
+  - [identity-platform-login-ui-operator:hydra-endpoint-info, hydra:hydra-endpoint-info]
+  - [identity-platform-login-ui-operator:ui-endpoint-info, hydra:ui-endpoint-info]
+  - [identity-platform-login-ui-operator:ui-endpoint-info, kratos:ui-endpoint-info]
+  - [identity-platform-login-ui-operator:kratos-info, kratos:kratos-info]
+  - [traefik-admin:certificates, self-signed-certificates:certificates]
+  - [traefik-public:certificates, self-signed-certificates:certificates]

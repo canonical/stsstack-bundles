@@ -1,0 +1,9 @@
+applications:
+  kratos-external-idp-integrator:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__kratos-external-idp-integrator
+    scale: 1
+    series: jammy
+    options:
+      provider: generic
+relations:
+  - [kratos-external-idp-integrator:kratos-external-idp, kratos:kratos-external-idp]
