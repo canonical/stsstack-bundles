@@ -50,7 +50,7 @@ fi
 
 if [ -n "${MASTER_OPTS[MODEL_CONSTRAINTS]}" ]; then
     juju set-model-constraints ${MASTER_OPTS[MODEL_CONSTRAINTS]}
-else
+elif ! ${MASTER_OPTS[HYPERCONVERGED_DEPLOYMENT]}; then
     juju set-model-constraints root-disk-source=volume root-disk=20G
 fi
 
