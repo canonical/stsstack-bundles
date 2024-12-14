@@ -1,0 +1,18 @@
+# This file must contain defaults for all variables used in bundles/overlays.
+# They are used to render to final product in the event they are not provided
+# elsewhere. It is inserted into the global context at the start of the
+# pipeline.
+#
+# You can check that none are missing by running lint/check_var_defaults.sh
+#
+
+MOD_PARAMS[__MICROK8S_CHANNEL__]="latest/edge"
+MOD_PARAMS[__CONTAINERD_PROXY__]=''
+MOD_PARAMS[__CONTAINERD_NO_PROXY__]='127.0.0.1,localhost,::1,10.149.0.0/16,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16'
+MOD_PARAMS[__NUM_MICROK8S_UNITS__]=1
+MOD_PARAMS[__NUM_COS_PROXY_UNITS__]=1
+MOD_PARAMS[__NUM_CEPH_MON_UNITS__]=3
+MOD_PARAMS[__NUM_CEPH_OSD_UNITS__]=3
+MOD_PARAMS[__MACHINE1_CONSTRAINTS__]='mem=8G'
+MOD_PARAMS[__MACHINE2_CONSTRAINTS__]='mem=8G'
+MOD_PARAMS[__MACHINE3_CONSTRAINTS__]='mem=8G'

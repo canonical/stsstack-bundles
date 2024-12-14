@@ -1,0 +1,64 @@
+#!/bin/bash
+# Global variables are first defined in 00setup and module
+# dependencies are defined in 01import-config-defaults
+#
+# All overlay/bundle variables (MOD_PARAMS) defaults must go into
+# the <module>/module_defaults file.
+
+target=$series
+[ -z "$pocket" ] || target=${target}-$pocket
+target=${target}:${MOD_PARAMS[__MICROK8S_CHANNEL__]}
+MOD_PASSTHROUGH_OPTS+=( --release-name $target )
+
+# Automatically use proxy if in prodstack only
+if $(timeout 1s getent hosts squid.internal &> /dev/null) && [ -z "${MOD_PARAMS[__CONTAINERD_PROXY__]}" ]; then
+    MOD_MSGS[1_proxy.0]='PROXY: squid.internal exists, setting containerd proxy to http://squid.internal:3128'
+    MOD_PARAMS[__CONTAINERD_PROXY__]=http://squid.internal:3128
+fi
+
+if ! has_opt --charmed-ceph-lxd && ! has_opt --microceph; then
+    MOD_OVERLAYS+=( "cos/charmed-ceph.yaml" )
+    MOD_OVERLAYS+=( "cos/ceph-csi.yaml" )
+fi
+
+# Skip processing input if it includes exclusive passthrough options
+! has_excl_passthrough_opt && \
+while (($# > 0))
+do
+    case "$1" in
+        --containerd-proxy)  #__OPT__type:<str> (default="" unless the hostname squid.internal resolves, then it's http://squid.internal:3128)
+            MOD_PARAMS[__CONTAINERD_PROXY__]=$2
+            shift
+            ;;
+        --containerd-no-proxy)  #__OPT__type:<str> (default=127.0.0.1,localhost,::1,10.149.0.0/16,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16)
+            MOD_PARAMS[__CONTAINERD_NO_PROXY__]=$2
+            shift
+            ;;
+        --microceph)
+            MOD_OVERLAYS+=( "cos/microceph.yaml" )
+            ;;
+        --charmed-ceph-lxd)
+            MOD_OVERLAYS+=( "cos/charmed-ceph-lxd.yaml" )
+            ;;
+        --cos-proxy)
+            MOD_OVERLAYS+=( "cos/cos-proxy.yaml" )
+            MOD_MSGS[2_cos-proxy.0]='Once the COS deployment is complete you need to do the following:'
+            MOD_MSGS[2_cos-proxy.1]='juju relate grafana-dashboards:grafana-dashboard cos-proxy:downstream-grafana-dashboard'
+            MOD_MSGS[2_cos-proxy.2]='juju relate loki-logging:logging cos-proxy:downstream-logging'
+            MOD_MSGS[2_cos-proxy.3]='juju relate prometheus-scrape:metrics-endpoint cos-proxy:downstream-prometheus-scrape'
+            ;;
+        --filebeat)
+            MOD_OVERLAYS+=( "cos/cos-proxy-filebeat.yaml" )
+            if ! has_opt --cos-proxy; then
+                set -- $@ --cos-proxy && cache $@
+            fi
+            ;;
+        *)
+            echo "ERROR: invalid input '$1'"
+            _usage
+            exit 1
+            ;;
+    esac
+    shift
+done || true
+

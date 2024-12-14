@@ -1,0 +1,20 @@
+machines:
+  '0':
+    constraints: __MACHINE1_CONSTRAINTS__
+    series: __SERIES__
+  '1':
+    constraints: __MACHINE2_CONSTRAINTS__
+    series: __SERIES__
+  '2':
+    constraints: __MACHINE3_CONSTRAINTS__
+    series: __SERIES__
+applications:
+  microceph:
+    charm: microceph
+    channel: quincy/stable
+    num_units: __NUM_CEPH_OSD_UNITS__
+    to:
+    - 0
+    - 1
+    - 2
+

@@ -1,0 +1,34 @@
+machines:
+  '0':
+    constraints: __MACHINE1_CONSTRAINTS__
+    series: __SERIES__
+  '1':
+    constraints: __MACHINE2_CONSTRAINTS__
+    series: __SERIES__
+  '2':
+    constraints: __MACHINE3_CONSTRAINTS__
+    series: __SERIES__
+applications:
+  ceph-mon:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__ceph-mon
+    channel: quincy/stable
+    num_units: __NUM_CEPH_MON_UNITS__
+    to:
+    - 0
+    - 1
+    - 2
+  ceph-osd:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__ceph-osd
+    channel: quincy/stable
+    num_units: __NUM_CEPH_OSD_UNITS__
+    to:
+    - 0
+    - 1
+    - 2
+    options:
+      osd-devices: ''  # must be empty string when using juju storage
+      config-flags: '{"osd": {"osd memory target": 1073741824}}' # matching 2G constraint
+    storage:
+      osd-devices: cinder,10G,1
+relations:
+  - [ ceph-osd:mon, ceph-mon:osd ]

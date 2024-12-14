@@ -185,7 +185,7 @@ if ${MASTER_OPTS[HYPERCONVERGED_DEPLOYMENT]}; then
         num_placement_machines=\
             $((${MOD_PARAMS[__NUM_K8S_CONTROL_PLANE_UNITS__]}+
                 ${MOD_PARAMS[__NUM_K8S_WORKER_UNITS__]}))
-    elif [[ $MOD_NAME = ceph ]]; then
+    elif [[ $MOD_NAME = ceph ]] || [[ $MOD_NAME = cos ]]; then
         num_placement_machines=$((${MOD_PARAMS[__NUM_CEPH_OSD_UNITS__]}))
     else
         echo -n "ERROR: module '$MOD_NAME'" 1>&2
