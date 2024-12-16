@@ -637,7 +637,7 @@ do
                 done
             fi
             has_opt --ceph && MOD_OVERLAYS+=( "ceph/vault-ceph.yaml" )
-            MOD_MSGS[vault.0]="run ./tools/vault-unseal-and-authorise.sh"
+            MOD_MSGS[0_common.0]="run ./tools/vault-unseal-and-authorise.sh"
             ;;
         --etcd-channel)  #__OPT__type:<str>
             MOD_PARAMS[__ETCD_SNAP_CHANNEL__]=$2
