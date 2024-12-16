@@ -2,11 +2,11 @@
 
 This repository contains a set of bundles that leverage Juju bundle overlays to
 allow generating complex deployments from a number of options using a single
-command. These bundles are designed for use with a Juju Openstack provider.
+command. These bundles are designed for use with the Juju OpenStack provider.
 
-If you look in the top level directory you will see a set of modules. If you
-then go into these you will find a generate-bundle.sh tool with which you can
-create a deployment from a number of options.
+The top level directory contains a set of *modules*, each of which has a
+generate-bundle.sh script which you can use to create a deployment from a
+number of options.
 
 NOTE: see `generate-bundle.sh --help` for option info about using that
 particular module.
@@ -14,8 +14,8 @@ particular module.
 The basic usage is as follows:
 
 * give your deployment a name with (`--name`)
-* create a Juju model using the given name or use existing one or default
-* add a bunch of feature overlays depending on what you need (see
+* create a Juju model using the given name or use existing one
+* add one or more feature overlays depending on what you need (see
   `--list-overlays`)
 * resources are stored under a named directory so as to be able to avoid
   collisions and replay later (`--replay`)
@@ -23,23 +23,45 @@ The basic usage is as follows:
 
 Example:
 
-Say you want to deploy Openstack using the Stein release on Bionic and you want
+Say you want to deploy OpenStack using the Caracal release on Jammy and you want
 to enable ceph and heat with keystone in HA:
 
 ```console
 $ cd openstack
-$ ./generate-bundle.sh --name mytest -r stein --ceph --heat --keystone-ha
+$ ./generate-bundle.sh --name mytest -r caracal --ceph --heat --keystone-ha
 Creating Juju model mytest
-Added 'mytest' model on stsstack/stsstack with credential 'hopem' for user 'admin'
 
-Created bionic-stein bundle and overlays (using dev/next charms):
- + ceph.yaml
- + openstack-ceph.yaml
- + heat.yaml
- + keystone-ha.yaml
+Created jammy-caracal bundle and overlays:
+  + openstack/glance.yaml
+  + openstack/keystone.yaml
+  + ceph/ceph.yaml
+  + openstack/openstack-ceph.yaml
+  + ceph/ceph-juju-storage.yaml
+  + openstack/heat.yaml
+  + openstack/keystone-ha.yaml
+  + openstack/neutron-ovn.yaml
+  + vault.yaml
+  + openstack/vault-openstack-secrets.yaml
+  + openstack/vault-openstack-certificates.yaml
+  + openstack/vault-openstack-certificates-heat.yaml
+  + openstack/vault-openstack-certificates-placement.yaml
+  + ceph/vault-ceph.yaml
+  + openstack/neutron-ml2dns.yaml
+  + mysql-innodb-cluster.yaml
+  + mysql-innodb-cluster-router.yaml
+  + openstack/placement.yaml
 
 Command to deploy:
-juju deploy ./b/mytest/openstack.yaml --overlay ./b/mytest/o/ceph.yaml --overlay ./b/mytest/o/openstack-ceph.yaml --overlay ./b/mytest/o/heat.yaml --overlay ./b/mytest/o/keystone-ha.yaml
+juju deploy     /home/user1/git/canonical/stsstack-bundles/openstack/b/mytest/openstack.yaml --overlay /home/user1/git/canonical/stsstack-bundles/openstack/b/mytest/o/openstack/glance.yaml --overlay /home/user1/git/canonical/stsstack-bundles/openstack/b/mytest/o/openstack/keystone.yaml --overlay /home/user1/git/canonical/stsstack-bundles/openstack/b/mytest/o/ceph/ceph.yaml --overlay /home/user1/git/canonical/stsstack-bundles/openstack/b/mytest/o/openstack/openstack-ceph.yaml --overlay /home/user1/git/canonical/stsstack-bundles/openstack/b/mytest/o/ceph/ceph-juju-storage.yaml --overlay /home/user1/git/canonical/stsstack-bundles/openstack/b/mytest/o/openstack/heat.yaml --overlay /home/user1/git/canonical/stsstack-bundles/openstack/b/mytest/o/openstack/keystone-ha.yaml --overlay /home/user1/git/canonical/stsstack-bundles/openstack/b/mytest/o/openstack/neutron-ovn.yaml --overlay /home/user1/git/canonical/stsstack-bundles/openstack/b/mytest/o/vault.yaml --overlay /home/user1/git/canonical/stsstack-bundles/openstack/b/mytest/o/openstack/vault-openstack-secrets.yaml --overlay /home/user1/git/canonical/stsstack-bundles/openstack/b/mytest/o/openstack/vault-openstack-certificates.yaml --overlay /home/user1/git/canonical/stsstack-bundles/openstack/b/mytest/o/openstack/vault-openstack-certificates-heat.yaml --overlay /home/user1/git/canonical/stsstack-bundles/openstack/b/mytest/o/openstack/vault-openstack-certificates-placement.yaml --overlay /home/user1/git/canonical/stsstack-bundles/openstack/b/mytest/o/ceph/vault-ceph.yaml --overlay /home/user1/git/canonical/stsstack-bundles/openstack/b/mytest/o/openstack/neutron-ml2dns.yaml --overlay /home/user1/git/canonical/stsstack-bundles/openstack/b/mytest/o/mysql-innodb-cluster.yaml --overlay /home/user1/git/canonical/stsstack-bundles/openstack/b/mytest/o/mysql-innodb-cluster-router.yaml --overlay /home/user1/git/canonical/stsstack-bundles/openstack/b/mytest/o/openstack/placement.yaml 
+ 
+
+Post-Deployment Info/Actions:
+
+[common]
+  - run ./tools/vault-unseal-and-authorise.sh
+  - run ./configure to initialise your deployment
+  - source novarc
+  - add rules to default security group: ./tools/sec_groups.sh
 ```
 
 Note that the generated bundles and overlays are stored under a directory with
