@@ -61,10 +61,10 @@ Deploy of bundle completed.
 Post-Deployment Info/Actions:
 
 [common]
+  - run ./tools/vault-unseal-and-authorise.sh
   - run ./configure to initialise your deployment
   - source novarc
   - add rules to default security group: ./tools/sec_groups.sh
-  - run ./tools/vault-unseal-and-authorise.sh
 ```
 
 We'll come back to the post deploy steps, but for now,
