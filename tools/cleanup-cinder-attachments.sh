@@ -1,5 +1,6 @@
 #!/bin/bash -u
-for vol in $(openstack volume list| grep juju| grep in-use| awk '{print $2}'); do
+
+for vol in $(openstack volume list --status in-use | awk '{print $2}'); do
     echo "Finding attachments for in-use volume $vol"
     for server in $(openstack volume attachment list  --os-volume-api-version 3.27 --volume-id $vol -c 'Server ID' -f value); do
         openstack server show $server && continue
