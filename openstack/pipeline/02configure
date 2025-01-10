@@ -49,6 +49,8 @@ else
 fi
 
 if is_hyperconverged; then
+    # Need at least 3 physical machines so use 3 computes.
+    MOD_PARAMS[__NUM_COMPUTE_UNITS__]=3
     MOD_PARAMS[__GLOBAL_MTU__]=1500
     MOD_PARAMS[__PATH_MTU__]=1500
 fi
