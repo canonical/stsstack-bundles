@@ -3,6 +3,6 @@
 
 # Versions are based on https://docs.openstack.org/charm-guide/latest/project/charm-delivery.html
 
-CHARM_CHANNEL[ovn-central]=24.03/candidate
-CHARM_CHANNEL[ovn-chassis]=24.03/candidate
-CHARM_CHANNEL[ovn-dedicated-chassis]=24.03/candidate
+CHARM_CHANNEL[ovn-central]=24.03/edge
+CHARM_CHANNEL[ovn-chassis]=24.03/edge
+CHARM_CHANNEL[ovn-dedicated-chassis]=24.03/edge
