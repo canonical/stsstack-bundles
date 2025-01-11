@@ -70,8 +70,8 @@ OPTIONS:
         Enable bash debug logging.
      --defaults
         Use module config defaults and don't ask for input.
-     --default-binding
-        Default Juju binding to use when using Juju placement with MAAS.
+     --default-binding b
+        Default Juju space units will bind to when using Juju placement with MAAS.
      -h, --help
         Display this help message.
      --hyperconverged
