@@ -17,3 +17,4 @@ applications:
     num_units: __NUM_K8S_WORKER_UNITS__
 relations:
   - [ 'kubernetes-control-plane:kube-control', 'kubernetes-worker:kube-control' ]
+  - [ 'kubernetes-control-plane:tokens', 'kubernetes-worker:tokens' ]
