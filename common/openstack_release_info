@@ -24,12 +24,45 @@ declare -A lts=( [trusty]=icehouse
                  [jammy]=yoga
                  [noble]=caracal
 )
+
+# These hardcoded sorted lists replace the previous "sorted" lists
+# because we cannot sort when the alphabet wraps around.
+declare -a lts_releases_sorted=( caracal
+                                 yoga
+                                 ussuri
+                                 queens
+                                 mitaka
+                                 icehouse
+)
+
 declare -A nonlts=( [hirsute]=wallaby
                     [impish]=xena
                     [kinetic]=zed
                     [lunar]=antelope
                     [mantic]=bobcat
+                    [oracular]=dalmatian
+                    [plucky]=epoxy
 )
+
+declare -a nonlts_releases_sorted=( epoxy
+                                    dalmatian
+                                    bobcat
+                                    antelope
+                                    zed
+                                    xena
+                                    wallaby
+                                    victoria
+                                    train
+                                    stein
+                                    rocky
+                                    pike
+                                    ocata
+                                    newton
+                                    liberty
+                                    kilo
+                                    juno
+)			    
+
 # NOTE: must be kept up-to-date with ALL versions of openstack.
 declare -A os_releases=( [icehouse]=0
                          [juno]=1
@@ -52,7 +85,36 @@ declare -A os_releases=( [icehouse]=0
                          [antelope]=18
                          [bobcat]=19
                          [caracal]=20
+                         [dalmatian]=21
+                         [epoxy]=22
 )
+
+declare -a all_releases_sorted=( epoxy
+                                 dalmatian
+                                 caracal
+                                 bobcat
+                                 antelope
+                                 zed
+                                 yoga
+                                 xena
+                                 wallaby
+                                 victoria
+                                 ussuri
+                                 train
+                                 stein
+                                 rocky
+                                 queens
+                                 pike
+                                 ocata
+                                 newton
+                                 mitaka
+                                 liberty
+                                 kilo
+                                 juno
+                                 icehouse
+)
+
+
 # Reverse lookups (revision to series)
 declare -A lts_rev=()
 for s in ${!lts[@]}; do
@@ -63,10 +125,3 @@ for s in ${!nonlts[@]}; do
     nonlts_rev[${nonlts[$s]}]=$s
 done
 
-# Alphabetically sorted arrays of release names
-readarray -t lts_releases_sorted<<<\
-"`echo -n ${lts[@]}| tr ' ' '\n' | sort -r`"
-readarray -t nonlts_releases_sorted<<<\
-"`echo -n ${nonlts[@]}| tr ' ' '\n' | sort -r`"
-readarray -t all_releases_sorted<<<"\
-`{ echo -n ${lts[@]}; echo " ${nonlts[@]}"; }| tr ' ' '\n'| sort -r`"

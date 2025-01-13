@@ -3,9 +3,15 @@ declare -A RELNAME_MAP=(
     [antelope]=2023.1
     [bobcat]=2023.2
     [caracal]=2024.1
+    [dalmatian]=latest
+    [epoxy]=latest
 )
 for c in ${OST_CHARMS[@]}; do
     CHARM_CHANNEL[$c]=${RELNAME_MAP[$release]:-$release}/edge
+    # use latest/edge when on noble but not jammy-caracal
+    if [[  $series = noble ]]; then
+        CHARM_CHANNEL[$c]=latest/edge
+    fi
 done
 
 for c in ${CEPH_CHARMS[@]}; do
