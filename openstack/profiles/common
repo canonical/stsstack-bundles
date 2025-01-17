@@ -132,17 +132,18 @@ function create_tempest_users_v3 {
 }
 
 function create_tempest_flavors {
-    openstack flavor show m1.cirros || openstack flavor create  --id 6 --ram 64  --disk 1 --vcpus 1 m1.cirros
-    openstack flavor show m1.tempest || openstack flavor create --id 7 --ram 256 --disk 0 --vcpus 1 m1.tempest
-    openstack flavor show m2.tempest || openstack flavor create --id 8 --ram 512 --disk 0 --vcpus 1 m2.tempest
+    openstack flavor show m1.cirros  || openstack flavor create --id 7 --ram 64  --disk 1 --vcpus 1 m1.cirros
+    openstack flavor show m1.tempest || openstack flavor create --id 8 --ram 256 --disk 0 --vcpus 1 m1.tempest
+    openstack flavor show m2.tempest || openstack flavor create --id 9 --ram 512 --disk 0 --vcpus 1 m2.tempest
 }
 
 function create_default_flavors {
-    openstack flavor show m1.tiny || openstack flavor create   --id 1 --ram 512   --disk 1  --vcpus 1 m1.tiny
-    openstack flavor show m1.small || openstack flavor create  --id 2 --ram 2048  --disk 20 --vcpus 1 m1.small
-    openstack flavor show m1.medium || openstack flavor create --id 3 --ram 4096  --disk 20 --vcpus 2 m1.medium
-    openstack flavor show m1.large || openstack flavor create  --id 4 --ram 8192  --disk 20 --vcpus 4 m1.large
-    openstack flavor show m1.xlarge || openstack flavor create --id 5 --ram 16384 --disk 20 --vcpus 8 m1.xlarge
+    openstack flavor show m1.tiny   || openstack flavor create --id 1 --ram 512   --disk 1  --vcpus 1 m1.tiny
+    openstack flavor show m1.xsmall || openstack flavor create --id 2 --ram 1024  --disk 8 --vcpus 1 m1.xsmall
+    openstack flavor show m1.small  || openstack flavor create --id 3 --ram 2048  --disk 20 --vcpus 1 m1.small
+    openstack flavor show m1.medium || openstack flavor create --id 4 --ram 4096  --disk 20 --vcpus 2 m1.medium
+    openstack flavor show m1.large  || openstack flavor create --id 5 --ram 8192  --disk 20 --vcpus 4 m1.large
+    openstack flavor show m1.xlarge || openstack flavor create --id 6 --ram 16384 --disk 20 --vcpus 8 m1.xlarge
 }
 
 function is_ksv3 () {
