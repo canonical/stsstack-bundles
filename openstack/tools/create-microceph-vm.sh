@@ -63,7 +63,6 @@ enable_rgw() {
 }
 
 enable_cephfs() {
-    as_root ${VM_NAME}-1 microceph enable mds
     as_root ${VM_NAME}-1 ceph osd pool create cephfs_data
     as_root ${VM_NAME}-1 ceph osd pool create cephfs_metadata
     as_root ${VM_NAME}-1 ceph fs new cephfs cephfs_metadata cephfs_data
