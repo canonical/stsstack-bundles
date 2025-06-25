@@ -2,13 +2,13 @@
 
 ## Documentation
 
-https://docs.openstack.org/neutron-dynamic-routing/latest/
+<https://docs.openstack.org/neutron-dynamic-routing/latest/>
 
 ## Example Usage
 
-NOTE: based on https://docs.openstack.org/ocata/networking-guide/config-bgp-dynamic-routing.html
+NOTE: based on <https://docs.openstack.org/neutron/2024.1/admin/config-bgp-dynamic-routing.html>
 
-```
+```console
 source novarc
 openstack network agent list --agent-type bgp
 openstack address scope create --share --ip-version 4 bgp
@@ -27,7 +27,7 @@ openstack subnet create --network provider --subnet-pool provider \
                         --gateway 10.5.0.1 provider
 ```
 
-```
+```console
 openstack network create selfservice1
 openstack network create selfservice2
 openstack network create selfservice3
@@ -41,7 +41,7 @@ openstack subnet create --network selfservice3 subnet3 \
                         --subnet-range 192.168.23.0/24
 ```
 
-```
+```console
 openstack router create router1
 openstack router create router2
 openstack router create router3
@@ -55,7 +55,7 @@ openstack router set --external-gateway provider router2
 openstack router set --external-gateway provider router3
 ```
 
-```
+```console
 openstack bpg speaker create --ip-version 4 \
                              --local-as 1234 bgpspeaker
 
@@ -68,9 +68,9 @@ openstack bgp speaker add peer bgpspeaker bgppeer
 openstack bgp speaker show bgppeer
 ```
 
-# Assumes no l3-HA
+## Assumes no l3-HA
 
-```
+```console
 dr_agent=`openstack network agent list --agent-type bgp -c id -f value`
 
 openstack bpg dragent add speaker $dr_agent bgpspeaker

@@ -1,8 +1,8 @@
 # How to add more OSDs to your Ceph cluster
 
-When you deploy Ceph with stsstack-bundles it is using Juju storage [1] to create disks and attach them to the ceph-osd machines to be used as osd devices. For example, the following add one 10G osd to each unit:
+When you deploy Ceph with `stsstack-bundles` it is using [Juju storage](https://jaas.ai/docs/storage) to create disks and attach them to the `ceph-osd` machines to be used as OSD devices. For example, the following adds one 10G OSD to each unit:
 
-```
+```yaml
 applications:
   ceph-osd:
     charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__ceph-osd
@@ -18,6 +18,4 @@ applications:
 
 If you wanted to add more disk just increase from 1 to number you want or if you want to increase size of each disk just set 10G to whatever you need.
 
-NOTE: these changes only apply at deploy time, if you want to add more disks post-deployment you will need to create volumes in Openstack and attach them to the vms running ceph-osd then use the add-disk action to format them as OSDs.
-
-[1] https://jaas.ai/docs/storage
+**NOTE**: these changes only apply at deploy time, if you want to add more disks post-deployment you will need to create volumes in OpenStack and attach them to the VMs running `ceph-osd` then use the `add-disk` action to format them as OSDs.

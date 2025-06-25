@@ -1,11 +1,9 @@
-.. _usage:
-
 Usage
 =====
 
-Using stsstack-bundles involves generating a bundle and overlays, deploying them then performing some post-deployment actions.
+Using ``stsstack-bundles`` involves generating a bundle and overlays, deploying them then performing some post-deployment actions.
 
-As an example, lets say you want to deploy OpenStack using the Caracal release on Jammy and you want to enable ceph and heat with keystone in HA:
+As an example, let's say you want to deploy OpenStack using the Caracal release on Jammy and you want to enable Ceph and heat with Keystone in HA:
 
 .. code-block:: console
 
@@ -67,8 +65,10 @@ As an example, lets say you want to deploy OpenStack using the Caracal release o
       - source novarc
       - add rules to default security group: ./tools/sec_groups.sh
 
-If you need to manually edit a bundle/overlay prior to deploying you can skip the --run argument and either manually run the deploy command once you have made your changes or alternatively re-run with --replay (which will prevent the files from being re-generated).
+If you need to manually edit a bundle/overlay prior to deploying you can skip the ``--run`` argument and either manually run the deploy command once you have made your changes or alternatively re-run with ``--replay`` (which will prevent the files from being re-generated).
 
-Note that an OpenStack deployment will almost certainly require the openstack command line client. At the time of this writing, installing openstackclients via snap is not fully supported. Instead, please install the client via package:
+Note that an OpenStack deployment will almost certainly require the OpenStack command line client. At the time of this writing, installing ``openstackclients`` via ``snap`` is not fully supported. Instead, please install the client via package:
 
-sudo apt install python3-openstackclient python3-neutronclient
+.. code-block:: console
+
+    sudo apt install python3-openstackclient python3-neutronclient
