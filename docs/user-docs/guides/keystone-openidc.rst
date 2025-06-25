@@ -70,7 +70,7 @@ Login as **tmpadm**, click the side-bar and proceed to:
   * (Obs: if the IDP supports multiple values for "Valid redirect URIs" (Keycloak does) then it is good to also include **http://<keystone>:5000/v3/redirect_uri** because it solves the upgrade issue later)
   * Create client
 
-* openstack client > Credentials > Copy client secret (3DuWbK41tAbIdGHyaNigykQNbhxVUABm)
+* openstack client > Credentials > Copy client secret (**3DuWbK41tAbIdGHyaNigykQNbhxVUABm**)
 
 2) Install keycloak cert in Keystone
 ====================================
@@ -227,4 +227,3 @@ _`[1]` https://www.keycloak.org/getting-started/getting-started-zip
 [3] https://medium.com/keycloak/running-keycloak-with-tls-self-signed-certificate-d8da3e10c544
 
 [4] https://www.keycloak.org/server/bootstrap-admin-recovery
-
