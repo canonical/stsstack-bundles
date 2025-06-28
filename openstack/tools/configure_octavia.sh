@@ -41,7 +41,13 @@ juju config octavia \
     lb-mgmt-controller-cacert="$(base64 $dout/controller_ca.pem)" \
     lb-mgmt-controller-cert="$(base64 $dout/controller_cert_bundle.pem)"
 
-juju $JUJU_RUN_CMD octavia/leader configure-resources --wait 10m
+CMD="juju $JUJU_RUN_CMD octavia/leader configure-resources"
+
+if [[ "$JUJU_VERSION" =~ ^3 ]]; then
+    CMD="$CMD --wait 10m"
+fi
+
+$CMD
 
 # Add load-balancer_admin role for admin user
 source $(readlink --canonicalize $(dirname $0))/../novarc
