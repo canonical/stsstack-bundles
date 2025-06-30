@@ -1,6 +1,6 @@
-===========================================
-Manila generic driver DHSS=True charm guide
-===========================================
+===============================================
+Manila generic driver ``DHSS=True`` charm guide
+===============================================
 
 1) Deploy openstack bundle
 ==========================
@@ -9,7 +9,7 @@ Generate bundle::
 
   ./generate-bundle.sh --series jammy --release yoga --name jy-manila-ovn --cinder-lvm --run
 
-Initialize vault, wait for it to settle, then run **./configure**
+Initialise vault, wait for it to settle, then run **./configure**
 
 2) Deploy manila
 ================
@@ -160,5 +160,3 @@ Write a file::
   ls -lha
 
   cat hi
-
-
