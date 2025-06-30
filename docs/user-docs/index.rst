@@ -2,7 +2,10 @@ User Documentation
 ==================
 
 .. toctree::
-   :maxdepth: 1
+   :hidden:
+   :maxdepth: 2
 
+   Guides </user-docs/guides/index>
    usage
+
 
