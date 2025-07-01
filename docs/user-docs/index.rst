@@ -5,7 +5,6 @@ User Documentation
    :hidden:
    :maxdepth: 2
 
-   Guides </user-docs/guides/index>
    usage
    openstack/index
    ceph/index

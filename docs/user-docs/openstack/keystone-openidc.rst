@@ -2,8 +2,8 @@
 Keycloak guide + Keystone-OpenIDC
 =================================
 
-1) Install Keycloak
-===================
+Install Keycloak
+================
 
 In a model with keystone Yoga deployed:
 
@@ -86,8 +86,8 @@ Login as ``tmpadm``, click the side-bar and proceed to:
 
 * openstack client > Credentials > Copy client secret (``3DuWbK41tAbIdGHyaNigykQNbhxVUABm``)
 
-2) Install keycloak cert in Keystone
-====================================
+Install keycloak cert in Keystone
+=================================
 
 Ssh to keystone unit as root
 
@@ -97,11 +97,11 @@ Run ``dpkg-reconfigure ca-certificates``, choose ``ask``, select ``keycloak.crt`
 
 Test ``curl https://10.149.138.19:8081/realms/myrealm/.well-known/openid-configuration``
 
-3) Install ``keystone-openidc`` charm
-=====================================
+Install ``keystone-openidc`` charm
+==================================
 
-a) If using yoga/stable rev 5:
-------------------------------
+If using yoga/stable rev 5
+--------------------------
 
 Bundle overlay:
 
@@ -123,8 +123,8 @@ Bundle overlay:
     - ["keystone-openidc", "openstack-dashboard"]
     - ["keystone:websso-trusted-dashboard", "openstack-dashboard:websso-trusted-dashboard"]
 
-b) If deploying any charm revision newer than rev 5 directly:
--------------------------------------------------------------
+If deploying any charm revision newer than rev 5 directly
+---------------------------------------------------------
 
 * Include in the options section::
 
@@ -132,8 +132,8 @@ b) If deploying any charm revision newer than rev 5 directly:
 
 * Refer to section **(6)** to apply the SSL workaround if necessary
 
-4) Configure keystone IDP
-=========================
+Configure keystone IDP
+======================
 
 commands:
 
@@ -186,8 +186,8 @@ commands:
   openstack identity provider create --remote-id https://<keycloak_VM_IP>:8081/realms/myrealm openid
   openstack federation protocol create openid --mapping openid_mapping --identity-provider openid
 
-5) Workaround for non-keycloak IDP
-==================================
+Workaround for non-keycloak IDP
+===============================
 
 If you are **NOT** using keycloak **AND** using yoga/stable rev 5, you may need to edit ``/var/lib/juju/agents/unit-keystone-openidc-0/charm/templates/apache-openidc-location.conf`` in keystone unit and replace the first settings with (more specifically ``OIDCSSLValidateServer`` and ``OIDCResponseType``):
 
@@ -201,8 +201,8 @@ If you are **NOT** using keycloak **AND** using yoga/stable rev 5, you may need 
 
 Flip ``juju config keystone-openidc debug`` to force a config update.
 
-6) Workaround for SSL issue on ``rev > 5``
-==========================================
+Workaround for SSL issue on ``rev > 5``
+=======================================
 
 You may see the following message when deploying ``rev > 5`` directly or upgrading from ``rev == 5`` despite having installed the self-signed SSL and configured oidc-provider-metadata-url in the bundle when using ``rev > 5``:
 
@@ -213,18 +213,18 @@ You may see the following message when deploying ``rev > 5`` directly or upgradi
 To hack yourself away from this issue you may want to edit ``/var/lib/juju/agents/unit-keystone-openidc-0/charm/./src/charm.py`` line 155 and change ``verify=False``.
 
 
-7) Workaround for missing config file when deploying ``rev > 5`` directly
-=========================================================================
+Workaround for missing config file when deploying ``rev > 5`` directly
+======================================================================
 
 If you deployed ``keystone-openidc`` ``rev > 5`` directly with all configs correctly set, you may find yourself in a situation where the charm is active/idle but did not create the ``/etc/apache2/openidc/apache-openidc-location.conf`` file. To force the creation of the file you can flip ``juju config keystone-openidc debug`` forcing the charm to write it.
 
-8) Access dashboard at Horizon IP
-=================================
+Access dashboard at Horizon IP
+==============================
 
 Choose ``keycloak``, login with username ``jdoe``.
 
-9) Upgrading from yoga/stable ``rev 5``
-=======================================
+Upgrading from yoga/stable ``rev 5``
+====================================
 
 Upon upgrading the charm from ``rev 5`` you will see the following charm status message:
 
@@ -244,7 +244,8 @@ To upgrade smoothly, the IDP must be configured with **BOTH** Redirect URIs if t
 
 Finally, the value of ``OIDCResponseType "id_token token"`` changed to ``OIDCResponseType "id_token"``, however I noticed no detrimental impact when using keycloak, but it may affect other IDPs.
 
-Sources:
+Sources
+=======
 
 _`[1]` https://www.keycloak.org/getting-started/getting-started-zip
 

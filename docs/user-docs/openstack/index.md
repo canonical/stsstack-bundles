@@ -13,6 +13,8 @@ NFS Server <nfs-server>
 Octavia <octavia>
 OVN <ovn>
 SAML <saml>
+Keystone + OpenIDC <keystone-openidc>
+Manila <manila-generic>
 ```
 
 ````{grid} 1 1 2 2
@@ -65,6 +67,19 @@ Dynamic Routing
 :link: saml
 :link-type: doc
 **SAML** - covering key operations and common tasks
+```
+````
+
+````{grid} 1 1 2 2
+```{grid-item-card} keystone-openidc
+:link: keystone-openidc
+:link-type: doc
+**Keystone-openidc** - guide on how to deploy and configure the ``keystone-openidc`` charm.
+```
+```{grid-item-card} Manila-generic
+:link: manila-generic
+:link-type: doc
+**Manila-generic** - guide on how to deploy and configure the Manila generic driver through the charm.
 ```
 ````
 
