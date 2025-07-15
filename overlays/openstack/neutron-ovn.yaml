@@ -24,6 +24,7 @@ applications:
       debug: *debug
       ovn-bridge-mappings: physnet1:br-data
       bridge-interface-mappings: __OVN_DATA_PORT__
+      prefer-chassis-as-gw: true
 relations:
   - [ neutron-api-plugin-ovn:neutron-plugin, neutron-api:neutron-plugin-api-subordinate ]
   - [ neutron-api-plugin-ovn:ovsdb-cms, ovn-central:ovsdb-cms ]
