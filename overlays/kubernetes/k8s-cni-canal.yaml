@@ -2,6 +2,6 @@ applications:
   canal:
     charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__canal
 relations:
-  - [ 'canal:cni', 'kubernetes-control-plane:cni' ]
-  - [ 'canal:cni', 'kubernetes-worker:cni' ]
+  - [ 'canal:cni', '__K8S_CONTROLLER_CHARM__:cni' ]
+  - [ 'canal:cni', '__K8S_WORKER_CHARM__:cni' ]
   - [ 'canal:etcd', 'etcd:db' ]

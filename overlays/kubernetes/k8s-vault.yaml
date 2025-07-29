@@ -1,4 +1,4 @@
 relations:
  - ['etcd:certificates', 'vault:certificates']
- - ['kubernetes-control-plane:certificates', 'vault:certificates']
- - ['kubernetes-worker:certificates', 'vault:certificates']
+ - ['__K8S_CONTROLLER_CHARM__:certificates', 'vault:certificates']
+ - ['__K8S_WORKER_CHARM__:certificates', 'vault:certificates']

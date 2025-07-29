@@ -6,5 +6,5 @@ applications:
       https_proxy: __CONTAINERD_PROXY__
       no_proxy: __CONTAINERD_NO_PROXY__
 relations:
- - [ 'containerd:containerd', 'kubernetes-worker:container-runtime' ]
- - [ 'containerd:containerd', 'kubernetes-control-plane:container-runtime' ]
+ - [ 'containerd:containerd', '__K8S_WORKER_CHARM__:container-runtime' ]
+ - [ 'containerd:containerd', '__K8S_CONTROLLER_CHARM__:container-runtime' ]

@@ -3,18 +3,15 @@ k8s_channel:                     &k8s_channel                    __K8S_CHANNEL__
 
 series: __SERIES__
 applications:
-  kubernetes-control-plane:
-    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__kubernetes-control-plane
+  __K8S_CONTROLLER_CHARM__:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX____K8S_CONTROLLER_CHARM__
     channel: *k8s_channel
-    constraints: mem=2G
+    constraints: mem=4G
     expose: true
     num_units: __NUM_K8S_CONTROL_PLANE_UNITS__
-  kubernetes-worker:
-    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__kubernetes-worker
+  __K8S_WORKER_CHARM__:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX____K8S_WORKER_CHARM__
     channel: *k8s_channel
     constraints: mem=4G
     expose: true
     num_units: __NUM_K8S_WORKER_UNITS__
-relations:
-  - [ 'kubernetes-control-plane:kube-control', 'kubernetes-worker:kube-control' ]
-  - [ 'kubernetes-control-plane:tokens', 'kubernetes-worker:tokens' ]
