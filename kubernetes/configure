@@ -1,10 +1,15 @@
 #!/bin/bash -x
 which kubectl || sudo snap install kubectl --classic
 mkdir -p ~/.kube
-kubecontrolplane_unit=$(juju status| sed -nr 's,(kubernetes-control-plane/[[:digit:]]+)\*.*,\1,p')
-ftmp=`mktemp -p .`
-juju scp ${kubecontrolplane_unit}:config $ftmp 
-mv ./$ftmp ~/.kube/config
+
+if ((`juju status --format=json| jq -r '.applications[]| select(."charm-name"=="k8s")'| wc -l`)); then
+    juju run k8s/0 get-kubeconfig| yq .kubeconfig > ~/.kube/config
+else
+    kubecontrolplane_unit=$(juju status| sed -nr 's,(kubernetes-control-plane/[[:digit:]]+)\*.*,\1,p')
+    ftmp=`mktemp -p .`
+    juju scp ${kubecontrolplane_unit}:config $ftmp 
+    mv ./$ftmp ~/.kube/config
+fi
 
 # If we're using keystone, let's create the user and setup everything
 if [[ `juju status keystone --format=json 2>/dev/null| jq '.machines| length'` -ne 0 ]] ; then

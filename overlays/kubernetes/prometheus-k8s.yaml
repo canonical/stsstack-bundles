@@ -1,6 +1,6 @@
 relations:
-  - [kubernetes-control-plane:juju-info, telegraf:juju-info]
-  - [kubernetes-worker:juju-info, telegraf:juju-info]
-  - [kubernetes-control-plane:prometheus, prometheus:manual-jobs]
-  - [kubernetes-control-plane:grafana, grafana:dashboards]
+  - [__K8S_CONTROLLER_CHARM__:juju-info, telegraf:juju-info]
+  - [__K8S_WORKER_CHARM__:juju-info, telegraf:juju-info]
+  - [__K8S_CONTROLLER_CHARM__:prometheus, prometheus:manual-jobs]
+  - [__K8S_CONTROLLER_CHARM__:grafana, grafana:dashboards]
   - [etcd:juju-info, telegraf:juju-info]

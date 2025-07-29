@@ -1,6 +1,6 @@
 ssl_ca:                     &ssl_ca                    __SSL_CA__
 
 applications:
-  kubernetes-control-plane:
+  __K8S_CONTROLLER_CHARM__:
     options:
       keystone-ssl-ca: *ssl_ca

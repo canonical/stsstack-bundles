@@ -1,6 +1,6 @@
 applications:
-  kubernetes-control-plane:
+  __K8S_CONTROLLER_CHARM__:
     options:
       enable-keystone-authorization: true
 relations:
-  - [ 'kubernetes-control-plane:keystone-credentials', 'keystone:identity-credentials' ]
+  - [ '__K8S_CONTROLLER_CHARM__:keystone-credentials', 'keystone:identity-credentials' ]

@@ -5,5 +5,5 @@ applications:
     expose: true
     num_units: __NUM_K8S_LB_UNITS__
 relations:
-  - [ 'kubernetes-control-plane:loadbalancer-external', 'kubeapi-load-balancer:lb-consumers' ]
-  - [ 'kubernetes-control-plane:loadbalancer-internal', 'kubeapi-load-balancer:lb-consumers' ]
+  - [ '__K8S_CONTROLLER_CHARM__:loadbalancer-external', 'kubeapi-load-balancer:lb-consumers' ]
+  - [ '__K8S_CONTROLLER_CHARM__:loadbalancer-internal', 'kubeapi-load-balancer:lb-consumers' ]

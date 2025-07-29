@@ -1,2 +1,2 @@
 relations:
-  - [ 'kubernetes-control-plane:ceph-client', __CEPH_INTERFACE__ ]
+  - [ '__K8S_CONTROLLER_CHARM__:ceph-client', __CEPH_INTERFACE__ ]
