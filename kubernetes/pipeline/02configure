@@ -8,17 +8,21 @@
 
 # default for current stable is to use containerd
 # See https://ubuntu.com/kubernetes/docs/container-runtime
-if ! has_opt --docker; then
+if ! has_opt --docker && has_opt --cdk; then
     set -- $@ --containerd && cache $@
 fi
 
 # default overlay setup
 MOD_OVERLAYS+=(
-    "etcd.yaml"
-    "etcd-easyrsa.yaml"
     "easyrsa.yaml"
-    "kubernetes/k8s-etcd.yaml"
 )
+if has_opt --cdk; then
+    MOD_OVERLAYS+=(
+        "etcd.yaml"
+        "etcd-easyrsa.yaml"
+        "kubernetes/k8s-etcd.yaml"
+    )
+fi
 
 add_mysql_overlay ()
 {
@@ -39,17 +43,28 @@ add_mysql_overlay ()
 
 using_kubeapi_lb ()
 {
-    ! has_opt --control-plane-ha* && ! has_opt --lb-octavia
+    ! has_opt --control-plane-ha* && ! has_opt --lb-octavia && has_opt --cdk
 }
 
-if using_kubeapi_lb; then
-    MOD_OVERLAYS+=( "kubernetes/k8s-lb.yaml"  )
+if has_opt --cdk; then
+    MOD_PARAMS[__K8S_CONTROLLER_CHARM__]="kubernetes-control-plane"
+    MOD_PARAMS[__K8S_WORKER_CHARM__]="kubernetes-worker"
+    MOD_OVERLAYS+=( "kubernetes/cdk-base.yaml"  )
+else
+    MOD_OVERLAYS+=( "kubernetes/canonical-k8s-base.yaml"  )
 fi
-# default to flannel cni
-if ! has_opt --calico && ! has_opt --canal; then
-    MOD_OVERLAYS+=( "kubernetes/k8s-cni-flannel.yaml" )
+
+if has_opt --cdk; then
+    if using_kubeapi_lb; then
+        MOD_OVERLAYS+=( "kubernetes/k8s-lb.yaml"  )
+    fi
+    
+    # default to flannel cni
+    if ! has_opt --calico && ! has_opt --canal; then
+        MOD_OVERLAYS+=( "kubernetes/k8s-cni-flannel.yaml" )
+    fi
 fi
-if ! has_opt --vault*; then
+if has_opt --cdk && ! has_opt --vault*; then
     MOD_OVERLAYS+=( "kubernetes/k8s-easyrsa.yaml" )
     if using_kubeapi_lb; then
         MOD_OVERLAYS+=( "kubernetes/k8s-lb-easyrsa.yaml" )
@@ -82,6 +97,9 @@ do
             # which Kubernetes channel to set on deployment
             MOD_PARAMS[__K8S_CHANNEL__]="$2"
             shift
+            ;;
+        --cdk)
+            # Deploying CDK as opposed to Canonical K8s
             ;;
         --ceph)
             conflicts_with $1 --rook-ceph

@@ -1,2 +1,2 @@
 relations:
-  - [ 'kubernetes-control-plane:etcd', 'etcd:db' ]
+  - [ '__K8S_CONTROLLER_CHARM__:etcd', 'etcd:db' ]

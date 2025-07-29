@@ -1,0 +1,6 @@
+# Variables
+k8s_channel:                     &k8s_channel                    __K8S_CHANNEL__
+
+relations:
+  - [ '__K8S_CONTROLLER_CHARM__:kube-control', '__K8S_WORKER_CHARM__:kube-control' ]
+  - [ '__K8S_CONTROLLER_CHARM__:tokens', '__K8S_WORKER_CHARM__:tokens' ]

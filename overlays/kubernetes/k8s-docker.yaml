@@ -2,5 +2,5 @@ applications:
   docker:
     charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__docker
 relations:
-  - [ 'docker:docker', 'kubernetes-worker:container-runtime' ]
-  - [ 'docker:docker', 'kubernetes-control-plane:container-runtime' ]
+  - [ 'docker:docker', '__K8S_WORKER_CHARM__:container-runtime' ]
+  - [ 'docker:docker', '__K8S_CONTROLLER_CHARM__:container-runtime' ]

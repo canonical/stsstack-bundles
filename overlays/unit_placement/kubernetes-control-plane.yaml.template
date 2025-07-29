@@ -1,3 +1,3 @@
-  kubernetes-control-plane:
+  __K8S_CONTROLLER_CHARM__:
     to:
 __UNIT_PLACEMENT_METAL__.__UNITS__.__NUM_K8S_CONTROL_PLANE_UNITS__

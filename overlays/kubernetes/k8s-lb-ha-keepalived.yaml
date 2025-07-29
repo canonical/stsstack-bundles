@@ -9,12 +9,12 @@ applications:
   kubeapi-load-balancer:
     options:
       extra_sans: __VIP__
-  kubernetes-control-plane:
+  __K8S_CONTROLLER_CHARM__:
     options:
       extra_sans: __VIP__
 relations:
   - [ kubeapi-lb-keepalived:juju-info, kubeapi-load-balancer:juju-info ]
   - [ kubeapi-lb-keepalived:lb-sink, kubeapi-load-balancer:website ]
-  - [ kubeapi-lb-keepalived:loadbalancer, kubernetes-control-plane:loadbalancer ]
-  - [ kubeapi-lb-keepalived:website, kubernetes-worker:kube-api-endpoint ]
+  - [ kubeapi-lb-keepalived:loadbalancer, __K8S_CONTROLLER_CHARM__:loadbalancer ]
+  - [ kubeapi-lb-keepalived:website, __K8S_WORKER_CHARM__:kube-api-endpoint ]
 
