@@ -1,4 +1,4 @@
 applications:
-  kubernetes-control-plane:
+  __K8S_CONTROLLER_CHARM__:
     options:
       default-storage: cephfs
