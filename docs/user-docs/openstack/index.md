@@ -15,6 +15,7 @@ OVN <ovn>
 SAML <saml>
 Keystone + OpenIDC <keystone-openidc>
 Manila <manila-generic>
+Tools <tools>
 ```
 
 ````{grid} 1 1 2 2
@@ -88,5 +89,10 @@ Dynamic Routing
 :link: tutorial
 :link-type: doc
 **Tutorial** - learn how to deploy an OpenStack cloud on `serverstack`
+```
+```{grid-item-card} Tools
+:link: tools
+:link-type: doc
+**Tools** - OpenStack Tools
 ```
 ````
