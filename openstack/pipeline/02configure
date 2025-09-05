@@ -443,7 +443,7 @@ do
             fi
             MOD_MSGS[octavia.0]="you need to to create an amphora image before you can use Octavia"
             MOD_MSGS[octavia.1]="this can be done in one of two ways:"
-            MOD_MSGS[octavia.2]="run ./tools/upload_octavia_amphora_image.sh --release $release to use a pre-created image (recommended)"
+            MOD_MSGS[octavia.2]="run ./tools/upload_octavia_amphora_image.sh to use a pre-created image (recommended)"
             MOD_MSGS[octavia.3]="create a new image with 'juju $JUJU_RUN_CMD octavia-diskimage-retrofit/0 retrofit-image source-image=<uuid>' with id of image in Glance to use as base"
             if has_opt --octavia-ipv4; then
                 MOD_MSGS[octavia.4]="run tools/create_ipv4_octavia.sh"
