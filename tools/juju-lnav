@@ -6,27 +6,6 @@ declare -A MACHINES=()
 declare -A CONTAINERS=()
 declare -A UNITS=()
 
-install_ssh_key() {
-    local unit
-    for unit in $@; do
-        echo "installing ssh key for ${unit}"
-        if [[ -f ~/testkey.pub ]]; then
-            cat ~/testkey.pub \
-                | timeout 10 juju ssh ${unit} \
-                -- sudo tee --append /root/.ssh/authorized_keys
-        else
-            echo "missing key: ~/testkey.pub"
-        fi
-        if [[ -f ~/.ssh/id_rsa.pub ]]; then
-            cat ~/.ssh/id_rsa.pub \
-                | timeout 10 juju ssh ${unit} \
-                -- sudo tee --append /root/.ssh/authorized_keys
-        else
-            echo "missing key: ~/.ssh/id_rsa.pub"
-        fi
-    done
-}
-
 get_application_units() {
     local application=$1
     local -a units=()
@@ -63,11 +42,34 @@ expand_unit() {
         done
         return
     fi
-    echo "checking ssh key for ${ip_address}"
-    if ! timeout 5 ssh "root@${ip_address}" < /dev//null > /dev/null 2>&1; then
-        install_ssh_key "${ip_address}"
-    fi
+    check_ssh_key "$unit" "$ip_address"
     lnav_arguments=( "${lnav_arguments[@]}" "root@${ip_address}:${files}" )
+}
+
+check_ssh_key() {
+    local unit="$1"
+    local ip_address="$2"
+    echo "checking ssh key for ${ip_address}"
+    if ! ssh \
+        -o ConnectTimeout=5 -o BatchMode=yes \
+        -o StrictHostKeyChecking=accept-new \
+        "root@${ip_address}" true > /dev/null 2>&1; then
+      cat << END
+Unable to ssh into root@${ip_address}.
+Please check that:
+  1. Your public key is in the authorized_hosts file of the root user on ${ip_address}
+     You can accomplish this via e.g.:
+         cat ~/.ssh/your_ssh_key.pub \\
+           | timeout 10 juju ssh ${unit} \\
+             -- sudo tee --append /root/.ssh/authorized_keys
+  2. A different key is not set for this host in ~/.ssh/config,
+     e.g.
+
+       HostName ${ip_address}
+       IdentityFile ~/non_existent_key
+END
+      exit 1
+    fi
 }
 
 get_machine_IPs() {
