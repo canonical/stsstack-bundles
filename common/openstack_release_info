@@ -44,6 +44,15 @@ declare -A nonlts=( [hirsute]=wallaby
                     [plucky]=epoxy
 )
 
+# NOTE: Keep this updated along with os_releases.
+declare -A os_release_map=(
+    [2023.1]=antelope
+    [2023.2]=bobcat
+    [2024.1]=caracal
+    [2024.2]=dalmatian
+    [2025.1]=epoxy
+)
+
 # NOTE: must be kept up-to-date with ALL versions of openstack.
 declare -A os_releases=( [icehouse]=0
                          [juno]=1
