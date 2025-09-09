@@ -751,6 +751,12 @@ pocket=`get_pocket`
 series=`get_series`
 release=`get_release`
 
+if [[ -v os_release_map[${release}] ]]; then
+    echo -n "mapped release ${release} to "
+    release=${os_release_map[${release}]}
+    echo "${release}"
+fi
+
 # The following is openstack specific but applies to multiple bundle
 # modules so putting it here.
 series=`ost_series_autocorrect "$series" "$release"`
