@@ -57,18 +57,18 @@ check_ssh_key() {
       cat << END
 Unable to ssh into root@${ip_address}.
 Please check that:
-  1. Your public key is in the authorized_hosts file of the root user on ${ip_address}
-     You can accomplish this via e.g.:
-         cat ~/.ssh/your_ssh_key.pub \\
-           | timeout 10 juju ssh ${unit} \\
-             -- sudo tee --append /root/.ssh/authorized_keys
-  2. A different key is not set for this host in ~/.ssh/config,
-     e.g.
+1.  Your public key is in the authorized_hosts file of the root user on ${ip_address}
+    You can accomplish this via e.g.:
+        cat ~/.ssh/your_ssh_key.pub \\
+            | timeout 10 juju ssh ${unit} \\
+            -- sudo tee --append /root/.ssh/authorized_keys
+2.  A different key is not set for this host in ~/.ssh/config,
+    e.g.
 
-       HostName ${ip_address}
-       IdentityFile ~/non_existent_key
+    HostName ${ip_address}
+    IdentityFile ~/non_existent_key
 END
-      exit 1
+        exit 1
     fi
 }
 
