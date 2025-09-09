@@ -43,6 +43,7 @@ OpenIDC
 openstack
 openstackclient
 openstackclients
+OSCI
 otf
 plantuml
 PNG

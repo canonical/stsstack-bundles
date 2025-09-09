@@ -6,6 +6,7 @@ User Documentation
    :maxdepth: 2
 
    usage
+   generate-bundle.sh<generate-bundle>
    openstack/index
    ceph/index
    osm/index
