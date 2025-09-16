@@ -1,0 +1,22 @@
+# Variables
+debug:                      &debug                     True
+verbose:                    &verbose                   True
+openstack_origin:           &openstack_origin          __OS_ORIGIN__
+loglevel:                   &loglevel                  1
+
+applications:
+  manila-ganesha:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__manila-ganesha
+    num_units: __NUM_MANILA_GANESHA_UNITS__
+    options:
+      openstack-origin: *openstack_origin
+      debug: *debug
+  manila:
+    options:
+      default-share-backend: cephfsnfs1
+relations:
+  - [ manila-ganesha, __CEPH_INTERFACE__ ]
+  - [ manila-ganesha:shared-db, __MYSQL_INTERFACE__ ]
+  - [ manila-ganesha, rabbitmq-server ]
+  - [ manila-ganesha, keystone ]
+  - [ manila, manila-ganesha ]

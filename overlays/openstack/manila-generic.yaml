@@ -5,6 +5,15 @@ openstack_origin:           &openstack_origin          __OS_ORIGIN__
 loglevel:                   &loglevel                  1
 
 applications:
+  manila-generic:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__manila-generic
+    options:
+      openstack-origin: *openstack_origin
+      debug: *debug
+      driver-service-instance-flavor-id: 2
+      driver-connect-share-server-to-tenant-network: false
+      driver-service-instance-password: manila
+      driver-auth-type: password
   manila:
     charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__manila
     num_units: __NUM_MANILA_UNITS__
@@ -13,14 +22,7 @@ applications:
       verbose: *verbose
       openstack-origin: *openstack_origin
       share-protocols: NFS
-      vip: __VIP__
-  manila-hacluster:
-    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__hacluster
-    options:
-        cluster_count: __NUM_MANILA_UNITS__
+      default-share-backend: generic
+      default-share-type: default
 relations:
-  - [ manila, rabbitmq-server ]
-  - [ manila, keystone ]
-  - [ manila:shared-db, __MYSQL_INTERFACE__ ]
-  - [ manila, manila-hacluster ]
-
+  - [ manila:manila-plugin, manila-generic:manila-plugin ]

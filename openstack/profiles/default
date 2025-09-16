@@ -88,6 +88,14 @@ set_img_properties ()
 
 # Download images if not already present
 mkdir -vp ~/images
+if $(juju show-application manila &>/dev/null); then
+    img_name=manila-service-image-master.qcow2
+    dst=$HOME/images/$img_name
+    if ! [[ -s $dst ]]; then
+        wget https://tarballs.opendev.org/openstack/manila-image-elements/images/$img_name -O $dst
+    fi
+    upload_image cloudimages manila-service-image $img_name &
+fi
 upload_image cloudimages focal focal-server-cloudimg-amd64.img &
 upload_image cloudimages jammy jammy-server-cloudimg-amd64.img &
 upload_image cirros cirros-0.4.0 0.4.0/cirros-0.4.0-x86_64-disk.img &
