@@ -21,6 +21,7 @@ keystone-ldap
 keystone-saml-mellon
 manila
 manila-ganesha
+manila-generic
 masakari
 masakari-monitors
 neutron-api

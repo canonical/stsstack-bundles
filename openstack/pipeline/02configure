@@ -334,17 +334,45 @@ do
         --manila)
             assert_min_release rocky "manila"
             MOD_OVERLAYS+=( "openstack/manila.yaml" )
-            has_opt --ceph-fs || set -- $@ --ceph-fs && cache $@
+            # We don't necessarily need ceph by default but without it volume
+            # creation will fail atm due to flakey cinder-lvm so adding
+            # anyway.
+            has_opt --ceph || set -- $@ --ceph && cache $@
             # need to list both here in case --ovn comes after --manila on cli
             # since --ovn adds --vault as a dep.
             if has_opt --vault || is_ml2_ovn; then
                 MOD_OVERLAYS+=( "openstack/vault-manila.yaml" )
+            fi
+            ;;
+        --manila-generic)
+            assert_min_release rocky "manila"
+            # This needs to be colocated with a nova-compute unit so set units
+            # to 0 then add-unit --to <compute unit> later
+            MOD_PARAMS[__NUM_MANILA_UNITS__]=0
+            MOD_PARAMS[__NOVA_COMPUTE_UNIT_CONSTRAINTS__]="mem=8G cores=2"
+            has_opt --manila || set -- $@ --manila && cache $@
+            MOD_OVERLAYS+=( "openstack/manila-generic.yaml" )
+            MOD_MSGS[manila-generic.0]='Once deployment is stable do the following:'
+            MOD_MSGS[manila-generic.1]=' * juju add-unit manila --to <nova-compute machine>'
+            MOD_MSGS[manila-generic.2]='Once manila unit is active/idle you need to do the following:'
+            MOD_MSGS[manila-generic.3]=' * vi /var/lib/juju/agents/unit-manila-generic-*/charm/templates/parts/authentication_data'
+            MOD_MSGS[manila-generic.4]=' * (see LP 2025507) remove the 3 lines with "Defense mechanism..."'
+            MOD_MSGS[manila-generic.5]=' * /var/lib/juju/agents/unit-manila-generic-*/charm/templates/mitaka/manila.conf'
+            MOD_MSGS[manila-generic.6]=' * add [glance] section with {% include "parts/authentication_data" %}'
+            MOD_MSGS[manila-generic.7]=' * toggle juju config manila-generic debug=false/true to apply changes'
+            ;;
+        --manila-ganesha)
+            assert_min_release rocky "manila"
+            has_opt --manila || set -- $@ --manila && cache $@
+            # need to list both here in case --ovn comes after --manila on cli
+            # since --ovn adds --vault as a dep.
+            if has_opt --vault || is_ml2_ovn; then
                 MOD_OVERLAYS+=( "openstack/vault-manila-ganesha.yaml" )
             fi
             ;;
-	--manila-ha*)
-	    set -- $@ --manila-ganesha-ha && cache $@
-	    ;;
+        --manila-ha*)
+            set -- $@ --manila-ganesha-ha && cache $@
+            ;;
         --manila-ganesha-ha*)
             get_units $1 __NUM_MANILA_GANESHA_UNITS__ 3
             get_units $1 __NUM_MANILA_UNITS__ 3
