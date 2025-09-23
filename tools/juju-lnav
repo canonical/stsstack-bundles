@@ -65,6 +65,9 @@ check_ssh_key() {
 
     echo "Unable to ssh into root@${ip_address}." 1>&2
 
+    # Guess a pub key using ssh -G if not supplied
+    : "${PUB_KEY:=$(ssh -G "root@${ip_address}" |awk '/identityfile/ { print $2; exit }').pub}"
+
     if [[ -n "$PUB_KEY" ]]; then
         copy_pub_key "$unit" "$ip_address"
     else
@@ -94,8 +97,7 @@ copy_pub_key() {
         exit 1
     fi
 
-    cat "${PUB_KEY}" \
-        | timeout 10 juju ssh -q "$unit" \
+    timeout 10 juju ssh -q "$unit" < "$PUB_KEY"\
         -- sudo tee --append /root/.ssh/authorized_keys >/dev/null
 
 
@@ -189,7 +191,8 @@ UNIT        is the name of the unit
 LOGFILES    is a regular shell GLOB
 
 --pub-key PATH      Key to copy to supplied UNIT's authorized_keys file
-                    if ssh authentication fails.
+                    if ssh authentication fails. Default: the first key
+                    returned by 'ssh -G' for the given host.
 EOF
             exit 0
             ;;
