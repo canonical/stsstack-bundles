@@ -1,6 +1,6 @@
 #!/bin/bash -ex
+
 # Give all instances a floating IP address.
-# Requires >= Newton openstack client
 
 echo " + Floating all instances."
 
