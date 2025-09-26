@@ -98,7 +98,7 @@ if $(juju show-application manila &>/dev/null); then
 fi
 upload_image cloudimages focal focal-server-cloudimg-amd64.img &
 upload_image cloudimages jammy jammy-server-cloudimg-amd64.img &
-upload_image cirros cirros-0.4.0 0.4.0/cirros-0.4.0-x86_64-disk.img &
+upload_image cirros cirros-0.6.3 0.6.3/cirros-0.6.3-x86_64-disk.img &
 wait
 
 # Set properties needed by octavia-disk-image-retrofit (See LP: #1842430)
