@@ -6,6 +6,7 @@ FUNC_TEST_PR=
 FUNC_TEST_TARGET=
 IMAGES_PATH=$HOME/tmp
 MODIFY_BUNDLE_CONSTRAINTS=true
+RERUN_PHASE=
 
 . $(dirname $0)/func_test_tools/common.sh
 
@@ -21,6 +22,10 @@ OPTIONS:
     --func-test-pr PR_ID
         Provides similar functionality to Func-Test-Pr in commit message. Set
         to zaza-openstack-tests Pull Request ID.
+    --rerun configure|test
+        Re-run the charmed-openstack-tester configure or test phase. This is
+        useful if the deployment is part of a test run that failed, perhaps
+        because of an infra issue, but can safely continue where it left off.
     --skip-modify-bundle-constraints
         By default we modify test bundle constraints to ensure that applications
         have the resources they need. For example nova-compute needs to have
@@ -28,6 +33,12 @@ OPTIONS:
     --help
         This help message.
 EOF
+}
+
+opt_error ()
+{
+    echo "ERROR: invalid input provided for $1: $2"
+    exit 1
 }
 
 while (($# > 0)); do
@@ -41,6 +52,11 @@ while (($# > 0)); do
             ;;
         --func-test-pr)
             FUNC_TEST_PR=$2
+            shift
+            ;;
+        --rerun)
+            RERUN_PHASE=$2
+            [[ $2 = configure ]] || [[ $2 = test ]] || opt_error $1 $2
             shift
             ;;
         --skip-modify-bundle-constraints)
@@ -59,7 +75,7 @@ while (($# > 0)); do
     shift
 done
 
-if [[ -z $FUNC_TEST_TARGET ]]; then
+if [[ -z $RERUN_PHASE ]] && [[ -z $FUNC_TEST_TARGET ]]; then
     echo "ERROR: must provide a target name with --func-test-target"
     exit 1
 fi
@@ -151,7 +167,24 @@ LOGFILE=$(mktemp --suffix=-openstack-release-test-results)
         apply_func_test_pr $FUNC_TEST_PR
     fi
 
-    tox -re func-target -- $FUNC_TEST_TARGET || true
-    model=$(juju list-models| egrep -o "^zaza-\S+"|tr -d '*')
+    if [[ -n $RERUN_PHASE ]]; then
+        model=$(juju list-models| egrep -o "^zaza-\S+"|tr -d '*')
+        echo "Re-running functest-$RERUN_PHASE (model=$model)"
+        juju switch $model
+        . .tox/func-target/bin/activate
+        (
+        if [[ $RERUN_PHASE = test ]]; then
+            # needed for the script to run
+            export _juju_model_arg="-m $model"
+            . scripts/novarcv3_ssl_project
+        fi
+        # NOTE: almost all tests use the focal_wallaby alias so go with that for
+        #       now but we should find a way to do this dynamically.
+        functest-$RERUN_PHASE -m focal_wallaby:$model --test-directory tests/distro-regression/tests
+        )
+    else
+        echo "Running $FUNC_TEST_TARGET tests"
+        tox -re func-target -- $FUNC_TEST_TARGET || true
+    fi
 ) 2>&1 | tee $LOGFILE
 echo -e "\nResults also saved to $LOGFILE"
