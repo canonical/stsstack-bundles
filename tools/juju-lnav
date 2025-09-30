@@ -68,6 +68,9 @@ check_ssh_key() {
     # Guess a pub key using ssh -G if not supplied
     : "${PUB_KEY:=$(ssh -G "root@${ip_address}" |awk '/identityfile/ { print $2; exit }').pub}"
 
+    # 'Good Enough' tilde expansion
+    PUB_KEY="${PUB_KEY/#\~/$HOME}"
+
     if [[ -n "$PUB_KEY" ]]; then
         copy_pub_key "$unit" "$ip_address"
     else
