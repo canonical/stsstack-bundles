@@ -2,30 +2,10 @@
 
 set -e -u
 
+declare PUB_KEY=
 declare -A MACHINES=()
 declare -A CONTAINERS=()
 declare -A UNITS=()
-
-install_ssh_key() {
-    local unit
-    for unit in $@; do
-        echo "installing ssh key for ${unit}"
-        if [[ -f ~/testkey.pub ]]; then
-            cat ~/testkey.pub \
-                | timeout 10 juju ssh ${unit} \
-                -- sudo tee --append /root/.ssh/authorized_keys
-        else
-            echo "missing key: ~/testkey.pub"
-        fi
-        if [[ -f ~/.ssh/id_rsa.pub ]]; then
-            cat ~/.ssh/id_rsa.pub \
-                | timeout 10 juju ssh ${unit} \
-                -- sudo tee --append /root/.ssh/authorized_keys
-        else
-            echo "missing key: ~/.ssh/id_rsa.pub"
-        fi
-    done
-}
 
 get_application_units() {
     local application=$1
@@ -63,11 +43,78 @@ expand_unit() {
         done
         return
     fi
-    echo "checking ssh key for ${ip_address}"
-    if ! timeout 5 ssh "root@${ip_address}" < /dev//null > /dev/null 2>&1; then
-        install_ssh_key "${ip_address}"
-    fi
+    check_ssh_key "$unit" "$ip_address"
     lnav_arguments=( "${lnav_arguments[@]}" "root@${ip_address}:${files}" )
+}
+
+can_ssh_connect() {
+    local ip_address="$1"
+    ssh \
+        -o ConnectTimeout=5 -o BatchMode=yes \
+        -o StrictHostKeyChecking=no \
+        "root@${ip_address}" true > /dev/null 2>&1
+}
+
+check_ssh_key() {
+    local unit="$1"
+    local ip_address="$2"
+    echo "checking ssh key for ${ip_address}"
+    if can_ssh_connect "$ip_address"; then
+        return
+    fi
+
+    echo "Unable to ssh into root@${ip_address}." 1>&2
+
+    # Guess a pub key using ssh -G if not supplied
+    : "${PUB_KEY:=$(ssh -G "root@${ip_address}" |awk '/identityfile/ { print $2; exit }').pub}"
+
+    # 'Good Enough' tilde expansion
+    PUB_KEY="${PUB_KEY/#\~/$HOME}"
+
+    if [[ -n "$PUB_KEY" ]]; then
+        copy_pub_key "$unit" "$ip_address"
+    else
+        cat << END
+Please check that:
+1.  Your public key is in the authorized_hosts file of the root user on ${ip_address}
+    You can accomplish this by rerunning this script with the --pub-key flag:
+    ./juju-lnav --pub-key ~/.ssh/id_rsa.pub UNIT:LOG
+
+2.  A different key is not set for this host in ~/.ssh/config,
+    e.g.
+
+    HostName ${ip_address}
+    IdentityFile ~/non_existent_key
+END
+        exit 1
+    fi
+}
+
+copy_pub_key() {
+    local unit="$1"
+    local ip_address="$2"
+    echo "copying ${PUB_KEY} to ${unit}'s authorized_keys"
+
+    if ! [[ -f "${PUB_KEY}" ]]; then
+        echo "${PUB_KEY} does not exist." 1>&2
+        exit 1
+    fi
+
+    timeout 10 juju ssh -q "$unit" < "$PUB_KEY"\
+        -- sudo tee --append /root/.ssh/authorized_keys >/dev/null
+
+
+    if ! can_ssh_connect "$ip_address"; then
+        echo "Still unable to connect to ${ip_address}"
+        cat << END
+Please check that a different key is not set for this host in ~/.ssh/config,
+    e.g.
+
+    HostName ${ip_address}
+    IdentityFile ~/non_existent_key
+END
+        exit 1
+    fi
 }
 
 get_machine_IPs() {
@@ -145,8 +192,16 @@ Options:
 
 UNIT        is the name of the unit
 LOGFILES    is a regular shell GLOB
+
+--pub-key PATH      Key to copy to supplied UNIT's authorized_keys file
+                    if ssh authentication fails. Default: the first key
+                    returned by 'ssh -G' for the given host.
 EOF
             exit 0
+            ;;
+        --pub-key)
+            PUB_KEY="$2"
+            shift
             ;;
         *)
             if (( juju_info_loaded == 0 )); then
