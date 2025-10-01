@@ -1,8 +1,10 @@
 # Leave a blank line at the end of this file to support concatenation
 apache
 AthenaV2
+az
 backend
 backends
+balancers
 Caracal
 ceph
 Charmcraft
@@ -12,9 +14,11 @@ config
 configs
 cryptographically
 DHSS
+distributable
 dvipng
 fonts
 freefont
+functest
 github
 GPG
 gyre
@@ -25,6 +29,7 @@ IDP
 IDPs
 Intersphinx
 io
+ipv
 JDK
 Jira
 Kanban
@@ -33,16 +38,20 @@ Keycloak
 lang
 LaTeX
 latexmk
+lnav
 manila
 Manila
+microceph
 Multipass
 neutronclient
+octavia
 oidc
 openidc
 OpenIDC
 openstack
 openstackclient
 openstackclients
+OSCI
 otf
 plantuml
 PNG
@@ -52,10 +61,14 @@ Pygments
 QEMU
 readthedocs
 Rockcraft
+routable
 rst
 rsync
+samltestid
+sg
 sitemapindex
 sos
+ssl
 SSL
 stsstack
 STSStack
@@ -73,6 +86,8 @@ uncommenting
 URIs
 url
 utils
+vips
+vm
 VMs
 WCAG
 webhook
