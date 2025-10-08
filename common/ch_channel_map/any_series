@@ -5,6 +5,7 @@ declare -A RELNAME_MAP=(
     [caracal]=2024.1
     [dalmatian]=latest
     [epoxy]=latest
+    [flamingo]=latest
 )
 for c in ${OST_CHARMS[@]}; do
     CHARM_CHANNEL[$c]=${RELNAME_MAP[$release]:-$release}/edge
