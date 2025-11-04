@@ -55,6 +55,12 @@ can_ssh_connect() {
         "root@${ip_address}" true > /dev/null 2>&1
 }
 
+guess_pub_key() {
+    local ip_address="$1"
+    local priv_key="$(ssh -G "root@${ip_address}" |awk '/identityfile/ { print $2; exit }')"
+    echo "${priv_key/%.priv}.pub"
+}
+
 check_ssh_key() {
     local unit="$1"
     local ip_address="$2"
@@ -66,7 +72,7 @@ check_ssh_key() {
     echo "Unable to ssh into root@${ip_address}." 1>&2
 
     # Guess a pub key using ssh -G if not supplied
-    : "${PUB_KEY:=$(ssh -G "root@${ip_address}" |awk '/identityfile/ { print $2; exit }').pub}"
+    : "${PUB_KEY:=$(guess_pub_key "$ip_address")}"
 
     # 'Good Enough' tilde expansion
     PUB_KEY="${PUB_KEY/#\~/$HOME}"
