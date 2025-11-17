@@ -757,6 +757,9 @@ do
             MOD_OVERLAYS+=( "openstack/magnum.yaml" )
             MOD_MSGS[magnum.0]="You need to configure required domains, roles and users in the cloud for Magnum clusters"
             MOD_MSGS[magnum.1]="You can do this with 'juju $JUJU_RUN_CMD magnum/0 domain-setup'"
+            if has_opt --openstack-dashboard*; then
+                MOD_OVERLAYS+=( "openstack/magnum-dashboard.yaml" )
+            fi
             ;;
         *)
             echo "ERROR: invalid input '$1'"
