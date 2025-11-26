@@ -761,6 +761,11 @@ do
                 MOD_OVERLAYS+=( "openstack/magnum-dashboard.yaml" )
             fi
             ;;
+        --magnum-ha*)
+            get_units $1 __NUM_MAGNUM_UNITS__ 3
+            MOD_OVERLAYS+=( "openstack/magnum-ha.yaml" )
+            set -- $@ --magnum && cache $@
+            ;;
         *)
             echo "ERROR: invalid input '$1'"
             _usage
