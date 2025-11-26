@@ -172,6 +172,9 @@ do
                 MOD_OVERLAYS+=( "kubernetes/k8s-e2e-vault.yaml" )
             fi
             ;;
+        --cinder)
+            MOD_OVERLAYS+=( "kubernetes/k8s-cinder-csi.yaml" )
+            ;;
         --keystone)
             MOD_OVERLAYS+=( "openstack/keystone.yaml" )
             MOD_OVERLAYS+=( "kubernetes/k8s-keystone.yaml" )
