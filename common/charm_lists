@@ -41,6 +41,7 @@ pacemaker-remote
 placement
 swift-proxy
 swift-storage
+watcher
 )
 
 declare -a OVN_CHARMS=(
