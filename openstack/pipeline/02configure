@@ -721,6 +721,9 @@ do
             assert_min_release ussuri 'cinder-volume'
             MOD_OVERLAYS+=( "openstack/cinder-volume.yaml" )
             MOD_PARAMS[__CINDER_VOLUME_INTERFACE__]='cinder-volume'
+            if has_opt --vault || is_ml2_ovn; then
+                MOD_OVERLAYS+=( "openstack/vault-openstack-certificates-cinder-volume.yaml" )
+            fi
             ;;
         --purestorage-api-token)  #__OPT__type:<str>
             MOD_PARAMS[__PURESTORAGE_API_TOKEN__]=$2
