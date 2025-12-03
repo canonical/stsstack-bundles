@@ -1,0 +1,10 @@
+# Variables
+debug:                      &debug                     True
+openstack_origin:           &openstack_origin          __OS_ORIGIN__
+
+applications:
+  magnum-dashboard:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__magnum-dashboard
+relations:
+  - ['magnum-dashboard:certificates', 'vault:certificates']
+  - ['magnum-dashboard:dashboard', 'openstack-dashboard:dashboard-plugin']

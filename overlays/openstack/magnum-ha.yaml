@@ -1,0 +1,10 @@
+applications:
+  magnum:
+    options:
+      vip: __VIP__
+  magnum-hacluster:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__hacluster
+    options:
+        cluster_count: __NUM_MAGNUM_UNITS__
+relations:
+  - [ magnum, magnum-hacluster ]
