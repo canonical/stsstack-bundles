@@ -52,6 +52,9 @@ MOD_PARAMS[__MAAS_API_KEY__]=
 MOD_PARAMS[__GLOBAL_MTU__]=1500
 MOD_PARAMS[__PATH_MTU__]=
 MOD_PARAMS[__NUM_WATCHER_UNITS__]=1
+MOD_PARAMS[__WATCHER_DATASOURCES__]='gnocchi'
+MOD_PARAMS[__WATCHER_PLANNER__]='weight'
+MOD_PARAMS[__WATCHER_PLANNER_CONFIG__]='{"weights": "change_node_power_state:9,change_nova_service_state:50,migrate:30,nop:70,resize:20,sleep:40,turn_host_to_acpi_s3_state:10,volume_migrate:60","parallelization": "change_node_power_state:2,change_nova_service_state:1,migrate:2,nop:1,resize:2,sleep:1,turn_host_to_acpi_s3_state:2,volume_migrate:2"}'
 MOD_PARAMS[__NUM_MAGNUM_UNITS__]=1
 
 # This is enough for creating one ubuntu vm or multiple cirros vms but some
