@@ -64,11 +64,11 @@ if [[ $# -gt 1 && $1 = --service ]]; then
     RELATION_ID=$(juju exec --unit "$2/leader" -- relation-ids identity-service | cut -d : -f 2)
     readarray -t CREDENTIALS < <(juju exec --unit "$2/leader" -- relation-get --relation "${RELATION_ID}" --format json - keystone/0)
 
-    export OS_USERNAME=$(echo ${CREDENTIALS} | jq --raw-output .service_username)
-    export OS_USER_DOMAIN_NAME=$(echo ${CREDENTIALS} | jq --raw-output .service_domain)
-    export OS_PROJECT_NAME=$(echo ${CREDENTIALS} | jq --raw-output .service_tenant)
-    export OS_PROJECT_DOMAIN_NAME=$(echo ${CREDENTIALS} | jq --raw-output .service_domain)
-    export OS_PASSWORD=$(echo ${CREDENTIALS} | jq --raw-output .service_password)
+    export OS_USERNAME=$(echo "${CREDENTIALS[0]}" | jq --raw-output .service_username)
+    export OS_USER_DOMAIN_NAME=$(echo "${CREDENTIALS[0]}" | jq --raw-output .service_domain)
+    export OS_PROJECT_NAME=$(echo "${CREDENTIALS[0]}" | jq --raw-output .service_tenant)
+    export OS_PROJECT_DOMAIN_NAME=$(echo "${CREDENTIALS[0]}" | jq --raw-output .service_domain)
+    export OS_PASSWORD=$(echo "${CREDENTIALS[0]}" | jq --raw-output .service_password)
 else
     export OS_USERNAME=admin
     export OS_USER_DOMAIN_NAME=admin_domain
