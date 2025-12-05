@@ -41,7 +41,7 @@ END
             case $yn in
             [nN])
                 echo "exiting..." 1>&2
-                return
+                exit
                 ;;
             esac
         fi
