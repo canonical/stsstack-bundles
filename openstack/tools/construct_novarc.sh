@@ -3,7 +3,7 @@
 set -euo pipefail
 
 juju_status_json_cache=$(mktemp)
-cleanup() { rm -rf $juju_status_json_cache; }
+cleanup() { rm "$juju_status_json_cache"; }
 trap cleanup EXIT
 
 scriptdir=$(readlink --canonicalize $(dirname ${BASH_SOURCE}))
