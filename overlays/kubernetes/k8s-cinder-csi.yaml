@@ -1,0 +1,13 @@
+series: jammy
+applications:
+  cinder-csi:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__cinder-csi
+    channel: latest/stable
+    series: jammy
+    options:
+      storage-class-default: true
+relations:
+ - [cinder-csi:certificates, easyrsa:client]
+ - [cinder-csi:kube-control, __K8S_CONTROLLER_CHARM__:kube-control]
+ - [cinder-csi:openstack, openstack-integrator:clients]
+
