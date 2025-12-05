@@ -1,0 +1,7 @@
+# Variables
+
+applications:
+  watcher-dashboard:
+    charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__watcher-dashboard
+relations:
+  - [ watcher-dashboard:dashboard, openstack-dashboard:dashboard-plugin ]

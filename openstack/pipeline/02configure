@@ -748,6 +748,9 @@ do
         --watcher)
             if assert_min_release yoga 'watcher'; then
                 MOD_OVERLAYS+=( "openstack/watcher.yaml" )        
+                if has_opt --openstack-dashboard*; then
+                    MOD_OVERLAYS+=( "openstack/watcher-dashboard.yaml" )
+                fi
             fi
             ;;
         --watcher-ha*)
