@@ -44,6 +44,7 @@ placement
 swift-proxy
 swift-storage
 watcher
+watcher-dashboard
 )
 
 declare -a OVN_CHARMS=(
