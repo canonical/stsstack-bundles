@@ -1,5 +1,7 @@
 #!/bin/bash -eu
 
-scriptdir=$(readlink --canonicalize $(dirname ${BASH_SOURCE:-0}))
+# NOTE(raineszm): This is written to work in both bash and
+# zsh. Thanks, @wilkmar.
+scriptdir="$(readlink --canonicalize $(dirname ${BASH_SOURCE:-0}))"
 
 source <("${scriptdir}/tools/construct_novarc.sh" "$@")
