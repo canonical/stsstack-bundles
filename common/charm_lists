@@ -19,6 +19,8 @@ ironic-conductor
 keystone
 keystone-ldap
 keystone-saml-mellon
+magnum
+magnum-dashboard
 manila
 manila-ganesha
 manila-generic
