@@ -662,7 +662,7 @@ do
             fi
             if ! has_opt --ssl; then
                 MOD_OVERLAYS+=( "openstack/vault-openstack-certificates.yaml" )
-                for opt in --heat --octavia --barbican --designate --placement --openstack-dashboard --ironic; do
+                for opt in --heat --octavia --barbican --designate --placement --openstack-dashboard --ironic --watcher; do
                     has_opt $opt* && MOD_OVERLAYS+=( "openstack/vault-openstack-certificates-${opt##--}.yaml" )
                 done
             fi

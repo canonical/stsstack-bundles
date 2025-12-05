@@ -1,0 +1,2 @@
+relations:
+  - ['watcher:certificates', 'vault:certificates']

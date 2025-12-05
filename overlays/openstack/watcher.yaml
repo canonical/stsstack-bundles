@@ -10,6 +10,9 @@ applications:
     options:
       debug: *debug
       openstack-origin: *openstack_origin
+      datasources: '__WATCHER_DATASOURCES__'
+      planner: '__WATCHER_PLANNER__'
+      planner-config: '__WATCHER_PLANNER_CONFIG__'
 relations:
   - [ watcher:shared-db, __MYSQL_INTERFACE__ ]
   - [ watcher:identity-service, keystone:identity-service ]
