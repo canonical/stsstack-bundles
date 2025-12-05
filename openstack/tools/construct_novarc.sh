@@ -6,19 +6,19 @@ juju_status_json_cache=$(mktemp)
 cleanup() { rm "$juju_status_json_cache"; }
 trap cleanup EXIT
 
-scriptdir=$(readlink --canonicalize $(dirname ${BASH_SOURCE}))
+scriptdir=$(readlink --canonicalize "$(dirname "${BASH_SOURCE[0]}")")
 
 # cache juju status
-juju status --format=json >|$juju_status_json_cache
+juju status --format=json >|"$juju_status_json_cache"
 
 _OS_PARAMS=($(env | awk 'BEGIN {FS="="} /^OS_/ {print $1;}'))
-for param in ${_OS_PARAMS[@]}; do
-    unset $param
+for param in "${_OS_PARAMS[@]}"; do
+    unset "$param"
 done
 
 keystone_addr=$(juju config keystone vip)
 if [ -z "$keystone_addr" ]; then
-    keystone_addr=$(jq --raw-output '.applications.keystone.units[] | select (.leader == true) | .["public-address"]' $juju_status_json_cache)
+    keystone_addr=$(jq --raw-output '.applications.keystone.units[] | select (.leader == true) | .["public-address"]' "$juju_status_json_cache")
 fi
 
 # check config-based ssl first
@@ -53,7 +53,7 @@ fi
 
 if [ "${OS_AUTH_PROTOCOL:-}" = "https" ]; then
     echo -n "INFO: installing certificate authority for this deployment..." 1>&2
-    ${scriptdir}/install_local_ca.sh 1>/dev/null
+    "${scriptdir}/install_local_ca.sh" 1>/dev/null
     echo done. 1>&2
 fi
 
@@ -61,8 +61,8 @@ unset _OS_PARAMS
 
 # If user was specified use it
 if [[ $# -gt 1 && $1 = --service ]]; then
-    RELATION_ID=$(juju exec --unit $2/leader -- relation-ids identity-service | cut -d : -f 2)
-    readarray -t CREDENTIALS < <(juju exec --unit $2/leader -- relation-get --relation ${RELATION_ID} --format json - keystone/0)
+    RELATION_ID=$(juju exec --unit "$2/leader" -- relation-ids identity-service | cut -d : -f 2)
+    readarray -t CREDENTIALS < <(juju exec --unit "$2/leader" -- relation-get --relation "${RELATION_ID}" --format json - keystone/0)
 
     export OS_USERNAME=$(echo ${CREDENTIALS} | jq --raw-output .service_username)
     export OS_USER_DOMAIN_NAME=$(echo ${CREDENTIALS} | jq --raw-output .service_domain)
@@ -89,7 +89,7 @@ export OS_REGION_NAME=RegionOne
 api_ver="$(juju config keystone preferred-api-version)"
 rel="$(juju config keystone openstack-origin | sed -r 's/.+-(.+)/\1/g')"
 rel="$(echo -e "$rel\nqueens" | sort | head -n 1)"
-series=$(jq -r '.applications| to_entries[]| select(.key=="keystone")| .value| .series' $juju_status_json_cache)
+series=$(jq -r '.applications| to_entries[]| select(.key=="keystone")| .value| .series' "$juju_status_json_cache")
 if [ "$api_ver" = "3" ] || [[ "${rel%%/*}" > "pike" ]] ||
     { [[ "$series" > "artful" ]] && [[ "$series" < "trusty" ]]; }; then
     export OS_AUTH_URL=${OS_AUTH_PROTOCOL:-http}://${keystone_addr}:5000/v3
@@ -104,6 +104,6 @@ else
 fi
 
 _OS_PARAMS=($(env | awk 'BEGIN {FS="="} /^OS_/ {print $1;}'))
-for param in ${_OS_PARAMS[@]}; do
+for param in "${_OS_PARAMS[@]}"; do
     echo "export $param=${!param}"
 done
