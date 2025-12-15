@@ -97,7 +97,10 @@ if __name__ == '__main__':
             name=subnet_name,
             cidr=cidr,
             ip_version=4,
-            tenant_id=project_id,
+            # NOTE: project_id doesn't show up in the explicit
+            # kwargs as of 8.2.0, but is supported anyway
+            # as it is properly passed along through **kwargs
+            project_id=project_id,
             enable_dhcp=opts.dhcp
         )
     else:

@@ -75,6 +75,9 @@ if __name__ == '__main__':
         network_args = {
             'name': net_name,
             'external': True,
+            # NOTE: project_id doesn't show up in the explicit
+            # kwargs as of 8.2.0, but is supported anyway
+            # as it is properly passed along through **kwargs
             'project_id': project_id,
             'provider': {'network_type': opts.network_type},
         }
@@ -102,7 +105,7 @@ if __name__ == '__main__':
             'name': subnet_name,
             'enable_dhcp': False,
             'ip_version': 4,
-            'tenant_id': project_id
+            'project_id': project_id
         }
 
         if opts.default_gateway:
