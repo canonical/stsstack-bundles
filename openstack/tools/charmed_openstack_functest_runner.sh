@@ -13,6 +13,7 @@ REMOTE_BUILD=
 SKIP_BUILD=false
 SLEEP=
 WAIT_ON_DESTROY=true
+RERUN_PHASE=
 
 . $(dirname $0)/func_test_tools/common.sh
 
@@ -50,6 +51,10 @@ OPTIONS:
         The destination needs to be prepared for the build and authorized for
         ssh. Implies --skip-build. Specify parameter as <destination>,<path>.
         Example: --remote-build ubuntu@10.171.168.1,~/git/charm-nova-compute
+    --rerun deploy|configure|test
+        Re-run a specific phase. This is useful if the deployment is part of a
+        test run that failed, perhaps because of an infra issue, but can safely
+        continue where it left off.
     --skip-build
         Skip building charm if already done to save time.
     --skip-modify-bundle-constraints
@@ -62,6 +67,75 @@ OPTIONS:
         This help message.
 EOF
 }
+
+run_test_phase ()
+{
+    local phase=$1
+    local model=$2
+    local bundle=${3:-""}
+    local args=
+    local ret=
+
+    unit_errors=$(juju status --format json| jq '.applications[]| select(.units!=null)| .units[]."workload-status"| select(.current=="error")')
+    if [[ -n $unit_errors ]]; then
+        echo -e "\nNOTE: before you run a phase make sure that any hook errors have been resolved.\n"
+        echo "$unit_errors"
+        read -p "press [ENTER] to continue"
+    fi
+
+    . .tox/func-target/bin/activate
+    echo "Running '$phase' phase..."
+    if [[ $phase == deploy ]]; then
+        if [[ -z $bundle ]]; then
+            read -p "Enter name of bundle we are running (from tests/bundles/): " bundle
+        fi
+        args="-b tests/bundles/$bundle.yaml"
+    fi
+    functest-$phase -m $model ${args}
+    ret=$?
+    deactivate
+    return $ret
+}
+
+
+retry_on_fail ()
+{
+    local model=$1
+    local bundle=$2
+    local ret=
+    juju switch $model
+cat << EOF
+The tests have failed. You now have the choice to either exit or re-run a test phase.
+
+To re-run the tests you need to choose which of the following phases you want to run:
+  * deploy
+  * configure
+  * test
+
+EOF
+    read -p "Enter phase to run (exit|deploy|configure|test): " phase
+    case "$phase" in
+        deploy|configure|test)
+            while true; do
+                run_test_phase $phase $model $bundle
+                ret=$?
+                if (($ret)); then
+                    read -p "Failed. Try $phase phase again? [Y/n]" answer
+                    [[ -z $answer ]] || [[ ${answer,,} == y ]] || break
+                else
+                    [[ $phase == test ]] && break
+                    [[ $phase == deploy ]] && phase=configure || phase=test
+                fi
+            done
+        ;;
+        *)
+            echo "ERROR: unrecognised phase name '$phase'"
+            exit 1
+        ;;
+    esac
+    return $ret
+}
+
 
 while (($# > 0)); do
     case "$1" in
@@ -85,6 +159,11 @@ while (($# > 0)); do
         --remote-build)
             REMOTE_BUILD=$2
             SKIP_BUILD=true
+            shift
+            ;;
+        --rerun)
+            RERUN_PHASE=$2
+            [[ $2 = deploy ]] || [[ $2 = configure ]] || [[ $2 = test ]] || opt_error $1 $2
             shift
             ;;
         --skip-modify-bundle-constraints)
@@ -227,9 +306,22 @@ if $MODIFY_BUNDLE_CONSTRAINTS; then
     )
 fi
 
+if [[ -n $RERUN_PHASE ]]; then
+    fail=false
+    [[ -d src ]] && pushd src &>/dev/null || true
+    model=$(juju list-models| egrep -o "^zaza-\S+"|tr -d '*')
+    echo "Re-running functest-$RERUN_PHASE (model=$model)"
+    juju switch $model
+    ((${#FUNC_TEST_TARGET[@]}==1)) && bundle=${FUNC_TEST_TARGET[0]} || bundle=
+    run_test_phase $RERUN_PHASE $model $bundle
+    popd
+fi
+
 first=true
 init_noop_target=true
 for target in ${func_target_order[@]}; do
+    [[ -z $RERUN_PHASE ]] || continue
+
     # Destroy any existing zaza models to ensure we have all the resources we
     # need.
     destroy_zaza_models
@@ -253,6 +345,7 @@ for target in ${func_target_order[@]}; do
         init_noop_target=false
     fi
 
+    $fail && retry_on_fail "$model" "$target" && fail=false
     if $fail; then
         func_target_state[$target]='fail'
     else
@@ -260,7 +353,7 @@ for target in ${func_target_order[@]}; do
     fi
 
     if $WAIT_ON_DESTROY; then
-        read -p "Destroy model and run next test? [ENTER]"
+        read -p "Destroy model '$model' and run next test? [ENTER]"
     fi
 
     # Cleanup before next run
