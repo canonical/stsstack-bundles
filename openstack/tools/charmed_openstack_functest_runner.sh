@@ -234,7 +234,7 @@ export TEST_JUJU3=1
 export TEST_ZAZA_BUG_LP1987332=1
 
 # Some charms point to an upstream constraints file that installs python-libjuju 2.x so we need to do this to ensure we get 3.x
-export TEST_CONSTRAINTS_FILE=https://raw.githubusercontent.com/openstack-charmers/zaza/master/constraints-juju34.txt
+export TEST_CONSTRAINTS_FILE=https://raw.githubusercontent.com/openstack-charmers/zaza/master/constraints-juju36.txt
 
 LOGFILE=$(mktemp --suffix=-charm-func-test-results)
 (
