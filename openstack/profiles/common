@@ -94,7 +94,7 @@ function create_tempest_users {
     openstack role add --user alt_demo --project alt_demo member || :
 }
 
-function create_tempest_users_v3 {
+function create_tempest_users {
     # Create demo/testing users and projects
     create_roles
     openstack project show --domain admin_domain demo || {

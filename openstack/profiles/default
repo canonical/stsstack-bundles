@@ -56,10 +56,10 @@ fi
 # Configure neutron networking on overcloud
 source novarc
 
-./bin/neutron-ext-net-ksv3 --project admin --network-type flat -g $GATEWAY -c $CIDR_EXT -f $FIP_RANGE ext_net
-./bin/neutron-tenant-net-ksv3 --project admin --network-type $net_type -r provider-router $NS_ARG private $CIDR_PRIV
+./bin/neutron-ext-net --project admin --network-type flat -g $GATEWAY -c $CIDR_EXT -f $FIP_RANGE ext_net
+./bin/neutron-tenant-net --project admin --network-type $net_type -r provider-router $NS_ARG private $CIDR_PRIV
 # Create demo/testing users, tenants and flavor
-create_tempest_users_v3
+create_tempest_users
 
 set_img_properties ()
 {

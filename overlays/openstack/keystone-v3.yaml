@@ -1,4 +1,0 @@
-applications:
-  keystone:
-    options:
-      preferred-api-version: 3

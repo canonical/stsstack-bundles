@@ -138,12 +138,7 @@ if __name__ == '__main__':
         if data_port not in ext_port:
             ext_port.append(data_port)
 
-    if juju_version == 1:
-        config_cmd = 'set'
-    else:
-        config_cmd = 'config'
-
     ports = " ".join(ext_port)
     print("Setting data-port configuration on {} to {}".format(service, ports))
-    subprocess.check_call(['juju', config_cmd, service,
+    subprocess.check_call(['juju', 'config', service,
                           'data-port={}'.format(ports)])
