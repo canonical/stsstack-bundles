@@ -81,19 +81,7 @@ else
 fi
 export OS_REGION_NAME=RegionOne
 
-api_ver="`juju config keystone preferred-api-version`"
-rel="`juju config keystone openstack-origin| sed -r 's/.+-(.+)/\1/g'`"
-rel="`echo -e "$rel\nqueens"| sort| head -n 1`"
-series=`jq -r '.applications| to_entries[]| select(.key=="keystone")| .value| .series' $juju_status_json_cache`
-if [ "$api_ver" = "3" ] || [[ "${rel%%/*}" > "pike" ]] || \
-    { [[ "$series" > "artful" ]] && [[ "$series" < "trusty" ]]; }; then
-    export OS_AUTH_URL=${OS_AUTH_PROTOCOL:-http}://${keystone_addr}:5000/v3
-    export OS_IDENTITY_API_VERSION=3
-    # Gnocchi needs this:
-    export OS_AUTH_TYPE=password
-else
-    export OS_AUTH_URL=${OS_AUTH_PROTOCOL:-http}://${keystone_addr}:5000/v2.0
-    # Pike fix
-    unset OS_PROJECT_DOMAIN_NAME
-    unset OS_USER_DOMAIN_NAME
-fi
+export OS_AUTH_URL=${OS_AUTH_PROTOCOL:-http}://${keystone_addr}:5000/v3
+export OS_IDENTITY_API_VERSION=3
+# Gnocchi needs this:
+export OS_AUTH_TYPE=password

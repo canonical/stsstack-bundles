@@ -146,19 +146,6 @@ function create_default_flavors {
     openstack flavor show m1.xlarge || openstack flavor create --id 6 --ram 16384 --disk 20 --vcpus 8 m1.xlarge
 }
 
-function is_ksv3 () {
-    api_ver="$(juju config keystone preferred-api-version)"
-    rel="$(juju config keystone openstack-origin| sed -r 's/.+-(.+)/\1/g')"
-    rel="$(echo -e "$rel\nqueens"| sort| head -n 1)"
-    series=$(juju status keystone --format=json| jq .machines[].series| tr -d '"')
-    if [ "$api_ver" = "3" ] || [[ "${rel%%/*}" > "pike" ]] || \
-        { [[ "$series" > "artful" ]] && [[ "$series" < "trusty" ]]; }; then
-        return 0
-    else
-        return 1
-    fi
-}
-
 function heat_setup() {
     juju $JUJU_RUN_CMD heat/leader domain-setup
 }
