@@ -304,7 +304,7 @@ accounts_quotas_available = True
 container_quotas_available = True
 
 # Set operator role for tests that require creating a container
-operator_role = Member
+operator_role = member
 
 #jamespage
 accounts_quotas_available = True
@@ -393,7 +393,7 @@ dashboard_url = http://{{ horizon_host }}/horizon
 login_url = http://{{ horizon_host }}/horizon/auth/login/
 
 [scenario]
-# Cirros from http://download.cirros-cloud.net/0.3.1/cirros-0.3.1-x86_64-uec.tar.gz 
+# Cirros from http://download.cirros-cloud.net/0.3.1/cirros-0.3.1-x86_64-uec.tar.gz
 # Directory containing image files
 img_dir = /var/lib/jenkins/images/
 

@@ -63,7 +63,7 @@ function install_packages {
 }
 
 function create_roles {
-    openstack role show Member || openstack role create Member
+    openstack role show member || openstack role create member
     openstack role show ResellerAdmin || openstack role create ResellerAdmin
 }
 
@@ -80,7 +80,7 @@ function create_tempest_users {
                               --enable \
                               --email demo@dev.null demo
     }
-    openstack role add --user demo --project demo Member || :
+    openstack role add --user demo --project demo member || :
 
     openstack project show alt_demo || {
         openstack project create alt_demo
@@ -91,7 +91,7 @@ function create_tempest_users {
                               --enable \
                               --email alt_demo@dev.null alt_demo
     }
-    openstack role add --user alt_demo --project alt_demo Member || :
+    openstack role add --user alt_demo --project alt_demo member || :
 }
 
 function create_tempest_users_v3 {
@@ -111,7 +111,7 @@ function create_tempest_users_v3 {
     openstack role add --user-domain admin_domain \
                        --user demo \
                        --project-domain admin_domain \
-                       --project demo Member || :
+                       --project demo member || :
 
     openstack project show --domain admin_domain alt_demo || {
         openstack project create --domain admin_domain alt_demo
@@ -128,7 +128,7 @@ function create_tempest_users_v3 {
     openstack role add --user-domain admin_domain \
                        --user alt_demo \
                        --project-domain admin_domain \
-                       --project alt_demo Member || :
+                       --project alt_demo member || :
 }
 
 function create_tempest_flavors {
