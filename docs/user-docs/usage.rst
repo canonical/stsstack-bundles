@@ -1,7 +1,7 @@
 Usage
 =====
 
-Using ``stsstack-bundles`` involves generating a bundle and overlays, deploying them then performing some post-deployment actions.
+Using `stsstack-bundles` involves generating a bundle and overlays, deploying them then performing some post-deployment actions.
 
 As an example, let's say you want to deploy OpenStack using the Caracal release on Jammy and you want to enable Ceph and heat with Keystone in HA:
 
