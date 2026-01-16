@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 
-from keystoneclient.auth import identity
-from keystoneclient import session, v3
-from neutronclient.v2_0 import client
 import optparse
-import os
 import sys
 import logging
 
+import openstack
 
 usage = """Usage: %prog [options] ext_net_name
 
@@ -64,104 +61,91 @@ if __name__ == '__main__':
         start_floating_ip = None
         end_floating_ip = None
 
-    auth = identity.v3.Password(
-        user_domain_name=os.environ['OS_USER_DOMAIN_NAME'],
-        username=os.environ['OS_USERNAME'],
-        password=os.environ['OS_PASSWORD'],
-        project_domain_name=os.environ['OS_PROJECT_DOMAIN_NAME'],
-        project_name=os.environ['OS_PROJECT_NAME'],
-        auth_url=os.environ['OS_AUTH_URL'])
-    if 'https' == os.environ.get('OS_AUTH_PROTOCOL') and os.environ.get('OS_CACERT'):
-        sess = session.Session(auth=auth, verify=os.environ['OS_CACERT'])
-    else:
-        sess = session.Session(auth=auth)
-
-    # Clients support sessions
-    keystone = v3.Client(session=sess)
-    quantum = client.Client(session=sess)
+    conn = openstack.connect(envvars=True)
 
     # Resolve tenant id
-    project_id = auth.get_project_id(sess)
+    project_id = conn.current_project_id
     if not project_id:
         logging.error("Unable to locate project id for %s.", opts.tenant)
         sys.exit(1)
 
-    networks = quantum.list_networks(name=net_name)
-    if len(networks['networks']) == 0:
+    networks = conn.list_networks(filters={'name':net_name})
+    if len(networks) == 0:
         logging.info("Configuring external network '%s'", net_name)
-        network_msg = {
-            'network': {
-                'name': net_name,
-                'router:external': True,
-                'tenant_id': project_id,
-                'provider:network_type': opts.network_type,
-            }
+        network_args = {
+            'name': net_name,
+            'external': True,
+            # NOTE: project_id doesn't show up in the explicit
+            # kwargs as of 8.2.0, but is supported anyway
+            # as it is properly passed along through **kwargs
+            'project_id': project_id,
+            'provider': {'network_type': opts.network_type},
         }
 
         if opts.network_type == 'vxlan':
-            network_msg['network']['provider:segmentation_id'] = 1234
+            network_args['provider']['segmentation_id'] = 1234
         elif opts.network_type == 'vlan':
-            network_msg['network']['provider:segmentation_id'] = opts.vlan_id
-            network_msg['network']['provider:physical_network'] = opts.physical_network
+            network_args['provider']['segmentation_id'] = opts.vlan_id
+            network_args['provider']['physical_network'] = opts.physical_network
         elif opts.network_type == 'flat':
-            network_msg['network']['provider:physical_network'] = opts.physical_network
+            network_args['provider']['physical_network'] = opts.physical_network
         else:
-            network_msg['network']['provider:segmentation_id'] = 2
+            network_args['provider']['segmentation_id'] = 2
 
         logging.info('Creating new external network definition: %s', net_name)
-        network = quantum.create_network(network_msg)['network']
-        logging.info('New external network created: %s', network['id'])
+        network = conn.create_network(**network_args)
+        logging.info('New external network created: %s', network.id)
     else:
         logging.warning('Network %s already exists.', net_name)
-        network = networks['networks'][0]
+        network = networks[0]
 
-    subnets = quantum.list_subnets(name=subnet_name)
-    if len(subnets['subnets']) == 0:
-        subnet_msg = {
+    subnets = conn.list_subnets(filters={'name': subnet_name})
+    if len(subnets) == 0:
+        subnet_args= {
             'name': subnet_name,
-            'network_id': network['id'],
             'enable_dhcp': False,
             'ip_version': 4,
-            'tenant_id': project_id
+            'project_id': project_id
         }
 
         if opts.default_gateway:
-            subnet_msg['gateway_ip'] = opts.default_gateway
+            subnet_args['gateway_ip'] = opts.default_gateway
         if opts.cidr:
-            subnet_msg['cidr'] = opts.cidr
+            subnet_args['cidr'] = opts.cidr
         if (start_floating_ip and end_floating_ip):
-            subnet_msg['allocation_pools'] = [{
+            subnet_args['allocation_pools'] = [{
                 'start': start_floating_ip,
                 'end': end_floating_ip
             }]
 
         logging.info('Creating new subnet for %s', net_name)
-        subnet = quantum.create_subnet({'subnet': subnet_msg})['subnet']
-        logging.info('New subnet created: %s', subnet['id'])
+        subnet = conn.create_subnet(network.id, **subnet_args)
+        logging.info('New subnet created: %s', subnet.id)
     else:
         logging.warning('Subnet %s already exists.', subnet_name)
-        subnet = subnets['subnets'][0]
+        subnet = subnets[0]
 
-    routers = quantum.list_routers(name='provider-router')
-    if len(routers['routers']) == 0:
+    routers = conn.list_routers(filters={'name':'provider-router'})
+    if len(routers) == 0:
         logging.info('Creating provider router for external network access')
-        router = quantum.create_router(
-            {'router': {'name': 'provider-router', 'tenant_id': project_id}}
-        )['router']
+        router = conn.create_router(
+            name='provider-router',
+            project_id=project_id,
+        )
         logging.info('New router created: %s', (router['id']))
     else:
         logging.warning('Router provider-router already exists.')
-        router = routers['routers'][0]
+        router = routers[0]
 
-    ports = quantum.list_ports(device_owner='network:router_gateway',
-                               network_id=network['id'])
-    if len(ports['ports']) == 0:
+    ports = conn.list_ports(filters={
+        'device_owner':'network:router_gateway',
+        'network_id': network['id']})
+    if len(ports) == 0:
         logging.info('Plugging router into ext_net')
-        router = \
-            quantum.add_gateway_router(
-                            router=router['id'],
-                            body={'network_id': network['id']}
-                            )
+        conn.update_router(
+            router['id'],
+            ext_gateway_net_id=network['id']
+        )
         logging.info('Router connected to %s', net_name)
     else:
         logging.warning('Router already connect to %s', net_name)
