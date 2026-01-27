@@ -63,10 +63,10 @@ if __name__ == '__main__':
 
     conn = openstack.connect(envvars=True)
 
-    # Resolve tenant id
+    # Resolve project id
     project_id = conn.current_project_id
     if not project_id:
-        logging.error("Unable to locate project id for %s.", opts.tenant)
+        logging.error("Unable to locate project id for %s.", opts.project)
         sys.exit(1)
 
     networks = conn.list_networks(filters={'name':net_name})
