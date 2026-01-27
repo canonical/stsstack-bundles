@@ -138,7 +138,7 @@ if __name__ == '__main__':
         router = routers[0]
 
     ports = conn.list_ports(filters={
-        'device_owner':'network:router_gateway',
+        'device_owner': 'network:router_gateway',
         'network_id': network['id']})
     if len(ports) == 0:
         logging.info('Plugging router into ext_net')
