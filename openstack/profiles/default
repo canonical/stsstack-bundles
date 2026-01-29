@@ -57,7 +57,7 @@ fi
 source novarc
 
 ./bin/neutron-ext-net --project admin --network-type flat -g $GATEWAY -c $CIDR_EXT -f $FIP_RANGE ext_net
-./bin/neutron-tenant-net --project admin --network-type $net_type -r provider-router $NS_ARG private $CIDR_PRIV
+./bin/neutron-project-net --project admin --network-type $net_type -r provider-router $NS_ARG private $CIDR_PRIV
 # Create demo/testing users, tenants and flavor
 create_tempest_users
 
