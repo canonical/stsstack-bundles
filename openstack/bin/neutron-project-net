@@ -11,7 +11,7 @@ For example:
 
   %prog -p admin -r provider-router admin_net 10.5.5.0/24
 
-will create a new network for the admin tenant called 'admin_net' with a
+will create a new network for the admin project called 'admin_net' with a
 default gateway of 10.5.5.1 and a dhcp allocation range of
 10.5.5.2->10.5.5.254
 """
@@ -57,16 +57,16 @@ if __name__ == '__main__':
 
     conn = openstack.connect(envvars=True)
 
-    # Resolve tenant id
+    # Resolve project id
     project_id = conn.current_project_id
     if not project_id:
-        logging.error("Unable to locate project id for %s.", opts.tenant)
+        logging.error("Unable to locate project id for %s.", opts.project)
         sys.exit(1)
 
     # Create network
     networks = conn.list_networks(filters={'name': net_name})
     if len(networks) == 0:
-        logging.info('Creating tenant network: %s', net_name)
+        logging.info('Creating project network: %s', net_name)
         network_args = {
             'name': net_name,
             'shared': opts.shared,

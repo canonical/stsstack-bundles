@@ -319,10 +319,6 @@ do
                 MOD_OVERLAYS+=( "openstack/neutron-l3ha.yaml" )
             fi
             ;;
-        --keystone-v3)
-            # useful for <= pike since queens is v3 only
-            MOD_OVERLAYS+=( "openstack/keystone-v3.yaml" )
-            ;;
         --keystone-saml)
             assert_min_release rocky "keystone saml"
             MOD_OVERLAYS+=( "openstack/keystone-saml.yaml" )

@@ -24,9 +24,6 @@ admin_role=Admin
 region=RegionOne
 default_domain_id=__DEFAULT_DOMAIN_ID__
 admin_domain_scope=true
-[identity-feature-enabled]
-api_v2=false
-api_v3=true
 [image]
 catalog_type = image
 region=RegionOne

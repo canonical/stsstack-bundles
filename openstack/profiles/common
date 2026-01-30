@@ -94,7 +94,7 @@ function create_tempest_users {
     openstack role add --user alt_demo --project alt_demo member || :
 }
 
-function create_tempest_users_v3 {
+function create_tempest_users {
     # Create demo/testing users and projects
     create_roles
     openstack project show --domain admin_domain demo || {
@@ -144,19 +144,6 @@ function create_default_flavors {
     openstack flavor show m1.medium || openstack flavor create --id 4 --ram 4096  --disk 20 --vcpus 2 m1.medium
     openstack flavor show m1.large  || openstack flavor create --id 5 --ram 8192  --disk 20 --vcpus 4 m1.large
     openstack flavor show m1.xlarge || openstack flavor create --id 6 --ram 16384 --disk 20 --vcpus 8 m1.xlarge
-}
-
-function is_ksv3 () {
-    api_ver="$(juju config keystone preferred-api-version)"
-    rel="$(juju config keystone openstack-origin| sed -r 's/.+-(.+)/\1/g')"
-    rel="$(echo -e "$rel\nqueens"| sort| head -n 1)"
-    series=$(juju status keystone --format=json| jq .machines[].series| tr -d '"')
-    if [ "$api_ver" = "3" ] || [[ "${rel%%/*}" > "pike" ]] || \
-        { [[ "$series" > "artful" ]] && [[ "$series" < "trusty" ]]; }; then
-        return 0
-    else
-        return 1
-    fi
 }
 
 function heat_setup() {

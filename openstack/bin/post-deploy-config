@@ -5,14 +5,7 @@ import yaml
 import os
 import sys
 
-import novaclient
-
-from neutronclient.v2_0 import client as ne_client
-from novaclient import client as no_client
-
-import keystoneauth1.identity.v2 as keystoneauth1_v2
-import keystoneauth1.identity.v3 as keystoneauth1_v3
-import keystoneauth1.session as keystoneauth1_session
+import openstack
 
 
 def get_data_port_config(juju_version, service):
@@ -32,46 +25,18 @@ def get_data_port_config(juju_version, service):
 
 
 if __name__ == '__main__':
-    if os.environ.get('OS_AUTH_VERSION', '2') == '3':
-        auth = keystoneauth1_v3.Password(
-            username=os.environ['OS_USERNAME'],
-            user_domain_name=os.environ['OS_USER_DOMAIN_NAME'],
-            password=os.environ['OS_PASSWORD'],
-            project_name=os.environ['OS_PROJECT_NAME'],
-            project_domain_name=os.environ['OS_PROJECT_DOMAIN_NAME'],
-            auth_url=os.environ['OS_AUTH_URL'])
-    else:
-        auth = keystoneauth1_v2.Password(
-            username=os.environ['OS_USERNAME'],
-            password=os.environ['OS_PASSWORD'],
-            tenant_name=os.environ['OS_PROJECT_NAME'],
-            auth_url=os.environ['OS_AUTH_URL'])
-    if 'https' == os.environ.get('OS_AUTH_PROTOCOL') and os.environ.get('OS_CACERT'):
-        session = keystoneauth1_session.Session(auth=auth,
-            verify=os.environ['OS_CACERT'])
-    else:
-        session = keystoneauth1_session.Session(auth=auth)
+    conn = openstack.connect(load_envvars=True)
 
-    neutron = ne_client.Client(session=session,
-                               region_name=os.environ['OS_REGION_NAME'])
-    if novaclient.__version__[0] >= "7":
-        nova = no_client.Client('2', session=session,
-                                region_name=os.environ['OS_REGION_NAME'])
-    else:
-        nova = no_client.Client('2', session=session,
-                                region_name=os.environ['OS_REGION_NAME'])
-
-    net_id = os.environ.get('NET_ID')
-    net_name = None
+    net_id: str | None = os.environ.get('NET_ID')
+    net_name: str | None = None
     if net_id:
         # Use OSCI / Jenkins environment variable if defined.
         print('Using NET_ID environment variable: {}'.format(net_id))
-        try:
-            network = neutron.list_networks(id=net_id)['networks'][0]
-            net_name = network['name']
-        except IndexError:
-            print("Unable to find network with id: {}".format(net_id))
+        network = conn.get_network(net_id)
+        if network is None:
+            print('Unable to find network with id: {}'.format(net_id))
             raise ValueError('Unable to find network {}'.format(net_id))
+        net_name = network['name']
     else:
         # Preserve existing default behavior (eg. manual testing)
         net_name = os.environ.get('UNDERCLOUD_EXT_NET')
@@ -79,16 +44,13 @@ if __name__ == '__main__':
             net_name = os.environ['OS_USERNAME'] + '_admin_net'
 
         print('Using default network name: {}'.format(net_name))
-        try:
-            network = neutron.list_networks(name=net_name)['networks'][0]
-            net_id = network['id']
-        except IndexError:
+        network = conn.get_network(net_name)
+        if network is None:
             print('Unable to find local network {}'.format(net_name))
-            raise ValueError('Unable to find local network '
-                             '{}'.format(net_name))
+            raise ValueError('Unable to find local network {}'.format(net_name))
+        net_id = network['id']
 
-    exts = neutron.list_extensions()
-    ext_aliases = [item['alias'] for item in exts['extensions']]
+    ext_aliases = conn.get_network_extensions()
 
     service = sys.argv[1]
 
@@ -124,13 +86,14 @@ if __name__ == '__main__':
     config_ports = get_data_port_config(juju_version, service)
 
     for uuid in uuids:
-        print("Configuring interface for instance {}".format(uuid))
-        server = nova.servers.get(uuid)
+        print('Configuring interface for instance {}'.format(uuid))
+        server = conn.get_server(uuid)
 
         # Check how many interfaces have been attached to the instance
         # already to see if more are necessary.
-        attached_ports = neutron.list_ports(network_id=net_id,
-                                            device_id=uuid)['ports']
+        attached_ports = conn.search_ports(
+            name_or_id=net_id, filters={'device_id': uuid}
+        )
 
         data_port = None
         for port in attached_ports:
@@ -153,13 +116,19 @@ if __name__ == '__main__':
                 }
             }
 
+            extra_options = {}
             if 'port-security' in ext_aliases:
-                new_port['port']["port_security_enabled"] = False
+                extra_options['port_security_enabled'] = False
 
-            result = neutron.create_port(body=new_port)
-            result = server.interface_attach(port_id=result['port']['id'],
-                                             net_id=None,
-                                             fixed_ip=None).to_dict()
+            result = conn.create_port(
+                net_id,
+                name='data-port',
+                admin_state_up=True,
+                **extra_options,
+            )
+            result = conn.compute.create_server_interface(
+                server=server.id, port_id=result.id
+            )
             data_port = result['mac_addr']
         else:
             print("Using existing interface {} "
@@ -169,12 +138,7 @@ if __name__ == '__main__':
         if data_port not in ext_port:
             ext_port.append(data_port)
 
-    if juju_version == 1:
-        config_cmd = 'set'
-    else:
-        config_cmd = 'config'
-
     ports = " ".join(ext_port)
     print("Setting data-port configuration on {} to {}".format(service, ports))
-    subprocess.check_call(['juju', config_cmd, service,
+    subprocess.check_call(['juju', 'config', service,
                           'data-port={}'.format(ports)])
