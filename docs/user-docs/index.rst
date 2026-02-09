@@ -7,6 +7,7 @@ User Documentation
 
    usage
    openstack/index
+   kubernetes/index
    ceph/index
    osm/index
 
@@ -26,11 +27,19 @@ User Documentation
 
 .. grid:: 1 1 2 2
 
+   .. grid-item-card:: Kubernetes
+      :link: kubernetes/index
+      :link-type: doc
+
+      **Kubernetes** - how to deploy Kubernetes
+
    .. grid-item-card:: Ceph
       :link: ceph/index
       :link-type: doc
 
       **Ceph** - how to deploy Ceph
+
+.. grid:: 1 1 1 1
 
    .. grid-item-card:: OSM
       :link: osm/index

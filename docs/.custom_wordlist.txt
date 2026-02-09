@@ -30,11 +30,13 @@ Jira
 Kanban
 keycloak
 Keycloak
+kubectl
 lang
 LaTeX
 latexmk
 manila
 Manila
+Microk
 Multipass
 neutronclient
 oidc
