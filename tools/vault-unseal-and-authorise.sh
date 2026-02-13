@@ -1,25 +1,32 @@
-#!/bin/bash -ux
+#!/bin/bash
+
+set -e -u -x
 
 . $(dirname $0)/../common/juju_helpers
 
 which vault > /dev/null || sudo snap install vault
 which jq > /dev/null || sudo apt install -y jq
 
-model=`juju show-model --format=json| jq -r '.| keys[]'`
-model_uuid=`juju show-model --format=json| jq -r '.[]."model-uuid"'`
+model=$(juju show-model --format=json | jq -r '. | keys[]')
+model_uuid=$(juju show-model --format=json | jq -r '.[]."model-uuid"')
 unseal_output=~/unseal_output.$model
 
-ftmp=`mktemp`
+ftmp=$(mktemp)
 juju status --format=json vault > $ftmp
-readarray -t addrs<<<"`jq -r '.applications[].units[]?."public-address"' $ftmp 2>/dev/null`"
-leader="`jq -r '.applications[] | select(."charm-name"=="vault") | .units | to_entries[] | select(.value.leader==true) | .key' $ftmp 2>/dev/null`"
-leader_addr="`jq -r '.applications[]| select(."charm-name"=="vault") |.units | to_entries[] | select(.value.leader==true) | .value."public-address"' $ftmp 2>/dev/null`"
+readarray -t addrs <<<"$(jq -r '.applications[].units[]?."public-address"' $ftmp 2>/dev/null)"
+leader="$(jq -r '.applications[] | select(."charm-name"=="vault") | .units | to_entries[] | select(.value.leader==true) | .key' $ftmp 2>/dev/null)"
+leader_addr="$(jq -r '.applications[]| select(."charm-name"=="vault") |.units | to_entries[] | select(.value.leader==true) | .value."public-address"' $ftmp 2>/dev/null)"
 rm $ftmp
 
+if [[ -z $leader ]] || [[ -z $leader_addr ]]; then
+    echo "Cannot identify vault leader or leader address"
+    exit 1
+fi
+
 init=true
-if [ -r "$unseal_output" ] && [ "`head -n 1 $unseal_output`" = "$model_uuid" ] ; then
+if [[ -r "$unseal_output" ]] && [[ $(head -n 1 $unseal_output) == $model_uuid ]] ; then
     read -p "Unseal info file $unseal_output already exists - overwrite? [y/N]" answer
-    if [ -n "$answer" ] && [ "${answer,,}" = "y" ]; then
+    if [[ -n $answer ]] && [[ ${answer,,} == y ]]; then
         init=true
     else
         init=false
@@ -33,10 +40,10 @@ fi
 
 for addr in ${addrs[@]}; do
     export VAULT_ADDR="http://$addr:8200"
-    key1=`sed -r 's/Unseal Key 1: (.+)/\1/g;t;d' $unseal_output`
-    key2=`sed -r 's/Unseal Key 2: (.+)/\1/g;t;d' $unseal_output`
-    key3=`sed -r 's/Unseal Key 3: (.+)/\1/g;t;d' $unseal_output`
-    token=`sed -r 's/Initial Root Token: (.+)/\1/g;t;d' $unseal_output`
+    key1=$(sed -r 's/Unseal Key 1: (.+)/\1/g;t;d' $unseal_output)
+    key2=$(sed -r 's/Unseal Key 2: (.+)/\1/g;t;d' $unseal_output)
+    key3=$(sed -r 's/Unseal Key 3: (.+)/\1/g;t;d' $unseal_output)
+    token=$(sed -r 's/Initial Root Token: (.+)/\1/g;t;d' $unseal_output)
     vault operator unseal $key1
     vault operator unseal $key2
     vault operator unseal $key3
