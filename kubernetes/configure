@@ -3,6 +3,7 @@ which kubectl || sudo snap install kubectl --classic
 mkdir -p ~/.kube
 
 if ((`juju status --format=json| jq -r '.applications[]| select(."charm-name"=="k8s")'| wc -l`)); then
+    which yq || sudo snap install yq
     juju run k8s/0 get-kubeconfig| yq .kubeconfig > ~/.kube/config
 else
     kubecontrolplane_unit=$(juju status| sed -nr 's,(kubernetes-control-plane/[[:digit:]]+)\*.*,\1,p')
