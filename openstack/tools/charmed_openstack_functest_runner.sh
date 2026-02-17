@@ -314,7 +314,7 @@ if [[ -n $RERUN_PHASE ]]; then
     model=$(juju list-models| egrep -o "^zaza-\S+"|tr -d '*')
     echo "Re-running functest-$RERUN_PHASE (model=$model)"
     juju switch $model
-    ((${#FUNC_TEST_TARGET[@]}==1)) && bundle=${FUNC_TEST_TARGET[0]} || bundle=
+    [[ ${#FUNC_TEST_TARGET[@]}==1 ]] && bundle=${FUNC_TEST_TARGET[0]} || bundle=
     run_test_phase $RERUN_PHASE $model $bundle
     popd
 fi

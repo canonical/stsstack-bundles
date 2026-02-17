@@ -38,7 +38,8 @@ apply_func_test_pr ()
     # Similar to https://github.com/openstack-charmers/zosci-config/blob/master/roles/handle-func-test-pr/tasks/main.yaml#L19
     local pr_id=$1
     # We use the zosci-config tools to do this.
-    local msg=$(echo "Func-Test-Pr: https://github.com/openstack-charmers/zaza-openstack-tests/pull/$pr_id"| base64)
+    local msg
+    msg=$(echo "Func-Test-Pr: https://github.com/openstack-charmers/zaza-openstack-tests/pull/$pr_id"| base64)
     ~/zosci-config/roles/handle-func-test-pr/files/process_func_test_pr.py \
         -f './test-requirements*.txt' \
         -f './src/test-requirements*.txt' \
@@ -51,7 +52,8 @@ allocate_port ()
     #
     local net_name=$1
     local port_name=$2
-    local port_id=$(openstack port create --network $net_name $port_name -c id -f value)
+    local port_id
+    port_id=$(openstack port create --network $net_name $port_name -c id -f value)
     openstack port show -c fixed_ips $port_id -f yaml| yq .fixed_ips[0].ip_address
 }
 

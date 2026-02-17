@@ -7,16 +7,16 @@
 # This script expects your undercloud novarc to be found at ~/novarc .
 #
 application=${1:-""}
-(($#>1)) && network="$2" || network=""
-(($#>2)) && bridge="$3" || bridge="br-data"
+[[ $# -gt 1 ]] && network="$2" || network=""
+[[ $# -gt 2 ]] && bridge="$3" || bridge="br-data"
 
 declare -A requires=()
 
 # if no app name provided, assume neutron-openvswitch then ovn-chassis
 if [ -z "$application" ]; then
     for app in neutron-openvswitch ovn-chassis; do
-        count=`juju status --format=json| jq -r ".applications[]| select(.\"charm-name\"==\"$app\")"| wc -l`   
-        ((count==0)) && continue    
+        count=`juju status --format=json| jq -r ".applications[]| select(.\"charm-name\"==\"$app\")"| wc -l`
+        [[ $count -eq 0 ]] && continue
         application=$app
         break
     done
@@ -34,7 +34,7 @@ openstack port list --long --format json \
 readarray -t instances<<<"`juju status $application --format=json| jq -r '.machines[].\"instance-id\"'`"
 
 if [ "$application" = "ovn-chassis" ] && \
-        ((`juju status ovn-chassis --format=json 2>/dev/null| jq '.machines| length'`)); then
+        [[ `juju status ovn-chassis --format=json 2>/dev/null| jq '.machines| length'` -gt 0 ]]; then
     optname="bridge-interface-mappings"
 else
     optname="data-port"
@@ -48,7 +48,7 @@ for inst in "${instances[@]}"; do
         requires[$inst]=false
     else
         requires[$inst]=true
-        ((require_count+=1))
+        require_count=$((require_count + 1))
     fi
 done
 

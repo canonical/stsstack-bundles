@@ -57,7 +57,8 @@ can_ssh_connect() {
 
 guess_pub_key() {
     local ip_address="$1"
-    local priv_key="$(ssh -G "root@${ip_address}" |awk '/identityfile/ { print $2; exit }')"
+    local priv_key
+    priv_key="$(ssh -G "root@${ip_address}" |awk '/identityfile/ { print $2; exit }')"
     echo "${priv_key/%.priv}.pub"
 }
 
