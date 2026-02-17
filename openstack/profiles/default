@@ -89,14 +89,14 @@ if $(juju show-application manila &>/dev/null); then
     fi
     upload_image cloudimages manila-service-image $img_name &
 fi
-upload_image cloudimages focal focal-server-cloudimg-amd64.img &
 upload_image cloudimages jammy jammy-server-cloudimg-amd64.img &
+upload_image cloudimages noble noble-server-cloudimg-amd64.img &
 upload_image cirros cirros-0.4.0 0.4.0/cirros-0.4.0-x86_64-disk.img &
 wait
 
 # Set properties needed by octavia-disk-image-retrofit (See LP: #1842430)
-set_img_properties focal 20.04 focal-server-cloudimg-amd64.img &
 set_img_properties jammy 22.04 jammy-server-cloudimg-amd64.img &
+set_img_properties noble 24.04 noble-server-cloudimg-amd64.img &
 wait
 
 # TODO: remove fallbacks once we move to queens (they are there for clients still on ocata)
