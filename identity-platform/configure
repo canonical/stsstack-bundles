@@ -2,19 +2,19 @@
 
 # Reset
 if [[ "$1" == "reset" ]]; then
-	helm uninstall authentik -n authentik
-	kubectl delete pvc -n authentik data-authentik-postgresql-0 redis-data-authentik-redis-master-0
+    helm uninstall authentik -n authentik
+    kubectl delete pvc -n authentik data-authentik-postgresql-0 redis-data-authentik-redis-master-0
 fi
 
 # Check for kratos-external-idp-integrator
 if [ "$(juju status --format json| jq -r '.applications["kratos-external-idp-integrator"].units|to_entries[]|select(.value["leader"])|.key' 2> /dev/null)" == "" ]; then
-		echo 'ERROR: Cannot configure OIDC without kratos-external-idp-integrator!'
-		exit 1
+    echo 'ERROR: Cannot configure OIDC without kratos-external-idp-integrator!'
+    exit 1
 fi
 
 # Install Helm
 if ! snap list | grep -q helm; then
-		sudo snap install helm --classic
+    sudo snap install helm --classic
 fi
 
 # Install authentik
@@ -27,13 +27,13 @@ timeout=0
 echo 'Waiting for Authentik to start...'
 up=0
 while [[ "$up" != 1 ]]; do
-	up="$(kubectl get deploy -n authentik authentik-server -o json | jq '.status.readyReplicas')"
-	if [[ $timeout == 600 ]]; then
-		echo 'ERROR: Authentik failed to start.'
-		exit 1
-	fi
-	sleep 1
-	((timeout++))
+    up="$(kubectl get deploy -n authentik authentik-server -o json | jq '.status.readyReplicas')"
+    if [[ $timeout == 600 ]]; then
+        echo 'ERROR: Authentik failed to start.'
+        exit 1
+    fi
+    sleep 1
+    timeout=$((timeout + 1))
 done
 
 # Prepare port for API calls and wait
@@ -43,11 +43,21 @@ AUTH_IP=$(kubectl get po -n authentik -o json | jq -r '.items[] | select(.metada
 
 # Configure OIDC
 ## get default values
-until [ -n "$AUTH_FLOW" ]; do AUTH_FLOW=$(curl -s -X GET -H "accept: application/json" -H "Authorization: Bearer my-secure-bootstrap-token" "http://${AUTH_IP}:${AUTH_PORT}/api/v3/flows/instances/?search=default-authentication-flow" | jq -r '.results[0].pk'); done
-until [ -n "$AUTHZ_FLOW" ]; do AUTHZ_FLOW=$(curl -s -X GET -H "accept: application/json" -H "Authorization: Bearer my-secure-bootstrap-token" "http://${AUTH_IP}:${AUTH_PORT}/api/v3/flows/instances/?search=default-provider-authorization-implicit-consent" | jq -r '.results[0].pk'); done
-until [ -n "$INVALID_FLOW" ]; do INVALID_FLOW=$(curl -s -X GET -H "accept: application/json" -H "Authorization: Bearer my-secure-bootstrap-token" "http://${AUTH_IP}:${AUTH_PORT}/api/v3/flows/instances/?search=default-invalidation-flow" | jq -r '.results[0].pk'); done
-until [ -n "$SIGN_KEY" ]; do SIGN_KEY=$(curl -s -X GET -H "accept: application/json" -H "Authorization: Bearer my-secure-bootstrap-token" "http://${AUTH_IP}:${AUTH_PORT}/api/v3/crypto/certificatekeypairs/" | jq -r '.results[0].pk'); done
-until [ -n "$SCOPE" ]; do SCOPE=$(curl -s -X GET -H "accept: application/json" -H "Authorization: Bearer my-secure-bootstrap-token" "http://${AUTH_IP}:${AUTH_PORT}/api/v3/propertymappings/provider/scope/?search=email" | jq -r '.results[0].pk'); done
+until [ -n "$AUTH_FLOW" ]; do
+    AUTH_FLOW=$(curl -s -X GET -H "accept: application/json" -H "Authorization: Bearer my-secure-bootstrap-token" "http://${AUTH_IP}:${AUTH_PORT}/api/v3/flows/instances/?search=default-authentication-flow" | jq -r '.results[0].pk')
+done
+until [ -n "$AUTHZ_FLOW" ]; do
+    AUTHZ_FLOW=$(curl -s -X GET -H "accept: application/json" -H "Authorization: Bearer my-secure-bootstrap-token" "http://${AUTH_IP}:${AUTH_PORT}/api/v3/flows/instances/?search=default-provider-authorization-implicit-consent" | jq -r '.results[0].pk')
+done
+until [ -n "$INVALID_FLOW" ]; do
+    INVALID_FLOW=$(curl -s -X GET -H "accept: application/json" -H "Authorization: Bearer my-secure-bootstrap-token" "http://${AUTH_IP}:${AUTH_PORT}/api/v3/flows/instances/?search=default-invalidation-flow" | jq -r '.results[0].pk')
+done
+until [ -n "$SIGN_KEY" ]; do
+    SIGN_KEY=$(curl -s -X GET -H "accept: application/json" -H "Authorization: Bearer my-secure-bootstrap-token" "http://${AUTH_IP}:${AUTH_PORT}/api/v3/crypto/certificatekeypairs/" | jq -r '.results[0].pk')
+done
+until [ -n "$SCOPE" ]; do
+    SCOPE=$(curl -s -X GET -H "accept: application/json" -H "Authorization: Bearer my-secure-bootstrap-token" "http://${AUTH_IP}:${AUTH_PORT}/api/v3/propertymappings/provider/scope/?search=email" | jq -r '.results[0].pk')
+done
 
 ## create provider
 curl -X POST "http://${AUTH_IP}:${AUTH_PORT}/api/v3/providers/oauth2/" -H "Authorization: Bearer my-secure-bootstrap-token" -H "accept: application/json" -H "content-type: application/json" -d "{\"name\":\"oidc-provider\",\"authentication_flow\":\"$AUTH_FLOW\",\"authorization_flow\":\"$AUTHZ_FLOW\",\"invalidation_flow\":\"$INVALID_FLOW\",\"client_type\":\"confidential\",\"client_id\":\"canonical-support\",\"client_secret\":\"my-secure-oidc-secret\",\"access_code_validity\":\"hours=3\",\"access_token_validity\":\"hours=3\",\"refresh_token_validity\":\"hours=3\",\"include_claims_in_id_token\":true,\"redirect_uris\":\"*\",\"sub_mode\":\"hashed_user_id\",\"issuer_mode\":\"per_provider\",\"signing_key\":\"$SIGN_KEY\",\"property_mappings\":[\"$SCOPE\"]}"
@@ -70,5 +80,5 @@ Password: Passw0rd"
 
 grafana_url="$(juju run grafana/0 get-admin-password 2> /dev/null | grep url | sed -e 's/url: //')"
 if [[ -n $grafana_url ]]; then
-	echo "Grafana Dashboard: $grafana_url"
+    echo "Grafana Dashboard: $grafana_url"
 fi

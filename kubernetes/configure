@@ -8,7 +8,7 @@ if ((`juju status --format=json| jq -r '.applications[]| select(."charm-name"=="
 else
     kubecontrolplane_unit=$(juju status| sed -nr 's,(kubernetes-control-plane/[[:digit:]]+)\*.*,\1,p')
     ftmp=`mktemp -p .`
-    juju scp ${kubecontrolplane_unit}:config $ftmp 
+    juju scp ${kubecontrolplane_unit}:config $ftmp
     mv ./$ftmp ~/.kube/config
 fi
 
