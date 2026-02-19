@@ -1,4 +1,7 @@
 #!/bin/bash
+# This script can be sourced from both Bash and Zsh shells.
+# When updating please make sure not to use either Bash
+# or Zsh specific features!
 
 set -euo pipefail
 
@@ -6,7 +9,7 @@ juju_status_json_cache=$(mktemp)
 cleanup() { rm "$juju_status_json_cache"; }
 trap cleanup EXIT
 
-scriptdir=$(readlink --canonicalize "$(dirname "${BASH_SOURCE[0]}")")
+scriptdir=$(readlink --canonicalize "$(dirname "${BASH_SOURCE[0]-$0}")")
 
 # cache juju status
 juju status --format=json >|"$juju_status_json_cache"
@@ -27,7 +30,7 @@ if [[ -n "$(juju config keystone ssl_cert)" ]]; then
 elif (($(jq -r '.applications[]| select(."charm-name"=="vault")' "$juju_status_json_cache" | wc -l))); then
     # Vault-based ssl
     if jq -r '.applications.vault.relations.certificates[]' "$juju_status_json_cache" | grep -q keystone; then
-        readarray -t VAULT_STATUS < <(juju status vault --format=json | jq -r '.applications.vault.units."vault/0"."workload-status" | .current,.message')
+        VAULT_STATUS=( $(juju status vault --format=json | jq -r '.applications.vault.units."vault/0"."workload-status" | .current,.message') )
         if [[ "${VAULT_STATUS[0]}" == "blocked" && "${VAULT_STATUS[1]}" == "Vault needs to be initialized" ]]; then
             read -p "$(
                 cat <<-END
@@ -62,7 +65,7 @@ unset _OS_PARAMS
 # If user was specified use it
 if [[ $# -gt 1 && $1 = --service ]]; then
     RELATION_ID=$(juju exec --unit "$2/leader" -- relation-ids identity-service | cut -d : -f 2)
-    readarray -t CREDENTIALS < <(juju exec --unit "$2/leader" -- relation-get --relation "${RELATION_ID}" --format json - keystone/0)
+    CREDENTIALS=( $(juju run --unit "$2/leader" -- relation-get --relation "${RELATION_ID}" --format json - keystone/0) )
 
     export OS_USERNAME=$(echo "${CREDENTIALS[0]}" | jq --raw-output .service_username)
     export OS_USER_DOMAIN_NAME=$(echo "${CREDENTIALS[0]}" | jq --raw-output .service_domain)
