@@ -83,9 +83,15 @@ if ! is_hyperconverged; then
 fi
 
 # Automatically use proxy if in prodstack only
-if $(timeout 1s getent hosts squid.internal &> /dev/null) && [ -z "${MOD_PARAMS[__CONTAINERD_PROXY__]}" ]; then
-    MOD_MSGS[1_proxy.0]='PROXY: Hostname squid.internal resolves, setting containerd proxy to http://squid.internal:3128'
-    MOD_PARAMS[__CONTAINERD_PROXY__]=http://squid.internal:3128
+if $(timeout 1s getent hosts squid.internal &> /dev/null); then
+    if has_opt --cdk && [ -z "${MOD_PARAMS[__CONTAINERD_PROXY__]}" ]; then
+        MOD_MSGS[1_proxy.0]='PROXY: Hostname squid.internal resolves, setting containerd proxy to http://squid.internal:3128'
+        MOD_PARAMS[__CONTAINERD_PROXY__]=http://squid.internal:3128
+    else
+        MOD_MSGS[1_proxy.0]='PROXY: Hostname squid.internal resolves, setting juju proxy to http://squid.internal:3128'
+        # from https://documentation.ubuntu.com/canonical-kubernetes/latest/charm/howto/proxy
+        juju model-config juju-http-proxy=http://squid.internal:3128 juju-https-proxy=http://squid.internal:3128 juju-no-proxy="${MOD_PARAMS[__CONTAINERD_NO_PROXY__]}"
+    fi
 fi
 
 # Skip processing input if it includes exclusive passthrough options
@@ -138,7 +144,7 @@ do
             MOD_PARAMS[__CONTAINERD_PROXY__]=$2
             shift
             ;;
-        --containerd-no-proxy)  #__OPT__type:<str> (default=127.0.0.1,localhost,::1,10.149.0.0/16,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16)
+        --containerd-no-proxy)  #__OPT__type:<str> (default=127.0.0.1,localhost,::1,10.149.0.0/16,10.152.183.0/24,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16)
             MOD_PARAMS[__CONTAINERD_NO_PROXY__]=$2
             shift
             ;;
