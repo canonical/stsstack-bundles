@@ -1,6 +1,6 @@
 # This is a templated file and must be kept up-to-date with the original
 # from upstream at https://github.com/canonical/se-tooling-ci-common.
 bashate
-flake8==6.1.0
-flake8-import-order==0.18.2
+flake8==7.3.0
+flake8-import-order==0.19.2
 pylint==3.1.0

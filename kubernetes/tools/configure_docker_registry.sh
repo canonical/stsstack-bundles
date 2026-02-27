@@ -17,7 +17,7 @@ images=`kubectl get po --all-namespaces -o json | jq '.items[].spec.containers[]
 # Upload the identified images from current image-registry to new private docker-registry
 # TODO: check if this functionality can be replaced with images specified at
 # https://github.com/charmed-kubernetes/bundle/blob/master/container-images.txt
-for image in ${images}; do 
+for image in ${images}; do
     tag=${image/$old_image_registry/$registry};
     juju $JUJU_RUN_CMD docker-registry/0 push image=$image tag=$tag
 done
