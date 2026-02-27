@@ -1,7 +1,10 @@
 #!/bin/bash -eu
+# This script can be sourced from both Bash and Zsh shells.
+# When updating please make sure not to use either Bash
+# or Zsh specific features!
 
 # NOTE(raineszm): This is written to work in both bash and
 # zsh. Thanks, @wilkmar.
-scriptdir="$(readlink --canonicalize $(dirname ${BASH_SOURCE:-0}))"
+scriptdir="$(readlink --canonicalize $(dirname ${BASH_SOURCE[0]-$0}))"
 
 source <("${scriptdir}/tools/construct_novarc.sh" "$@")
