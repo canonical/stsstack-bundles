@@ -83,7 +83,7 @@ if ! is_hyperconverged; then
 fi
 
 # Automatically use proxy if in prodstack only
-if [[ -z $http_proxy ]]; then
+if [[ -z ${http_proxy:-""} ]]; then
     if $(timeout 1s nc -vz egress.ps7.internal 3128 &> /dev/null); then
         proxy=http://egress.ps7.internal:3128  # ps7
     elif $(timeout 1s nc -vz squid.internal 3128 &> /dev/null); then
@@ -93,13 +93,13 @@ else
     proxy=$http_proxy
 fi
 
-if [[ -z $no_proxy ]]; then
+if [[ -z ${no_proxy:-""} ]]; then
     _no_proxy=${MOD_PARAMS[__CONTAINERD_NO_PROXY__]}
 else
     _no_proxy=$no_proxy
 fi
 
-if [[ -n $proxy ]] then
+if [[ -n $proxy ]]; then
     if has_opt --cdk && [[ -z $_no_proxy ]]; then
         MOD_MSGS[1_proxy.0]='PROXY: Hostname ${proxy} resolves, setting containerd proxy to $proxy'
         MOD_PARAMS[__CONTAINERD_PROXY__]=$proxy
