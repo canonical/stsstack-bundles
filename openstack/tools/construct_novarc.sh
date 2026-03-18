@@ -24,9 +24,9 @@ fi
 # check config-based ssl first
 if [[ -n "$(juju config keystone ssl_cert)" ]]; then
     export OS_AUTH_PROTOCOL=https
-elif (($(jq -r '.applications[]| select(."charm-name"=="vault")' "$juju_status_json_cache" | wc -l))); then
+elif (($(jq -r '(.applications // {})[]| select(."charm-name"=="vault")' "$juju_status_json_cache" | wc -l))); then
     # Vault-based ssl
-    if jq -r '.applications.vault.relations.certificates[]' "$juju_status_json_cache" | grep -q keystone; then
+    if jq -r '(.applications.vault.relations.certificates // [])[]' "$juju_status_json_cache" | grep -q keystone; then
         readarray -t VAULT_STATUS < <(juju status vault --format=json | jq -r '.applications.vault.units."vault/0"."workload-status" | .current,.message')
         if [[ "${VAULT_STATUS[0]}" == "blocked" && "${VAULT_STATUS[1]}" == "Vault needs to be initialized" ]]; then
             read -p "$(
