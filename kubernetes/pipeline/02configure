@@ -83,28 +83,35 @@ if ! is_hyperconverged; then
 fi
 
 # Automatically use proxy if in prodstack only
+proxy=${http_proxy:-""}
 if [[ -z ${http_proxy:-""} ]]; then
     if $(timeout 1s nc -vz egress.ps7.internal 3128 &> /dev/null); then
         proxy=http://egress.ps7.internal:3128  # ps7
     elif $(timeout 1s nc -vz squid.internal 3128 &> /dev/null); then
         proxy=http://squid.internal:3128  # ps6
     fi
-else
-    proxy=$http_proxy
 fi
 
+_no_proxy=${no_proxy:-""}
+# NOTE: we add in the default k8s service-cidr=10.152.183.0/24
+k8s_service_cidr=10.152.183.0/24
 if [[ -z ${no_proxy:-""} ]]; then
-    _no_proxy=${MOD_PARAMS[__CONTAINERD_NO_PROXY__]}
+    _no_proxy=${MOD_PARAMS[__CONTAINERD_NO_PROXY__]},$k8s_service_cidr
 else
-    _no_proxy=$no_proxy
+    MOD_PARAMS[__CONTAINERD_NO_PROXY__]=127.0.0.1,localhost,::1,${_no_proxy},$k8s_service_cidr
+fi
+
+if ! $(juju model-config juju-no-proxy| grep -q $k8s_service_cidr); then
+    model_no_proxy=$(juju model-config juju-no-proxy)
+    juju model-config juju-no-proxy=${model_no_proxy},$k8s_service_cidr
 fi
 
 if [[ -n $proxy ]]; then
-    if has_opt --cdk && [[ -z $_no_proxy ]]; then
-        MOD_MSGS[1_proxy.0]='PROXY: Hostname ${proxy} resolves, setting containerd proxy to $proxy'
+    if has_opt --cdk; then
+        MOD_MSGS[1_proxy.0]="PROXY: Hostname ${proxy} resolves, setting containerd proxy to $proxy"
         MOD_PARAMS[__CONTAINERD_PROXY__]=$proxy
     else
-        MOD_MSGS[1_proxy.0]='PROXY: Hostname $proxy resolves, setting juju proxy to $proxy'
+        MOD_MSGS[1_proxy.0]="PROXY: Hostname $proxy resolves, setting juju proxy to $proxy"
         # from https://documentation.ubuntu.com/canonical-kubernetes/latest/charm/howto/proxy
         juju model-config juju-http-proxy=$proxy juju-https-proxy=$proxy juju-no-proxy="$_no_proxy"
     fi
