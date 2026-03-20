@@ -2,5 +2,7 @@ applications:
   openstack-integrator:
     charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__openstack-integrator
     num_units: 1
+    options:
+      web-proxy-enable: true
 relations:
   - [ 'openstack-integrator:clients',  'openstack-cloud-controller:openstack']

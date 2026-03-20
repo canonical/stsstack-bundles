@@ -1,6 +1,8 @@
 applications:
   openstack-cloud-controller:
     charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__openstack-cloud-controller
+    options:
+      web-proxy-enable: true
 relations:
   - [openstack-cloud-controller:certificates,            easyrsa:client]
   - [openstack-cloud-controller:kube-control,            __K8S_CONTROLLER_CHARM__:kube-control]
