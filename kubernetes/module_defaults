@@ -7,7 +7,7 @@
 #
 
 # NOTE: this should be updated each a new version is released.
-MOD_PARAMS[__K8S_CHANNEL__]="1.32/stable"
+MOD_PARAMS[__K8S_CHANNEL__]="1.35/stable"
 MOD_PARAMS[__K8S_CONTROLLER_CHARM__]="k8s"  # default to canonical k8s
 MOD_PARAMS[__K8S_WORKER_CHARM__]="k8s-worker"  # default to canonical k8s
 MOD_PARAMS[__NUM_ETCD_UNITS__]=1
