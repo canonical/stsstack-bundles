@@ -131,6 +131,9 @@ do
             # Deploying CDK as opposed to Canonical K8s
             ;;
         --ceph)
+            if ((MOD_PARAMS[__NUM_K8S_WORKER_UNITS__]<3)); then
+                MOD_PARAMS[__NUM_K8S_WORKER_UNITS__]=3
+            fi
             conflicts_with $1 --rook-ceph
             MOD_OVERLAYS+=( "ceph/ceph.yaml" )
             MOD_OVERLAYS+=( "ceph/ceph-juju-storage.yaml" )
