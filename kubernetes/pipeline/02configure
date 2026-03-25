@@ -108,12 +108,12 @@ fi
 
 if [[ -n $proxy ]]; then
     if has_opt --cdk; then
-        MOD_MSGS[1_proxy.0]="PROXY: Hostname ${proxy} resolves, setting containerd proxy to $proxy"
+        MOD_MSGS[1_proxy.0]="proxy: hostname $proxy resolves, setting containerd proxy to $proxy"
         MOD_PARAMS[__CONTAINERD_PROXY__]=$proxy
     else
-        MOD_MSGS[1_proxy.0]="PROXY: Hostname $proxy resolves, setting juju proxy to $proxy"
+        MOD_MSGS[1_proxy.0]="proxy: hostname $proxy resolves, setting juju proxy to $proxy"
         # from https://documentation.ubuntu.com/canonical-kubernetes/latest/charm/howto/proxy
-        juju model-config juju-http-proxy=$proxy juju-https-proxy=$proxy juju-no-proxy="$_no_proxy"
+        juju model-config juju-http-proxy=$proxy juju-https-proxy=$proxy
     fi
 fi
 
@@ -137,8 +137,12 @@ do
             conflicts_with $1 --rook-ceph
             MOD_OVERLAYS+=( "ceph/ceph.yaml" )
             MOD_OVERLAYS+=( "ceph/ceph-juju-storage.yaml" )
-            MOD_OVERLAYS+=( "kubernetes/k8s-ceph.yaml" )
-            MOD_OVERLAYS+=( "kubernetes/k8s-ceph-csi.yaml" )
+            if has_opt --cdk; then
+                MOD_OVERLAYS+=( "kubernetes/k8s-ceph.yaml" )
+                MOD_OVERLAYS+=( "kubernetes/k8s-ceph-csi.yaml" )
+            else
+                MOD_OVERLAYS+=( "kubernetes/canonical-k8s-ceph-csi.yaml" )
+            fi
             ;;
         --ceph-proxy)
             MOD_PARAMS[__CEPH_INTERFACE__]='ceph-proxy'

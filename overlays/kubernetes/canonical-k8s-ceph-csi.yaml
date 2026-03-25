@@ -1,0 +1,9 @@
+applications:
+  ceph-csi:
+    charm: ceph-csi
+    channel: stable
+
+relations:
+  - [ '__K8S_CONTROLLER_CHARM__:juju-info', 'ceph-csi:kubernetes' ]
+  - [ 'ceph-csi:ceph-client', 'ceph-mon:client']
+
