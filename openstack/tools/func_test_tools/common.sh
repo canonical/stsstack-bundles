@@ -66,7 +66,7 @@ create_zaza_vip ()
     local vip_id=$1
     # We use the same naming convention as ../tools/allocate_vips.sh to avoid conflicts and re-use
     # those vips.
-    vip_port_name=ps6-vip-ip$vip_id
+    vip_port_name=ps-vip-ip$vip_id
     vip_addr=$(openstack port show -c fixed_ips $vip_port_name -f yaml| yq .fixed_ips[0].ip_address)
     if [[ $vip_addr = null ]]; then
         # Pre-allocate ports with addresses used for VIPs so that they don't

@@ -19,6 +19,6 @@ j=1
 for i in $(seq ${vip_start_suffix} ${net_end}); do
     echo openstack port create --network net_${OS_USERNAME}-psd \
         --fixed-ip subnet=subnet_${OS_USERNAME}-psd,ip-address=${net_pre}.$i \
-        --disable --os-cloud ps6 ps6-vip-ip$( printf "%02d" $j )
+        --disable ps-vip-ip$( printf "%02d" $j )
     j=$((j+1))
 done
