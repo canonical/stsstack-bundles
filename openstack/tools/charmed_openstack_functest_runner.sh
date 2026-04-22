@@ -259,6 +259,16 @@ elif [[ -n $REMOTE_BUILD ]]; then
     rsync -vza $REMOTE_BUILD_DESTINATION:$REMOTE_BUILD_PATH/*.charm .
 fi
 
+# If rename.sh has been removed from the charm repo, rename the built
+# artifact here (same as rename.sh would have done). Only applies when a
+# fresh build was produced locally or via --remote-build.
+if { ! $SKIP_BUILD || [[ -n $REMOTE_BUILD ]]; } && [[ ! -f rename.sh ]] \
+        && compgen -G "${CHARM_NAME}_*.charm" >/dev/null; then
+    echo "rename.sh not found; renaming ${CHARM_NAME}_*.charm -> ${CHARM_NAME}.charm"
+    rm -f "${CHARM_NAME}.charm"
+    mv "${CHARM_NAME}"_*.charm "${CHARM_NAME}.charm"
+fi
+
 # 3. Run functional tests.
 
 # If a func test pr is provided switch to that pr.
