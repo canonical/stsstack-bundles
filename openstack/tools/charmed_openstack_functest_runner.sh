@@ -63,6 +63,8 @@ OPTIONS:
         enough capacity to boot the vms required by the tests.
     --sleep TIME_SECS
         Specify amount of seconds to sleep between functest steps.
+    --debug
+        Run with debug (-x) enabled.
     --help
         This help message.
 EOF
@@ -143,6 +145,10 @@ while (($# > 0)); do
             set -x
             ;;
         --func-test-target)
+            if [[ $# < 2 ]]; then
+                echo "ERROR: '$1' requires argument"
+                exit 1
+            fi
             FUNC_TEST_TARGET+=( $2 )
             shift
             ;;
@@ -157,11 +163,19 @@ while (($# > 0)); do
             WAIT_ON_DESTROY=false
             ;;
         --remote-build)
+            if [[ $# < 2 ]]; then
+                echo "ERROR: '$1' requires argument"
+                exit 1
+            fi
             REMOTE_BUILD=$2
             SKIP_BUILD=true
             shift
             ;;
         --rerun)
+            if [[ $# < 2 ]]; then
+                echo "ERROR: '$1' requires argument"
+                exit 1
+            fi
             RERUN_PHASE=$2
             [[ $2 = deploy ]] || [[ $2 = configure ]] || [[ $2 = test ]] || opt_error $1 $2
             shift
@@ -173,6 +187,10 @@ while (($# > 0)); do
             SKIP_BUILD=true
             ;;
         --sleep)
+            if [[ $# < 2 ]]; then
+                echo "ERROR: '$1' requires argument"
+                exit 1
+            fi
             SLEEP=$2
             shift
             ;;
