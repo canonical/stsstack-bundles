@@ -244,7 +244,13 @@ LOGFILE=$(mktemp --suffix=-charm-func-test-results)
 if ! $SKIP_BUILD; then
     # default value is 1.5/stable, assumed that later charm likely have charmcraft_channel value
     CHARMCRAFT_CHANNEL=$(grep charmcraft_channel osci.yaml | sed -r 's/.+:\s+(\S+)/\1/')
-    sudo snap refresh charmcraft --channel ${CHARMCRAFT_CHANNEL:-"1.5/stable"}
+    if [[ -n $CHARMCRAFT_CHANNEL ]]; then
+        sudo snap refresh charmcraft --channel $CHARMCRAFT_CHANNEL
+    else
+        echo "No charmcraft version info found (osci.yaml) - skipping charmcraft refresh"
+    fi
+
+    echo "Using charmcraft version $(snap info charmcraft| sed -rn 's/^installed:\s+(\S+)\s+.+/\1/p')"
 
     # ensure lxc initialised
     lxd init --auto || true
