@@ -322,7 +322,7 @@ if [[ -n $RERUN_PHASE ]]; then
     juju switch $model
     [[ ${#FUNC_TEST_TARGET[@]}==1 ]] && bundle=${FUNC_TEST_TARGET[0]} || bundle=
     run_test_phase $RERUN_PHASE $model $bundle
-    popd
+    popd &>/dev/null || true
 fi
 
 first=true
