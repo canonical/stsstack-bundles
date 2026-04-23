@@ -296,6 +296,11 @@ else
     done
 fi
 
+if [[ -n $RERUN_PHASE ]] && ! ((${#FUNC_TEST_TARGET[@]}==1)); then
+    echo "ERROR: please provide a single --func-test-target to use with --rerun"
+    exit 1
+fi
+
 # Ensure nova-compute has enough resources to create vms in tests. Not all
 # charms have bundles with constraints set so we need to cover both cases here.
 if $MODIFY_BUNDLE_CONSTRAINTS; then
@@ -320,8 +325,14 @@ if [[ -n $RERUN_PHASE ]]; then
     model=$(juju list-models| egrep -o "^zaza-\S+"|tr -d '*')
     echo "Re-running functest-$RERUN_PHASE (model=$model)"
     juju switch $model
-    [[ ${#FUNC_TEST_TARGET[@]}==1 ]] && bundle=${FUNC_TEST_TARGET[0]} || bundle=
-    run_test_phase $RERUN_PHASE $model $bundle
+    (( ${#FUNC_TEST_TARGET[@]}==1 )) && bundle=${FUNC_TEST_TARGET[0]} || bundle=
+    run_test_phase $RERUN_PHASE $model $bundle || fail=true
+    target=${FUNC_TEST_TARGET[0]}
+    if $fail; then
+        func_target_state[$target]='fail'
+    else
+        func_target_state[$target]='success'
+    fi
     popd &>/dev/null || true
 fi
 
@@ -369,22 +380,24 @@ for target in ${func_target_order[@]}; do
 done
 popd &>/dev/null || true
 
-# Report results
-echo -e "\nTest results for charm $CHARM_NAME functional tests @ commit $COMMIT_ID:"
-for target in ${func_target_order[@]}; do
-    if $(python3 $TOOLS_PATH/test_is_voting.py $target); then
-        voting_info=""
-    else
-        voting_info=" (non-voting)"
-    fi
+if [[ -z $RERUN_PHASE ]] || [[ $RERUN_PHASE = 'test' ]]; then
+    # Report results
+    echo -e "\nTest results for charm $CHARM_NAME functional tests @ commit $COMMIT_ID:"
+    for target in ${func_target_order[@]}; do
+        if $(python3 $TOOLS_PATH/test_is_voting.py $target); then
+            voting_info=""
+        else
+            voting_info=" (non-voting)"
+        fi
 
-    if [[ ${func_target_state[$target]} = null ]]; then
-        echo "  * $target: SKIPPED$voting_info"
-    elif [[ ${func_target_state[$target]} = success ]]; then
-        echo "  * $target: SUCCESS$voting_info"
-    else
-        echo "  * $target: FAILURE$voting_info"
-    fi
-done
+        if [[ ${func_target_state[$target]} = null ]]; then
+            echo "  * $target: SKIPPED$voting_info"
+        elif [[ ${func_target_state[$target]} = success ]]; then
+            echo "  * $target: SUCCESS$voting_info"
+        else
+            echo "  * $target: FAILURE$voting_info"
+        fi
+    done
+fi
 ) 2>&1 | tee $LOGFILE
 echo -e "\nResults also saved to $LOGFILE"
