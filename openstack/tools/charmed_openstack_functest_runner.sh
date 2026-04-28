@@ -218,6 +218,11 @@ for ((i=2;i;i-=1)); do
     export {OS,TEST}_VIP0$((i-1))=$(create_zaza_vip 0$i)
 done
 
+# The following is needed in clouds that need to have the proxy set in order to reach external sites.
+for ps in http_proxy https_proxy no_proxy; do
+    export TEST_${ps^^}=${!ps:-""}
+done
+
 # More information on config https://github.com/openstack-charmers/zaza/blob/master/doc/source/runningcharmtests.rst
 export {,TEST_}NET_ID=$(openstack network show net_${OS_USERNAME}-psd-extra -f value -c id)
 export {,TEST_}FIP_RANGE=$FIP_MIN:$FIP_MAX
