@@ -227,7 +227,7 @@ done
 export {,TEST_}NET_ID=$(openstack network show net_${OS_USERNAME}-psd-extra -f value -c id)
 export {,TEST_}FIP_RANGE=$FIP_MIN:$FIP_MAX
 export {,TEST_}GATEWAY=$(openstack subnet show subnet_${OS_USERNAME}-psd-extra -c gateway_ip -f value)
-export {,TEST_}NAME_SERVER=91.189.91.131
+export {,TEST_}NAME_SERVER=$(resolvectl dns| egrep -o '([0-9]{1,3}\.?){4}'| head -n 1)
 export {,TEST_}CIDR_PRIV=192.168.21.0/24
 #export SWIFT_IP=10.140.56.22
 export TEST_MODEL_SETTINGS="image-stream=released;default-series=jammy;test-mode=true;transmit-vendor-metrics=false"
