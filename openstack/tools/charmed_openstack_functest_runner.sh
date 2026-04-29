@@ -127,7 +127,10 @@ EOF
                     [[ $phase == deploy ]] && phase=configure || phase=test
                 fi
             done
-        ;;
+            ;;
+        exit)
+            return
+            ;;
         *)
             echo "ERROR: unrecognised phase name '$phase'"
             exit 1
