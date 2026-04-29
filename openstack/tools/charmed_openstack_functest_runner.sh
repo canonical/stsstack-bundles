@@ -303,6 +303,8 @@ fi
 
 if [[ -n $RERUN_PHASE ]] && ! ((${#FUNC_TEST_TARGET[@]}==1)); then
     echo "ERROR: please provide a single --func-test-target to use with --rerun"
+    echo -e "\nAvailable targets are: $(python3 $TOOLS_PATH/identify_charm_func_test_jobs.py)"
+    echo "NOTE: you must use the current target being executed and this would be printed towards the start of the run."
     exit 1
 fi
 
