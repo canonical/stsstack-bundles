@@ -216,6 +216,14 @@ FIP_MIN_ABC=${FIP_MIN%.*}
 FIP_MIN_D=${FIP_MIN##*.}
 FIP_MIN=${FIP_MIN_ABC}.$(($FIP_MIN_D + 64))
 
+if [[ -n $http_proxy ]]; then
+    if [[ -n $no_proxy ]]; then
+        export no_proxy=$no_proxy,$CIDR_EXT
+    else
+        export no_proxy=$CIDR_EXT
+    fi
+fi
+
 # Setup vips needed by zaza tests.
 for ((i=2;i;i-=1)); do
     export {OS,TEST}_VIP0$((i-1))=$(create_zaza_vip 0$i)
