@@ -133,6 +133,8 @@ do
     shift
 done
 
+MOD_PARAMS[__EXPECTED_OSD_COUNT__]=$(( MOD_PARAMS[__NUM_CEPH_OSD_UNITS__] * MOD_PARAMS[__NUM_OSDS_PER_HOST__] ))
+
 app_release_name=`get_app_release_name "$release"`
 target=${series}-${release}
 [ -z "$pocket" ] || target=${target}-$pocket

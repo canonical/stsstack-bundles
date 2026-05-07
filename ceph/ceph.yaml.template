@@ -7,6 +7,7 @@
 loglevel:                   &loglevel                  1
 source:                     &source                    __SOURCE__
 num_mon_units:              &num_mon_units             __NUM_CEPH_MON_UNITS__
+expected_osd_count:         &expected_osd_count        __EXPECTED_OSD_COUNT__
 
 series: __SERIES__
 applications:
@@ -19,7 +20,7 @@ applications:
       loglevel: *loglevel
       monitor-count: *num_mon_units
       monitor-secret: AQCXrnZQwI7KGBAAiPofmKEXKxu5bUzoYLVkbQ==
-      expected-osd-count: 3
+      expected-osd-count: *expected_osd_count
   ceph-osd:
     charm: __CHARM_STORE____CHARM_CS_NS____CHARM_CH_PREFIX__ceph-osd
     num_units: 3
@@ -29,6 +30,6 @@ applications:
       loglevel: *loglevel
       osd-devices: ''  # must be empty string when using juju storage
     storage:
-      osd-devices: cinder,10G,1
+      osd-devices: cinder,10G,__NUM_OSDS_PER_HOST__
 relations:
   - [ ceph-mon, ceph-osd ]
