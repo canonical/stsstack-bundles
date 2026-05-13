@@ -24,6 +24,8 @@ Each deployable stack lives in its own top-level directory (openstack/, ceph/, k
 
 ### OpenStack Stack (openstack/)
 
+Openstack is a an open source cloud. Documentation can be found at https://www.openstack.org. Canonical supports a set of Juju charms used to deploy Openstack. A typical openstack consists of core components that are required for any deployment to run and optional components that can be added to provide extra functionality. It is also possible to deploy different variants of Openstack components for example Neutron ML2-OVS vs. ML2-OVN. When running generate-bundle.sh without any arguments you get a default cloud. Extra components are called "overlays" and a list of supported overlays can be found usin --list-overlays. 
+
 The primary and most fully-featured stack:
 
 ```
