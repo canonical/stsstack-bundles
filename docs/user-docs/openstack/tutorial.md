@@ -9,32 +9,16 @@ First some terminology:
 
 The overcloud is deployed onto the undercloud.
 
-## Juju controller
+## Prerequisites
 
-Now, first step is to get a juju controller on `Serverstack` (the undercloud).
-
-1. source your `serverstack` `novarc`
-2. `juju add-cloud` and follow the prompts; they should be auto-filled with info from the environment after sourcing the `Serverstack` `novarc`
-3. `juju autoload-credentials --client`
-4. `juju bootstrap serverstack serverstack --bootstrap-constraints="allocate-public-ip=true"`
-
-We want a public (floating) IP here so we can use the controller instance as a jump host for accessing other instances (_e.g._ the units for charmed OpenStack). We can't deploy all units with a public IP because we will reach the quota for floating IPs on `Serverstack`.
-
-## Tunnel into the undercloud network
-
-You will need access to the internal subnet available to you on `Serverstack` (all instances created via juju will have an address on this subnet) - this is so you can do things like juju ssh to the instances, unseal the vault using the `stsstack-bundles` scripts, access the cloud using the openstack CLI, etc. If you are running these steps from inside a bastion instance on `Serverstack`, you may skip this step.
-
-Otherwise, set up a tunnel into your `Serverstack` private subnet. This can be done via `sshuttle` to the juju controller instance (which was deployed with a public floating IP), or any other instance with a public floating IP (_e.g._if you already have a bastion instance). `10.5.0.0/16` is used as an example; your subnet may be different.
-
-```console
-sshuttle -r IP_OF_JUJU_CONTROLLER 10.5.0.0/16
-```
+Be sure to read the [prerequisites](/user-docs/prerequisites) before proceeding to ensure a working environment.
 
 ## Deploy the OpenStack overcloud
 
 Now we can start deploying!
 
-Use the `generate-bundle.sh` script in this directory, using the flags to set the desired configuration, and include the `--run` option to deploy it. For example, to create a juju model named `openstack`, and deploy a OpenStack Yoga release on Jammy machines:
+Use the `generate-bundle.sh` script in this directory, using the flags to set the desired configuration, and include the `--run` option to deploy it.
+For example, to create a juju model named `openstack`, and deploy a OpenStack Yoga release on Jammy machines:
 
 ```console
 ./generate-bundle.sh --name openstack -r yoga -s jammy --run
@@ -54,7 +38,8 @@ Post-Deployment Info/Actions:
   - add rules to default security group: ./tools/sec_groups.sh
 ```
 
-We'll come back to the post deploy steps, but for now, check `juju status` and wait for all the units to become idle. (Some will remain blocked or waiting; these will be fixed in the post deploy steps.)
+We'll come back to the post deploy steps, but for now, check `juju status` and wait for all the units to become idle. (Some will remain blocked or
+waiting; these will be fixed in the post deploy steps.)
 
 ### Post Deployment
 
@@ -66,7 +51,8 @@ First, unseal the vault:
 ./tools/vault-unseal-and-authorise.sh
 ```
 
-Then the configure script, passing `serverstack` argument as the profile. For deployments on other OpenStack underclouds, see available profiles in `./profiles/`.
+Then the configure script, passing `serverstack` argument as the profile. For deployments on other OpenStack underclouds, see available profiles in
+`./profiles/`.
 
 Before running this, ensure your `novarc` file for your `Serverstack` user is available at `~/novarc`.
 If this is not possible, search the scripts for `~/novarc` and update the path to point to your `Serverstack` `novarc` file.
@@ -75,7 +61,9 @@ If this is not possible, search the scripts for `~/novarc` and update the path t
 ./configure serverstack
 ```
 
-A final optional step is to set up some default rules for the overcloud security groups. This also demonstrates use of the overcloud `./novarc` file that extracts the required authentication information for the overcloud, setting the appropriate `OS_*` variables in the environment. This script only supports bash, and requires the openstack model to be active in juju.
+A final optional step is to set up some default rules for the overcloud security groups. This also demonstrates use of the overcloud `./novarc` file
+that extracts the required authentication information for the overcloud, setting the appropriate `OS_*` variables in the environment.
+This script only supports bash, and requires the openstack model to be active in juju.
 
 ```console
 source ./novarc
