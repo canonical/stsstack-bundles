@@ -128,13 +128,22 @@ Upon completion, `generate-bundle.sh` prints a set of post-deployment commands t
 
 ### 2. Deployment
 
+Before you can deploy a cloud you need to have a bootstrapped Juju controller. Assume that we have a bootstrapped controller and access is configured so we are ready to run juju commands.
+
 The generated bundle is deployed via Juju onto a cloud substrate (provider):
 
 ```
-juju deploy ./<stack>/b/
+./generate-bundle.sh --run
 ```
 
 Supported providers include **MAAS** (bare-metal), **OpenStack** (VMs), **LXD** (containers), and public clouds (AWS, Azure, GCP). The provider is determined by the Juju controller's cloud configuration, not by this repo.
+
+If you need to modify a generated bundle before deployment you can do so then use the --replay option so that modifications are not overwritten e.g.
+
+```
+./generate-bundle.sh --replay
+```
+
 
 ### 3. Post-Deployment Configuration
 
