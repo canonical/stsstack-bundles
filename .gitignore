@@ -3,3 +3,4 @@ bundles
 ssl/*/
 microk8s/dockercreds
 __pycache__
+.claude/settings.local.json
