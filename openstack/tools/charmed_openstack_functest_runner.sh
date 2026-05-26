@@ -72,9 +72,12 @@ run_test_phase ()
 {
     local phase=$1
     local model=$2
-    local bundle=${3:-""}
+    local job=${3:-""}
     local args=
     local ret=
+    local target=
+    local alias=
+    local bundle=
 
     unit_errors=$(juju status --format json| jq '.applications[]| select(.units!=null)| .units[]."workload-status"| select(.current=="error")')
     if [[ -n $unit_errors ]]; then
@@ -84,13 +87,23 @@ run_test_phase ()
     fi
 
     . .tox/func-target/bin/activate
+
+    target="$(python3 $TOOLS_PATH/extract_job_target.py $job)"
+    bundle=${target##*:}
+
     echo "Running '$phase' phase..."
     if [[ $phase == deploy ]]; then
         if [[ -z $bundle ]]; then
             read -p "Enter name of bundle we are running (from tests/bundles/): " bundle
         fi
         args="-b tests/bundles/$bundle.yaml"
+    else
+        alias=${target%%:*}
+        if [[ -n $alias ]] && [[ $alias != $bundle ]]; then
+            model=$alias:$model
+        fi
     fi
+
     functest-$phase -m $model ${args}
     ret=$?
     deactivate
@@ -101,7 +114,7 @@ run_test_phase ()
 retry_on_fail ()
 {
     local model=$1
-    local bundle=$2
+    local target_jobname=$2
     local ret=
     juju switch $model
 cat << EOF
@@ -117,7 +130,7 @@ EOF
     case "$phase" in
         deploy|configure|test)
             while true; do
-                run_test_phase $phase $model $bundle
+                run_test_phase $phase $model $target_jobname
                 ret=$?
                 if (($ret)); then
                     read -p "Failed. Try $phase phase again? [Y/n]" answer
@@ -129,6 +142,7 @@ EOF
             done
             ;;
         exit)
+            echo "INFO: exiting re-run"
             return
             ;;
         *)
@@ -343,8 +357,8 @@ if [[ -n $RERUN_PHASE ]]; then
     model=$(juju list-models| egrep -o "^zaza-\S+"|tr -d '*')
     echo "Re-running functest-$RERUN_PHASE (model=$model)"
     juju switch $model
-    (( ${#FUNC_TEST_TARGET[@]}==1 )) && bundle=${FUNC_TEST_TARGET[0]} || bundle=
-    run_test_phase $RERUN_PHASE $model $bundle || fail=true
+    (( ${#FUNC_TEST_TARGET[@]}==1 )) && target_jobname=${FUNC_TEST_TARGET[0]} || target_jobname=
+    run_test_phase $RERUN_PHASE $model $target_jobname || fail=true
     target=${FUNC_TEST_TARGET[0]}
     if $fail; then
         func_target_state[$target]='fail'
