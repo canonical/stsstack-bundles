@@ -61,7 +61,7 @@ As an example, let's say you want to deploy OpenStack using the Caracal release 
 
     [common]
       - run ./tools/vault-unseal-and-authorise.sh
-      - run ./configure to initialise your deployment
+      - run ./configure to initialize your deployment
       - source novarc
       - add rules to default security group: ./tools/sec_groups.sh
 

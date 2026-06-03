@@ -11,7 +11,7 @@ Generate bundle:
 
   ./generate-bundle.sh --series jammy --release yoga --name jy-manila-ovn --cinder-lvm --run
 
-Initialise vault, wait for it to settle, then run **./configure**
+Initialize vault, wait for it to settle, then run **./configure**
 
 Deploy manila
 =============
