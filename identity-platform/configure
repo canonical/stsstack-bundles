@@ -17,10 +17,20 @@ if ! snap list | grep -q helm; then
     sudo snap install helm --classic
 fi
 
+# Detect proxy
+_proxy=${https_proxy:-${http_proxy:-""}}
+if [[ -z "$_proxy" ]]; then
+    if $(timeout 1s nc -vz egress.ps7.internal 3128 &> /dev/null); then
+        _proxy=http://egress.ps7.internal:3128
+    elif $(timeout 1s nc -vz squid.internal 3128 &> /dev/null); then
+        _proxy=http://squid.internal:3128
+    fi
+fi
+
 # Install authentik
 kubectl get ns authentik &> /dev/null || kubectl create ns authentik
-https_proxy=http://squid.internal:3128 helm repo add authentik https://charts.goauthentik.io
-https_proxy=http://squid.internal:3128 helm repo update
+https_proxy=${_proxy} helm repo add authentik https://charts.goauthentik.io
+https_proxy=${_proxy} helm repo update
 helm install authentik authentik/authentik -f ./authentik-values.yaml -n authentik --version 2024.10.1
 
 timeout=0
