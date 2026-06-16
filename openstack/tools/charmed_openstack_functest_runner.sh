@@ -230,8 +230,8 @@ FIP_MIN_ABC=${FIP_MIN%.*}
 FIP_MIN_D=${FIP_MIN##*.}
 FIP_MIN=${FIP_MIN_ABC}.$(($FIP_MIN_D + 64))
 
-if [[ -n $http_proxy ]]; then
-    if [[ -n $no_proxy ]]; then
+if [[ -n ${http_proxy:-} ]]; then
+    if [[ -n ${no_proxy:-} ]]; then
         export no_proxy=$no_proxy,$CIDR_EXT
     else
         export no_proxy=$CIDR_EXT
