@@ -263,6 +263,9 @@ export TEST_JUJU3=1
 # NOTE: this should not be necessary for > juju 2.x but since we still have a need for it we add it in
 export TEST_ZAZA_BUG_LP1987332=1
 
+# Juju 3.x is a confined snap so cannot read/write from/to /tmp. This makes the tests use a path that juju can read/write.
+export TMPDIR=$(mktemp -d ${HOME}/charm-functests-tmp-XXXX) 
+
 # Some charms point to an upstream constraints file that installs python-libjuju 2.x so we need to do this to ensure we get 3.x
 # NOTE: we only do this if we are using Juju >= 3.x
 juju_version=$(juju --version)
@@ -433,3 +436,8 @@ if [[ -z $RERUN_PHASE ]] || [[ $RERUN_PHASE = 'test' ]]; then
 fi
 ) 2>&1 | tee $LOGFILE
 echo -e "\nResults also saved to $LOGFILE"
+
+if [ -d $TMPDIR ]; then
+    rm -rf $TMPDIR
+    unset TMPDIR
+fi
