@@ -78,6 +78,7 @@ run_test_phase ()
     local target=
     local alias=
     local bundle=
+    local _tmpdir_save=
 
     unit_errors=$(juju status --format json| jq '.applications[]| select(.units!=null)| .units[]."workload-status"| select(.current=="error")')
     if [[ -n $unit_errors ]]; then
@@ -104,7 +105,10 @@ run_test_phase ()
         fi
     fi
 
+    _tmpdir_save=${TMPDIR:-}
+    export TMPDIR=$TESTS_TMPDIR
     functest-$phase -m $model ${args}
+    export TMPDIR=$_tmpdir_save
     ret=$?
     deactivate
     return $ret
@@ -264,7 +268,7 @@ export TEST_JUJU3=1
 export TEST_ZAZA_BUG_LP1987332=1
 
 # Juju 3.x is a confined snap so cannot read/write from/to /tmp. This makes the tests use a path that juju can read/write.
-export TMPDIR=$(mktemp -d ${HOME}/charm-functests-tmp-XXXX) 
+TESTS_TMPDIR=$(mktemp -d ${HOME}/charm-functests-tmp-XXXX)
 
 # Some charms point to an upstream constraints file that installs python-libjuju 2.x so we need to do this to ensure we get 3.x
 # NOTE: we only do this if we are using Juju >= 3.x
@@ -390,6 +394,8 @@ for target in ${func_target_order[@]}; do
     [[ -d src ]] && pushd src &>/dev/null || true
     fail=false
     _target="$(python3 $TOOLS_PATH/extract_job_target.py $target)"
+    _tmpdir_save=${TMPDIR:-}
+    export TMPDIR=$TESTS_TMPDIR
     if ! $MANUAL_FUNCTESTS; then
         tox ${tox_args} -- $_target || fail=true
         model=$(juju list-models| egrep -o "^zaza-\S+"|tr -d '*')
@@ -398,6 +404,7 @@ for target in ${func_target_order[@]}; do
         model=test-$target
         init_noop_target=false
     fi
+    export TMPDIR=$_tmpdir_save
 
     $fail && retry_on_fail "$model" "$target" && fail=false
     if $fail; then
@@ -437,7 +444,6 @@ fi
 ) 2>&1 | tee $LOGFILE
 echo -e "\nResults also saved to $LOGFILE"
 
-if [ -d $TMPDIR ]; then
-    rm -rf $TMPDIR
-    unset TMPDIR
+if [ -d $TESTS_TMPDIR ]; then
+    rm -rf $TESTS_TMPDIR
 fi
