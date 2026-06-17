@@ -227,20 +227,33 @@ CHARM_NAME=$(awk '/^name: .+/{print $2}' metadata.yaml)
 echo "Running functional tests for charm $CHARM_NAME commit $COMMIT_ID"
 
 source ~/novarc
-export {,TEST_}CIDR_EXT=$(openstack subnet show subnet_${OS_USERNAME}-psd-extra -c cidr -f value)
-FIP_MAX=$(ipcalc $CIDR_EXT| awk '$1=="HostMax:" {print $2}')
-FIP_MIN=$(ipcalc $CIDR_EXT| awk '$1=="HostMin:" {print $2}')
-FIP_MIN_ABC=${FIP_MIN%.*}
-FIP_MIN_D=${FIP_MIN##*.}
-FIP_MIN=${FIP_MIN_ABC}.$(($FIP_MIN_D + 64))
-
-if [[ -n ${http_proxy:-} ]]; then
-    if [[ -n ${no_proxy:-} ]]; then
-        export no_proxy=$no_proxy,$CIDR_EXT
-    else
-        export no_proxy=$CIDR_EXT
+declare -A networks=(
+    [primary]=$(openstack subnet show subnet_${OS_USERNAME}-psd -c cidr -f value)
+    [fip]=$(openstack subnet show subnet_${OS_USERNAME}-psd-extra -c cidr -f value)
+    [test]=192.168.0.0/16  # https://github.com/openstack-charmers/zaza-openstack-tests/blob/233b9ee8deabec1909ac9df1c2efac17efdf0528/zaza/openstack/charm_tests/neutron/setup.py#L45
+)
+for netname in ${!networks[@]}; do
+    net_cidr=${networks[$netname]}
+    net_max=$(ipcalc $net_cidr| awk '$1=="HostMax:" {print $2}')
+    net_min=$(ipcalc $net_cidr| awk '$1=="HostMin:" {print $2}')
+    net_min_abc=${net_min%.*}
+    net_min_d=${net_min##*.}
+    if [[ $netname = fip ]]; then
+        export {,TEST_}CIDR_EXT=$net_cidr
+        FIP_MAX=$(ipcalc $CIDR_EXT| awk '$1=="HostMax:" {print $2}')
+        FIP_MIN=${net_min_abc}.$(($net_min_d + 64))
     fi
-fi
+    if [[ -n ${http_proxy:-} ]]; then
+        if [[ -n ${no_proxy:-} ]]; then
+            export no_proxy=$no_proxy,$net_cidr
+        else
+            export no_proxy=$net_cidr
+        fi
+        for ((suffix=$net_min_d;suffix<${net_max##*.};suffix+=1)); do
+            no_proxy+=",$net_min_abc.$suffix"
+        done
+    fi
+done
 
 # Setup vips needed by zaza tests.
 for ((i=2;i;i-=1)); do
