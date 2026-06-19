@@ -108,8 +108,8 @@ run_test_phase ()
     _tmpdir_save=${TMPDIR:-}
     export TMPDIR=$TESTS_TMPDIR
     functest-$phase -m $model ${args}
-    export TMPDIR=$_tmpdir_save
     ret=$?
+    export TMPDIR=$_tmpdir_save
     deactivate
     return $ret
 }
