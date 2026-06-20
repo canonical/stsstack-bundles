@@ -424,7 +424,7 @@ for target in ${func_target_order[@]}; do
     _tmpdir_save=${TMPDIR:-}
     export TMPDIR=$TESTS_TMPDIR
     if ! $MANUAL_FUNCTESTS; then
-        tox ${tox_args} -- $_target || fail=true
+        uv run --with tox-uv tox ${tox_args} -- $_target || fail=true
         model=$(juju list-models| egrep -o "^zaza-\S+"|tr -d '*')
     else
         $TOOLS_PATH/manual_functests_runner.sh "$_target" $SLEEP $init_noop_target || fail=true
