@@ -14,6 +14,7 @@ SKIP_BUILD=false
 SLEEP=
 WAIT_ON_DESTROY=true
 RERUN_PHASE=
+DEFAULT_BUILD_PYTHON_VERSION="3.12"
 
 . $(dirname $0)/func_test_tools/common.sh
 
@@ -212,6 +213,7 @@ done
 
 # Install dependencies
 which yq &>/dev/null || sudo snap install yq
+which uv &>/dev/null || sudo snap install astral-uv --classic
 
 # Ensure zosci-config checked out and up-to-date
 get_and_update_repo https://github.com/openstack-charmers/zosci-config
@@ -291,6 +293,16 @@ juju_version=$(juju --version)
 LOGFILE=$(mktemp --suffix=-charm-func-test-results)
 (
 # 2. Build
+get_python_version_from_tox() {
+    local version
+    # the following command works with both tox 3.x and 4.x
+    version=$(tox --showconfig -e build |grep -P '^base_?python' |grep -Po '(?<=python)[0-9.]+')
+    [[ -n "$version" ]] && echo "$version" && return 0
+
+    echo "WARNING: basepython not found in [testenv:build] or [testenv]; falling back to $DEFAULT_BUILD_PYTHON_VERSION" >&2
+    echo $DEFAULT_BUILD_PYTHON_VERSION
+}
+
 if ! $SKIP_BUILD; then
     # default value is 1.5/stable, assumed that later charm likely have charmcraft_channel value
     CHARMCRAFT_CHANNEL=$(grep charmcraft_channel osci.yaml | sed -r 's/.+:\s+(\S+)/\1/')
@@ -305,7 +317,9 @@ if ! $SKIP_BUILD; then
     # ensure lxc initialised
     lxd init --auto || true
 
-    tox -re build
+    build_python_version=$(get_python_version_from_tox)
+    echo "Using Python$build_python_version for the charm build"
+    uv run --python $build_python_version tox -re build
 elif [[ -n $REMOTE_BUILD ]]; then
     IFS=',' read -ra remote_build_params <<< "$REMOTE_BUILD"
     REMOTE_BUILD_DESTINATION=${remote_build_params[0]}
