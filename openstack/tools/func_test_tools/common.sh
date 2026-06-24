@@ -42,7 +42,9 @@ apply_func_test_pr ()
     msg=$(echo "Func-Test-Pr: https://github.com/openstack-charmers/zaza-openstack-tests/pull/$pr_id"| base64)
     ~/zosci-config/roles/handle-func-test-pr/files/process_func_test_pr.py \
         -f './test-requirements*.txt' \
+        -f './merged-requirements*.txt' \
         -f './src/test-requirements*.txt' \
+        -f './src/merged-requirements*.txt' \
         "$msg"
 }
 
