@@ -30,6 +30,8 @@ OPTIONS:
         By default we modify test bundle constraints to ensure that applications
         have the resources they need. For example nova-compute needs to have
         enough capacity to boot the vms required by the tests.
+    --debug
+        Run with debug (-x) enabled.
     --help
         This help message.
 EOF
@@ -47,14 +49,26 @@ while (($# > 0)); do
             set -x
             ;;
         --func-test-target)
+            if [[ $# < 2 ]]; then
+                echo "ERROR: '$1' requires argument"
+                exit 1
+            fi
             FUNC_TEST_TARGET=$2
             shift
             ;;
         --func-test-pr)
+            if [[ $# < 2 ]]; then
+                echo "ERROR: '$1' requires argument"
+                exit 1
+            fi
             FUNC_TEST_PR=$2
             shift
             ;;
         --rerun)
+            if [[ $# < 2 ]]; then
+                echo "ERROR: '$1' requires argument"
+                exit 1
+            fi
             RERUN_PHASE=$2
             [[ $2 = configure ]] || [[ $2 = test ]] || opt_error $1 $2
             shift
