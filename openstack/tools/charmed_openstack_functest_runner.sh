@@ -411,6 +411,9 @@ for target in ${func_target_order[@]}; do
     # need.
     destroy_zaza_models
 
+    # Drop ext-ports the teardown leaked, before this model's FIPs are assigned.
+    $(dirname $0)/clean_orphan_dataports.sh || true
+
     # Only rebuild on first run.
     if $first; then
         first=false
