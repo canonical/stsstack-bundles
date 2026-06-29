@@ -21,6 +21,7 @@ gyre
 hotsos
 html
 https
+hyperconverged
 IDP
 IDPs
 Intersphinx

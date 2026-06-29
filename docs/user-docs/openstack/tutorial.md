@@ -33,7 +33,7 @@ Post-Deployment Info/Actions:
 
 [common]
   - run ./tools/vault-unseal-and-authorise.sh
-  - run ./configure to initialise your deployment
+  - run ./configure to initialize your deployment
   - source novarc
   - add rules to default security group: ./tools/sec_groups.sh
 ```
