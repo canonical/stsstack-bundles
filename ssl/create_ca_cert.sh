@@ -5,7 +5,7 @@ declare -a required=( cacert.pem servercert.csr servercert.pem )
 
 all_exist=true
 for f in ${required[@]}; do
-    [ -r "$results_dir/$f" ] || all_exist=false && break
+    [ -r "$results_dir/$f" ] || { all_exist=false; break; }
 done
 
 if $all_exist; then
