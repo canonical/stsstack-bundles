@@ -86,9 +86,21 @@ class OSCIConfig():
     @property
     def jobs(self):
         """ Generator returning all job definitions. """
+        _check_jobs = {}
+        for item in self._osci_config:
+            if 'project' in item and 'check' in item['project']:
+                for job in item['project']['check']['jobs']:
+                    _check_jobs[job] = {'name': job}
+                break
+        else:
+            print("Error: no jobs found in project:check:jobs section "
+                  "in osci.yaml")
+
         for item in self._osci_config:
             if 'job' in item:
-                yield item['job']
+                _check_jobs[item['job']['name']] = item['job']
+
+        yield from _check_jobs.values()
 
     def get_job(self, name):
         """ Get job by name.
