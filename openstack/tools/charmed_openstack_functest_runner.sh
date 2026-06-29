@@ -148,7 +148,7 @@ EOF
             ;;
         exit)
             echo "INFO: exiting re-run"
-            return
+            return 1
             ;;
         *)
             echo "ERROR: unrecognised phase name '$phase'"
