@@ -91,12 +91,17 @@ class OSCIConfig():
         for item in self._osci_config:
             if 'project' in item and 'check' in item['project']:
                 for job in item['project']['check']['jobs']:
-                    _check_jobs[job] = {'name': job}
+                    if isinstance(job, dict):
+                        jobname = list(job)[0]
+                        _check_jobs[jobname] = job
+                        _check_jobs[jobname]['name'] = jobname
+                    else:
+                        _check_jobs[job] = {'name': job}
                 break
         else:
-            sys.stderr.write("INFO: no jobs found in "
-                             "osci.yaml project.check.jobs "
-                             "- relying on job overrides and/or zosci-config\n")
+            sys.stderr.write("INFO: no jobs found in osci.yaml "
+                             "project.check.jobs - relying on job overrides"
+                             "and/or zosci-config\n")
 
         for item in self._osci_config:
             if 'job' in item:
