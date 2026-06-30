@@ -1,6 +1,7 @@
 """ Common helpers for func test runners. """
 from functools import cached_property
 import os
+import sys
 
 import yaml
 
@@ -83,7 +84,7 @@ class OSCIConfig():
 
             yield from item['project']['check'].get('jobs', [])
 
-    @property
+    @cached_property
     def jobs(self):
         """ Generator returning all job definitions. """
         _check_jobs = {}
@@ -93,8 +94,9 @@ class OSCIConfig():
                     _check_jobs[job] = {'name': job}
                 break
         else:
-            print("Error: no jobs found in project:check:jobs section "
-                  "in osci.yaml")
+            sys.stderr.write("INFO: no jobs found in "
+                             "osci.yaml project.check.jobs "
+                             "- relying on job overrides and/or zosci-config\n")
 
         for item in self._osci_config:
             if 'job' in item:
