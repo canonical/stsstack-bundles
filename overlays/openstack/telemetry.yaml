@@ -25,6 +25,7 @@ relations:
   - [ ceilometer, 'keystone:identity-service' ]
   - [ ceilometer, 'keystone:identity-credentials' ]
   - [ 'ceilometer:amqp', 'rabbitmq-server:amqp' ]
+  - [ ceilometer:shared-db, __MYSQL_INTERFACE__ ]
   - [ ceilometer-agent, nova-compute ]
   - [ ceilometer-agent, ceilometer ]
   - [ ceilometer-agent, rabbitmq-server ]
