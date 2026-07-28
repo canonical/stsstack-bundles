@@ -167,7 +167,7 @@ LOGFILE=$(mktemp --suffix=-openstack-release-test-results)
 
     # If a func test pr is provided switch to that pr.
     if [[ -n $FUNC_TEST_PR ]]; then
-        apply_func_test_pr $FUNC_TEST_PR
+        apply_func_test_pr $FUNC_TEST_PR https://github.com/openstack-charmers/charmed-openstack-tester
     fi
 
     if [[ -n $RERUN_PHASE ]]; then
