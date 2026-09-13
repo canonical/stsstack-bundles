@@ -11,9 +11,16 @@ target=${target}:${MOD_PARAMS[__MICROK8S_CHANNEL__]}
 MOD_PASSTHROUGH_OPTS+=( --release-name $target )
 
 # Automatically use proxy if in prodstack only
-if $(timeout 1s getent hosts squid.internal &> /dev/null) && [ -z "${MOD_PARAMS[__CONTAINERD_PROXY__]}" ]; then
-    MOD_MSGS[1_proxy.0]='PROXY: squid.internal exists, setting containerd proxy to http://squid.internal:3128'
-    MOD_PARAMS[__CONTAINERD_PROXY__]=http://squid.internal:3128
+if [ -z "${MOD_PARAMS[__CONTAINERD_PROXY__]}" ]; then
+    if [[ -n ${http_proxy:-""} ]]; then
+        MOD_PARAMS[__CONTAINERD_PROXY__]=${http_proxy}
+    elif $(timeout 1s nc -vz egress.ps7.internal 3128 &> /dev/null); then
+        MOD_MSGS[1_proxy.0]='PROXY: egress.ps7.internal reachable, setting containerd proxy to http://egress.ps7.internal:3128'
+        MOD_PARAMS[__CONTAINERD_PROXY__]=http://egress.ps7.internal:3128
+    elif $(timeout 1s nc -vz squid.internal 3128 &> /dev/null); then
+        MOD_MSGS[1_proxy.0]='PROXY: squid.internal reachable, setting containerd proxy to http://squid.internal:3128'
+        MOD_PARAMS[__CONTAINERD_PROXY__]=http://squid.internal:3128
+    fi
 fi
 
 if ! has_opt --charmed-ceph-lxd && ! has_opt --microceph; then
