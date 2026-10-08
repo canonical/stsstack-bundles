@@ -1,5 +1,6 @@
+.workshop.lock
+__pycache__
 b
 bundles
-ssl/*/
 microk8s/dockercreds
-__pycache__
+ssl/*/
