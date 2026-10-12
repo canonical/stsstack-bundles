@@ -16,6 +16,7 @@ declare -A lts_order=( [0]=trusty
                        [3]=focal
                        [4]=jammy
                        [5]=noble
+                       [6]=resolute
 )
 declare -A lts=( [trusty]=icehouse
                  [xenial]=mitaka
@@ -23,6 +24,7 @@ declare -A lts=( [trusty]=icehouse
                  [focal]=ussuri
                  [jammy]=yoga
                  [noble]=caracal
+                 [resolute]=gazpacho
 )
 
 # These hardcoded sorted lists replace the previous "sorted" lists
@@ -53,6 +55,7 @@ declare -A os_release_map=(
     [2024.2]=dalmatian
     [2025.1]=epoxy
     [2025.2]=flamingo
+    [2026.1]=gazpacho
 )
 
 # NOTE: must be kept up-to-date with ALL versions of openstack.
@@ -80,6 +83,7 @@ declare -A os_releases=( [icehouse]=0
                          [dalmatian]=21
                          [epoxy]=22
                          [flamingo]=23
+                         [gazpacho]=24
 )
 
 # Reverse lookups (revision to series)
