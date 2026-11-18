@@ -399,7 +399,10 @@ if [[ -n $RERUN_PHASE ]]; then
     model=$(juju list-models| egrep -o "^zaza-\S+"|tr -d '*')
     echo "Re-running functest-$RERUN_PHASE (model=$model)"
     juju switch $model
-    (( ${#FUNC_TEST_TARGET[@]}==1 )) && target_jobname=${FUNC_TEST_TARGET[0]} || target_jobname=
+    target_jobname=
+    if (( ${#FUNC_TEST_TARGET[@]} == 1 )); then
+        target_jobname=${FUNC_TEST_TARGET[0]}
+    fi
     run_test_phase $RERUN_PHASE $model $target_jobname || fail=true
     target=${FUNC_TEST_TARGET[0]}
     if $fail; then

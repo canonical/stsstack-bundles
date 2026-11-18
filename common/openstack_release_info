@@ -45,6 +45,7 @@ declare -A nonlts=( [hirsute]=wallaby
                     [oracular]=dalmatian
                     [plucky]=epoxy
                     [questing]=flamingo
+                    [stonking]=hibiscus
 )
 
 # NOTE: Keep this updated along with os_releases.
@@ -56,6 +57,7 @@ declare -A os_release_map=(
     [2025.1]=epoxy
     [2025.2]=flamingo
     [2026.1]=gazpacho
+    [2026.2]=hibiscus
 )
 
 # NOTE: must be kept up-to-date with ALL versions of openstack.
@@ -84,6 +86,7 @@ declare -A os_releases=( [icehouse]=0
                          [epoxy]=22
                          [flamingo]=23
                          [gazpacho]=24
+                         [hibiscus]=25
 )
 
 # Reverse lookups (revision to series)
